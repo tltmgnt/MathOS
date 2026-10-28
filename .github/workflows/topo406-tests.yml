@@ -49,3 +49,9 @@ jobs:
             -s tests \
             -p "test_topo406_integrity.py" \
             -v
+      - name: Run reproducible mathematical verification
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_topo406_reproducibility.py" \
+            -v
