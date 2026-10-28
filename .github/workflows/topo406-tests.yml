@@ -364,6 +364,19 @@ jobs:
           name: mathos-experiment-016
           path: artifacts/internal_reasoning/experiment_016.json
           if-no-files-found: error
+      - name: Run cross-model operand-swap comparison 017
+        run: |
+          python experiments/internal_reasoning/arithmetic_model_comparison_017.py \
+            --distilgpt2 artifacts/internal_reasoning/experiment_014.json \
+            --tiny-gpt2 artifacts/internal_reasoning/experiment_016.json \
+            --output artifacts/internal_reasoning/experiment_017.json
+
+      - name: Upload cross-model comparison 017 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-017
+          path: artifacts/internal_reasoning/experiment_017.json
+          if-no-files-found: error
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
