@@ -265,6 +265,18 @@ jobs:
           name: mathos-experiment-008
           path: artifacts/internal_reasoning/experiment_008.json
           if-no-files-found: error
+      - name: Run arithmetic structure analysis 009
+        run: |
+          python experiments/internal_reasoning/arithmetic_structure_analysis.py \
+            --input artifacts/internal_reasoning/experiment_008.json \
+            --output artifacts/internal_reasoning/experiment_009.json
+
+      - name: Upload arithmetic structure analysis 009 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-009
+          path: artifacts/internal_reasoning/experiment_009.json
+          if-no-files-found: error
 
       - name: Upload neural activation artifact
         if: always()
