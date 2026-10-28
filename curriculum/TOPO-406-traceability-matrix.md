@@ -128,3 +128,62 @@ Automated verification implementation: Pending.
 10. Core Principle
 
 Every requirement must be traceable to a test, every test to evidence, and every acceptance decision to a justified conclusion.
+11. Reasoning Standard — Confirmed Source Mappings
+
+Source: docs/reasoning-standard.md
+
+The following mappings are supported by the reasoning-standard sections reviewed on October 27, 2026.
+
+Source section	Related acceptance tests	Mapping status
+Purpose	TEST-P01, TEST-P02, TEST-P04	Confirmed
+Reasoning Pipeline — Step 1	TEST-P01, TEST-P02	Confirmed
+Reasoning Pipeline — Step 2	TEST-P01	Partial
+Reasoning Pipeline — Step 3	TEST-P02, TEST-P03, TEST-P05	Confirmed
+Reasoning Pipeline — Step 4	TEST-E01, TEST-E02	Confirmed
+Reasoning Pipeline — Step 5	TEST-C01, TEST-C02	Confirmed
+Reasoning Pipeline — Step 6	TEST-T01–TEST-T05	Confirmed
+Reasoning Pipeline — Step 7	TEST-P04, TEST-T04	Partial
+Reasoning Pipeline — Step 8	TEST-C02	Partial
+Mathematical Verification	TEST-P01–TEST-P05, TEST-C01	Confirmed
+Empirical and Causal Validation	TEST-E03, TEST-P04	Partial
+Transferability	TEST-T01–TEST-T05	Confirmed
+Multi-Agent Review	No dedicated test	Coverage gap
+Human Oversight	No dedicated test	Coverage gap
+Evidence Status	Pending detailed mapping	Pending
+
+11.1 Mapping Interpretation
+
+Confirmed means the acceptance test addresses the identified source requirement.
+
+Partial means the test addresses only part of the requirement.
+
+A confirmed mapping does not mean that a test has been executed or passed.
+
+11.2 Identified Coverage Gaps
+
+The following requirements need additional acceptance tests:
+
+1. Independent multi-agent review.
+2. Human oversight and approval.
+3. Empirical versus causal reasoning.
+4. Revision of conclusions after contradictory evidence.
+5. Complete evidence-status classification.
+
+11.3 Verification Rule
+
+A requirement is fully covered only when its corresponding tests address all material obligations and have documented acceptance criteria.
+
+Uncovered requirements must remain explicitly identified until additional tests are implemented.
+
+12. Next Implementation Milestone
+
+Create machine-readable acceptance tests and automated validation for:
+
+* Requirement-to-test traceability.
+* Missing evidence detection.
+* Invalid verification statuses.
+* Unresolved critical requirements.
+* Coverage gaps.
+* Test-result consistency.
+
+Automation must distinguish structural compliance from substantive mathematical proof.
