@@ -45,7 +45,6 @@ def analyze(data, experiment_id="MathOS-EXP-014"):
             timezone.utc
         ).isoformat(),
         "method": "Deduplicated unordered operand-pair analysis of the supplied source experiment",
-        ),
         "unique_nonidentical_pair_count": len(selected),
         "identical_operand_case_count": len(identical_pairs),
         "prediction_change_count": changed,
