@@ -61,3 +61,14 @@ jobs:
             -s tests \
             -p "test_topo406_registry.py" \
             -v
+      - name: Generate TOPO-406 execution provenance
+        if: always()
+        run: python verification/generate_provenance.py
+
+      - name: Upload TOPO-406 provenance artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topo406-provenance
+          path: verification/provenance.json
+          if-no-files-found: error
