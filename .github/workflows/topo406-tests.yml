@@ -127,3 +127,9 @@ jobs:
             verification/attestation.json
             verification/test-results.xml
           if-no-files-found: error
+      - name: Run TOPO-406 integrity tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_topo406_integrity.py" \
+            -v
