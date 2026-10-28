@@ -315,6 +315,19 @@ jobs:
           path: artifacts/internal_reasoning/experiment_012.json
           if-no-files-found: error
 
+      - name: Run arithmetic operand-swap experiment 013
+        run: |
+          python experiments/internal_reasoning/arithmetic_operand_swap.py \
+            --output artifacts/internal_reasoning/experiment_013.json \
+            --seed 406
+
+      - name: Upload arithmetic operand-swap experiment 013 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-013
+          path: artifacts/internal_reasoning/experiment_013.json
+          if-no-files-found: error
+
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
