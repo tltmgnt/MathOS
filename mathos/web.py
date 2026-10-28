@@ -58,7 +58,49 @@ pre {
 <body>
 <h1>MathOS</h1>
 <p>Mathematical Reasoning & Verification</p>
+<section style="background:#1e293b;padding:20px;border-radius:10px;margin:20px 0;">
+  <h2 style="color:#69b7ff;">Ω Welfare Optimization</h2>
 
+  <p>WE THE PEOPLE Ω — Universal Welfare Framework</p>
+
+  <div style="overflow-x:auto;text-align:center;padding:15px 0;">
+    <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
+      <msubsup>
+        <mi>𝒲</mi>
+        <mi>Ω</mi>
+        <mo>*</mo>
+      </msubsup>
+      <mo>=</mo>
+      <munder>
+        <mo>max</mo>
+        <mrow><mi>π</mi><mo>∈</mo><mi>Π</mi></mrow>
+      </munder>
+      <msubsup>
+        <mo>∫</mo><mn>0</mn><mi>T</mi>
+      </msubsup>
+      <msup>
+        <mi>e</mi>
+        <mrow><mo>−</mo><mi>ρ</mi><mi>t</mi></mrow>
+      </msup>
+      <mo>[</mo>
+      <munderover>
+        <mo>∑</mo>
+        <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow>
+        <mi>n</mi>
+      </munderover>
+      <msub><mi>w</mi><mi>i</mi></msub>
+      <msub><mi>U</mi><mi>i</mi></msub>
+      <mo>(</mo><mi>t</mi><mo>)</mo>
+      <mo>−</mo><mi>λ</mi><mi>R</mi><mo>(</mo><mi>t</mi><mo>)</mo>
+      <mo>−</mo><mi>μ</mi><mi>G</mi><mo>(</mo><mi>t</mi><mo>)</mo>
+      <mo>]</mo>
+      <mi>d</mi><mi>t</mi>
+    </math>
+  </div>
+
+  <p>Maximizing weighted welfare while accounting for risk
+  and governance costs over time.</p>
+</section>
 <form method="POST">
 <input
     name="problem"
