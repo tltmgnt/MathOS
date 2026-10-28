@@ -72,3 +72,58 @@ jobs:
           name: topo406-provenance
           path: verification/provenance.json
           if-no-files-found: error
+      - name: Install JUnit reporting dependency
+        run: python -m pip install "unittest-xml-reporting>=3.2,<4"
+
+      - name: Generate JUnit XML test results
+        run: |
+          mkdir -p verification
+          python -m xmlrunner discover \
+            -s tests \
+            -p "test_topo406*.py" \
+            -o verification
+
+      - name: Prepare JUnit report
+        if: always()
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          folder = Path("verification")
+          files = sorted(folder.glob("TEST-*.xml"))
+
+          if not files:
+              raise SystemExit("No JUnit XML reports found")
+
+          root = ET.Element("testsuites")
+
+          for file in files:
+              tree = ET.parse(file)
+              source = tree.getroot()
+
+              if source.tag == "testsuite":
+                  root.append(source)
+              elif source.tag == "testsuites":
+                  root.extend(source.findall("testsuite"))
+
+          ET.ElementTree(root).write(
+              folder / "test-results.xml",
+              encoding="utf-8",
+              xml_declaration=True,
+          )
+          PY
+
+      - name: Generate test-result attestation
+        if: always()
+        run: python verification/generate_attestation.py
+
+      - name: Upload attestation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topo406-attestation
+          path: |
+            verification/attestation.json
+            verification/test-results.xml
+          if-no-files-found: error
