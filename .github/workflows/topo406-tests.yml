@@ -238,6 +238,19 @@ jobs:
           name: mathos-experiment-006
           path: artifacts/internal_reasoning/experiment_006.json
           if-no-files-found: error
+      - name: Run reusable arithmetic benchmark 007
+        run: |
+          python experiments/internal_reasoning/arithmetic_benchmark.py \
+            --model sshleifer/tiny-gpt2 \
+            --seed 406 \
+            --output artifacts/internal_reasoning/experiment_007.json
+
+      - name: Upload arithmetic benchmark 007 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-007
+          path: artifacts/internal_reasoning/experiment_007.json
+          if-no-files-found: error
 
       - name: Upload neural activation artifact
         if: always()
