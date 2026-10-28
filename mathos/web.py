@@ -7,6 +7,7 @@ linear equations without paid AI services.
 
 import html
 import json
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
@@ -124,18 +125,19 @@ class MathOSHandler(BaseHTTPRequestHandler):
 
         self.send_page(output)
 
-
 def main():
+    host = os.environ.get("MATHOS_HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", "8000"))
+
     server = HTTPServer(
-        ("127.0.0.1", 8000),
+        (host, port),
         MathOSHandler,
     )
 
-    print("MathOS web interface running on port 8000")
-    print("Open your browser at localhost:8000")
-
+    print(f"MathOS running on {host}:{port}")
     server.serve_forever()
 
 
 if __name__ == "__main__":
     main()
+    
