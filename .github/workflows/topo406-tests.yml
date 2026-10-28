@@ -145,3 +145,9 @@ jobs:
             -s tests \
             -p "test_mathos_agents.py" \
             -v
+      - name: Run MathOS CLI tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_cli.py" \
+            -v
