@@ -133,3 +133,9 @@ jobs:
             -s tests \
             -p "test_topo406_integrity.py" \
             -v
+      - name: Run MathOS core tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_core.py" \
+            -v
