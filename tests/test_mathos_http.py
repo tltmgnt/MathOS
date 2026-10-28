@@ -1,5 +1,5 @@
-import html"""HTTP integration tests for the MathOS web interface."""
-
+"""HTTP integration tests for the MathOS web interface."""
+import html
 import http.client
 import threading
 import unittest
