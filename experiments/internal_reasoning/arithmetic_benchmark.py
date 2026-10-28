@@ -182,7 +182,7 @@ def run_benchmark(model_name, output_path, seed, experiment_id=None):
     evaluation = evaluate(model, tokenizer)
 
     report = {
-        ""experiment": experiment_id,
+        "experiment": experiment_id,
         "benchmark": "MathOS-Arithmetic-Grid-v1",
         "model": model_name,
         "timestamp_utc": datetime.now(
