@@ -162,6 +162,10 @@ jobs:
             --model sshleifer/tiny-gpt2 \
             --prompt "Policy A has score 8. Policy B has score 4." \
             --output artifacts/internal_reasoning/activations.json
+      - name: Validate neural activation artifact
+        run: |
+          python verification/validate_activations.py \
+            artifacts/internal_reasoning/activations.json
 
       - name: Upload neural activation artifact
         if: always()
