@@ -195,7 +195,7 @@ class MathOSHandler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, KeyError, OverflowError) as error:
             self.send_json(400, {"error": str(error)})
     def do_POST(self):
-                if self.path == "/api/omega-welfare":
+        if self.path == "/api/omega-welfare":
             self.do_omega_welfare()
             return
         length = int(self.headers.get("Content-Length", 0))
