@@ -139,6 +139,12 @@ jobs:
             -s tests \
             -p "test_mathos_core.py" \
             -v
+      - name: Run internal reasoning adapter tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_internal_reasoning_adapter.py" \
+            -v
       - name: Run MathOS multi-agent tests
         run: |
           python -m unittest discover \
