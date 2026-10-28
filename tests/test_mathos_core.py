@@ -1,6 +1,4 @@
-"""
-Automated tests for the MathOS reasoning core.
-"""
+"""Automated tests for the MathOS reasoning core."""
 
 import unittest
 from fractions import Fraction
@@ -16,49 +14,33 @@ class TestMathEngine(unittest.TestCase):
 
     def test_simple_equation(self):
         result = self.engine.solve_linear("x + 5 = 12")
-
         self.assertEqual(result["answer"], "7")
-        self.assertEqual(
-            result["verification_status"],
-            "verified"
-        )
+        self.assertEqual(result["verification_status"], "verified")
 
     def test_coefficient_equation(self):
         result = self.engine.solve_linear("2x + 5 = 13")
-
         self.assertEqual(result["answer"], "4")
-        self.assertEqual(
-            result["verification_status"],
-            "verified"
-        )
 
     def test_negative_constant(self):
         result = self.engine.solve_linear("3x - 6 = 0")
-
         self.assertEqual(result["answer"], "2")
 
     def test_fractional_solution(self):
         result = self.engine.solve_linear("4x + 1 = 2")
-
         self.assertEqual(
             Fraction(result["answer"]),
-            Fraction(1, 4)
+            Fraction(1, 4),
         )
 
     def test_no_solution(self):
         result = self.engine.solve_linear("0x + 5 = 12")
-
-        self.assertEqual(
-            result["answer"],
-            "No solution"
-        )
+        self.assertEqual(result["answer"], "No solution")
 
     def test_infinite_solutions(self):
         result = self.engine.solve_linear("0x + 5 = 5")
-
         self.assertEqual(
             result["answer"],
-            "Infinitely many solutions"
+            "Infinitely many solutions",
         )
 
     def test_invalid_equation(self):
@@ -66,125 +48,71 @@ class TestMathEngine(unittest.TestCase):
             self.engine.solve_linear("x^2 = 4")
 
 
+class MockAIEngine:
+
+    def solve(self, problem, domain="general"):
+        return {
+            "problem": problem,
+            "domain": domain,
+            "answer": "Gravity attracts masses.",
+            "model": "mock-model",
+            "verification_status": "unverified",
+        }
+
+
 class TestMathOSCore(unittest.TestCase):
 
     def setUp(self):
-        self.system = MathOS()
+        self.system = MathOS(ai_engine=MockAIEngine())
 
     def test_mathematics_integration(self):
         result = self.system.solve(
             "2x + 5 = 13",
-            domain="mathematics"
+            domain="mathematics",
         )
-
         self.assertEqual(result.answer, "4")
         self.assertEqual(
             result.verification_status,
-            "verified"
+            "verified",
         )
 
     def test_structured_output(self):
         result = self.system.solve(
             "x + 5 = 12",
-            domain="mathematics"
+            domain="mathematics",
         )
-
         data = result.to_dict()
-
         self.assertEqual(data["domain"], "mathematics")
         self.assertEqual(data["answer"], "7")
         self.assertIn("evidence", data)
 
     def test_empty_problem(self):
         with self.assertRaises(ValueError):
-            self.system.solve(
-                "",
-                domain="mathematics"
-            )
+            self.system.solve("", domain="mathematics")
 
-            def test_general_reasoning_with_mock_ai(self):
-        class MockAIEngine:
-            def solve(self, problem, domain="general"):
-                return {
-                    "problem": problem,
-                    "domain": domain,
-                    "answer": "Gravity attracts masses.",
-                    "model": "mock-model",
-                    "verification_status": "unverified",
-                }
-
-        system = MathOS(ai_engine=MockAIEngine())
-
-        result = system.solve(
-            "Explain gravity",
-            domain="science",
-        )
-
-        self.assertEqual(
-            result.answer,
-            "Gravity attracts masses.",
-        )
-
-        self.assertEqual(
-            result.verification_status,
-            "unverified",
-        )
-
-        self.assertIn(
-            "Model: mock-model",
-            result.evidence,
-        )
-        class MockAIEngine:
-            def solve(self, problem, domain="general"):
-                return {
-                    "problem": problem,
-                    "domain": domain,
-                    "answer": "Gravity attracts masses.",
-                    "model": "mock-model",
-                    "verification_status": "unverified",
-                }
-
-        system = MathOS(ai_engine=MockAIEngine())
-
-        result = system.solve(
-            "Explain gravity",
-            domain="science",
-        )
-
-        self.assertEqual(
-            result.answer,
-            "Gravity attracts masses.",
-        )
-
-        self.assertEqual(
-            result.verification_status,
-            "unverified",
-        )
-
-        self.assertIn(
-            "Model: mock-model",
-            result.evidence,
-        )
+    def test_unsupported_domain(self):
         with self.assertRaises(ValueError):
             self.system.solve(
                 "Test problem",
-                domain="unknown"
+                domain="unknown",
             )
 
-    def test_general_reasoning_not_connected(self):
+    def test_general_reasoning_with_mock_ai(self):
         result = self.system.solve(
             "Explain gravity",
-            domain="science"
+            domain="science",
         )
-
-        self.assertEqual(
-            result.verification_status,
-            "unverified"
-        )
-
         self.assertEqual(
             result.answer,
-            "No solution generated yet."
+            "Gravity attracts masses.",
+        )
+        self.assertEqual(
+            result.verification_status,
+            "unverified",
+        )
+        self.assertIn(
+            "Model: mock-model",
+            result.evidence,
         )
 
 
