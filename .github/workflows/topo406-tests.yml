@@ -183,6 +183,17 @@ jobs:
           name: mathos-experiment-001
           path: artifacts/internal_reasoning/experiment_001.json
           if-no-files-found: error
+      - name: Run controlled activation experiment 002
+        run: |
+          python experiments/internal_reasoning/controlled_activation_experiment_002.py \
+            --output artifacts/internal_reasoning/experiment_002.json
+
+      - name: Upload controlled experiment 002 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-002
+          path: artifacts/internal_reasoning/experiment_002.json
+          if-no-files-found: error
 
       - name: Upload neural activation artifact
         if: always()
