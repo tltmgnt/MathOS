@@ -104,4 +104,11 @@ def main():
             error = str(exc)
 
         results.append({
-            "experiment_id": f"IRL-{index:03d
+            "experiment_id": f"IRL-{index:03d}",
+                "policy_a": a,
+                "policy_b": b,
+                "expected": expected,
+                "model_answer": answer,
+                "error": error,
+            }
+        )
