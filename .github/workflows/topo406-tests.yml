@@ -172,6 +172,17 @@ jobs:
         run: |
           python verification/validate_activations.py \
             --input artifacts/internal_reasoning/activations.json
+                  - name: Run controlled activation experiment 001
+        run: |
+          python experiments/internal_reasoning/controlled_activation_experiment.py \
+            --output artifacts/internal_reasoning/experiment_001.json
+
+      - name: Upload controlled experiment 001 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-001
+          path: artifacts/internal_reasoning/experiment_001.json
+          if-no-files-found: error
 
       - name: Upload neural activation artifact
         if: always()
