@@ -170,8 +170,13 @@ def evaluate(model, tokenizer):
 
 
 def run_benchmark(model_name, output_path, seed, experiment_id=None):
-        if experiment_id is None:
-        experiment_id = "MathOS-EXP-008" if model_name == "distilgpt2" else "MathOS-EXP-007"
+    if experiment_id is None:
+        experiment_id = (
+            "MathOS-EXP-008"
+            if model_name == "distilgpt2"
+            else "MathOS-EXP-007"
+        )
+
     model, tokenizer = load_model(model_name, seed)
 
     evaluation = evaluate(model, tokenizer)
