@@ -151,3 +151,9 @@ jobs:
             -s tests \
             -p "test_mathos_cli.py" \
             -v
+      - name: Run MathOS web tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_web.py" \
+            -v
