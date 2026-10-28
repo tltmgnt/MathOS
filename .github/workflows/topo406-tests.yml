@@ -293,18 +293,26 @@ jobs:
         run: |
           python experiments/internal_reasoning/arithmetic_standardized_analysis.py \
             --input artifacts/internal_reasoning/experiment_008.json \
-            --output artifacts/internal_reasoning/experiment_011.
+            --output artifacts/internal_reasoning/experiment_011.json
       - name: Upload standardized arithmetic analysis 011 artifact
         uses: actions/upload-artifact@v4
         with:
           name: mathos-experiment-011
           path: artifacts/internal_reasoning/experiment_011.json
           if-no-files-found: error
-      - name: Upload standardized arithmetic analysis 011 artifact
+      - name: Run arithmetic permutation test 012
+        run: |
+          python experiments/internal_reasoning/arithmetic_permutation_test.py \
+            --input artifacts/internal_reasoning/experiment_008.json \
+            --output artifacts/internal_reasoning/experiment_012.json \
+            --permutations 1000 \
+            --seed 406
+
+      - name: Upload arithmetic permutation test 012 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mathos-experiment-011
-          path: artifacts/internal_reasoning/experiment_011.json
+          name: mathos-experiment-012
+          path: artifacts/internal_reasoning/experiment_012.json
           if-no-files-found: error
 
       - name: Upload neural activation artifact
