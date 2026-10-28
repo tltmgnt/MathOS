@@ -351,6 +351,19 @@ jobs:
           name: mathos-experiment-015
           path: artifacts/internal_reasoning/experiment_015.json
           if-no-files-found: error
+      - name: Run tiny-GPT2 unique operand-pair analysis 016
+        run: |
+          python experiments/internal_reasoning/arithmetic_unique_pairs.py \
+            --input artifacts/internal_reasoning/experiment_015.json \
+            --output artifacts/internal_reasoning/experiment_016.json \
+            --experiment-id MathOS-EXP-016
+
+      - name: Upload tiny-GPT2 unique operand-pair analysis 016 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-016
+          path: artifacts/internal_reasoning/experiment_016.json
+          if-no-files-found: error
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
