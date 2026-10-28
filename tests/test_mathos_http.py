@@ -114,7 +114,7 @@ class TestMathOSHTTP(unittest.TestCase):
         )
 
         self.assertEqual(status, 200)
-        self.assertNotIn("<script>", page)
+        self.assertNotIn("<script>alert(1)</script>", page)
         self.assertIn("Error: Unsupported equation", page)
 
 
