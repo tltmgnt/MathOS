@@ -1,0 +1,30 @@
+name: MathOS TOPO-406 Verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-topo406:
+    name: Run TOPO-406 Tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run structural verification tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_topo406.py" \
+            -v
