@@ -139,3 +139,9 @@ jobs:
             -s tests \
             -p "test_mathos_core.py" \
             -v
+      - name: Run MathOS multi-agent tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_agents.py" \
+            -v
