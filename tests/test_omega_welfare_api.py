@@ -53,11 +53,13 @@ class TestOmegaWelfareAPI(unittest.TestCase):
 
     def valid_payload(self):
         return {
-            "times": [0, 1],
-            "weights": [1],
-            "rho": 0,
-            "risk_penalty": 1,
-            "governance_penalty": 1,
+            "parameters": {
+                "times": [0, 1],
+                "weights": [1],
+                "rho": 0,
+                "risk_penalty": 1,
+                "governance_penalty": 1,
+            },
             "policies": {
                 "Policy_A": {
                     "utilities": [[10, 10]],
