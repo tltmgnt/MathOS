@@ -114,6 +114,92 @@ pre {
 <pre>{result}</pre>
 
 <p>Offline mathematical engine — no API key required.</p>
+<hr>
+<section id="omega-calculator">
+  <h2>Ω Welfare Calculator</h2>
+  <p>Compare policies using weighted welfare,
+  risk penalties, and governance costs.</p>
+
+  <label for="omega-input">Policy data (JSON)</label>
+  <textarea id="omega-input" rows="18"
+    style="width:95%;background:#1e293b;color:white;
+    padding:12px;border-radius:8px;">{
+  "parameters": {
+    "times": [0, 1],
+    "weights": [1],
+    "rho": 0,
+    "risk_penalty": 1,
+    "governance_penalty": 1
+  },
+  "policies": {
+    "Policy_A": {
+      "utilities": [[10, 10]],
+      "risks": [1, 1],
+      "governance": [1, 1]
+    },
+    "Policy_B": {
+      "utilities": [[6, 6]],
+      "risks": [1, 1],
+      "governance": [1, 1]
+    }
+  }
+}</textarea>
+
+  <br>
+  <button type="button" onclick="calculateOmega()">
+    Calculate Welfare
+  </button>
+
+  <h3>Calculation Results</h3>
+  <pre id="omega-results" aria-live="polite">
+Enter policy data and select Calculate Welfare.
+  </pre>
+</section>
+
+<script>
+async function calculateOmega() {
+  const output = document.getElementById(
+    "omega-results"
+  );
+  const input = document.getElementById(
+    "omega-input"
+  );
+
+  output.textContent = "Calculating...";
+
+  try {
+    const payload = JSON.parse(input.value);
+
+    const response = await fetch(
+      "/api/omega-welfare",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      output.textContent = "Error: " +
+        (result.error || "Request failed");
+      return;
+    }
+
+    output.textContent = JSON.stringify(
+      result,
+      null,
+      2
+    );
+  } catch (error) {
+    output.textContent = "Error: " +
+      error.message;
+  }
+}
+</script>
 </body>
 </html>
 """
