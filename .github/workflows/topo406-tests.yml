@@ -163,3 +163,9 @@ jobs:
             -s tests \
             -p "test_mathos_http.py" \
             -v
+      - name: Run Omega welfare tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_omega_welfare.py" \
+            -v
