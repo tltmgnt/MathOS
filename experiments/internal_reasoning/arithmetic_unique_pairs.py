@@ -5,7 +5,7 @@ from pathlib import Path
 from statistics import mean
 
 
-def analyze(data):
+def analyze(data, experiment_id="MathOS-EXP-014"):
     records = data["records"]
 
     unique_pairs = {}
@@ -37,8 +37,8 @@ def analyze(data):
     ]
 
     return {
-        "experiment": "MathOS-EXP-014",
-        "source_experiment": "MathOS-EXP-013",
+        "experiment": experiment_id,
+        "source_experiment": data["experiment"],
         "model": data["model"],
         "benchmark": data["benchmark"],
         "timestamp_utc": datetime.now(
@@ -100,18 +100,22 @@ def main():
         "--input",
         required=True,
     )
+    
 
     parser.add_argument(
         "--output",
         required=True,
     )
-
+    parser.add_argument(
+        "--experiment-id",
+        default="MathOS-EXP-014",
+    )
     args = parser.parse_args()
 
     with open(args.input, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    report = analyze(data)
+        report = analyze(data, experiment_id=args.experiment_id)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(
