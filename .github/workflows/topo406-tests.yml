@@ -327,6 +327,18 @@ jobs:
           name: mathos-experiment-013
           path: artifacts/internal_reasoning/experiment_013.json
           if-no-files-found: error
+      - name: Run unique operand-pair analysis 014
+        run: |
+          python experiments/internal_reasoning/arithmetic_unique_pairs.py \
+            --input artifacts/internal_reasoning/experiment_013.json \
+            --output artifacts/internal_reasoning/experiment_014.json
+
+      - name: Upload unique operand-pair analysis 014 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-014
+          path: artifacts/internal_reasoning/experiment_014.json
+          if-no-files-found: error
 
       - name: Upload neural activation artifact
         if: always()
