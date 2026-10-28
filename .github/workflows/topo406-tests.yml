@@ -157,3 +157,9 @@ jobs:
             -s tests \
             -p "test_mathos_web.py" \
             -v
+      - name: Run MathOS HTTP integration tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_http.py" \
+            -v
