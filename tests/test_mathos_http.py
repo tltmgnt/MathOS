@@ -75,7 +75,7 @@ class TestMathOSHTTP(unittest.TestCase):
             },
         )
 
-                self.assertEqual(status, 200)
+        self.assertEqual(status, 200)
         self.assertIn('"answer": "4"', html.unescape(page))
         self.assertIn(
             '"verification_status": "verified"',
