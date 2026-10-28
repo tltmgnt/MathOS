@@ -339,7 +339,18 @@ jobs:
           name: mathos-experiment-014
           path: artifacts/internal_reasoning/experiment_014.json
           if-no-files-found: error
+      - name: Run tiny-GPT2 operand-swap experiment 015
+        run: |
+          python experiments/internal_reasoning/arithmetic_operand_swap_015.py \
+            --output artifacts/internal_reasoning/experiment_015.json \
+            --seed 406
 
+      - name: Upload tiny-GPT2 operand-swap experiment 015 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-015
+          path: artifacts/internal_reasoning/experiment_015.json
+          if-no-files-found: error
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
