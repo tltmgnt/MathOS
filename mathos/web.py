@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
 from mathos.core import MathOS
-
+from models.omega_welfare_solver import optimize_policies
 
 PAGE = """
 <!DOCTYPE html>
@@ -141,8 +141,63 @@ class MathOSHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.send_page()
+    def send_json(self, status, data):
+        content = json.dumps(data, allow_nan=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(content)))
+        self.end_headers()
+        self.wfile.write(content)
 
+    def do_omega_welfare(self):
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+
+            if length <= 0 or length > 65536:
+                self.send_json(413, {"error": "Invalid request size"})
+                return
+
+            data = json.loads(
+                self.rfile.read(length).decode("utf-8")
+            )
+
+            if not isinstance(data, dict):
+                raise ValueError("Expected a JSON object")
+
+            policies = data.get("policies")
+            parameters = data.get("parameters")
+
+            if not isinstance(policies, dict) or not policies:
+                raise ValueError("Provide at least one policy")
+
+            if not isinstance(parameters, dict):
+                raise ValueError("Provide a parameters object")
+
+            if len(policies) > 20:
+                raise ValueError("Maximum 20 policies")
+
+            times = parameters.get("times")
+            weights = parameters.get("weights")
+
+            if not isinstance(times, list) or not 2 <= len(times) <= 100:
+                raise ValueError("Provide 2–100 time points")
+
+            if not isinstance(weights, list) or not 1 <= len(weights) <= 100:
+                raise ValueError("Provide 1–100 participant weights")
+
+            for policy in policies.values():
+                if not isinstance(policy, dict):
+                    raise ValueError("Each policy must be an object")
+
+            result = optimize_policies(policies, **parameters)
+            self.send_json(200, result)
+
+        except (ValueError, TypeError, KeyError, OverflowError) as error:
+            self.send_json(400, {"error": str(error)})
     def do_POST(self):
+                if self.path == "/api/omega-welfare":
+            self.do_omega_welfare()
+            return
         length = int(self.headers.get("Content-Length", 0))
 
         if length > 4096:
