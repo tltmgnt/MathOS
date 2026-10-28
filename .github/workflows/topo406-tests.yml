@@ -165,7 +165,7 @@ jobs:
       - name: Validate neural activation artifact
         run: |
           python verification/validate_activations.py \
-            artifacts/internal_reasoning/activations.json
+            --input artifacts/internal_reasoning/activations.json
 
       - name: Upload neural activation artifact
         if: always()
