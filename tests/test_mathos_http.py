@@ -75,9 +75,11 @@ class TestMathOSHTTP(unittest.TestCase):
             },
         )
 
-        self.assertEqual(status, 200)
+                self.assertEqual(status, 200)
         self.assertIn('"answer": "4"', html.unescape(page))
-        self.assertIn("Error: Unsupported equation", page)
+        self.assertIn(
+            '"verification_status": "verified"',
+            html.unescape(page),
         )
 
     def test_invalid_equation(self):
@@ -113,7 +115,7 @@ class TestMathOSHTTP(unittest.TestCase):
 
         self.assertEqual(status, 200)
         self.assertNotIn("<script>", page)
-        self.assertIn("&lt;script&gt;", page)
+        self.assertIn("Error: Unsupported equation", page)
 
 
 if __name__ == "__main__":
