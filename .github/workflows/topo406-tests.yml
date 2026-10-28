@@ -37,3 +37,9 @@ jobs:
             -s tests \
             -p "test_topo406_schema.py" \
             -v
+      - name: Validate TOPO-406 evidence records
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_topo406_records.py" \
+            -v
