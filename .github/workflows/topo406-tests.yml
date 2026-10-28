@@ -145,6 +145,12 @@ jobs:
             -s tests \
             -p "test_internal_reasoning_adapter.py" \
             -v
+      - name: Run neural activation capture tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_activation_capture.py" \
+            -v 
       - name: Run MathOS multi-agent tests
         run: |
           python -m unittest discover \
