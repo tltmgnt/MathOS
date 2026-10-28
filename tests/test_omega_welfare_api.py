@@ -116,7 +116,7 @@ class TestOmegaWelfareAPI(unittest.TestCase):
 
     def test_rejects_invalid_time_points(self):
         payload = self.valid_payload()
-        payload["times"] = [1, 0]
+        payload["parameters"]["times"] = [1, 0]
 
         status, result = self.post_json(payload)
         self.assertEqual(status, 400)
