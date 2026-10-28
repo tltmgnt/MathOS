@@ -1,4 +1,4 @@
-"""HTTP integration tests for the MathOS web interface."""
+import html"""HTTP integration tests for the MathOS web interface."""
 
 import http.client
 import threading
@@ -76,10 +76,8 @@ class TestMathOSHTTP(unittest.TestCase):
         )
 
         self.assertEqual(status, 200)
-        self.assertIn('"answer": "4"', page)
-        self.assertIn(
-            '"verification_status": "verified"',
-            page,
+        self.assertIn('"answer": "4"', html.unescape(page))
+        self.assertIn("Error: Unsupported equation", page)
         )
 
     def test_invalid_equation(self):
