@@ -102,7 +102,38 @@ class TestMathOSCore(unittest.TestCase):
                 domain="mathematics"
             )
 
-    def test_unsupported_domain(self):
+        def test_general_reasoning_with_mock_ai(self):
+        class MockAIEngine:
+            def solve(self, problem, domain="general"):
+                return {
+                    "problem": problem,
+                    "domain": domain,
+                    "answer": "Gravity attracts masses.",
+                    "model": "mock-model",
+                    "verification_status": "unverified",
+                }
+
+        system = MathOS(ai_engine=MockAIEngine())
+
+        result = system.solve(
+            "Explain gravity",
+            domain="science",
+        )
+
+        self.assertEqual(
+            result.answer,
+            "Gravity attracts masses.",
+        )
+
+        self.assertEqual(
+            result.verification_status,
+            "unverified",
+        )
+
+        self.assertIn(
+            "Model: mock-model",
+            result.evidence,
+        )
         with self.assertRaises(ValueError):
             self.system.solve(
                 "Test problem",
