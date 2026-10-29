@@ -427,6 +427,17 @@ jobs:
           name: mathos-experiment-021
           path: artifacts/internal_reasoning/experiment_021.json
           if-no-files-found: error
+      - name: Run MathOS Experiment 022 arithmetic prompt validation
+        run: |
+          python experiments/internal_reasoning/arithmetic_prompt_validation_022.py \
+            --output artifacts/internal_reasoning/experiment_022.json
+
+      - name: Upload MathOS Experiment 022 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-022
+          path: artifacts/internal_reasoning/experiment_022.json
+          if-no-files-found: error
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
