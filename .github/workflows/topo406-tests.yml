@@ -403,7 +403,19 @@ jobs:
           name: mathos-experiment-019
           path: artifacts/internal_reasoning/experiment_019.json
           if-no-files-found: error
+      - name: Run MathOS Experiment 020 constant-answer baseline analysis
+        run: |
+          python experiments/internal_reasoning/arithmetic_constant_baseline_020.py \
+            --distilgpt2 artifacts/internal_reasoning/experiment_013.json \
+            --tiny-gpt2 artifacts/internal_reasoning/experiment_015.json \
+            --output artifacts/internal_reasoning/experiment_020.json
 
+      - name: Upload MathOS Experiment 020 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-020
+          path: artifacts/internal_reasoning/experiment_020.json
+          if-no-files-found: error
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
