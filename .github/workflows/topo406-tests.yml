@@ -390,6 +390,20 @@ jobs:
           name: mathos-experiment-018
           path: artifacts/internal_reasoning/experiment_018.json
           if-no-files-found: error
+      - name: Run MathOS Experiment 019 arithmetic error analysis
+        run: |
+          python experiments/internal_reasoning/arithmetic_error_analysis_019.py \
+            --distilgpt2 artifacts/internal_reasoning/experiment_013.json \
+            --tiny-gpt2 artifacts/internal_reasoning/experiment_015.json \
+            --output artifacts/internal_reasoning/experiment_019.json
+
+      - name: Upload MathOS Experiment 019 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-experiment-019
+          path: artifacts/internal_reasoning/experiment_019.json
+          if-no-files-found: error
+
       - name: Upload neural activation artifact
         if: always()
         uses: actions/upload-artifact@v4
