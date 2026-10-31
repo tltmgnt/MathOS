@@ -120,4 +120,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Contributions should make assumptions 
 
 ## Naming and attribution
 
-MathOS is the project name used in this repository. The proof-understanding theme is a general mathematical and engineering principle; this repository does not claim endorsement by, affiliation with, or authorship by Terence Tao. Any references to public talks or subtitles should be cited to their original source when included in a published version.
+MathOS is the project name used in this repository. The proof-understanding theme is a general mathematical and engineering principle. Any references to public talks or subtitles should be cited to their original source when included in a published version.
