@@ -1,0 +1,8 @@
+artifact,component,classification,commit_or_version,public_reference,audit_evidence,reviewer,reviewed_at
+pending,tga,D4,,,,,
+pending,dti,D4,,,,,
+pending,hedgeops,D4,,,,,
+pending,evidence,D4,,,,,
+pending,integration,D4,,,,,
+pending,training_calibration,D4,,,,,
+pending,operations,D4,,,,,
