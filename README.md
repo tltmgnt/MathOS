@@ -121,3 +121,33 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Contributions should make assumptions 
 ## Naming and attribution
 
 MathOS is the project name used in this repository. The proof-understanding theme is a general mathematical and engineering principle. Any references to public talks or subtitles should be cited to their original source when included in a published version.
+
+## Ω-R3B proposed replication benchmark
+
+The [Ω-R3B specification](docs/OMEGA_R3B.md) defines matched B0–B6 comparisons,
+component ablations, factorial interactions, fidelity, replication resistance, disclosure
+boundaries and empirical completion gates. `mathos/r3b.py` provides four-layer adapter
+contracts, a matched runner, validated metrics, paired bootstrap analysis and auditable
+JSON exports. Start with the [protocol template](benchmarks/r3b/protocol.json) and
+[disclosure inventory](benchmarks/r3b/disclosure_inventory.csv).
+
+Analyze an exported record with:
+
+```bash
+python -m mathos.r3b_report run.json --metric task_success --output report.json
+```
+
+The report verifies the record digest, requires matched task/trial coverage and aggregates
+tasks within trials before computing paired confidence intervals. Use `--lower-is-better`
+for loss metrics. Operators must establish trial independence and enforce actual budgets.
+
+Reference systems and independent replication results remain pending; this addition makes
+no claim of integration superiority or intellectual-property protection. Existing MathOS
+reasoning, agent, and welfare-model demonstrations do not establish B6 or independent
+replication fidelity.
+
+Run the dependency-free benchmark tests with:
+
+```bash
+python -m unittest discover -s tests -p 'test_r3b*.py' -v
+```
