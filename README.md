@@ -17,6 +17,12 @@ MathOS separates two kinds of checking:
 
 Success in one category does not guarantee success in the other.
 
+### Video: from a proof to useful knowledge
+
+[**Watch: Terence Tao — AI Solved It. What Comes Next?**](https://www.youtube.com/shorts/4VV0-TfxOWU) · AI Signal
+
+This clip provides context for MathOS’s emphasis on turning a result into understanding: checking correctness, explaining the method, and identifying how it can be used elsewhere.
+
 ## The MathOS reasoning loop
 
 1. **Observe** — Gather relevant evidence about structure, capacity, dependencies, incentives, and outcomes.
