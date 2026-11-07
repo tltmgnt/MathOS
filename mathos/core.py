@@ -20,6 +20,7 @@ class ReasoningResult:
     explanation: str
     verification_status: str = "unverified"
     evidence: List[str] = field(default_factory=list)
+    empirical_evidence: dict = field(default_factory=dict)
 
     def to_dict(self):
         return asdict(self)
@@ -43,7 +44,7 @@ class MathOS:
             else AIEngine()
         )
 
-    def solve(self, problem: str, domain: str = "general"):
+    def solve(self, problem: str, domain: str = "general", *, evidence_bundle=None):
         if not isinstance(problem, str) or not problem.strip():
             raise ValueError(
                 "Problem must be a nonempty string."
@@ -55,6 +56,10 @@ class MathOS:
             )
 
         problem = problem.strip()
+        empirical = {}
+        if evidence_bundle is not None:
+            from mathos.efo_integration import summarize_evidence_bundle
+            empirical = summarize_evidence_bundle(evidence_bundle)
 
         if domain == "mathematics":
             result = self.multi_agent.solve(problem)
@@ -69,6 +74,7 @@ class MathOS:
                     "verifier recomputed the equation."
                 ),
                 verification_status=result["status"],
+                empirical_evidence=empirical,
                 evidence=[
                     f"Critic: {result['critic']['status']}",
                     f"Verifier: {result['verifier']['status']}",
@@ -90,6 +96,7 @@ class MathOS:
                 "Independent verification has not been performed."
             ),
             verification_status="unverified",
+            empirical_evidence=empirical,
             evidence=[
                 f"Model: {result['model']}",
                 "Verification: AI-generated response only",
