@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "status": "template_not_preregistered",
+  "source_commit": null,
+  "dataset_version": null,
+  "expert_adjudication_reference": null,
+  "comparator_implementation": null,
+  "independent_operators": [],
+  "reviewer_assignment_and_counterbalancing": null,
+  "independent_sample_size_rationale": null,
+  "primary_metrics": ["missed_dependencies", "spurious_dependencies", "review_seconds", "missed_review_findings", "elapsed_ns", "python_peak_bytes"],
+  "practical_improvement_thresholds": null,
+  "accuracy_noninferiority_margin": null,
+  "exclusions_and_missing_data_policy": "reject_unmatched_review_pairs",
+  "held_out_graphs_reference": null,
+  "external_replication_reports": [],
+  "superiority_established": false
+}
