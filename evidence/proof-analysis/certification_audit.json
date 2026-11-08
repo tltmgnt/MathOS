@@ -1,0 +1,61 @@
+{
+  "overall_mathematical_certification": "NOT_CERTIFIED",
+  "rating": "No 5/5 rating awarded; no calibrated rating benchmark exists here.",
+  "gates": {
+    "finite_graph_certificate_checks": "PASS",
+    "seeded_cross_implementation_regression": "PASS",
+    "precise_formalization_of_all_mathematical_claims": "NOT_MET",
+    "all_mathematical_dependencies_proved": "NOT_MET",
+    "proof_assistant_kernel_check": "NOT_RUN_NO_TOOLCHAIN",
+    "independent_external_audit": "NOT_PERFORMED"
+  },
+  "trusted_assumptions": [
+    "Authored dependency routes are mathematically sufficient (not verified).",
+    "External background claims are accepted as supplied (not proof checked).",
+    "Python interpreter, host arithmetic and both checker implementations behave correctly.",
+    "SHA-256 provides content identification, not source authenticity or proof."
+  ],
+  "graph_checks": {
+    "Birch-Swinnerton-Dyer": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 8,
+      "graph_sha256": "dce30f09ac8ef2441eb7bb516e42ce6f1cd84ac150360f1725d1009fa6153f72"
+    },
+    "Hodge": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 4,
+      "graph_sha256": "85380853f32d0718c452d23e54ee1ab69473d4654d351b13f8a2b7c424cde2ac"
+    },
+    "Navier-Stokes": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 2,
+      "graph_sha256": "fde5f5ed52d12ca0c8901872c23ec2e4b9f480d335383c05ecf2bdb3afe57360"
+    },
+    "P-versus-NP": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 4,
+      "graph_sha256": "205550ba8b39c9b33db0a8e79b145af42ad213264edf2c5ed6763791bdc18dbe"
+    },
+    "Poincare": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 2,
+      "graph_sha256": "7d165ded33d4696e01bcbea444b84d5ee51bf13e4db6619df0372ae553874f90"
+    },
+    "Riemann": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 4,
+      "graph_sha256": "4b6e699ffede490ca3d7eab4ad31c64c43b83c61281179beb2f5ae310ab792a5"
+    },
+    "Yang-Mills": {
+      "verified_scope": "Boolean completion-set calculation only",
+      "assignments_checked": 8,
+      "graph_sha256": "e4076e286cdd632d61c58667a8a8b69954dcbd4fc30f8be9a6c4fd712db24844"
+    }
+  },
+  "regression": {
+    "seed": 173,
+    "graphs_checked": 1000,
+    "assignments_checked": 19814
+  },
+  "new_millennium_proofs": 0
+}

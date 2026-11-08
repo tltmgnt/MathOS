@@ -106,6 +106,24 @@ MathOS/
 
 ## Status
 
+### Executable proof dependency and adversarial analysis
+
+The repository includes a deterministic, offline proof-planning prototype:
+
+```sh
+python -m mathos.proof_analysis --run-tests --output-dir artifacts/proof-analysis
+```
+
+It computes inclusion-minimal completion sets for finite AND/OR dependency
+graphs, cross-checks them by Boolean evaluation, and runs seven fixed, narrowly
+scoped adversarial witnesses. Reports include the result contract, assumptions,
+limits, test outcomes and content hashes. **This is not a theorem prover or a
+certification of any new Millennium solution.**
+
+See [the implementation and review guide](docs/proof-analysis/README.md),
+[the professional handoff](docs/proof-analysis/HANDOFF.md), and
+[the verification curriculum](curriculum/proof-analysis-verification.md).
+
 **Concept and specification stage.** This repository documents a proposed framework and acceptance standards. It does not claim that the full multi-agent system, measurement instruments, or validation results have already been implemented. Numerical measures and operational claims should be treated as hypotheses until supported by testing.
 
 ## Roadmap
