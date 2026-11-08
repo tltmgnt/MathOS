@@ -135,3 +135,11 @@ The [ResearchOS / Topological Epistemic Control Theory technical concept paper](
 ## Portfolio implementation boundary
 
 See [current implementation and shared-core integration](docs/portfolio/INTEGRATION.md) and [machine-readable status](docs/portfolio/STATUS.json). Independent empirical reproduction and real-provider acceptance remain separate from software checks.
+
+## Proof dependency evaluation
+
+See [proof dependency and expert review evaluation](docs/PROOF_REVIEW_EVALUATION.md) for
+an AND/OR route analyzer, exhaustive Boolean baseline, matched local timing/allocation
+measurements, dependency coverage metrics and paired review observations. The included
+example is synthetic. Comparative superiority and external validation remain unestablished.
+
