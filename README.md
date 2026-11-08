@@ -106,7 +106,7 @@ MathOS/
 
 ## Status
 
-**Concept and specification stage.** This repository documents a proposed framework and acceptance standards. It does not claim that the full multi-agent system, measurement instruments, or validation results have already been implemented. Numerical measures and operational claims should be treated as hypotheses until supported by testing.
+**Bounded research software and evolving specification.** Implemented modules include `mathos/core.py`, agents/CLI, EFO integration, R3B reporting, internal-reasoning experiments and TOPO406 verification tests. The broader mathematical framework remains a research proposal; these components are not a universal theorem prover or a validated measure of general intelligence. Numerical and operational claims require their scoped evidence and tests.
 
 ## Roadmap
 
@@ -131,3 +131,7 @@ MathOS is the project name used in this repository. The proof-understanding them
 ## ResearchOS / TECT concept integration
 
 The [ResearchOS / Topological Epistemic Control Theory technical concept paper](docs/researchos/TECT_WHITE_PAPER.md) proposes an epistemic control and assurance infrastructure for AI-generated knowledge. Read the [repository integration status](docs/researchos/INTEGRATION.md) and [machine-readable scope](docs/researchos/integration.json) for the boundary between the concept and implemented capabilities. Performance targets are research objectives, not achieved results. This documentation addition does not implement the complete ResearchOS architecture or change operational authority.
+
+## Portfolio implementation boundary
+
+See [current implementation and shared-core integration](docs/portfolio/INTEGRATION.md) and [machine-readable status](docs/portfolio/STATUS.json). Independent empirical reproduction and real-provider acceptance remain separate from software checks.
