@@ -143,3 +143,4 @@ an AND/OR route analyzer, exhaustive Boolean baseline, matched local timing/allo
 measurements, dependency coverage metrics and paired review observations. The included
 example is synthetic. Comparative superiority and external validation remain unestablished.
 
+**∞**
