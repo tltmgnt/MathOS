@@ -144,3 +144,7 @@ measurements, dependency coverage metrics and paired review observations. The in
 example is synthetic. Comparative superiority and external validation remain unestablished.
 
 **∞**
+
+## Topology compatibility and curriculum
+
+See the [repository-specific v2 curriculum](docs/portfolio/TOPOLOGY_CURRICULUM_V2.md) for the minimum useful mathematics, six-criterion compatibility scorecard, source-linked exercises and adoption boundaries.
