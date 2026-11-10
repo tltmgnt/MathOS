@@ -32,6 +32,14 @@ Start with one bounded task: for example, reviewing the dependencies of an AI-as
 
 The [proof review evaluation guide](docs/PROOF_REVIEW_EVALUATION.md) provides commands, observation formats, and evidence gates. This is a proposed adoption path, not a completed lab study.
 
+## External validation and broader evaluation tracks
+
+The [external validation guide](docs/EXTERNAL_VALIDATION.md) defines independent-operator handoff, evidence gates, and separate evaluation contracts for mathematics, computational research, experiments, and operations. The new offline package auditor checks required study records and artifact digests; it does not establish scientific truth or operator independence. Start with the [study manifest template](validation/manifest.template.json). Real external observations and reviewed replication reports are still required.
+
+```sh
+python -m mathos.validation /path/to/study
+```
+
 ## Why MathOS?
 
 Generating an answer is not the same as understanding or safely using it. MathOS treats each consequential conclusion as a claim that must carry its evidence, assumptions, uncertainty, limitations, and a plan for verification.
