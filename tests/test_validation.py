@@ -64,6 +64,35 @@ class PackageAuditTests(unittest.TestCase):
         self.manifest["domain"] = "unbounded"
         self.assertIn("unsupported domain", self.run_audit()["errors"])
 
+    def test_malformed_manifests_return_structured_failures(self):
+        for value in ([], None, "text", 42):
+            self.manifest = value
+            self.assertEqual(self.run_audit()["status"], "incomplete_or_invalid")
+        (self.root / "manifest.json").write_text('{"domain":"mathematics","domain":"operations"}')
+        self.assertIn("duplicate JSON key", audit(self.root)["errors"][0])
+        (self.root / "manifest.json").write_text('{broken')
+        self.assertEqual(audit(self.root)["status"], "incomplete_or_invalid")
+
+    def test_invalid_field_types_do_not_crash(self):
+        self.manifest["domain"] = []
+        self.manifest["schema_version"] = True
+        self.manifest["artifacts"][0]["sha256"] = "invalid"
+        errors = self.run_audit()["errors"]
+        self.assertIn("unsupported domain", errors)
+        self.assertIn("unsupported schema_version", errors)
+        self.assertTrue(any("invalid sha256" in e for e in errors))
+
+    def test_large_artifact_streaming_hash(self):
+        data = b"a" * (3 * 1024 * 1024 + 17)
+        (self.root / "analysis.txt").write_bytes(data)
+        self.manifest["artifacts"][3]["sha256"] = hashlib.sha256(data).hexdigest()
+        self.assertEqual(self.run_audit()["errors"], [])
+
+    def test_missing_manifest_and_manifest_escape(self):
+        self.assertEqual(audit(self.root)["status"], "incomplete_or_invalid")
+        (self.root / "manifest.json").symlink_to(self.root.parent / "outside.json")
+        self.assertIn("manifest escapes", audit(self.root)["errors"][0])
+
 
 if __name__ == "__main__":
     unittest.main()
