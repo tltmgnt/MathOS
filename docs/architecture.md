@@ -57,3 +57,9 @@ Consequential actions must respect defined authorization boundaries. The system 
 8. Current Status
 
 This document describes the proposed architecture. Individual capabilities should be labeled as implemented, tested, or planned as development progresses.
+
+9. Domain evaluation contracts and external evidence
+
+The [external validation guide](EXTERNAL_VALIDATION.md) extends the evaluation design to mathematics, computational research, experimental studies and operations. Each track retains separate outcome measures, references and transfer boundaries. These are evaluation contracts, not newly implemented domain solvers.
+
+`mathos.validation` implements an offline study-package audit for these tracks. It checks required metadata, artifact roles, relative-path boundaries and SHA-256 integrity. It always leaves external validation unestablished; identity, independence, preregistration timing and scientific conclusions require external human review. The existing solve interface and verification statuses are unchanged.
