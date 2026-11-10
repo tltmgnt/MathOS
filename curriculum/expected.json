@@ -1,0 +1,86 @@
+{
+  "case_count": 6,
+  "cases": [
+    {
+      "actual": true,
+      "case": "capture requests hidden states",
+      "expected": true,
+      "passed": true
+    },
+    {
+      "actual": true,
+      "case": "capture disables dropout via eval",
+      "expected": true,
+      "passed": true
+    },
+    {
+      "actual": true,
+      "case": "capture records last-token vector",
+      "expected": true,
+      "passed": true
+    },
+    {
+      "actual": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        4
+      ],
+      "case": "orthogonal rotation preserves pair distances",
+      "expected": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        4
+      ],
+      "passed": true
+    },
+    {
+      "actual": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        4
+      ],
+      "case": "synthetic distance multiset",
+      "expected": [
+        2,
+        2,
+        2,
+        2,
+        4,
+        4
+      ],
+      "passed": true
+    },
+    {
+      "actual": [
+        8,
+        8,
+        8,
+        8,
+        16,
+        16
+      ],
+      "case": "scaling changes distance convention",
+      "expected": [
+        8,
+        8,
+        8,
+        8,
+        16,
+        16
+      ],
+      "passed": true
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Synthetic curriculum checks only",
+  "status": "PASS"
+}
