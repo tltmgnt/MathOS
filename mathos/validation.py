@@ -7,15 +7,47 @@ from pathlib import Path
 DOMAINS = {"mathematics", "computational", "experimental", "operations"}
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key: " + key)
+        result[key] = value
+    return result
+
+
+def _digest(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def audit(root):
     root = Path(root).resolve()
-    manifest = json.loads((root / "manifest.json").read_text())
     errors = []
+    def report():
+        return {"status": "package_complete_pending_external_review" if not errors else "incomplete_or_invalid",
+                "errors": errors, "external_validation_established": False,
+                "limitations": ["Hashes check package integrity, not authenticity or truth.",
+                                "Identity, independence, preregistration timing, methods and conclusions require human external review."]}
+    try:
+        manifest_path = (root / "manifest.json").resolve()
+        if not manifest_path.is_relative_to(root):
+            raise ValueError("manifest escapes package")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
+        if not isinstance(manifest, dict):
+            raise ValueError("manifest must be an object")
+    except (OSError, ValueError, RuntimeError) as exc:
+        errors.append("invalid manifest: " + str(exc))
+        return report()
     def require(condition, message):
         if not condition:
             errors.append(message)
-    require(manifest.get("schema_version") == 1, "unsupported schema_version")
-    require(manifest.get("domain") in DOMAINS, "unsupported domain")
+    require(type(manifest.get("schema_version")) is int and manifest["schema_version"] == 1, "unsupported schema_version")
+    domain = manifest.get("domain")
+    require(isinstance(domain, str) and domain in DOMAINS, "unsupported domain")
     require(manifest.get("data_origin") == "external_observations", "external observations required")
     for key in ("claim", "scope", "source_commit", "operator", "independence_disclosure",
                 "comparator", "primary_metric", "acceptance_rule", "sample_size_rationale",
@@ -35,25 +67,32 @@ def audit(root):
             errors.append("invalid artifact record")
             continue
         role, name, digest = (item.get(k) for k in ("role", "path", "sha256"))
-        if not isinstance(role, str) or not isinstance(name, str) or not name:
+        if not isinstance(role, str) or not role.strip() or not isinstance(name, str) or not name.strip():
             errors.append("artifact role and path required")
             continue
         roles.add(role)
         require(name not in seen, "duplicate artifact path: " + name)
         seen.add(name)
-        path = (root / name).resolve()
+        if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            errors.append("invalid sha256: " + name)
+            continue
+        try:
+            path = (root / name).resolve()
+        except (OSError, ValueError, RuntimeError) as exc:
+            errors.append("invalid artifact path: " + str(exc))
+            continue
         if Path(name).is_absolute() or not path.is_relative_to(root):
             errors.append("artifact escapes package: " + name)
             continue
-        if not path.is_file():
-            errors.append("missing artifact: " + name)
-            continue
-        require(hashlib.sha256(path.read_bytes()).hexdigest() == digest, "digest mismatch: " + name)
+        try:
+            if not path.is_file():
+                errors.append("missing artifact: " + name)
+                continue
+            require(_digest(path) == digest, "digest mismatch: " + name)
+        except (OSError, ValueError) as exc:
+            errors.append("unreadable artifact: " + name + ": " + str(exc))
     require(required <= roles, "missing artifact roles: " + ", ".join(sorted(required - roles)))
-    return {"status": "package_complete_pending_external_review" if not errors else "incomplete_or_invalid",
-            "errors": errors, "external_validation_established": False,
-            "limitations": ["Hashes check package integrity, not authenticity or truth.",
-                            "Identity, independence, preregistration timing, methods and conclusions require human external review."]}
+    return report()
 
 
 def main():
