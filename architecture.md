@@ -41,6 +41,19 @@ These are proposed roles, not a claim that these agents currently exist or have 
 
 ## Standard result contract
 
+### Implemented proof analysis prototype
+
+`mathos.proof_analysis` implements finite AND/OR dependency calculations,
+a separate exhaustive Boolean checker, and seven fixed exact adversarial
+witnesses. Run `python -m mathos.proof_analysis --run-tests` from the repository
+root. Its `result_contracts.json` records scoped claims, assumptions, evidence,
+limitations and required human review using the root result contract.
+
+Claim text and mathematical sufficiency of dependency edges remain unverified.
+A challenged shortcut marks only its candidate route as contested; it does not
+refute the underlying conjecture. No proof-assistant integration or independent
+external audit is claimed. See [the implementation guide](docs/proof-analysis/README.md).
+
 Every consequential agent result should state:
 
 1. The claim

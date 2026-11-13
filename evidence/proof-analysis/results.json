@@ -1,0 +1,348 @@
+{
+  "scope": "Author-modeled proof dependencies; no theorem proving or new mathematical certification.",
+  "sources": [
+    "https://github.com/tltmgnt/ResearchOs/blob/main/core.py",
+    "https://github.com/tltmgnt/ResearchOs/blob/main/TECT_SPEC.md"
+  ],
+  "integration": "MathOS repository implementation inspired by ResearchOS; not the ResearchOS controller or a theorem prover.",
+  "results": {
+    "Birch-Swinnerton-Dyer": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "analytic_selmer",
+          "leading_term",
+          "sha_finiteness"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "analytic_selmer",
+        "leading_term",
+        "sha_finiteness"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "analytic_selmer": {
+          "label": "Prove the general complex analytic rank / Selmer corank comparison",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "sha_finiteness": {
+          "label": "Prove finiteness of the Tate-Shafarevich group",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "leading_term": {
+          "label": "Prove the full leading-term identity with specified normalizations",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Full BSD for elliptic curves over Q",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "analytic_selmer",
+              "sha_finiteness",
+              "leading_term"
+            ]
+          ],
+          "note": "Full leading-term identity overlaps the other obligations. Graph tracks work packages, not independent axioms."
+        }
+      }
+    },
+    "Hodge": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "primitive_cycles",
+          "reduction"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "primitive_cycles",
+        "reduction"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "primitive_cycles": {
+          "label": "Construct rational algebraic cycle representatives for all remaining primitive rational Hodge classes on all smooth projective varieties",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "reduction": {
+          "label": "Prove coverage of all classes from primitive cases, including rationality and algebraicity of every reduction",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Rational Hodge conjecture",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "primitive_cycles",
+              "reduction"
+            ]
+          ],
+          "note": "The primitive-class obligation remains a major geometric theorem, not an implemented construction."
+        }
+      }
+    },
+    "Navier-Stokes": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "critical_bound"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "critical_bound"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "critical_bound": {
+          "label": "Prove an a priori L^4_t L^6_x bound up to every finite candidate breakdown time for all admissible data",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Unforced global smoothness branch",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "critical_bound"
+            ]
+          ],
+          "note": "Uses the established continuation criterion. This is one sufficient branch, not a review of announced forced-breakdown proofs."
+        }
+      }
+    },
+    "P-versus-NP": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "sat_correctness",
+          "sat_runtime"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "sat_correctness",
+        "sat_runtime"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "sat_correctness": {
+          "label": "Supply a fully specified deterministic SAT algorithm and prove correctness",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "sat_runtime": {
+          "label": "Prove polynomial worst-case total bit complexity, including all intermediate representations",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "P=NP via SAT",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "sat_correctness",
+              "sat_runtime"
+            ]
+          ],
+          "note": "Only a P=NP route is modeled. Failure does not imply P!=NP. Explicit expansion route is refuted separately."
+        }
+      }
+    },
+    "Poincare": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "reconstruction"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "reconstruction"
+      ],
+      "claims": {
+        "published": {
+          "label": "Poincare conjecture via established Perelman proof",
+          "state": "established_external",
+          "routes": [],
+          "note": "External established result; not newly verified by this program."
+        },
+        "reconstruction": {
+          "label": "Supply a complete independently checked reconstruction of the proof",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Our independent proof reconstruction",
+          "state": "derived",
+          "routes": [
+            [
+              "reconstruction"
+            ]
+          ],
+          "note": ""
+        }
+      },
+      "established_result": "EXTERNAL_RESULT_OR_ROUTE_CLOSED"
+    },
+    "Riemann": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "operator",
+          "zero_identity"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "operator",
+        "zero_identity"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "operator": {
+          "label": "Construct an independently defined self-adjoint operator with a rigorous domain",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "zero_identity": {
+          "label": "Prove a spectral/determinant identity accounting for every nontrivial zero with multiplicity",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Riemann hypothesis via spectral realization",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "operator",
+              "zero_identity"
+            ]
+          ],
+          "note": "The identity must be noncircular and include any determinant regularization and nonvanishing factors."
+        }
+      }
+    },
+    "Yang-Mills": {
+      "target": "target",
+      "status": "BLOCKED",
+      "minimal_completion_sets": [
+        [
+          "axioms",
+          "continuum",
+          "uniform_gap"
+        ]
+      ],
+      "common_to_all_modeled_routes": [
+        "axioms",
+        "continuum",
+        "uniform_gap"
+      ],
+      "claims": {
+        "background": {
+          "label": "Established mathematical background (externally accepted)",
+          "state": "established_external",
+          "routes": [],
+          "note": "Assumed; not independently proof-checked here."
+        },
+        "continuum": {
+          "label": "Construct a nontrivial continuum limit for each required compact simple gauge group",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "axioms": {
+          "label": "Verify the required quantum-field axioms and reconstruction hypotheses",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "uniform_gap": {
+          "label": "Prove regulator-uniform bounds yielding a strictly positive physical spectral gap",
+          "state": "open",
+          "routes": [],
+          "note": ""
+        },
+        "target": {
+          "label": "Four-dimensional Yang-Mills existence and mass gap",
+          "state": "derived",
+          "routes": [
+            [
+              "background",
+              "continuum",
+              "axioms",
+              "uniform_gap"
+            ]
+          ],
+          "note": "These are coupled work packages. No continuum construction or gap proof is supplied."
+        }
+      }
+    }
+  },
+  "sat_counterexample": {
+    "formula": "AND_i (x_i OR y_i), disjoint variable pairs",
+    "polynomial": "PRODUCT_i (x_i + y_i - x_i*y_i)",
+    "exact_monomials": "3**m",
+    "proof": "Each factor has three nonzero terms on disjoint variables; choices yield distinct monomials, so no cancellation is possible.",
+    "counts_m_1_to_8": [
+      3,
+      9,
+      27,
+      81,
+      243,
+      729,
+      2187,
+      6561
+    ]
+  }
+}

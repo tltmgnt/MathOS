@@ -185,6 +185,24 @@ The [ResearchOS / Topological Epistemic Control Theory technical concept paper](
 
 See [current implementation and shared-core integration](docs/portfolio/INTEGRATION.md) and [machine-readable status](docs/portfolio/STATUS.json). Independent empirical reproduction and real-provider acceptance remain separate from software checks.
 
+## Executable proof dependency and adversarial analysis
+
+The repository includes a deterministic offline proof-planning prototype:
+
+```sh
+python -m mathos.proof_analysis --run-tests --output-dir artifacts/proof-analysis
+```
+
+It computes inclusion-minimal completion sets for finite AND/OR dependency graphs,
+cross-checks them against exhaustive Boolean evaluation, and reports seven fixed,
+narrowly scoped adversarial witnesses. The reports record assumptions, limitations,
+test outcomes and content hashes. **This is not a theorem prover, a certification
+of a new Millennium Prize solution, or an independent external audit.**
+
+See [the implementation guide](docs/proof-analysis/README.md),
+[the mathematical review handoff](docs/proof-analysis/HANDOFF.md), and
+[the verification curriculum](curriculum/proof-analysis-verification.md).
+
 ## Proof dependency evaluation
 
 See [proof dependency and expert review evaluation](docs/PROOF_REVIEW_EVALUATION.md) for
