@@ -1,0 +1,39 @@
+name: Millennium research probes (bounded)
+
+on:
+  push:
+    paths:
+      - 'mathos/research/**'
+      - 'tests/test_millennium_attacks_001.py'
+      - 'docs/research/MILLENNIUM_ATTACK_001.md'
+      - '.github/workflows/millennium-research-tests.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/**'
+      - 'tests/test_millennium_attacks_001.py'
+      - 'docs/research/MILLENNIUM_ATTACK_001.md'
+      - '.github/workflows/millennium-research-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-research-probes:
+    name: bounded-probes (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Check bounded mathematical experiments
+        run: |
+          python -m unittest discover -s tests -p 'test_millennium_attacks_001.py' -v
+          python -m mathos.research.millennium_attacks_001 > /tmp/millennium-attacks-001.json
+          python -m json.tool /tmp/millennium-attacks-001.json > /dev/null
