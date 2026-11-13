@@ -1,0 +1,16 @@
+{
+  "case_count": 6,
+  "command": "python curriculum/lab.py --verify",
+  "exit_code": 0,
+  "expected_sha256": "209b2d405c98e9b57c8fef9e5dc1bf68f8c9fdafea8fc87007f7378b47eafc34",
+  "lab_sha256": "2b5df754ed42d76f5b728ffbbde5649a93f8a8dc9c493bee885064a2dee35993",
+  "python": "3.12.14",
+  "repository": "tltmgnt/MathOS",
+  "schema_version": 1,
+  "scope": "Local synthetic curriculum validation on the recorded source snapshot; not complete repository CI, learning outcomes, independent scientific reproduction or deployment approval",
+  "source_and_fixture_sha256": {
+    "experiments/internal_reasoning/activation_capture.py": "2ace49b74ecfdc167e96d114f758bef467060eb0adfb7433e9085b1ffbe9a446"
+  },
+  "source_base_commit": "ed927d96dbec0aa8d1720f6651da65aed3e607a2",
+  "wrong_expectation_exit_code": 1
+}
