@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "domain": "mathematics",
+  "data_origin": "not_collected",
+  "claim": null,
+  "scope": null,
+  "source_commit": null,
+  "operator": null,
+  "independence_disclosure": null,
+  "comparator": null,
+  "primary_metric": null,
+  "acceptance_rule": null,
+  "sample_size_rationale": null,
+  "assignment": null,
+  "missing_data_policy": null,
+  "limitations": null,
+  "artifacts": []
+}

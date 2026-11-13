@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MathOS TOPO-406 Verification Record",
+  "description": "Schema for structured proof, explanation, and transfer verification records.",
+  "type": "object",
+  "required": [
+    "evaluation_id",
+    "claim_id",
+    "proposition",
+    "assumptions",
+    "verification_method",
+    "results",
+    "status",
+    "reviewer"
+  ],
+  "properties": {
+    "evaluation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "derivation": {
+      "type": "string"
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "verification_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "results": {
+      "type": "string",
+      "minLength": 1
+    },
+    "counterexamples": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "transfer_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Verified",
+        "Supported",
+        "Hypothesis",
+        "Untested",
+        "Rejected",
+        "Contested"
+      ]
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision_history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

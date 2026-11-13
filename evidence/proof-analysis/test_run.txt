@@ -1,0 +1,51 @@
+test_bsd_nondegeneracy_dimensions (test_proof_adversarial.AdversarialTests.test_bsd_nondegeneracy_dimensions) ... ok
+test_challenge_does_not_refute_conjectures (test_proof_adversarial.AdversarialTests.test_challenge_does_not_refute_conjectures) ... ok
+test_complex_multiplication (test_proof_adversarial.AdversarialTests.test_complex_multiplication) ... ok
+test_duplicate_findings_rejected (test_proof_adversarial.AdversarialTests.test_duplicate_findings_rejected) ... ok
+test_gaussian_derivative_constant (test_proof_adversarial.AdversarialTests.test_gaussian_derivative_constant) ... ok
+test_gaussian_derivative_linear (test_proof_adversarial.AdversarialTests.test_gaussian_derivative_linear) ... ok
+test_hodge_image_is_proper (test_proof_adversarial.AdversarialTests.test_hodge_image_is_proper) ... ok
+test_ns_arbitrarily_large_origin_vorticity (test_proof_adversarial.AdversarialTests.test_ns_arbitrarily_large_origin_vorticity) ... ok
+test_ns_curl_coefficients (test_proof_adversarial.AdversarialTests.test_ns_curl_coefficients) ... ok
+test_ns_divergence_zero (test_proof_adversarial.AdversarialTests.test_ns_divergence_zero) ... ok
+test_ns_helicity_density_zero (test_proof_adversarial.AdversarialTests.test_ns_helicity_density_zero) ... ok
+test_poincare_perfect_group (test_proof_adversarial.AdversarialTests.test_poincare_perfect_group) ... ok
+test_rank_exact_rationals (test_proof_adversarial.AdversarialTests.test_rank_exact_rationals) ... ok
+test_rank_ragged_rejected (test_proof_adversarial.AdversarialTests.test_rank_ragged_rejected) ... ok
+test_rank_row_swap (test_proof_adversarial.AdversarialTests.test_rank_row_swap) ... ok
+test_rh_exact_root_square (test_proof_adversarial.AdversarialTests.test_rh_exact_root_square) ... ok
+test_sat_boolean_truth (test_proof_adversarial.AdversarialTests.test_sat_boolean_truth) ... ok
+test_sat_counts (test_proof_adversarial.AdversarialTests.test_sat_counts) ... ok
+test_sat_empty_product (test_proof_adversarial.AdversarialTests.test_sat_empty_product) ... ok
+test_sat_resource_limit (test_proof_adversarial.AdversarialTests.test_sat_resource_limit) ... ok
+test_seven_distinct_findings (test_proof_adversarial.AdversarialTests.test_seven_distinct_findings) ... ok
+test_unrecognized_outcome_rejected (test_proof_adversarial.AdversarialTests.test_unrecognized_outcome_rejected) ... ok
+test_ym_positive_gaps_decrease (test_proof_adversarial.AdversarialTests.test_ym_positive_gaps_decrease) ... ok
+test_content_hash_changes (test_proof_certification.CertificateTests.test_content_hash_changes) ... ok
+test_cycle_rejected (test_proof_certification.CertificateTests.test_cycle_rejected) ... ok
+test_external_is_assumption_not_new_proof (test_proof_certification.CertificateTests.test_external_is_assumption_not_new_proof) ... ok
+test_false_completion_rejected (test_proof_certification.CertificateTests.test_false_completion_rejected) ... ok
+test_forged_empty_certificate_rejected (test_proof_certification.CertificateTests.test_forged_empty_certificate_rejected) ... ok
+test_missing_route_rejected (test_proof_certification.CertificateTests.test_missing_route_rejected) ... ok
+test_resource_limit_fails_closed (test_proof_certification.CertificateTests.test_resource_limit_fails_closed) ... ok
+test_seeded_graph_cross_check (test_proof_certification.CertificateTests.test_seeded_graph_cross_check) ... ok
+test_superset_rejected (test_proof_certification.CertificateTests.test_superset_rejected) ... ok
+test_unknown_leaf_rejected (test_proof_certification.CertificateTests.test_unknown_leaf_rejected) ... ok
+test_valid (test_proof_certification.CertificateTests.test_valid) ... ok
+test_alternative_routes_and_superset_elimination (test_proof_gap_analysis.GapTests.test_alternative_routes_and_superset_elimination) ... ok
+test_cycle_rejected_even_in_unused_route (test_proof_gap_analysis.GapTests.test_cycle_rejected_even_in_unused_route) ... ok
+test_empty_proof_cannot_certify (test_proof_gap_analysis.GapTests.test_empty_proof_cannot_certify) ... ok
+test_external_route_can_close (test_proof_gap_analysis.GapTests.test_external_route_can_close) ... ok
+test_missing_dependency (test_proof_gap_analysis.GapTests.test_missing_dependency) ... ok
+test_sat_expansion_with_exact_coefficients (test_proof_gap_analysis.GapTests.test_sat_expansion_with_exact_coefficients) ... ok
+test_seven_attempts_blocked_poincare_external (test_proof_gap_analysis.GapTests.test_seven_attempts_blocked_poincare_external) ... ok
+test_shared_dependency_deduplicated (test_proof_gap_analysis.GapTests.test_shared_dependency_deduplicated) ... ok
+test_cli_reports_and_scope (test_proof_runner.RunnerTests.test_cli_reports_and_scope) ... ok
+test_contract_fields_match_repository_schema (test_proof_runner.RunnerTests.test_contract_fields_match_repository_schema) ... ok
+test_failed_tests_do_not_write_reports (test_proof_runner.RunnerTests.test_failed_tests_do_not_write_reports) ... ok
+test_no_cwd_mutation (test_proof_runner.RunnerTests.test_no_cwd_mutation) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 0.794s
+
+OK

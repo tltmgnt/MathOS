@@ -1,0 +1,32 @@
+{
+  "registry_version": "1.0.0",
+  "standard": "TOPO-406",
+  "description": "MathOS mathematical verification execution registry",
+  "claims": [
+    {
+      "claim_id": "CASE-001",
+      "proposition": "The sum of two even integers is even.",
+      "evidence_record": "evidence/topo406/CASE-001.json",
+      "verification": {
+        "type": "property_based_testing",
+        "test_file": "tests/test_topo406_reproducibility.py",
+        "test_class": "TestTOPO406Reproducibility",
+        "test_method": "test_even_integer_property",
+        "random_seed": 406,
+        "sample_count": 10000,
+        "boundary_test": "test_boundary_cases"
+      },
+      "proof": {
+        "type": "deductive",
+        "description": "For integers m and n, 2m + 2n = 2(m+n).",
+        "formal_machine_checked": false
+      },
+      "status": "Verified",
+      "limitations": [
+        "Randomized tests do not establish universal mathematical truth.",
+        "The deductive proof is documented but not machine-checked.",
+        "Registry status does not establish independent review."
+      ]
+    }
+  ]
+}

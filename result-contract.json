@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MathOS Result Contract",
+  "description": "A proposed structured contract for inspectable AI-agent outputs.",
+  "type": "object",
+  "required": [
+    "claim",
+    "evidence",
+    "assumptions",
+    "method",
+    "uncertainty",
+    "limitations",
+    "verification_plan"
+  ],
+  "properties": {
+    "claim": { "type": "string", "minLength": 1 },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string" },
+          "source": { "type": ["string", "null"] },
+          "observed_at": { "type": ["string", "null"], "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "method": { "type": "string" },
+    "uncertainty": { "type": "string" },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "counterexamples": { "type": "array", "items": { "type": "string" } },
+    "transfer_conditions": { "type": "array", "items": { "type": "string" } },
+    "verification_plan": { "type": "string" },
+    "human_review_required": { "type": "boolean", "default": true }
+  },
+  "additionalProperties": false
+}

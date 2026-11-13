@@ -1,0 +1,9 @@
+# MathOS v0.1 research dependencies
+#
+# Matches the dependency constraints used by GitHub Actions.
+# PyTorch CPU wheels are installed separately by the workflow.
+#
+# These are version ranges, not exact dependency locks.
+
+torch>=2.2,<3
+transformers>=4.40,<5
