@@ -110,7 +110,11 @@ def unit_pure_status(clauses: CNF, n: int) -> str:
     Returns 'sat', 'unsat' or 'stalled'; 'stalled' is NOT a SAT answer.
     """
     _check_cnf(clauses, n)
-    remaining: list[tuple[int, ...]] = list(clauses)
+    remaining: list[tuple[int, ...]] = [
+        tuple(dict.fromkeys(clause))
+        for clause in clauses
+        if not any(-lit in clause for lit in clause)
+    ]
     while True:
         if not remaining:
             return "sat"
