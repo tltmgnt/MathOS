@@ -55,3 +55,18 @@ a formalized enumeration algorithm, termination and completeness proofs.
 
 The source is a proof candidate until the Lean workflow actually passes on
 the commit containing it.
+
+## Stage 3a: finite candidate pruning
+
+[FiniteCompletionPruning.lean](FiniteCompletionPruning.lean) gives a predicate-set
+model of inclusion-minimality and proves that filtering a finite list of
+candidates removes precisely the candidates strictly dominated by another
+candidate. It establishes soundness relative to the supplied candidate list,
+the antichain property, and exact membership characterization.
+
+It does **not** prove candidate generation is complete or that the recursive
+DAG implementation terminates for every abstract input under resource limits.
+Predicate inclusion is decided classically (noncomputable), so this is a
+proof-level model, not a verified extraction of Python's implementation.
+
+The source remains a proof candidate until the pinned Lean CI job passes.

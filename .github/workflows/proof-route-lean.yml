@@ -29,3 +29,4 @@ jobs:
         run: |
           lean formal/ProofRouteLogic.lean
           lean formal/BooleanRoutes.lean
+          lean formal/FiniteCompletionPruning.lean
