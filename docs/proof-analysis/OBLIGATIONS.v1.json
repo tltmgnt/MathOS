@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0.0",
+  "created_date": "2026-11-13",
+  "title": "MathOS Millennium proof-obligation register",
+  "scope": "Research work packages from mathos.proof_analysis.gap_analysis.models(), not complete definitions or verified sufficient mathematical proof routes.",
+  "source_file": "mathos/proof_analysis/gap_analysis.py",
+  "source_review": "docs/proof-analysis/HANDOFF.md",
+  "external_result": {
+    "claim_id": "POINCARE.published",
+    "model_node_id": "published",
+    "graph_state": "established_external",
+    "verification": "accepted_external_not_replayed",
+    "statement": "Poincare conjecture via established Perelman proof",
+    "source_locator": "Official Clay Mathematics Institute Poincare problem materials; precise theorem-level citation still needs reviewer entry.",
+    "note": "This is not a MathOS proof. The distinct target POINCARE.reconstruction is open."
+  },
+  "abstract_algorithm": {
+    "claim_id": "GRAPH1",
+    "statement": "For every valid finite acyclic AND/OR graph and target, the recurrence returns all and only the inclusion-minimal open-leaf completion sets under its authored Boolean semantics.",
+    "status": "informal_argument_available",
+    "formal_check": "not_performed",
+    "boundary": "This does not prove the mathematical sufficiency of authored routes or certify the Python implementation."
+  },
+  "sat_subresult": {
+    "claim_id": "SAT1",
+    "statement": "For m >= 0, the polynomial over Z in 2m distinct variables given by product_i(x_i+y_i-x_i*y_i) has exactly 3^m nonzero monomials.",
+    "status": "informal_proof_in_repository",
+    "formal_check": "not_performed",
+    "boundary": "Explicit expansion lower bound only; not a general SAT algorithm lower bound."
+  },
+  "tracks": [
+    {
+      "track_id": "BSD",
+      "model_key": "Birch-Swinnerton-Dyer",
+      "model_target": "target",
+      "target_statement": "Full BSD for elliptic curves over Q",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "BSD.analytic_selmer",
+          "model_node_id": "analytic_selmer",
+          "statement": "Prove the general complex analytic rank / Selmer corank comparison",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "BSD.sha_finiteness",
+          "model_node_id": "sha_finiteness",
+          "statement": "Prove finiteness of the Tate-Shafarevich group",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "BSD.leading_term",
+          "model_node_id": "leading_term",
+          "statement": "Prove the full leading-term identity with specified normalizations",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "The leading-term obligation overlaps other work packages; this is not a decomposition into independent lemmas."
+    },
+    {
+      "track_id": "HODGE",
+      "model_key": "Hodge",
+      "model_target": "target",
+      "target_statement": "Rational Hodge conjecture",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "HODGE.primitive_cycles",
+          "model_node_id": "primitive_cycles",
+          "statement": "Construct rational algebraic cycle representatives for all remaining primitive rational Hodge classes on all smooth projective varieties",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "HODGE.reduction",
+          "model_node_id": "reduction",
+          "statement": "Prove coverage of all classes from primitive cases, including rationality and algebraicity of every reduction",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "The primitive case may restate the central conjecture; reduction validity requires specialist review."
+    },
+    {
+      "track_id": "NS",
+      "model_key": "Navier-Stokes",
+      "model_target": "target",
+      "target_statement": "Unforced global smoothness branch",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "NS.critical_bound",
+          "model_node_id": "critical_bound",
+          "statement": "Prove an a priori L^4_t L^6_x bound up to every finite candidate breakdown time for all admissible data",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "One proposed sufficient route, not an assessment of other approaches or announcements."
+    },
+    {
+      "track_id": "PNP",
+      "model_key": "P-versus-NP",
+      "model_target": "target",
+      "target_statement": "P=NP via SAT",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "PNP.sat_correctness",
+          "model_node_id": "sat_correctness",
+          "statement": "Supply a fully specified deterministic SAT algorithm and prove correctness",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "PNP.sat_runtime",
+          "model_node_id": "sat_runtime",
+          "statement": "Prove polynomial worst-case total bit complexity, including all intermediate representations",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "Models only the P=NP direction. Failure does not prove P!=NP."
+    },
+    {
+      "track_id": "POINCARE",
+      "model_key": "Poincare",
+      "model_target": "target",
+      "target_statement": "Our independent proof reconstruction",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "POINCARE.reconstruction",
+          "model_node_id": "reconstruction",
+          "statement": "Supply a complete independently checked reconstruction of the proof",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "The Poincare conjecture itself is recorded as externally established via Perelman's proof; independent reconstruction is a separate open project."
+    },
+    {
+      "track_id": "RH",
+      "model_key": "Riemann",
+      "model_target": "target",
+      "target_statement": "Riemann hypothesis via spectral realization",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "RH.operator",
+          "model_node_id": "operator",
+          "statement": "Construct an independently defined self-adjoint operator with a rigorous domain",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "RH.zero_identity",
+          "model_node_id": "zero_identity",
+          "statement": "Prove a spectral/determinant identity accounting for every nontrivial zero with multiplicity",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "The spectral identity must be noncircular and account for zero multiplicities and any regularization."
+    },
+    {
+      "track_id": "YM",
+      "model_key": "Yang-Mills",
+      "model_target": "target",
+      "target_statement": "Four-dimensional Yang-Mills existence and mass gap",
+      "target_graph_state": "derived",
+      "modeled_target_status": "BLOCKED",
+      "work_packages": [
+        {
+          "claim_id": "YM.continuum",
+          "model_node_id": "continuum",
+          "statement": "Construct a nontrivial continuum limit for each required compact simple gauge group",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "YM.axioms",
+          "model_node_id": "axioms",
+          "statement": "Verify the required quantum-field axioms and reconstruction hypotheses",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        },
+        {
+          "claim_id": "YM.uniform_gap",
+          "model_node_id": "uniform_gap",
+          "statement": "Prove regulator-uniform bounds yielding a strictly positive physical spectral gap",
+          "graph_state": "open",
+          "review_verdict": "not_reviewed",
+          "formal_check": "not_performed",
+          "evidence": "No proof artifact supplied; source is the authored MathOS dependency model.",
+          "dependencies": [],
+          "acceptance": "Supply an explicit mathematical proof or independently checkable, precisely sourced theorem that establishes this obligation under its complete hypotheses."
+        }
+      ],
+      "qualification": "These work packages interact; they are not independently verified."
+    }
+  ],
+  "certification": "NOT_CERTIFIED",
+  "policy": "Do not change graph_state=open based on a conditional implication, local software test, or unspecified external background."
+}
