@@ -69,4 +69,36 @@ DAG implementation terminates for every abstract input under resource limits.
 Predicate inclusion is decided classically (noncomputable), so this is a
 proof-level model, not a verified extraction of Python's implementation.
 
-The source remains a proof candidate until the pinned Lean CI job passes.
+Stage 3a passed pinned Lean 4.14.0 CI in PR #12.
+
+## Stage 3b: raw candidate generation for finite AND/OR formulas
+
+[FiniteCandidateGeneration.lean](FiniteCandidateGeneration.lean) introduces a
+structurally recursive finite candidate-set generator for the `RouteFormula`
+model. Assumed-true leaves produce the empty requirement, open leaves produce
+singleton requirements, AND combines candidates by union and OR concatenates
+alternatives. Structural recursion ensures termination for finite syntax.
+
+Lean theorem `eval_iff_candidate` characterizes evaluation as coverage of
+at least one generated candidate; the converse establishes soundness.
+`minimalCandidateSets_sound` establishes minimality of every pruned output
+relative to the formula semantics. `minimalCandidateSets_complete` proves
+that every abstract minimal solution corresponds to an output up to mutual
+predicate inclusion, while `minimalCandidateSets_antichain` reuses Stage 3a.
+
+**Boundary:** a formula is an unfolded, finite, acyclic dependency tree.
+This does not formalize a sharing-aware, indexed DAG, graph validity checking,
+memoized recurrence, Python refinement, running-time guarantees or the
+mathematical correctness of any authored proof-route edge. Accordingly the
+broader `GRAPH1` claim remains open; the next milestone is an explicit
+finite DAG representation with a proved refinement to this recurrence.
+
+Build the new imported modules with the same pinned Lean 4.14.0 toolchain:
+
+```sh
+lean -o formal/BooleanRoutes.olean formal/BooleanRoutes.lean
+lean -o formal/FiniteCompletionPruning.olean formal/FiniteCompletionPruning.lean
+LEAN_PATH="$PWD/formal" lean formal/FiniteCandidateGeneration.lean
+```
+
+Stage 3b is a candidate until the above commands pass on GitHub Actions.
