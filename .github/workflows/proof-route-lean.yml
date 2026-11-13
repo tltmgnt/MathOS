@@ -26,4 +26,6 @@ jobs:
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Check bounded proof-route lemmas
-        run: lean formal/ProofRouteLogic.lean
+        run: |
+          lean formal/ProofRouteLogic.lean
+          lean formal/BooleanRoutes.lean

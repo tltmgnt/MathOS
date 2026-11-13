@@ -39,3 +39,19 @@ the broad MathOS or Millennium claims.
 The source is a candidate pending actual compiler replay. Do not mark it
 `FORMALLY_VERIFIED` until the corresponding check succeeds and the
 version and imports are recorded.
+
+## Stage 2: finite Boolean formula semantics
+
+[BooleanRoutes.lean](BooleanRoutes.lean) introduces inductive AND/OR syntax,
+an assumed-true leaf and an open obligation leaf. It proves by structural
+induction that satisfaction is monotone in the accepted-open-leaf set; it
+also establishes invariance under mutual set inclusion, soundness of the
+abstract minimal-completion predicate, and the antichain property of minimal
+completions.
+
+These theorems do **not** prove that Python enumerates all minimal completion
+sets. This remains `GRAPH1` pending a finite DAG representation,
+a formalized enumeration algorithm, termination and completeness proofs.
+
+The source is a proof candidate until the Lean workflow actually passes on
+the commit containing it.
