@@ -31,7 +31,7 @@ inductive RouteDagNode (α : Type u) (n : Nat) where
 
 inductive RouteDag (α : Type u) : Nat → Type u where
   | nil : RouteDag α 0
-  | snoc {n : Nat} (prefix : RouteDag α n)
+  | snoc {n : Nat} (previous : RouteDag α n)
       (node : RouteDagNode α n) : RouteDag α (n + 1)
 
 def RouteDagNode.toFormula {α : Type u} {n : Nat}
@@ -67,8 +67,8 @@ def RouteDagNode.rawCandidates {α : Type u} {n : Nat}
 def RouteDag.unfold {α : Type u} {n : Nat} :
     RouteDag α n → Fin n → RouteFormula α
   | .nil => fun i => Fin.elim0 i
-  | .snoc prefix node =>
-      let prior := RouteDag.unfold prefix
+  | .snoc previous node =>
+      let prior := RouteDag.unfold previous
       Fin.snoc prior (node.toFormula prior)
 
 /-- Direct, topologically ordered DAG interpreter. -/
@@ -76,8 +76,8 @@ def RouteDag.evaluate {α : Type u} {n : Nat}
     (graph : RouteDag α n) (accepted : α → Prop) : Fin n → Prop :=
   match graph with
   | .nil => fun i => Fin.elim0 i
-  | .snoc prefix node =>
-      let prior := prefix.evaluate accepted
+  | .snoc previous node =>
+      let prior := previous.evaluate accepted
       Fin.snoc prior (node.evaluate prior accepted)
 
 /-- Topologically ordered raw candidate-set generator. -/
@@ -85,8 +85,8 @@ def RouteDag.rawCandidates {α : Type u} {n : Nat}
     (graph : RouteDag α n) : Fin n → List (α → Prop) :=
   match graph with
   | .nil => fun i => Fin.elim0 i
-  | .snoc prefix node =>
-      let prior := prefix.rawCandidates
+  | .snoc previous node =>
+      let prior := previous.rawCandidates
       Fin.snoc prior (node.rawCandidates prior)
 
 theorem RouteDagNode.evaluate_iff_formula {α : Type u} {n : Nat}
@@ -134,12 +134,12 @@ theorem RouteDag.evaluate_iff_unfold {α : Type u} {n : Nat}
   | nil =>
       intro i
       exact Fin.elim0 i
-  | @snoc n prefix node ih =>
+  | @snoc n previous node ih =>
       intro i
       refine Fin.lastCases ?_ (fun j => ?_) i
       · simpa [RouteDag.evaluate, RouteDag.unfold] using
           (RouteDagNode.evaluate_iff_formula node
-            (prefix.evaluate accepted) prefix.unfold accepted ih)
+            (previous.evaluate accepted) previous.unfold accepted ih)
       · simpa [RouteDag.evaluate, RouteDag.unfold] using (ih j)
 
 theorem RouteDag.rawCandidates_eq_unfold {α : Type u} {n : Nat}
@@ -149,12 +149,12 @@ theorem RouteDag.rawCandidates_eq_unfold {α : Type u} {n : Nat}
   | nil =>
       intro i
       exact Fin.elim0 i
-  | @snoc n prefix node ih =>
+  | @snoc n previous node ih =>
       intro i
       refine Fin.lastCases ?_ (fun j => ?_) i
       · simpa [RouteDag.rawCandidates, RouteDag.unfold] using
           (RouteDagNode.candidates_eq_formula node
-            prefix.rawCandidates prefix.unfold ih)
+            previous.rawCandidates previous.unfold ih)
       · simpa [RouteDag.rawCandidates, RouteDag.unfold] using (ih j)
 
 theorem RouteDag.evaluate_iff_candidate {α : Type u} {n : Nat}
