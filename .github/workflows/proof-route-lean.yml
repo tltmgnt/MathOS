@@ -30,3 +30,6 @@ jobs:
           lean formal/ProofRouteLogic.lean
           lean formal/BooleanRoutes.lean
           lean formal/FiniteCompletionPruning.lean
+          LEAN_PATH="$PWD/formal" lean -o formal/BooleanRoutes.olean formal/BooleanRoutes.lean
+          LEAN_PATH="$PWD/formal" lean -o formal/FiniteCompletionPruning.olean formal/FiniteCompletionPruning.lean
+          LEAN_PATH="$PWD/formal" lean formal/FiniteCandidateGeneration.lean
