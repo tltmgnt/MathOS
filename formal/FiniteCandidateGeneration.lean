@@ -1,3 +1,6 @@
+import BooleanRoutes
+import FiniteCompletionPruning
+
 /-!
 # Stage 3b: finite candidate generation for AND/OR proof-route formulas
 
@@ -11,9 +14,6 @@ minimality of the pruned output, and coverage of every minimal solution up to
 mutual inclusion. This models an *unfolded* finite acyclic route formula,
 not an indexed, sharing-aware DAG or the Python implementation.
 -/
-import BooleanRoutes
-import FiniteCompletionPruning
-
 namespace MathOS
 
 universe u
