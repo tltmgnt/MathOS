@@ -56,7 +56,8 @@ theorem pruneCandidates_antichain {α : Type u}
     (hb : b ∈ pruneCandidates candidates)
     (hab : SetIncluded a b) :
     SetIncluded b a := by
-  by_contra hba
+  apply Classical.byContradiction
+  intro hba
   have hs : StrictlyIncluded a b := ⟨hab, hba⟩
   have hminimal := pruneCandidates_minimal candidates b hb
   exact hminimal ⟨a, pruneCandidates_sound candidates a ha, hs⟩
