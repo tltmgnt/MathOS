@@ -102,3 +102,37 @@ LEAN_PATH="$PWD/formal" lean formal/FiniteCandidateGeneration.lean
 ```
 
 Stage 3b is a candidate until the above commands pass on GitHub Actions.
+
+Stage 3b passed pinned Lean 4.14.0 CI in PR #13.
+
+## Stage 3c: topologically indexed finite DAG semantics
+
+[FiniteRouteDAG.lean](FiniteRouteDAG.lean) represents a finite directed
+acyclic graph in topological insertion order. At each insertion, a node
+can only refer to an earlier node (`Fin n`), allowing shared references
+while ruling out cycles and forward edges by construction.
+
+The forward interpreter computes Boolean truth at every node and separately
+generates raw completion candidates. The `unfold` interpretation expands a
+node into the already verified `RouteFormula` model. The two refinement
+lemmas show Boolean evaluation and raw candidate lists coincide with those
+of the unfolded formula. Stage 3b then gives soundness, completeness up to
+mutual predicate inclusion, and an antichain property after pruning.
+
+The scope is binary AND/OR nodes with an assumed-true or open leaf.
+This model does not cover arbitrary-length OR-of-AND routes, string-index
+validation, memoized Python execution, or runtime/resource bounds. The
+broader `GRAPH1` and Python-refinement obligations remain open.
+
+Reproduce the new check using pinned Lean 4.14.0 with
+`LEAN_PATH="$PWD/formal"`:
+
+```sh
+lean -o formal/BooleanRoutes.olean formal/BooleanRoutes.lean
+lean -o formal/FiniteCompletionPruning.olean formal/FiniteCompletionPruning.lean
+lean -o formal/FiniteCandidateGeneration.olean formal/FiniteCandidateGeneration.lean
+lean formal/FiniteRouteDAG.lean
+```
+
+Stage 3c is not kernel-verified until its CI check passes on the relevant
+commit. Passing CI certifies only the precisely stated Lean theorems.

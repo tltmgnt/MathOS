@@ -32,4 +32,5 @@ jobs:
           lean formal/FiniteCompletionPruning.lean
           LEAN_PATH="$PWD/formal" lean -o formal/BooleanRoutes.olean formal/BooleanRoutes.lean
           LEAN_PATH="$PWD/formal" lean -o formal/FiniteCompletionPruning.olean formal/FiniteCompletionPruning.lean
-          LEAN_PATH="$PWD/formal" lean formal/FiniteCandidateGeneration.lean
+          LEAN_PATH="$PWD/formal" lean -o formal/FiniteCandidateGeneration.olean formal/FiniteCandidateGeneration.lean
+          LEAN_PATH="$PWD/formal" lean formal/FiniteRouteDAG.lean
