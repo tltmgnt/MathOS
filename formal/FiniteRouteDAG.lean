@@ -69,7 +69,7 @@ def RouteDag.unfold {α : Type u} {n : Nat} :
   | .nil => fun i => Fin.elim0 i
   | .snoc previous node =>
       let prior := RouteDag.unfold previous
-      Fin.snoc prior (node.toFormula prior)
+      Fin.lastCases (node.toFormula prior) prior
 
 /-- Direct, topologically ordered DAG interpreter. -/
 def RouteDag.evaluate {α : Type u} {n : Nat}
@@ -78,7 +78,7 @@ def RouteDag.evaluate {α : Type u} {n : Nat}
   | .nil => fun i => Fin.elim0 i
   | .snoc previous node =>
       let prior := previous.evaluate accepted
-      Fin.snoc prior (node.evaluate prior accepted)
+      Fin.lastCases (node.evaluate prior accepted) prior
 
 /-- Topologically ordered raw candidate-set generator. -/
 def RouteDag.rawCandidates {α : Type u} {n : Nat}
@@ -87,7 +87,7 @@ def RouteDag.rawCandidates {α : Type u} {n : Nat}
   | .nil => fun i => Fin.elim0 i
   | .snoc previous node =>
       let prior := previous.rawCandidates
-      Fin.snoc prior (node.rawCandidates prior)
+      Fin.lastCases (node.rawCandidates prior) prior
 
 theorem RouteDagNode.evaluate_iff_formula {α : Type u} {n : Nat}
     (node : RouteDagNode α n) (values : Fin n → Prop)
