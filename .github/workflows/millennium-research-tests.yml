@@ -9,11 +9,15 @@ on:
       - 'tests/test_seven_hypotheses.py'
       - 'tests/test_first_use_case_reverse_engineering.py'
       - 'tests/test_clay_alignment.py'
+      - 'tests/test_clay_proof_topology.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
       - 'docs/research/CLAY_FULL_TARGETS.v1.json'
       - 'docs/research/CLAY_TARGET_ALIGNMENT.md'
+      - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
+      - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
+      - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   pull_request:
@@ -24,11 +28,15 @@ on:
       - 'tests/test_seven_hypotheses.py'
       - 'tests/test_first_use_case_reverse_engineering.py'
       - 'tests/test_clay_alignment.py'
+      - 'tests/test_clay_proof_topology.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
       - 'docs/research/CLAY_FULL_TARGETS.v1.json'
       - 'docs/research/CLAY_TARGET_ALIGNMENT.md'
+      - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
+      - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
+      - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   workflow_dispatch:
@@ -61,8 +69,11 @@ jobs:
           python -m unittest discover -s tests -p 'test_seven_hypotheses.py' -v
           python -m unittest discover -s tests -p 'test_first_use_case_reverse_engineering.py' -v
           python -m unittest discover -s tests -p 'test_clay_alignment.py' -v
+          python -m unittest discover -s tests -p 'test_clay_proof_topology.py' -v
           python -m mathos.research.clay_alignment --output-dir artifacts/clay
           python -m json.tool artifacts/clay/clay_target_alignment.json > /dev/null
+          python -m mathos.research.clay_proof_topology --output-dir artifacts/clay
+          python -m json.tool artifacts/clay/clay_proof_topology.json > /dev/null
           python -m mathos.research.hypothesis_pipeline --output-dir artifacts/hypotheses
           python -m json.tool artifacts/hypotheses/seven_hypotheses_report.json > /dev/null
       - name: Upload bounded seven-track evidence
@@ -77,5 +88,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: clay-target-alignment-py${{ matrix.python-version }}
-          path: artifacts/clay/clay_target_alignment.json
+          path: |
+            artifacts/clay/clay_target_alignment.json
+            artifacts/clay/clay_proof_topology.json
           if-no-files-found: ignore
