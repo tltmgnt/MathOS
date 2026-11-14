@@ -10,7 +10,7 @@ Review this exact, **small** Lean result:
 - [Lean 4 source](../../../formal/SATSupport.lean), declaration `MathOS.satSupport_certificate`
 - [Current prior-art ledger](SAT1_LITERATURE_LEDGER.v1.json)
 - [Existing review form](SAT1_EXTERNAL_REVIEW.md)
-- [Public review invitation](https://github.com/tltmgnt/MathOS/issues/REVIEW_ISSUE_TO_BE_REPLACED)
+- [Public review invitation](https://github.com/tltmgnt/MathOS/issues/30)
 - [Machine-audited review register](SAT1_INDEPENDENT_REVIEW_REGISTER.v1.json)
 
 The theorem states, for each `m : Nat`, that the `SATFactorChoice` words produced by the repository's recurrence number `3^m`, are pairwise distinct, and have signed coefficient `±1`. The theorem **does not** formalize the polynomial ring `Z[x₁,y₁,…,xₘ,yₘ]` or derive any Turing-machine runtime lower bound.
