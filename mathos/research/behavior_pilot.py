@@ -235,6 +235,23 @@ def run_pilot(
     }
     if (rater_a_path is None) != (rater_b_path is None):
         raise ValueError("two independently completed rater files are required")
+    if response_path is not None:
+        # Personal data must not be staged in the tracked repository, even
+        # by accident through the default artifacts/ output location.
+        root = ROOT.resolve()
+        for candidate in (response_path, output_dir):
+            if candidate is not None:
+                resolved = candidate.resolve()
+                if resolved == root or root in resolved.parents:
+                    raise ValueError(
+                        "participant responses and blinded packets must stay "
+                        "outside the MathOS repository"
+                    )
+    elif output_dir is not None and (
+        (output_dir / "private_blinded_rater_packet.json").exists() or
+        (output_dir / "private_rater_template.json").exists()
+    ):
+        raise ValueError("previous private participant data remains in output directory")
     if response_path is None and (rater_a_path is not None or consent_attested):
         raise ValueError("consent/rating cannot occur without participant data")
     report = {
