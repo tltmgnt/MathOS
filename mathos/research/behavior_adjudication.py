@@ -131,6 +131,12 @@ def run_adjudication(
             _check_private(path)
     if response_path is not None and output_dir is not None:
         _check_private(output_dir)
+    if response_path is None and output_dir is not None and any(
+        (output_dir / filename).exists()
+        for filename in ("private_disagreement_packet.json",
+                         "private_adjudicator_template.json")
+    ):
+        raise ValueError("private adjudication files remain in protocol-only output")
 
     report = {
         "schema_version": "1.0.0",
@@ -293,6 +299,8 @@ def run_adjudication(
                         raise ValueError("missing meaningful adjudication rationale or source")
             if got != set(expected):
                 raise ValueError("incomplete adjudication")
+            if adjudicator_path.read_bytes() != decision_raw:
+                raise RuntimeError("adjudicator record changed during review")
             report.update({
                 "status": "ADJUDICATION_SUBMITTED_BUT_NOT_AUTHENTICATED",
                 "human_adjudication_file_supplied": True,
