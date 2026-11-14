@@ -4,14 +4,14 @@ on:
   push:
     paths:
       - 'mathos/research/**'
-      - 'tests/test_millennium_attacks_001.py'
-      - 'docs/research/MILLENNIUM_ATTACK_001.md'
+      - 'tests/test_millennium_attacks_*.py'
+      - 'docs/research/MILLENNIUM_ATTACK_*.md'
       - '.github/workflows/millennium-research-tests.yml'
   pull_request:
     paths:
       - 'mathos/research/**'
-      - 'tests/test_millennium_attacks_001.py'
-      - 'docs/research/MILLENNIUM_ATTACK_001.md'
+      - 'tests/test_millennium_attacks_*.py'
+      - 'docs/research/MILLENNIUM_ATTACK_*.md'
       - '.github/workflows/millennium-research-tests.yml'
   workflow_dispatch:
 
@@ -35,5 +35,8 @@ jobs:
       - name: Check bounded mathematical experiments
         run: |
           python -m unittest discover -s tests -p 'test_millennium_attacks_001.py' -v
+          python -m unittest discover -s tests -p 'test_millennium_attacks_002.py' -v
           python -m mathos.research.millennium_attacks_001 > /tmp/millennium-attacks-001.json
+          python -m mathos.research.millennium_attacks_002 > /tmp/millennium-attacks-002.json
           python -m json.tool /tmp/millennium-attacks-001.json > /dev/null
+          python -m json.tool /tmp/millennium-attacks-002.json > /dev/null
