@@ -6,12 +6,20 @@ on:
       - 'mathos/research/**'
       - 'tests/test_millennium_attacks_*.py'
       - 'docs/research/MILLENNIUM_ATTACK_*.md'
+      - 'tests/test_seven_hypotheses.py'
+      - 'docs/research/HYPOTHESES.v1.json'
+      - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   pull_request:
     paths:
       - 'mathos/research/**'
       - 'tests/test_millennium_attacks_*.py'
       - 'docs/research/MILLENNIUM_ATTACK_*.md'
+      - 'tests/test_seven_hypotheses.py'
+      - 'docs/research/HYPOTHESES.v1.json'
+      - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   workflow_dispatch:
 
@@ -40,3 +48,13 @@ jobs:
           python -m mathos.research.millennium_attacks_002 > /tmp/millennium-attacks-002.json
           python -m json.tool /tmp/millennium-attacks-001.json > /dev/null
           python -m json.tool /tmp/millennium-attacks-002.json > /dev/null
+          python -m unittest discover -s tests -p 'test_seven_hypotheses.py' -v
+          python -m mathos.research.hypothesis_pipeline --output-dir artifacts/hypotheses
+          python -m json.tool artifacts/hypotheses/seven_hypotheses_report.json > /dev/null
+      - name: Upload bounded seven-track evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seven-hypothesis-evidence-py${{ matrix.python-version }}
+          path: artifacts/hypotheses/seven_hypotheses_report.json
+          if-no-files-found: ignore
