@@ -26,7 +26,7 @@ There is **no valid comparison group**, no representative participant sample, no
 
 **Obtain appropriate consent outside this software.** The CLI requires `--consent-attested` before processing participant responses. That flag is only the operator's assertion; it is not verified consent, ethical approval or any research-institution approval. If the study involves research subjects, the operator is responsible for any applicable human-subjects review and requirements.
 
-Use only *pseudonyms*; avoid names, email addresses, health data or confidential information in notes, source references or rater comments. These files stay in a **private local directory**, never in a public Git commit or uploaded CI artifact. The script does not send responses to an API.
+Use only *pseudonyms*; avoid names, email addresses, health data or confidential information in notes, source references or rater comments. These files must stay in a **private local directory outside the MathOS repository**, never in a public Git commit or uploaded CI artifact. The script refuses participant input or private output paths inside the repository and does not send responses to an API.
 
 The rater-facing package hides the participant pseudonym, selected decision and answer key. However, free-form explanations may disclose the person's decision, identity or personal information; this is **partial blinding**, not guaranteed double blinding. Since the answer-key casebook is public in the repository, the tool cannot ensure raters are blind to the rubric or key.
 
@@ -47,9 +47,9 @@ In a *separate private workspace*, obtain the participant's voluntary consent an
 
 ```bash
 python -m mathos.research.behavior_pilot \
-  --responses private/answers.json \
+  --responses /tmp/mathos-private/answers.json \
   --consent-attested \
-  --output-dir private/pilot
+  --output-dir /tmp/mathos-private/pilot
 ```
 
 The output includes:
@@ -64,8 +64,8 @@ Make **two separate copies** of the template. Each reviewer must independently f
 python -m mathos.research.behavior_pilot \
   --responses private/answers.json \
   --consent-attested \
-  --rater-a private/rater_a.json \
-  --rater-b private/rater_b.json \
+  --rater-a /tmp/mathos-private/rater_a.json \
+  --rater-b /tmp/mathos-private/rater_b.json \
   --output-dir private/pilot
 ```
 
