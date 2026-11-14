@@ -54,8 +54,8 @@ PAPER_SENTINELS = (
 )
 # Keep required scientific denials independent of capitalization/typography:
 PAPER_WORDS = (
-    "full embedding", "not formalized", "unrestricted SAT",
-    "not establish", "independent review", "not submitted",
+    "full embedding", "not formalized", "unrestricted sat",
+    "not establish", "independent review", "not been submitted",
 )
 REVIEW_SENTINELS = (
     "REVIEW_READY_NOT_SUBMISSION_READY",
