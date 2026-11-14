@@ -22,12 +22,6 @@
     "research_alignment_only": true
   },
   "clay_rules_page": "https://www.claymath.org/millennium-problems/rules/",
-  "cmI_gate": {
-    "qualifying_publication": false,
-    "two_years_elapsed": false,
-    "general_mathematical_acceptance": false,
-    "clay_consideration": false
-  },
   "targets": [
     {
       "model_key": "Riemann",
@@ -169,5 +163,11 @@
       ],
       "external_solution_known": true
     }
-  ]
+  ],
+  "cmi_gate": {
+    "qualifying_publication": false,
+    "two_years_elapsed": false,
+    "general_mathematical_acceptance": false,
+    "clay_consideration": false
+  }
 }
