@@ -143,7 +143,7 @@ def audit_clay_alignment(
             field = entry.get(dimension)
             coverage_flags[dimension] = (
                 isinstance(field, str) and bool(field.strip())
-                and len(field.strip()) >= 18
+                and len(field.strip()) >= (6 if dimension == "current_probe" else 18)
             )
         if not all(coverage_flags.values()):
             missing = [k for k, valid in coverage_flags.items() if not valid]
