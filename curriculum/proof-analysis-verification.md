@@ -31,3 +31,14 @@ cannot establish that its input graph faithfully represents a mathematical proof
 
 Prioritize one subject and one sharply scoped lemma. Success means a correctly
 stated and checked result, not a smaller count of broad unresolved work packages.
+
+## Agentic Clay research extension
+
+For a six-module, 24-week AI-assisted research course aligned with the seven
+Clay Millennium problem statements, see [Agentic Clay research curriculum](agentic-clay-24-week.md) and its [machine-readable 24-week syllabus](agentic-clay-v1.json). This is an extension, not a mathematical certification.
+It introduces the planner–proposer–skeptic–reviewer workflow, negative controls,
+and explicit human research review gates. Run the syllabus audit with:
+
+```sh
+python -m mathos.research.agentic_curriculum --track all
+```
