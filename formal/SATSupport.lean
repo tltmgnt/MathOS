@@ -71,6 +71,26 @@ private theorem sat_disjoint (a b : SATFactorChoice) (hab : a ≠ b)
   have heq : a :: u = b :: v := hu.trans hv.symm
   exact hab (List.cons.inj heq).1
 
+/-- Disjoint nodup lists have a nodup append, proved using core
+list constructors to avoid depending on extra Lean libraries. -/
+private theorem sat_nodup_append {α : Type} (xs ys : List α)
+    (hxs : xs.Nodup) (hys : ys.Nodup)
+    (hdisj : ∀ z, z ∈ xs → z ∉ ys) :
+    (xs ++ ys).Nodup := by
+  induction xs with
+  | nil => simpa using hys
+  | cons hd tail ih =>
+    have hparts := List.nodup_cons.mp hxs
+    apply List.nodup_cons.mpr
+    constructor
+    · intro hmem
+      rcases List.mem_append.mp hmem with htail | hysmem
+      · exact hparts.1 htail
+      · exact hdisj hd (by simp) hysmem
+    · apply ih hparts.2
+      intro z hz hz2
+      exact hdisj z (by simp [hz]) hz2
+
 /-- All expanded terms have distinct exponent vectors: no cancellation
 is possible across the indexed, disjoint variable pairs. -/
 theorem satTerms_nodup (m : Nat) : (satTerms m).Nodup := by
@@ -80,20 +100,17 @@ theorem satTerms_nodup (m : Nat) : (satTerms m).Nodup := by
     change (((satTerms m).map (SATFactorChoice.x :: ·)) ++
        ((satTerms m).map (SATFactorChoice.y :: ·)) ++
        ((satTerms m).map (SATFactorChoice.xy :: ·))).Nodup
-    apply (List.nodup_append).mpr
-    constructor
-    · apply (List.nodup_append).mpr
-      refine ⟨sat_map_nodup _ _ ih, sat_map_nodup _ _ ih, ?_⟩
-      intro a ha b hb heq
-      subst b
-      exact sat_disjoint _ _ (by decide) _ _ a ha hb
-    constructor
+    apply sat_nodup_append _ _
+    · apply sat_nodup_append _ _
+      · exact sat_map_nodup _ _ ih
+      · exact sat_map_nodup _ _ ih
+      · intro z hz1 hz2
+        exact sat_disjoint _ _ (by decide) _ _ z hz1 hz2
     · exact sat_map_nodup _ _ ih
-    · intro a ha b hb heq
-      subst b
-      rcases List.mem_append.mp ha with hx | hy
-      · exact sat_disjoint _ _ (by decide) _ _ a hx hb
-      · exact sat_disjoint _ _ (by decide) _ _ a hy hb
+    · intro z hz1 hz2
+      rcases List.mem_append.mp hz1 with hx | hy
+      · exact sat_disjoint _ _ (by decide) _ _ z hx hz2
+      · exact sat_disjoint _ _ (by decide) _ _ z hy hz2
 
 /-- Coefficients of every choice word are +1 or -1; in particular,
 they never vanish over the integers. -/
