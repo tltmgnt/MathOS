@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "generated_for": "MathOS finite-model hypothesis exploration",
+  "certification": "NOT_CERTIFIED",
+  "mathematical_claim_policy": "No exploratory result promotes an open Millennium obligation",
+  "exploration_policy": "ALLOW_BLOCKED_RESEARCH_WITHOUT_PROMOTION",
+  "selection_criteria": [
+    "precise mathematical target",
+    "repeatable bounded falsification/check",
+    "connection to an open proof obligation",
+    "explicit missing proof step",
+    "known counterexamples and scope controls"
+  ],
+  "experiments": [
+    {
+      "model_key": "Riemann",
+      "id": "RH-LI-001",
+      "title": "Li-coefficient positivity and interval-ready normalization",
+      "hypothesis": "Search for a positivity mechanism proving every Li coefficient lambda_n >= 0, not just finitely many numerical instances.",
+      "use_case": "Numerically bracket the known first Li coefficient as a normalization check; full rigorous higher-n interval methods are not implemented.",
+      "bounded_probe": "li_first_coefficient",
+      "falsifier": "A rigorously negative Li coefficient at any index would refute RH; this initial positive numerical check does not certify any new index.",
+      "next_lemma": "A uniformly rigorous positivity inequality for arbitrary n or an equivalent all-test-functions criterion.",
+      "missing_global_step": "Prove positivity for every integer n without assuming the location of the zeros.",
+      "obligations": [
+        "RH.operator",
+        "RH.zero_identity"
+      ],
+      "source": "https://mathworld.wolfram.com/LisCriterion.html",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "P-versus-NP",
+      "id": "PNP-TSEITIN-001",
+      "title": "Tseitin parity contradictions and resolution proof complexity",
+      "hypothesis": "Quantify how graph expansion forces refutation width and size in a specified restricted proof system.",
+      "use_case": "Encode an odd-parity charge on the K4 graph as pure 3-CNF, then check unsatisfiability and construct a resolution refutation.",
+      "bounded_probe": "k4_tseitin",
+      "falsifier": "Failure to verify a refutation or existence of a satisfying assignment invalidates this particular encoded example.",
+      "next_lemma": "A correctly quantified expansion-to-width lower bound on an infinite bounded-degree graph family, within resolution.",
+      "missing_global_step": "Restricted resolution lower bounds cannot alone establish P != NP, and do not prove a polynomial SAT algorithm.",
+      "obligations": [
+        "PNP.sat_correctness",
+        "PNP.sat_runtime"
+      ],
+      "source": "https://people.inf.ethz.ch/emo/SatSem05/Papers/BensassonWidgerson01.pdf",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "id": "NS-ABC-STABILITY-001",
+      "title": "Perturbative energy stability around a nonlinear ABC flow",
+      "hypothesis": "Obtain controlled perturbation-energy estimates around the explicitly decaying ABC Beltrami solution, with all nonlinear cross terms accounted for.",
+      "use_case": "Check the conditional L2 perturbation Gronwall factor using a global bound for the ABC velocity gradient.",
+      "bounded_probe": "abc_perturbation_bound",
+      "falsifier": "Any claimed universal stability bound contradicted by an explicit smooth perturbation or missing pressure cancellation must be rejected.",
+      "next_lemma": "Provide a scale-critical a priori estimate or a logically complete breakdown construction for the official problem, not just L2 control around one flow.",
+      "missing_global_step": "L2 stability conditional on smooth solutions does not prove their global existence, nor regularity for arbitrary R3 data.",
+      "obligations": [
+        "NS.critical_bound"
+      ],
+      "source": "https://www.claymath.org/news/navier-stokes-announcement/",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "Yang-Mills",
+      "id": "YM-TRANSFER-001",
+      "title": "Continuum-uniform transfer-matrix gap and reflection positivity",
+      "hypothesis": "Determine precisely which reflection-positive spectral-gap bounds survive simultaneous infinite-volume and continuum limits in four-dimensional non-Abelian gauge theory.",
+      "use_case": "Evaluate a two-state positive transfer-matrix toy where each regulator has a gap but the uniform lower bound vanishes.",
+      "bounded_probe": "transfer_gap_obstruction",
+      "falsifier": "A toy gap that collapses along the regulator sequence blocks promotion of any finite-volume-only argument.",
+      "next_lemma": "For SU(N) in four dimensions, construct a nontrivial continuum limit and a strictly positive mass bound in physical units, uniform in volume and cutoff, with axioms established.",
+      "missing_global_step": "A two-state transfer model is not four-dimensional Yang-Mills and does not provide the required reconstruction.",
+      "obligations": [
+        "YM.continuum",
+        "YM.axioms",
+        "YM.uniform_gap"
+      ],
+      "source": "https://www.claymath.org/millennium-problems/",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "Hodge",
+      "id": "HODGE-HYPERPLANE-001",
+      "title": "Hyperplane-generated rational Hodge classes in controlled varieties",
+      "hypothesis": "Identify geometric hypotheses under which every rational (p,p) class is generated by explicit algebraic cycles.",
+      "use_case": "Verify the truncated cohomology ring and top pairing for projective space P^n as a known algebraic case.",
+      "bounded_probe": "projective_hodge",
+      "falsifier": "An exhibited rational Hodge class outside the image of the specified cycle map would falsify that restricted statement.",
+      "next_lemma": "Extend a justified construction from the known variety class to genuinely new primitive rational Hodge classes, respecting all hypotheses.",
+      "missing_global_step": "Projective-space calculations do not establish Hodge for arbitrary smooth projective varieties.",
+      "obligations": [
+        "HODGE.primitive_cycles",
+        "HODGE.reduction"
+      ],
+      "source": "https://www.claymath.org/millennium-problems/",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "id": "BSD-SELMER-001",
+      "title": "Descent, Selmer bounds and analytic-rank compatibility",
+      "hypothesis": "For an explicitly declared family of elliptic curves, reconcile finite-field traces, descent/Selmer upper bounds, and analytic-rank information without hiding local factors.",
+      "use_case": "Independently count points on y^2=x^3-x modulo several good primes, cross-check arithmetic and the Hasse bound.",
+      "bounded_probe": "elliptic_local_counts",
+      "falsifier": "Any mismatch between independently computed local point counts invalidates the input data pipeline.",
+      "next_lemma": "Supply precise analytic and algebraic rank/Selmer relations and the complete leading-term formula including Sha finiteness and local corrections.",
+      "missing_global_step": "Local counts do not determine Mordell-Weil rank, analytic rank, Sha or a general BSD formula.",
+      "obligations": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ],
+      "source": "https://dash.harvard.edu/bitstreams/417f2568-a28d-492e-ac94-6206b70b7e35/download",
+      "novelty_claim": false
+    },
+    {
+      "model_key": "Poincare",
+      "id": "POINCARE-PERELMAN-001",
+      "title": "Independent proof reconstruction with topological sanity checks",
+      "hypothesis": "Reconstruct and check the needed Ricci-flow-with-surgery lemmas and topology implications in a theorem-by-theorem proof ledger.",
+      "use_case": "Verify mod-2 homology and Euler characteristic of the boundary of a 4-simplex, a known triangulation of S^3.",
+      "bounded_probe": "simplicial_three_sphere",
+      "falsifier": "Failure of the chain-complex identity or Betti-number calculation invalidates the finite topology example.",
+      "next_lemma": "Check each relevant Perelman theorem and its precise hypotheses in a complete independent reconstruction.",
+      "missing_global_step": "Correct S3 homology does not imply simple connectivity or the Poincare theorem; the conjecture was already proved externally.",
+      "obligations": [
+        "POINCARE.reconstruction"
+      ],
+      "source": "https://www.claymath.org/millennium-problems/",
+      "novelty_claim": false
+    }
+  ]
+}
