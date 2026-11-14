@@ -203,6 +203,57 @@ def audit_theorem_assurance(
         (output_dir / "theorem_assurance.json").write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+        lines = [
+            "# SAT1: independent mathematical review handoff",
+            "",
+            "**Current status: NOT_CERTIFIED; no independent novelty assessment "
+            "or expert review has been completed.**",
+            "",
+            "## Exact theorem statement",
+            "",
+            claim["statement"],
+            "",
+            "## Verified-language scope",
+            "",
+            claim["mathematical_scope"],
+            "",
+            "## Known limits and non-implication to the Clay problem",
+            "",
+            claim["route_implication_gap"],
+            "",
+            claim["limitations"],
+            "",
+            "## Formal proof audit",
+            "",
+            "Lean source: `formal/SATSupport.lean`",
+            "",
+            "Source SHA-256: `" + report["sources_sha256"]["lean"] + "`",
+            "",
+            "Lean result: **" + lean_check["status"] + "**",
+            "",
+            "## Pending independent novelty assessment",
+            "",
+            claim["literature_review_plan"],
+            "",
+            "## Pending independent mathematical review",
+            "",
+            claim["external_review_plan"],
+            "",
+            "## Reviewer checklist (not automated acceptance)",
+            "",
+            "- [ ] Verify theorem statement and correct source correspondence",
+            "- [ ] Check proof and trusted Lean imports separately",
+            "- [ ] Search the literature; cite primary references and dates",
+            "- [ ] Evaluate whether any novelty claim is defensible",
+            "- [ ] Establish or reject any implication to SAT runtime",
+            "- [ ] Document limitations, counterexamples, reviewer identity and date",
+            "",
+            "Unchecked items are real, outstanding mathematical work, not "
+            "a substitute for expert approval.",
+        ]
+        (output_dir / "sat1_review_handoff.md").write_text(
+            "\n".join(lines) + "\n", encoding="utf-8"
+        )
     return report
 
 
