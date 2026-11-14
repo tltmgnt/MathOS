@@ -20,6 +20,7 @@ on:
       - 'tests/test_paper_packet.py'
       - 'tests/test_external_review.py'
       - 'tests/test_behavior_review.py'
+      - 'tests/test_behavior_pilot.py'
       - 'docs/research/papers/**'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -63,6 +64,7 @@ on:
       - 'tests/test_paper_packet.py'
       - 'tests/test_external_review.py'
       - 'tests/test_behavior_review.py'
+      - 'tests/test_behavior_pilot.py'
       - 'docs/research/papers/**'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -134,6 +136,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_paper_packet.py' -v
           python -m unittest discover -s tests -p 'test_external_review.py' -v
           python -m unittest discover -s tests -p 'test_behavior_review.py' -v
+          python -m unittest discover -s tests -p 'test_behavior_pilot.py' -v
           python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
           python -m mathos.research.agentic_clay --provider offline --track Navier-Stokes --route-id NS.C --claim-id BRIDGE.NS.C_forced_breakdown --rounds 1 --max-model-calls 4 --output-dir artifacts/agents/ns-c
@@ -149,6 +152,8 @@ jobs:
           python -m json.tool artifacts/external-review/external_review_status.json > /dev/null
           python -m mathos.research.behavior_review --output-dir artifacts/behavior
           python -m json.tool artifacts/behavior/review_behavior_report.json > /dev/null
+          python -m mathos.research.behavior_pilot --output-dir artifacts/behavior-pilot
+          python -m json.tool artifacts/behavior-pilot/pilot_status.json > /dev/null
           python -m mathos.research.clay_alignment --output-dir artifacts/clay
           python -m json.tool artifacts/clay/clay_target_alignment.json > /dev/null
           python -m mathos.research.clay_proof_topology --output-dir artifacts/clay
@@ -161,6 +166,13 @@ jobs:
         with:
           name: seven-hypothesis-evidence-py${{ matrix.python-version }}
           path: artifacts/hypotheses/seven_hypotheses_report.json
+          if-no-files-found: ignore
+      - name: Upload no-human-data blinded pilot protocol audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sat1-behavior-pilot-protocol-py${{ matrix.python-version }}
+          path: artifacts/behavior-pilot/pilot_status.json
           if-no-files-found: ignore
       - name: Upload adversarial research behavior use cards
         if: always()
