@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "SAT1_CHOICE_WORD_SUPPORT_ONLY",
+  "policy": {
+    "review_request": "PUBLIC_OPEN_CALL_NOT_INDEPENDENT_ASSESSMENT",
+    "expert_verdict": "NOT_RECEIVED",
+    "independent_reviewer_verified": false,
+    "mathematical_novelty": "NOT_ESTABLISHED",
+    "theorem_claim_promotion": false,
+    "journal_submission": "NOT_SUBMITTED",
+    "clay_solution": "NOT_CERTIFIED"
+  },
+  "review_request_url": null,
+  "reviews": [],
+  "note": "A GitHub issue invitation and internal review protocol do not count as external assessment. External replies must be reviewed by a human and retain source/identity provenance."
+}
