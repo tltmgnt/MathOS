@@ -320,7 +320,18 @@ def verify_lemmas(
                 packet.get("proof_completed") is not False or
                 packet.get("promoted_to_solution") is not False or
                 packet.get("route_sufficiency_validated") is not False or
-                packet.get("independent_mathematical_review") is not False):
+                packet.get("counterexample_search_completed") is not False or
+                packet.get("novelty_checked") is not False or
+                packet.get("formal_verification_completed") is not False or
+                packet.get("independent_mathematical_review") is not False or
+                not isinstance(packet.get("iterations"), list) or
+                not packet["iterations"] or any(
+                    step.get("model_statement_is_verified") is not False or
+                    step.get("falsification_plan_executed") is not False or
+                    step.get("formal_proof_checked") is not False or
+                    step.get("expert_review_performed") is not False
+                    for step in packet["iterations"]
+                )):
                 raise ValueError("agent packet asserts unearned proof or review")
             focus = packet.get("research_focus", {})
             key = (packet.get("model_key"), focus.get("route_id"),
