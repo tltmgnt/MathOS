@@ -11,6 +11,7 @@ on:
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
       - 'tests/test_agentic_clay.py'
+      - 'tests/test_bridge_agent_focus.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -33,6 +34,7 @@ on:
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
       - 'tests/test_agentic_clay.py'
+      - 'tests/test_bridge_agent_focus.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -77,8 +79,11 @@ jobs:
           python -m unittest discover -s tests -p 'test_clay_alignment.py' -v
           python -m unittest discover -s tests -p 'test_clay_proof_topology.py' -v
           python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+          python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
           python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
+          python -m mathos.research.agentic_clay --provider offline --track Navier-Stokes --route-id NS.C --claim-id BRIDGE.NS.C_forced_breakdown --rounds 1 --max-model-calls 4 --output-dir artifacts/agents/ns-c
+          python -m json.tool artifacts/agents/ns-c/agentic_research_report.json > /dev/null
           python -m mathos.research.clay_alignment --output-dir artifacts/clay
           python -m json.tool artifacts/clay/clay_target_alignment.json > /dev/null
           python -m mathos.research.clay_proof_topology --output-dir artifacts/clay
