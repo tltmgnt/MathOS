@@ -1,0 +1,102 @@
+name: Clay agentic research (guarded)
+
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/**'
+      - 'tests/test_agentic_clay.py'
+      - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - 'docs/research/CLAY_FULL_TARGETS.v1.json'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - '.github/workflows/agentic-clay-research.yml'
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Offline simulation or explicit paid OpenAI run'
+        type: choice
+        required: true
+        default: offline
+        options: [offline, openai]
+      track:
+        description: 'Clay problem research track'
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - Riemann
+          - P-versus-NP
+          - Navier-Stokes
+          - Yang-Mills
+          - Hodge
+          - Birch-Swinnerton-Dyer
+          - Poincare
+      rounds:
+        description: 'Maximum adversarial revision rounds per track'
+        type: choice
+        required: true
+        default: '1'
+        options: ['1', '2']
+
+permissions:
+  contents: read
+
+jobs:
+  offline-agent:
+    if: github.event_name == 'pull_request' || inputs.provider == 'offline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TRACK: ${{ inputs.track || 'all' }}
+      ROUNDS: ${{ inputs.rounds || '1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test agent handoffs, fail-closed gates, and mock provider
+        run: python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+      - name: Run deterministic offline process (not AI research)
+        run: |
+          python -m mathos.research.agentic_clay \
+            --provider offline --track "$TRACK" --rounds "$ROUNDS" \
+            --max-model-calls 56 --output-dir artifacts/agents
+          python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
+      - name: Upload research-process smoke-test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clay-agent-offline-handoff
+          path: artifacts/agents/
+          if-no-files-found: error
+
+  live-ai-agent:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.provider == 'openai'
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      TRACK: ${{ inputs.track }}
+      ROUNDS: ${{ inputs.rounds }}
+      OPENAI_MODEL: ${{ vars.MATHOS_OPENAI_MODEL }}
+      OPENAI_API_KEY: ${{ secrets.MATHOS_OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Enforce explicit model and secret configuration
+        run: |
+          test -n "$OPENAI_MODEL" || { echo 'MATHOS_OPENAI_MODEL repository variable is required'; exit 1; }
+          test -n "$OPENAI_API_KEY" || { echo 'MATHOS_OPENAI_API_KEY secret is required'; exit 1; }
+      - name: Execute model-driven bounded research (never certify)
+        run: |
+          python -m mathos.research.agentic_clay \
+            --provider openai --track "$TRACK" --rounds "$ROUNDS" \
+            --max-model-calls 56 --output-dir artifacts/agents
+          python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
+      - name: Upload unverified AI research candidates for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clay-agent-ai-candidates-unverified
+          path: artifacts/agents/
+          if-no-files-found: ignore
