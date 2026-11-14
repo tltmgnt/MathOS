@@ -39,30 +39,37 @@ theorem satTerms_length (m : Nat) : (satTerms m).length = 3 ^ m := by
     calc
       (satTerms (m + 1)).length =
           (satTerms m).length + (satTerms m).length +
-            (satTerms m).length := by simp [satTerms]
+            (satTerms m).length := by simp [satTerms, Nat.add_assoc]
       _ = 3 ^ m + 3 ^ m + 3 ^ m := by rw [ih]
       _ = 3 ^ (m + 1) := by
-        rw [pow_succ]
+        rw [Nat.pow_succ]
         omega
 
 /-- Prefixing a fixed factor choice preserves distinct exponent words. -/
 private theorem sat_map_nodup (tag : SATFactorChoice)
     (xs : List (List SATFactorChoice)) (h : xs.Nodup) :
     (xs.map (tag :: ·)).Nodup := by
-  apply List.Nodup.map h
-  intro a b hab
-  cases List.cons.inj hab with
-  | intro _ htail => exact htail
+  induction xs with
+  | nil => simp
+  | cons hd tail ih =>
+    have hparts := List.nodup_cons.mp h
+    apply List.nodup_cons.mpr
+    constructor
+    · intro hmem
+      rcases List.mem_map.mp hmem with ⟨w, hw, heq⟩
+      have hequal : w = hd := (List.cons.inj heq).2
+      exact hparts.1 (by simpa [hequal] using hw)
+    · exact ih hparts.2
 
-/-- Words with different first-factor exponents can never collide. -/
+/-- Distinct factor-choice prefixes never describe the same exponent word. -/
 private theorem sat_disjoint (a b : SATFactorChoice) (hab : a ≠ b)
     (xs ys : List (List SATFactorChoice)) :
-    List.Disjoint (xs.map (a :: ·)) (ys.map (b :: ·)) := by
+    ∀ z, z ∈ xs.map (a :: ·) → z ∈ ys.map (b :: ·) → False := by
   intro z hz1 hz2
   rcases List.mem_map.mp hz1 with ⟨u, _, hu⟩
   rcases List.mem_map.mp hz2 with ⟨v, _, hv⟩
-  have hEq : a :: u = b :: v := hu.symm.trans hv
-  exact hab (List.cons.inj hEq).1
+  have heq : a :: u = b :: v := hu.trans hv.symm
+  exact hab (List.cons.inj heq).1
 
 /-- All expanded terms have distinct exponent vectors: no cancellation
 is possible across the indexed, disjoint variable pairs. -/
@@ -70,26 +77,23 @@ theorem satTerms_nodup (m : Nat) : (satTerms m).Nodup := by
   induction m with
   | zero => simp [satTerms]
   | succ m ih =>
-    unfold satTerms
-    apply List.Nodup.append
-    · apply List.Nodup.append
-      · exact sat_map_nodup _ _ ih
-      · exact sat_map_nodup _ _ ih
-      · exact sat_disjoint _ _ (by decide) _ _
+    change (((satTerms m).map (SATFactorChoice.x :: ·)) ++
+       ((satTerms m).map (SATFactorChoice.y :: ·)) ++
+       ((satTerms m).map (SATFactorChoice.xy :: ·))).Nodup
+    apply List.nodup_append.mpr
+    constructor
+    · apply List.nodup_append.mpr
+      refine ⟨sat_map_nodup _ _ ih, sat_map_nodup _ _ ih, ?_⟩
+      intro a ha b hb heq
+      subst b
+      exact sat_disjoint _ _ (by decide) _ _ a ha hb
+    constructor
     · exact sat_map_nodup _ _ ih
-    · intro z hz1 hz2
-      have hd : List.Disjoint
-          ((satTerms m).map (SATFactorChoice.x :: ·))
-          ((satTerms m).map (SATFactorChoice.xy :: ·)) :=
-        sat_disjoint _ _ (by decide) _ _
-      have he : List.Disjoint
-          ((satTerms m).map (SATFactorChoice.y :: ·))
-          ((satTerms m).map (SATFactorChoice.xy :: ·)) :=
-        sat_disjoint _ _ (by decide) _ _
-      have hz := List.mem_append.mp hz1
-      cases hz with
-      | inl h => exact hd z h hz2
-      | inr h => exact he z h hz2
+    · intro a ha b hb heq
+      subst b
+      rcases List.mem_append.mp ha with hx | hy
+      · exact sat_disjoint _ _ (by decide) _ _ a hx hb
+      · exact sat_disjoint _ _ (by decide) _ _ a hy hb
 
 /-- Coefficients of every choice word are +1 or -1; in particular,
 they never vanish over the integers. -/
