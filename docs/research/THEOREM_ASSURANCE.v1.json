@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "policy": {
+    "canonical_certification": "NOT_CERTIFIED",
+    "mathematical_novelty": "NOT_INDEPENDENTLY_ASSESSED",
+    "peer_review": "NOT_PERFORMED",
+    "clay_implication": "NOT_ESTABLISHED",
+    "auto_promotion": false
+  },
+  "subresults": [
+    {
+      "theorem_id": "SAT1",
+      "model_key": "P-versus-NP",
+      "route_id": "PNP.equality",
+      "open_claim_id": "PNP.sat_runtime",
+      "lean_file": "formal/SATSupport.lean",
+      "lean_theorem": "MathOS.satSupport_certificate",
+      "model_semantics": "DISJOINT_VARIABLE_PAIR_CHOICE_WORDS",
+      "proof_goal": "FINITE_SUPPORT_COUNTS_ONLY",
+      "originality_status": "ELEMENTARY_KNOWN_STYLE_NOT_CLAIMED_NEW",
+      "literature_search": "NOT_COMPLETED",
+      "independent_mathematical_review": "NOT_PERFORMED",
+      "bridge_to_registered_obligation": "NOT_PROVEN",
+      "bridge_to_clay_target": "NOT_PROVEN",
+      "publication": "NOT_SUBMITTED",
+      "scope_complete_for_clay": false,
+      "statement": "For every natural number m, the indexed disjoint-factor expansion word list has exactly 3^m entries; its choice words are pairwise distinct and their signed coefficients are each +1 or -1.",
+      "mathematical_scope": "A theorem about a specially defined Lean list of choice words encoding the three formal terms in each factor (x_i+y_i-x_i*y_i), with factor index encoded by list position. It does not define or reason about a general polynomial-ring evaluation homomorphism.",
+      "relevance": "It demonstrates an exponential-size explicit expansion for a restricted, syntactic disjoint-variable SAT-associated polynomial route. Such a lower bound on this particular representation does not establish superpolynomial worst-case complexity for any unrestricted deterministic SAT algorithm.",
+      "limitations": "The proof does not establish a polynomial-ring support correspondence, does not show that all algorithms must expand these terms, does not prove a SAT decision procedure or lower bound and cannot imply either P=NP or P!=NP. Compiler success alone does not confer novelty or Clay acceptance.",
+      "literature_review_plan": "An independent researcher must verify whether this expansion encoding or stronger polynomial-support formulation is already recorded in the existing proof-complexity and algebraic SAT literature, provide dated search queries and primary citations, then evaluate novelty explicitly. No such independent search is claimed in this file.",
+      "external_review_plan": "Recruit a mathematician not involved in drafting the statement to inspect the exact Lean definitions, the input assumptions and the intended polynomial-ring interpretation; obtain a dated substantive review and record the reviewer's limitations. This is a human task, not an automated approval.",
+      "route_implication_gap": "The registered open PNP.sat_runtime obligation requires a polynomial total-bit-complexity proof for an explicitly specified deterministic SAT algorithm; an exponential lower bound on one naive symbolic expansion strategy says nothing about every algorithm, and no implication to the Clay target is established.",
+      "counterexample_limitations": "The theorem concerns only the syntactic indexed choice words and nonzero signed coefficients; it cannot rule out cancellation in a different representation with shared variables or deduce general computational lower bounds from example expansions."
+    }
+  ]
+}
