@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from mathos.research.clay_proof_topology import (
-    ROUTES_PATH, EXPECTED_ROUTES, audit_clay_proof_topology,
+    ROUTES_PATH, EXTERNAL_PATH, EXPECTED_ROUTES, audit_clay_proof_topology,
 )
 from mathos.research.clay_alignment import TARGETS_PATH
 from mathos.research.hypothesis_pipeline import HYPOTHESES, OBLIGATIONS
@@ -78,7 +78,7 @@ class ClayProofTopologyTests(unittest.TestCase):
                 self.assertTrue(any(x.startswith("BRIDGE.") for x in missing))
 
     def test_deterministic_and_read_only(self):
-        paths = [ROUTES_PATH, TARGETS_PATH, OBLIGATIONS, HYPOTHESES]
+        paths = [ROUTES_PATH, TARGETS_PATH, OBLIGATIONS, HYPOTHESES, EXTERNAL_PATH]
         before = [p.read_bytes() for p in paths]
         self.assertEqual(audit_clay_proof_topology(),
                          audit_clay_proof_topology())
@@ -90,6 +90,7 @@ class ClayProofTopologyTests(unittest.TestCase):
             "targets": TARGETS_PATH,
             "register": OBLIGATIONS,
             "hypotheses": HYPOTHESES,
+            "external": EXTERNAL_PATH,
         }
         with tempfile.TemporaryDirectory() as tmp:
             docs = {key: json.loads(path.read_text(encoding="utf-8"))
@@ -101,7 +102,7 @@ class ClayProofTopologyTests(unittest.TestCase):
                 local[key].write_text(json.dumps(doc), encoding="utf-8")
             return audit_clay_proof_topology(
                 local["routes"], local["targets"],
-                local["register"], local["hypotheses"]
+                local["register"], local["hypotheses"], local["external"]
             )
 
     def test_reject_removed_official_alternative(self):
@@ -157,6 +158,25 @@ class ClayProofTopologyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._tamper(lambda obj: obj["candidate_bridges"][2].update(
                 {"quantifiers": "a few examples"}))
+
+    def test_external_claims_separate_from_mathos_proofs(self):
+        result = audit_clay_proof_topology()
+        self.assertEqual(result["external_claims_as_of"], "2026-11-13")
+        events = {e["claim_id"]: e for e in result["external_claims"]}
+        self.assertEqual(events["POINCARE.published"]["state"], "ACCEPTED_EXTERNAL")
+        self.assertEqual(events["NS.2026_openai_claim"]["state"],
+                         "ANNOUNCED_UNDER_EXAMINATION")
+        self.assertTrue(all(not e["mathos_proof"] for e in events.values()))
+
+    def test_reject_external_claim_promotion(self):
+        for key, value in (
+            ("state", "ACCEPTED_EXTERNAL"),
+            ("official_clay_status", "SOLVED_EXTERNALLY"),
+            ("mathos_proof", True),
+        ):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self._tamper(lambda obj: obj["events"][1].update(
+                    {key: value}), "external")
 
     def test_reject_existing_canonical_promotion(self):
         def promote(obj):
