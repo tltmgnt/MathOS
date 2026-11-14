@@ -3,7 +3,7 @@
   "scope": "SAT1_CHOICE_WORD_SUPPORT_ONLY",
   "policy": {
     "review_request": "PUBLIC_OPEN_CALL_NOT_INDEPENDENT_ASSESSMENT",
-    "expert_verdict": "NOT_RECEIVED",
+    "expert_verdict": "NOT_INDEPENDENTLY_VALIDATED",
     "independent_reviewer_verified": false,
     "mathematical_novelty": "NOT_ESTABLISHED",
     "theorem_claim_promotion": false,
