@@ -11,6 +11,7 @@ on:
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
       - 'tests/test_agentic_clay.py'
+      - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -21,6 +22,8 @@ on:
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - 'curriculum/agentic-clay-v1.json'
+      - 'curriculum/agentic-clay-24-week.md'
       - '.github/workflows/agentic-clay-research.yml'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
@@ -34,6 +37,7 @@ on:
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
       - 'tests/test_agentic_clay.py'
+      - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -44,6 +48,8 @@ on:
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - 'curriculum/agentic-clay-v1.json'
+      - 'curriculum/agentic-clay-24-week.md'
       - '.github/workflows/agentic-clay-research.yml'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
@@ -79,6 +85,9 @@ jobs:
           python -m unittest discover -s tests -p 'test_clay_alignment.py' -v
           python -m unittest discover -s tests -p 'test_clay_proof_topology.py' -v
           python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+          python -m unittest discover -s tests -p 'test_agentic_curriculum.py' -v
+          python -m mathos.research.agentic_curriculum --track all --output-dir artifacts/curriculum
+          python -m json.tool artifacts/curriculum/curriculum_plan.json > /dev/null
           python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
           python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
