@@ -19,7 +19,7 @@ The following remain open:
 2. Termination, soundness, completeness, and inclusion-minimality of recurrence.
 3. A concrete refinement proof connecting Python implementation to abstract semantics.
 4. Validation of authored mathematical inferences and external theorem references.
-5. A Lean formalization of the SAT polynomial support theorem `SAT1`.
+5. A fully reviewed formal correspondence between the SAT1 choice-word model and coefficient support in the standard multivariate polynomial ring. The choice-word model is now separately formalized.
 
 ## Reproduction
 
@@ -136,3 +136,36 @@ lean formal/FiniteRouteDAG.lean
 
 Stage 3c is not kernel-verified until its CI check passes on the relevant
 commit. Passing CI certifies only the precisely stated Lean theorems.
+
+## Stage 4: generalized disjoint-variable SAT expansion support (SAT1 model)
+
+[`SATSupport.lean`](SATSupport.lean) proves for *every* natural number
+`m` that the recursively constructed list of three-way factor-choice
+words has length `3^m`, has no duplicates and assigns each word a
+nonzero signed integer coefficient. The position of a choice in its
+list distinguishes the indexed variable pair of
+`(x_i + y_i - x_i*y_i)`. This is a genuinely general combinatorial
+proof by induction, not just a numerical check for small `m`.
+
+The full polynomial-ring embedding and its interaction with
+standard coefficient cancellation has **not** been formalized here.
+It also says nothing about unrestricted SAT algorithms or a
+worst-case polynomial runtime. In particular it does not establish
+`PNP.sat_runtime`, P=NP, P!=NP or any Clay claim.
+
+```sh
+lean formal/SATSupport.lean
+python -m mathos.research.theorem_assurance --verify-lean \
+  --output-dir artifacts/theorems
+```
+
+The pinned Lean 4.14.0 workflow runs these commands, while Python
+3.10–3.12 CI runs the source-assurance audit without claiming Lean
+execution. The report includes SHA-256 provenance, the exact formal
+scope, known gaps, and a review queue.
+
+External novelty assessment and independent mathematical review are
+**not performed** by this CI. See
+[`THEOREM_ASSURANCE.md`](../docs/research/THEOREM_ASSURANCE.md)
+for the explicit research and trust boundaries. The canonical
+Millennium obligation register remains `NOT_CERTIFIED`.
