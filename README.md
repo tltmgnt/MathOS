@@ -221,3 +221,22 @@ python curriculum/lab.py --verify
 ```
 
 [Expected answers](curriculum/expected.json) · [Recorded local validation](curriculum/VALIDATION.json). The guide states any existing dependency needed for the lab.
+
+## SAT1 independent research review packet
+
+The [Lean-checked SAT1 technical note](docs/research/papers/SAT1_FORMAL_NOTE.md)
+documents an elementary all-`m` result for disjoint-factor choice-word
+expansions. The package includes a [preliminary source ledger](docs/research/papers/SAT1_LITERATURE_LEDGER.v1.json),
+an [unfilled independent-review protocol](docs/research/papers/SAT1_EXTERNAL_REVIEW.md),
+the actual [Lean source](formal/SATSupport.lean), and digest-based evidence.
+
+Generate a self-contained reviewer packet using:
+
+```sh
+python -m mathos.research.paper_packet --output-dir artifacts/paper
+```
+
+With pinned Lean 4.14.0 installed, add `--verify-lean` to replay the
+exact limited theorem. **The manuscript is not submitted, independently
+reviewed, proven novel, or a solution to P versus NP.** Passing CI
+prepares a reproducible research handoff, not an accepted mathematical paper.
