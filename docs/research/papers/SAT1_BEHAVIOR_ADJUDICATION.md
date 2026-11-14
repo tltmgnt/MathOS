@@ -14,13 +14,13 @@ The versioned [adjudication protocol](SAT1_BEHAVIOR_ADJUDICATION_PROTOCOL.v1.jso
 
 From the MathOS repository:
 
-\`\`\`sh
+```sh
 python -m unittest discover -s tests -p 'test_behavior_adjudication.py' -v
 python -m mathos.research.behavior_adjudication \
   --output-dir artifacts/adjudication
-\`\`\`
+```
 
-The output \`adjudication_status.json\` says \`PROTOCOL_ONLY_NO_HUMAN_DATA\`; CI **only** executes this mode. No participant or human assessment should appear in CI artifacts.
+The output `adjudication_status.json` says `PROTOCOL_ONLY_NO_HUMAN_DATA`; CI **only** executes this mode. No participant or human assessment should appear in CI artifacts.
 
 ## Real private exploratory pilot — only with appropriate consent and oversight
 
@@ -28,24 +28,24 @@ First establish a genuine human-research protocol, applicable human-subjects/eth
 
 After obtaining the participants' informed consent through an appropriate process, complete the [two-rater workflow](SAT1_BEHAVIOR_PILOT.md) in a private directory **outside the repository**. For example:
 
-\`\`\`sh
+```sh
 python -m mathos.research.behavior_adjudication \
   --responses /tmp/mathos-private/answers.json \
   --rater-a /tmp/mathos-private/rater_a.json \
   --rater-b /tmp/mathos-private/rater_b.json \
   --consent-attested \
   --output-dir /tmp/mathos-private/adjudication
-\`\`\`
+```
 
 The software validates exact evidence digests and writes:
 
-- \`private_disagreement_packet.json\`: only discrepant rubric judgments, relevant card text, submitted explanations, sources and the two original ratings. It conceals decision choices and participant identifiers as fields, but free-form statements **may still disclose identity or choices**; a human operator must inspect the packet for sensitive information before sharing it privately.
-- \`private_adjudicator_template.json\`: empty decisions for precisely the disputes found, bound to the exact Lean proof, casebook, two-rater protocol, adjudication protocol, participant-response digest, rater-file digests, and individual explanation hashes.
-- \`adjudication_status.json\`: hashes, count of disputes, original agreement metrics, and explicit noncertification flags, but **not** the full participant statements.
+- `private_disagreement_packet.json`: only discrepant rubric judgments, relevant card text, submitted explanations, sources and the two original ratings. It conceals decision choices and participant identifiers as fields, but free-form statements **may still disclose identity or choices**; a human operator must inspect the packet for sensitive information before sharing it privately.
+- `private_adjudicator_template.json`: empty decisions for precisely the disputes found, bound to the exact Lean proof, casebook, two-rater protocol, adjudication protocol, participant-response digest, rater-file digests, and individual explanation hashes.
+- `adjudication_status.json`: hashes, count of disputes, original agreement metrics, and explicit noncertification flags, but **not** the full participant statements.
 
 A third reader must independently inspect the disputed evidence, declare conflicts, and enter an explicit binary judgment, substantive explanation and source for **every** dispute. After that file exists:
 
-\`\`\`sh
+```sh
 python -m mathos.research.behavior_adjudication \
   --responses /tmp/mathos-private/answers.json \
   --rater-a /tmp/mathos-private/rater_a.json \
@@ -53,9 +53,9 @@ python -m mathos.research.behavior_adjudication \
   --adjudicator /tmp/mathos-private/adjudicator.json \
   --consent-attested \
   --output-dir /tmp/mathos-private/adjudication
-\`\`\`
+```
 
-The outcome is \`ADJUDICATION_SUBMITTED_BUT_NOT_AUTHENTICATED\`, not \`PEER_REVIEWED\`. If there are no disagreements, the outcome is \`NO_RATER_DISAGREEMENTS_UNAUTHENTICATED\` and no adjudicator verdict is fabricated. Both cases preserve the original pre-adjudication agreement analysis.
+The outcome is `ADJUDICATION_SUBMITTED_BUT_NOT_AUTHENTICATED`, not `PEER_REVIEWED`. If there are no disagreements, the outcome is `NO_RATER_DISAGREEMENTS_UNAUTHENTICATED` and no adjudicator verdict is fabricated. Both cases preserve the original pre-adjudication agreement analysis.
 
 ## Scientific and privacy boundaries
 
@@ -68,3 +68,7 @@ The outcome is \`ADJUDICATION_SUBMITTED_BUT_NOT_AUTHENTICATED\`, not \`PEER_REVI
 - **Separate mathematics:** the [real independent SAT1 mathematical reviewer issue](https://github.com/tltmgnt/MathOS/issues/30) is still a distinct request. Adversarial behavioral testing is not a mathematical proof review and cannot close any Clay obligation.
 
 The next human action is a methods/ethics review, appropriate consent planning, and independent collaborators willing to conduct the pilot. None is claimed as complete.
+
+## Independent methods feedback
+
+An external [research methodology and ethics review invitation (#33)](https://github.com/tltmgnt/MathOS/issues/33) asks for criticism of sampling, consent, potential answer leakage, blinding, reliability measurements and human-subjects review requirements. This invitation **does not** represent a completed study or an independent opinion.
