@@ -14,7 +14,6 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import shutil
 
 from mathos.research.hypothesis_pipeline import ROOT
 from mathos.research.theorem_assurance import (
@@ -225,13 +224,17 @@ def audit_paper_packet(
 
     if output_dir is not None:
         output_dir.mkdir(parents=True, exist_ok=True)
-        for src, dest in (
-            (paper_path, "SAT1_FORMAL_NOTE.md"),
-            (ledger_path, "SAT1_LITERATURE_LEDGER.v1.json"),
-            (review_path, "SAT1_EXTERNAL_REVIEW.md"),
-            (lean_path, "SATSupport.lean"),
+        for key, dest in (
+            ("manuscript", "SAT1_FORMAL_NOTE.md"),
+            ("literature_ledger", "SAT1_LITERATURE_LEDGER.v1.json"),
+            ("review_protocol", "SAT1_EXTERNAL_REVIEW.md"),
+            ("formal_lean_source", "SATSupport.lean"),
         ):
-            shutil.copyfile(src, output_dir / dest)
+            (output_dir / dest).write_bytes(raw[key])
+        (output_dir / "theorem_assurance.json").write_text(
+            json.dumps(theorem, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
         (output_dir / "packet_manifest.json").write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
