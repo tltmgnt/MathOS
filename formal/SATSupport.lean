@@ -152,3 +152,6 @@ theorem satSupport_certificate (m : Nat) :
     by intro w _; exact satCoefficient_ne_zero w⟩
 
 end MathOS
+
+-- Explicit trusted-axiom dependency audit for external replay.
+#print axioms MathOS.satSupport_certificate
