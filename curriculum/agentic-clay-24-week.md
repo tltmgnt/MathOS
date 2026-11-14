@@ -3,7 +3,7 @@
 **Path:** advanced undergraduate/graduate prerequisites, then a reproducible research apprenticeship.  
 **Pace:** 24 weeks, 8–12 hours per week, matching the existing [proof-analysis verification curriculum](proof-analysis-verification.md).  
 **Outcome:** an independently reviewable, honestly scoped mathematical research packet, not certification of a Millennium problem.  
-**Certification:** \`NOT_CERTIFIED\` (all seven MathOS tracks remain \`BLOCKED\`, with 14 open proof obligations).
+**Certification:** `NOT_CERTIFIED` (all seven MathOS tracks remain `BLOCKED`, with 14 open proof obligations).
 
 This course connects three existing MathOS components: [Clay full-target alignment](../docs/research/CLAY_TARGET_ALIGNMENT.md), [seven problem probes](../docs/research/SEVEN_HYPOTHESIS_LAB.md), and the [guarded four-role agent](../docs/research/AGENTIC_RESEARCH_PROCESS.md). **Clay does not provide or endorse these grades or a course certification.** Only the target statements and external prize rules originate from Clay.
 
@@ -64,7 +64,7 @@ At the start of week 13, select **one primary track**; the rest of the course us
 
 From repository root, with Python 3.10+:
 
-\`\`\`sh
+```sh
 # Verify 24 weeks, six modules, seven canonical track mappings and no-promotion gates.
 python -m mathos.research.agentic_curriculum --track all \
   --output-dir artifacts/curriculum
@@ -75,11 +75,11 @@ python -m mathos.research.agentic_curriculum --track Navier-Stokes \
 
 # Run strict schema, mapping, negative-control and no-certification tests.
 python -m unittest discover -s tests -p 'test_agentic_curriculum.py' -v
-\`\`\`
+```
 
-The first command produces \`curriculum_plan.json\` with 24 dated-by-week assignments, seven Clay targets, exact primary sources, open obligations, source SHA-256 digests and the necessary human-review gates. The second also produces \`offline_rehearsal/agentic_research_report.json\` and \`agentic_research_handoff.md\`.
+The first command produces `curriculum_plan.json` with 24 dated-by-week assignments, seven Clay targets, exact primary sources, open obligations, source SHA-256 digests and the necessary human-review gates. The second also produces `offline_rehearsal/agentic_research_report.json` and `agentic_research_handoff.md`.
 
-**Not an automated grade:** A passing CLI/CI run validates only curriculum structure and already-registered bounded evidence. It reports \`learning_state=CURRICULUM_PLAN_ONLY\`, \`completion_awarded=false\`, \`rubric_assessed=false\` and \`certification=NOT_CERTIFIED\`. It cannot tell whether the learner actually completed any assignment or wrote a valid mathematical proof.
+**Not an automated grade:** A passing CLI/CI run validates only curriculum structure and already-registered bounded evidence. It reports `learning_state=CURRICULUM_PLAN_ONLY`, `completion_awarded=false`, `rubric_assessed=false` and `certification=NOT_CERTIFIED`. It cannot tell whether the learner actually completed any assignment or wrote a valid mathematical proof.
 
 ### Manual capstone rubric (100 points)
 
@@ -98,7 +98,7 @@ Course completion is independent from *scientific* proof certification. No model
 
 ## Quality gates
 
-At each module boundary, the instructor must verify the required artifacts, reject fabricated citations or missing theorem assumptions, and record explicit unresolved limitations. Passing the skeptic stage means a challenge has been attempted, **not** that no counterexample exists. The formal stage must inspect actual checker output and theorem statement; tests cannot pass by adding \`sorry\`, \`admit\`, or unreviewed shortcut axioms. The final stage requires an actual independent reviewer; filling in a form or running a code pipeline cannot substitute.
+At each module boundary, the instructor must verify the required artifacts, reject fabricated citations or missing theorem assumptions, and record explicit unresolved limitations. Passing the skeptic stage means a challenge has been attempted, **not** that no counterexample exists. The formal stage must inspect actual checker output and theorem statement; tests cannot pass by adding `sorry`, `admit`, or unreviewed shortcut axioms. The final stage requires an actual independent reviewer; filling in a form or running a code pipeline cannot substitute.
 
 When an AI-generated lemma is flawed, revise or reject it and record the counterexample; do not silently drop failed attempts. When a bounded experiment contradicts a known theorem, investigate the encoding and mathematical assumptions before reporting a breakthrough. The validated Clay target statements and canonical proof register remain read-only throughout this course.
 
