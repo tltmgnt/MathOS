@@ -18,6 +18,7 @@ from mathos.research.clay_alignment import TARGETS_PATH, audit_clay_alignment
 from mathos.research.hypothesis_pipeline import HYPOTHESES, OBLIGATIONS, ROOT
 
 ROUTES_PATH = ROOT / "docs/research/CLAY_PROOF_ROUTES.v1.json"
+EXTERNAL_PATH = ROOT / "docs/research/CLAY_EXTERNAL_CLAIMS.v1.json"
 
 # Whitelisting stops a modified route manifest silently dropping difficult
 # proof work or inventing a "complete" alternative.
@@ -79,6 +80,7 @@ def audit_clay_proof_topology(
     targets_path: Path = TARGETS_PATH,
     register_path: Path = OBLIGATIONS,
     hypotheses_path: Path = HYPOTHESES,
+    external_path: Path = EXTERNAL_PATH,
 ) -> dict:
     # Reuse the PR #19 rules: all seven official targets, 14 still-open
     # canonical obligations, no forged Clay eligibility or proof promotion.
@@ -86,11 +88,13 @@ def audit_clay_proof_topology(
     paths = {
         "routes": routes_path, "targets": targets_path,
         "register": register_path, "hypotheses": hypotheses_path,
+        "external": external_path,
     }
     original = {name: path.read_bytes() for name, path in paths.items()}
     spec = json.loads(original["routes"])
     register = json.loads(original["register"])
     targets = json.loads(original["targets"])
+    external = json.loads(original["external"])
     if spec.get("schema_version") != "1.0.0":
         raise ValueError("unsupported proof route schema")
     if spec.get("policy") != {
@@ -111,6 +115,48 @@ def audit_clay_proof_topology(
     aligned = {entry["model_key"]: entry for entry in targets["targets"]}
     if set(aligned) != set(EXPECTED_ROUTES):
         raise ValueError("Clay target mapping changed")
+
+    # Externally announced work belongs to a separate ledger. It is neither
+    # a MathOS proof nor automatic Clay acceptance. No network status polling
+    # or live verification is claimed by this dated snapshot.
+    if external.get("schema_version") != "1.0.0" or external.get("policy") != {
+        "mathos_certification": "NOT_CERTIFIED",
+        "external_claims_do_not_promote_mathos": True,
+        "clay_prize_readiness": "NOT_ELIGIBLE",
+    }:
+        raise ValueError("invalid external-claims nonpromotion policy")
+    if external.get("status_as_of") != "2026-11-13":
+        raise ValueError("external-claims snapshot date changed without review")
+    expected_events = {
+        "POINCARE.published": ("Poincare", "ACCEPTED_EXTERNAL", "SOLVED_EXTERNALLY"),
+        "NS.2026_openai_claim": ("Navier-Stokes", "ANNOUNCED_UNDER_EXAMINATION", "ACTIVE"),
+    }
+    events = external.get("events")
+    if not isinstance(events, list) or len(events) != len(expected_events):
+        raise ValueError("expected external mathematical result and announcement")
+    event_ids = [e.get("claim_id") for e in events if isinstance(e, dict)]
+    if len(event_ids) != len(events) or set(event_ids) != set(expected_events):
+        raise ValueError("duplicate or unknown external mathematical claim")
+    for event in events:
+        key, state, official = expected_events[event["claim_id"]]
+        if (event.get("model_key"), event.get("state"),
+            event.get("official_clay_status"), event.get("mathos_proof")) != (
+                key, state, official, False
+        ) or aligned[key]["clay_status"] != official:
+            raise ValueError("external claim incorrectly promoted or misattributed")
+        if (event.get("source") != (
+            "https://www.claymath.org/millennium/poincare-conjecture/"
+            if key == "Poincare" else
+            "https://openai.com/index/navier-stokes-solution/"
+        )):
+            raise ValueError("external claim has an unrecognized primary source")
+        if key == "Navier-Stokes" and (
+            event.get("event_date") != "2026-09-08" or
+            event.get("cmi_response") !=
+            "https://www.claymath.org/news/navier-stokes-announcement/"
+        ):
+            raise ValueError("Navier-Stokes announcement review metadata changed")
+        _nontrivial_text(event.get("note"), f"{key}.external_note")
 
     raw_bridges = spec.get("candidate_bridges")
     raw_routes = spec.get("routes")
@@ -249,6 +295,16 @@ def audit_clay_proof_topology(
         "alternative_routes": len(raw_routes),
         "poincare_externally_solved": True,
         "poincare_mathos_reconstruction": "BLOCKED",
+        "external_claims_as_of": external["status_as_of"],
+        "external_claims": [
+            {
+                "claim_id": e["claim_id"],
+                "model_key": e["model_key"],
+                "state": e["state"],
+                "source": e["source"],
+                "mathos_proof": False,
+            } for e in events
+        ],
         "source_sha256": {
             name: hashlib.sha256(content).hexdigest()
             for name, content in original.items()
