@@ -59,7 +59,7 @@ The actual MathOS `PNP.sat_runtime` obligation involves a *specified algorithm*,
 
 ## 5. Reproducibility and exact evidence
 
-Repository: [tltmgnt/MathOS](https://github.com/tltmgnt/MathOS). Source: [`formal/SATSupport.lean`](../../formal/SATSupport.lean); formal assurance: [`mathos/research/theorem_assurance.py`](../../mathos/research/theorem_assurance.py). The pinned CI job executes:
+Repository: [tltmgnt/MathOS](https://github.com/tltmgnt/MathOS). Source: [`formal/SATSupport.lean`](../../../formal/SATSupport.lean); formal assurance: [`mathos/research/theorem_assurance.py`](../../../mathos/research/theorem_assurance.py). The pinned CI job executes:
 
 ```sh
 lean formal/SATSupport.lean
