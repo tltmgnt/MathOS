@@ -27,3 +27,8 @@ jobs:
           python-version: '3.12'
       - name: Verify worked answers against current source
         run: python curriculum/lab.py --verify
+      - name: Verify agentic Clay curriculum and no-certification gates
+        run: |
+          python -m unittest discover -s tests -p 'test_agentic_curriculum.py' -v
+          python -m mathos.research.agentic_curriculum --track all --output-dir artifacts/curriculum
+          python -m json.tool artifacts/curriculum/curriculum_plan.json > /dev/null
