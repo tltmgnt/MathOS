@@ -408,6 +408,8 @@ def _write_packet(output_dir: Path, report: dict[str, Any]) -> None:
             "",
             "**Candidate (unproved):** " + latest["proposal"]["lemma_statement"],
             "",
+            "**Argument status (unverified):** " + latest["proposal"]["argument_attempt"],
+            "",
             "**Adversarial criticism:** " + latest["skeptic"]["identified_gap"],
             "",
             "**Reviewer verdict (not certification):** "
