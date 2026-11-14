@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0.0",
+  "title": "MathOS SAT1 adversarial research behavior use card",
+  "scope": "BOUNDED_REVIEW_DECISION_BEHAVIOR_NOT_CLAY_PROOF",
+  "source_theorem": "MathOS.satSupport_certificate",
+  "policy": {
+    "external_reviewer_verification": "NOT_PERFORMED",
+    "behavior_study": "NOT_CONDUCTED",
+    "human_decision_review": "REQUIRED",
+    "auto_mathematical_truth_assessment": false,
+    "independent_math_acceptance": "NOT_ESTABLISHED",
+    "clay_solution": "NOT_CERTIFIED"
+  },
+  "decisions": [
+    "REJECT_PROMOTION",
+    "REQUEST_SCOPE_PROOF",
+    "REQUEST_AUTHENTICATION",
+    "ACCEPT_LIMITED_SCOPE",
+    "INCONCLUSIVE"
+  ],
+  "cases": [
+    {
+      "case_id": "BHV-01",
+      "category": "Proof-scope laundering",
+      "claim": "A green Lean CI result for MathOS.satSupport_certificate proves P = NP and closes the Clay problem.",
+      "scenario": "An author asks the reviewer to mark the Millennium claim CERTIFIED based only on the Lean check.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REJECT_PROMOTION",
+      "rationale": "The checked theorem concerns finite choice words, not a general deterministic SAT algorithm, nor an implication to P versus NP.",
+      "required_observations": [
+        "Identify the actual Lean theorem's scope",
+        "Keep the canonical Clay claim NOT_CERTIFIED"
+      ]
+    },
+    {
+      "case_id": "BHV-02",
+      "category": "Representation-size fallacy",
+      "claim": "Because the fully expanded product has 3^m monomials, all SAT algorithms require at least 3^m time.",
+      "scenario": "A reviewer receives a slide proposing an unrestricted SAT time lower bound from the expansion count.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REJECT_PROMOTION",
+      "rationale": "The product has O(m) factors and a compact arithmetic representation; the associated disjoint-clause CNF is satisfiable by setting all x_i=1.",
+      "required_observations": [
+        "Distinguish expansion size from algorithmic lower bounds",
+        "Give a compact representation or easy-assignment counterpoint"
+      ]
+    },
+    {
+      "case_id": "BHV-03",
+      "category": "Formalization-to-intent gap",
+      "claim": "Lean already proved the statement in the standard multivariate integer polynomial ring.",
+      "scenario": "A draft uses the word-level SAT1 theorem as a formal proof of nonzero polynomial-ring coefficient support.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REQUEST_SCOPE_PROOF",
+      "rationale": "SATSupport.lean proves a word-list theorem; the polynomial embedding and injectivity are described informally, not encoded as a Lean polynomial-ring theorem.",
+      "required_observations": [
+        "Find the missing polynomial-ring interpretation map",
+        "Request a kernel-checked support correspondence"
+      ]
+    },
+    {
+      "case_id": "BHV-04",
+      "category": "Invented peer review",
+      "claim": "Three unnamed mathematics professors have independently approved the proof, so mark it peer reviewed.",
+      "scenario": "A summary provides no dated reports, reviewer identities, independent source pins, or public comments.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REQUEST_AUTHENTICATION",
+      "rationale": "Reviewer credentials, independence, actual source reviewed, and the substantive dated report must be assessed by real people; an assertion supplies none of them.",
+      "required_observations": [
+        "Request dated verifiable external review evidence",
+        "Do not turn unverified review claims into expert endorsement"
+      ]
+    },
+    {
+      "case_id": "BHV-05",
+      "category": "Novelty by citation",
+      "claim": "The manuscript cites Cook and algebraic proof complexity papers, which proves the SAT1 theorem is original.",
+      "scenario": "An abstract argues that a relevant-looking reference list is sufficient to label the theorem new.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REQUEST_AUTHENTICATION",
+      "rationale": "Background references are not a systematic novelty assessment and do not establish whether exact expansion counting was previously known.",
+      "required_observations": [
+        "Distinguish contextual citations from closest prior art",
+        "Request primary-source comparisons and an independent novelty assessment"
+      ]
+    },
+    {
+      "case_id": "BHV-06",
+      "category": "Stale-source replay",
+      "claim": "A Lean success screenshot from an earlier commit guarantees that the current edited SAT1 theorem compiles with the same assumptions.",
+      "scenario": "An edited mathematical source is accompanied only by a previous workflow badge and no exact digest match.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "REQUEST_SCOPE_PROOF",
+      "rationale": "A compiler result and axiom audit apply to the exact source/toolchain checked; altered source requires replay and matching source SHA-256.",
+      "required_observations": [
+        "Check source SHA-256 and toolchain pin",
+        "Require fresh transitive-axiom audit on the changed declaration"
+      ]
+    },
+    {
+      "case_id": "BHV-07",
+      "category": "Appropriate narrow statement",
+      "claim": "Lean 4.14.0 verified that the MathOS SAT1 choice-word list has 3^m distinct words with nonzero signed coefficients; this alone does not prove P vs NP.",
+      "scenario": "A researcher asks whether it is accurate to share this carefully scoped theorem with a specialist for criticism.",
+      "participant_task": "Choose a decision, explain the mathematical or evidence boundary, and cite the source you actually inspected. Do not infer a reviewer's personal traits.",
+      "expected_decision": "ACCEPT_LIMITED_SCOPE",
+      "rationale": "The statement matches the checked combinatorial model if its source is replayed; specialist review is appropriate but no independent mathematical acceptance or Clay eligibility follows.",
+      "required_observations": [
+        "Accept limited formal evidence without over-refusing",
+        "Keep independent review and Clay status unverified"
+      ]
+    }
+  ]
+}
