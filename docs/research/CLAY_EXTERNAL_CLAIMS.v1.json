@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "status_as_of": "2026-11-13",
+  "scope": "External mathematical results and announcements, independently tracked from MathOS proof and Clay prize acceptance.",
+  "policy": {
+    "mathos_certification": "NOT_CERTIFIED",
+    "external_claims_do_not_promote_mathos": true,
+    "clay_prize_readiness": "NOT_ELIGIBLE"
+  },
+  "events": [
+    {
+      "claim_id": "POINCARE.published",
+      "model_key": "Poincare",
+      "state": "ACCEPTED_EXTERNAL",
+      "claim_type": "already_established_mathematical_result",
+      "source": "https://www.claymath.org/millennium/poincare-conjecture/",
+      "event_date": "2003",
+      "official_clay_status": "SOLVED_EXTERNALLY",
+      "mathos_proof": false,
+      "note": "Perelman's previously accepted solution is an externally established result; MathOS reconstruction remains open."
+    },
+    {
+      "claim_id": "NS.2026_openai_claim",
+      "model_key": "Navier-Stokes",
+      "state": "ANNOUNCED_UNDER_EXAMINATION",
+      "claim_type": "claimed_forced_breakdown_C_D",
+      "source": "https://openai.com/index/navier-stokes-solution/",
+      "cmi_response": "https://www.claymath.org/news/navier-stokes-announcement/",
+      "event_date": "2026-09-08",
+      "official_clay_status": "ACTIVE",
+      "mathos_proof": false,
+      "note": "The September 2026 claimed forced-breakdown result and Lean formalization are external. CMI described it as apparently settled on September 11 but had not certified prize acceptance as of this register date."
+    }
+  ]
+}

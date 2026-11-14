@@ -1,0 +1,324 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "Author-proposed dependency routes only; no route sufficiency, formal proof, novelty, or Clay eligibility is established.",
+  "policy": {
+    "certification": "NOT_CERTIFIED",
+    "route_sufficiency": "NOT_VALIDATED",
+    "mathematical_proof": "NOT_ESTABLISHED",
+    "external_review": "NOT_PERFORMED",
+    "no_automatic_promotion": true
+  },
+  "routes": [
+    {
+      "model_key": "Riemann",
+      "route_id": "RH.spectral",
+      "alternative": "universal_RH_proof",
+      "obligations": [
+        "RH.operator",
+        "RH.zero_identity",
+        "BRIDGE.RH.spectral"
+      ],
+      "scope": "Every nontrivial zero, including all heights and multiplicities, with justified spectral/operator domain.",
+      "interpretation": "Candidate spectral route: a genuine operator and zero identity still require an independent implication to the official RH assertion.",
+      "required_proof": "A noncircular universal theorem proving all nontrivial zeros lie on the critical line.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "P-versus-NP",
+      "route_id": "PNP.equality",
+      "alternative": "P_equals_NP",
+      "obligations": [
+        "PNP.sat_correctness",
+        "PNP.sat_runtime",
+        "BRIDGE.PNP.sat_to_class"
+      ],
+      "scope": "Every finite encoded SAT instance under an explicitly fixed uniform deterministic machine model.",
+      "interpretation": "Candidate equality route through SAT correctness and worst-case polynomial total bit complexity.",
+      "required_proof": "A fully specified deterministic SAT decision procedure with a rigorous polynomial-time class-reduction argument.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "P-versus-NP",
+      "route_id": "PNP.separation",
+      "alternative": "P_not_equals_NP",
+      "obligations": [
+        "BRIDGE.PNP.unrestricted_lower_bound"
+      ],
+      "scope": "All uniform deterministic polynomial-time algorithms, not bounded circuits or a restricted proof system.",
+      "interpretation": "Alternative general separation route; restricted lower bounds cannot be promoted to P != NP.",
+      "required_proof": "An unconditional lower-bound argument separating a language in NP from every polynomial-time deterministic machine.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "route_id": "NS.A",
+      "alternative": "A_unforced_R3",
+      "obligations": [
+        "NS.critical_bound",
+        "BRIDGE.NS.A_full_scope"
+      ],
+      "scope": "Official alternative A on three-dimensional Euclidean space with zero forcing and all prescribed smooth divergence-free data.",
+      "interpretation": "Unforced R3 continuation from an a priori estimate, requiring justification of full data and regularity scope.",
+      "required_proof": "A complete existence-and-smoothness argument satisfying all official R3 unforced assumptions.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "route_id": "NS.B",
+      "alternative": "B_unforced_periodic",
+      "obligations": [
+        "NS.critical_bound",
+        "BRIDGE.NS.B_full_scope"
+      ],
+      "scope": "Official alternative B on the three-dimensional periodic domain with zero forcing for all admissible initial data.",
+      "interpretation": "Unforced periodic continuation requires domain-specific regularity estimates and quantifier coverage.",
+      "required_proof": "A complete periodic global existence-and-smoothness proof under all Clay hypotheses.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "route_id": "NS.C",
+      "alternative": "C_forced_R3_breakdown",
+      "obligations": [
+        "BRIDGE.NS.C_forced_breakdown"
+      ],
+      "scope": "Official alternative C on three-dimensional Euclidean space, with admissible smooth data and smooth forcing.",
+      "interpretation": "A forced R3 breakdown construction is an alternative to either universal unforced regularity theorem.",
+      "required_proof": "A full smooth-force R3 breakdown counterexample satisfying the Clay initial, decay, energy and PDE conditions.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "route_id": "NS.D",
+      "alternative": "D_forced_periodic_breakdown",
+      "obligations": [
+        "BRIDGE.NS.D_forced_breakdown"
+      ],
+      "scope": "Official alternative D in the three-dimensional periodic setting with admissible smooth forcing.",
+      "interpretation": "A forced periodic breakdown construction is an alternative to global unforced regularity.",
+      "required_proof": "A fully rigorous smooth-force periodic breakdown satisfying the precise Clay data and forcing hypotheses.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Yang-Mills",
+      "route_id": "YM.continuum_mass",
+      "alternative": "existence_and_mass_gap",
+      "obligations": [
+        "YM.continuum",
+        "YM.axioms",
+        "YM.uniform_gap",
+        "BRIDGE.YM.complete_theory"
+      ],
+      "scope": "Every compact simple gauge group, four-dimensional continuum and infinite-volume reconstructed nontrivial theory.",
+      "interpretation": "Candidate constructive route joining continuum limits, axioms, and a positive physical mass gap.",
+      "required_proof": "A complete reconstruction and positive spectral-gap proof for all required compact simple gauge groups.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Hodge",
+      "route_id": "HODGE.cycles",
+      "alternative": "rational_cycle_representation",
+      "obligations": [
+        "HODGE.primitive_cycles",
+        "HODGE.reduction",
+        "BRIDGE.HODGE.full_quantifiers"
+      ],
+      "scope": "Every smooth complex projective variety, every codimension, every rational Hodge class.",
+      "interpretation": "Candidate cycle-generation route whose primitive reduction and quantifier lifting have not been validated.",
+      "required_proof": "A universal rational algebraic-cycle representation or a valid counterexample with precisely verified scope.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "route_id": "BSD.rank_refined",
+      "alternative": "core_rank_plus_refined_route",
+      "obligations": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term",
+        "BRIDGE.BSD.full_formula"
+      ],
+      "scope": "All elliptic curves over Q; core rank equality and MathOS's optional stronger refined formula are explicitly distinguished.",
+      "interpretation": "Stronger MathOS proposed refined BSD route; its overlap and sufficiency remain unreviewed.",
+      "required_proof": "An unconditional proof of the core all-curves rank equality; separately justify the refined leading term and Sha hypotheses if claimed.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Poincare",
+      "route_id": "POINCARE.replay",
+      "alternative": "independent_reconstruction_only",
+      "obligations": [
+        "POINCARE.reconstruction"
+      ],
+      "scope": "Independent reconstruction of the already accepted proof for all closed simply connected three-manifolds.",
+      "interpretation": "Positive-control benchmark only; Perelman's externally established theorem does not certify a MathOS replay.",
+      "required_proof": "An independently checked complete replay of the established result with specific theorem-level sources.",
+      "status": "PROPOSED_NOT_VALIDATED",
+      "sufficiency_review": "not_reviewed",
+      "quantifier_review": "not_reviewed",
+      "evidence_artifacts": []
+    }
+  ],
+  "candidate_bridges": [
+    {
+      "model_key": "Riemann",
+      "claim_id": "BRIDGE.RH.spectral",
+      "statement": "Prove without assuming RH that a correctly realized self-adjoint spectral correspondence implies the exact zero-location statement for every nontrivial zero.",
+      "quantifiers": "Universal quantification over nontrivial zeros, all heights, with multiplicity and required analytic continuation.",
+      "assumptions": "Operator domain, determinant regularization, completeness and spectral mapping cannot assume the claim being proved.",
+      "counterexample_checks": "Search for zeros not represented, multiplicity loss, invalid determinants or hidden use of RH.",
+      "acceptance": "An independently reviewable derivation of every implication and analytic hypothesis.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "P-versus-NP",
+      "claim_id": "BRIDGE.PNP.sat_to_class",
+      "statement": "Prove that the stated deterministic SAT algorithm is uniform and decides NP-complete SAT within polynomial bit complexity, hence P equals NP.",
+      "quantifiers": "Every finite input formula and every input length under standard bit-string encodings.",
+      "assumptions": "Correct NP-completeness reductions, representation sizes and deterministic machine execution are required.",
+      "counterexample_checks": "Try arbitrary malformed encodings, exponential intermediate data and hidden oracle operations.",
+      "acceptance": "Complete algorithm, correctness, complexity and reduction proofs with uniform bounds.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "P-versus-NP",
+      "claim_id": "BRIDGE.PNP.unrestricted_lower_bound",
+      "statement": "Establish an unrestricted lower bound for all deterministic polynomial-time decision procedures for a language in NP.",
+      "quantifiers": "All deterministic polynomial-time Turing machines across all input lengths, no restricted proof-system shortcut.",
+      "assumptions": "The chosen language must be in NP and the lower bound cannot assume any equivalent unresolved separation.",
+      "counterexample_checks": "Check relativization, natural-proofs scope and restricted models against the unrestricted conclusion.",
+      "acceptance": "A machine-model-specific unconditional separation proof under universal quantification.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "claim_id": "BRIDGE.NS.A_full_scope",
+      "statement": "Connect the proposed critical estimate to global smooth unforced solutions on R3 with exact Clay A hypotheses.",
+      "quantifiers": "Every admissible smooth divergence-free R3 datum for the official viscosity and decay conditions.",
+      "assumptions": "Local-to-global continuation, uniqueness, regularity and a priori estimate must cover the correct Euclidean domain.",
+      "counterexample_checks": "Test concentration scenarios, scaling, tail behavior and possible dependence on a finite time cutoff.",
+      "acceptance": "A domain-valid global continuation theorem with every assumption independently checked.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "claim_id": "BRIDGE.NS.B_full_scope",
+      "statement": "Connect the proposed critical estimate to global smooth unforced solutions on the periodic three-torus under Clay B.",
+      "quantifiers": "Every admissible smooth divergence-free periodic datum, with forcing identically zero.",
+      "assumptions": "Local-to-global continuation must establish periodic and energy hypotheses without importing R3 estimates blindly.",
+      "counterexample_checks": "Test high-frequency modes, periodic pressure normalization and borderline norm divergence.",
+      "acceptance": "A periodic global continuation theorem matching all of the official B conditions.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "claim_id": "BRIDGE.NS.C_forced_breakdown",
+      "statement": "Construct and verify a smooth forced three-dimensional Euclidean Navier-Stokes breakdown satisfying Clay C.",
+      "quantifiers": "An admissible smooth forcing and datum on R3 with breakdown in the exact official solution class.",
+      "assumptions": "Forcing decay, smoothness, finite energy and the precise nonexistence conclusion must all hold.",
+      "counterexample_checks": "Check whether forcing hides singular behavior or violates decay, smoothness or energy assumptions.",
+      "acceptance": "A fully qualified R3 forced breakdown proof with explicit PDE and force estimates.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "claim_id": "BRIDGE.NS.D_forced_breakdown",
+      "statement": "Construct and verify a smooth forced periodic three-dimensional Navier-Stokes breakdown satisfying Clay D.",
+      "quantifiers": "Admissible smooth periodic initial conditions and forcing, with the exact stipulated failure of global smoothness.",
+      "assumptions": "Periodicity, divergence-free conditions, forcing regularity and full PDE identities must be proved.",
+      "counterexample_checks": "Check trivial forcing artifacts, periodic compatibility, hidden losses of regularity and energy bounds.",
+      "acceptance": "A rigorous periodic forced breakdown construction meeting every official D condition.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Yang-Mills",
+      "claim_id": "BRIDGE.YM.complete_theory",
+      "statement": "Demonstrate that the continuum construction, axioms and regulator-uniform gap together imply the full physical Yang-Mills target.",
+      "quantifiers": "For each compact simple gauge group, in four Euclidean dimensions with continuum and infinite-volume limits.",
+      "assumptions": "Nontriviality, reflection positivity, reconstruction and physical-unit spectral interpretation are all required.",
+      "counterexample_checks": "Check gaps vanishing with regulator, trivial limits and nonuniform volume convergence.",
+      "acceptance": "A complete quantum-field reconstruction and strictly positive physical spectral-gap theorem.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Hodge",
+      "claim_id": "BRIDGE.HODGE.full_quantifiers",
+      "statement": "Show the proposed primitive-cycle construction and reduction actually cover all rational Hodge classes with correct algebraic cycle maps.",
+      "quantifiers": "Every smooth complex projective variety, all codimensions and rational classes of Hodge type (p,p).",
+      "assumptions": "Rational coefficients, cycle-class functoriality and reduction arguments must not presuppose Hodge.",
+      "counterexample_checks": "Check primitive exceptions, torsion confusions and mistaken use of integral Hodge claims.",
+      "acceptance": "A universally quantified theorem on rational algebraic cycle classes or valid counterexample.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "claim_id": "BRIDGE.BSD.full_formula",
+      "statement": "Derive the all-elliptic-curves rank equality from precisely stated analytic and arithmetic claims, distinguishing the refined formula.",
+      "quantifiers": "Every elliptic curve over Q at s=1; optional refined factors require their exact normalizations.",
+      "assumptions": "Analytic continuation, Selmer comparison, Sha finiteness and leading-term normalization must be explicit.",
+      "counterexample_checks": "Check rank greater than one, missing factors and possible assumption of the target equality.",
+      "acceptance": "A rigorously quantified proof of core BSD, and separate refined proof if that stronger claim is asserted.",
+      "status": "OPEN",
+      "review_verdict": "not_reviewed",
+      "formal_check": "not_performed",
+      "evidence_artifacts": []
+    }
+  ]
+}
