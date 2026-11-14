@@ -14,6 +14,7 @@ from mathos.research.behavior_pilot import (
     PROTOCOL_PATH, _agreement, run_pilot,
 )
 from mathos.research.theorem_assurance import SAT_LEAN
+from mathos.research.hypothesis_pipeline import ROOT
 
 
 class BehaviorPilotTests(unittest.TestCase):
@@ -230,6 +231,24 @@ class BehaviorPilotTests(unittest.TestCase):
                 path.write_text(json.dumps(protocol))
                 with self.assertRaises(ValueError):
                     run_pilot(protocol_path=path)
+
+    def test_private_participant_data_not_allowed_inside_repository(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            response = self._response(root)
+            with self.assertRaisesRegex(ValueError, "outside the MathOS repository"):
+                run_pilot(response_path=response, consent_attested=True,
+                          output_dir=ROOT / "artifacts" / "behavior-pilot")
+            with self.assertRaisesRegex(ValueError, "outside the MathOS repository"):
+                run_pilot(response_path=ROOT / "docs" / "private-response.json",
+                          consent_attested=True, output_dir=root / "safe")
+
+    def test_protocol_only_mode_refuses_old_private_outputs(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "private_blinded_rater_packet.json").write_text("private")
+            with self.assertRaisesRegex(ValueError, "previous private participant"):
+                run_pilot(output_dir=folder)
 
     def test_no_unintended_mutation_and_deterministic_protocol_report(self):
         before = [p.read_bytes() for p in (SAT_LEAN, PROTOCOL_PATH)]
