@@ -14,6 +14,7 @@ on:
       - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'tests/test_lemma_verification.py'
+      - 'tests/test_claim_twin.py'
       - 'tests/test_theorem_assurance.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -23,6 +24,8 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'docs/research/LEMMA_VERIFICATION.md'
+      - 'docs/research/CLAIM_TWIN.v1.json'
+      - 'docs/research/CLAIM_CERTIFICATE_DIGITAL_TWIN.md'
       - 'docs/research/THEOREM_ASSURANCE.v1.json'
       - 'docs/research/THEOREM_ASSURANCE.md'
       - 'formal/SATSupport.lean'
@@ -47,6 +50,7 @@ on:
       - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'tests/test_lemma_verification.py'
+      - 'tests/test_claim_twin.py'
       - 'tests/test_theorem_assurance.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
@@ -56,6 +60,8 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'docs/research/LEMMA_VERIFICATION.md'
+      - 'docs/research/CLAIM_TWIN.v1.json'
+      - 'docs/research/CLAIM_CERTIFICATE_DIGITAL_TWIN.md'
       - 'docs/research/THEOREM_ASSURANCE.v1.json'
       - 'docs/research/THEOREM_ASSURANCE.md'
       - 'formal/SATSupport.lean'
@@ -104,6 +110,9 @@ jobs:
           python -m json.tool artifacts/curriculum/curriculum_plan.json > /dev/null
           python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
           python -m unittest discover -s tests -p 'test_lemma_verification.py' -v
+          python -m unittest discover -s tests -p 'test_claim_twin.py' -v
+          python -m mathos.research.claim_twin --track all --output-dir artifacts/claim-twin
+          python -m json.tool artifacts/claim-twin/bounded_claim_certificates.json > /dev/null
           python -m unittest discover -s tests -p 'test_theorem_assurance.py' -v
           python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
@@ -133,6 +142,13 @@ jobs:
         with:
           name: sat1-assurance-py${{ matrix.python-version }}
           path: artifacts/theorems/
+          if-no-files-found: ignore
+      - name: Upload exact finite-claim digital-twin receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bounded-math-claim-twin-py${{ matrix.python-version }}
+          path: artifacts/claim-twin/bounded_claim_certificates.json
           if-no-files-found: ignore
       - name: Upload bounded mathematical lemma audit
         if: always()

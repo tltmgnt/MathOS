@@ -6,10 +6,13 @@ on:
       - 'mathos/research/**'
       - 'tests/test_agentic_clay.py'
       - 'tests/test_bridge_agent_focus.py'
+      - 'tests/test_claim_twin.py'
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - 'docs/research/CLAIM_TWIN.v1.json'
+      - 'docs/research/CLAIM_CERTIFICATE_DIGITAL_TWIN.md'
       - 'docs/research/CLAY_FULL_TARGETS.v1.json'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/agentic-clay-research.yml'
@@ -81,6 +84,11 @@ jobs:
             --provider offline --track "$TRACK" --rounds "$ROUNDS" \
             --max-model-calls 56 "${args[@]}" --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
+      - name: Verify and attach exact finite-model claims (not agent lemmas)
+        run: |
+          python -m unittest discover -s tests -p 'test_claim_twin.py' -v
+          python -m mathos.research.claim_twin --track "$TRACK" --output-dir artifacts/agents/bounded-twin
+          python -m json.tool artifacts/agents/bounded-twin/bounded_claim_certificates.json > /dev/null
       - name: Upload research-process smoke-test artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -117,6 +125,10 @@ jobs:
             --provider openai --track "$TRACK" --rounds "$ROUNDS" \
             --max-model-calls 56 "${args[@]}" --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
+      - name: Attach independent fixed finite-claim baseline (not AI proof)
+        run: |
+          python -m mathos.research.claim_twin --track "$TRACK" --output-dir artifacts/agents/bounded-twin
+          python -m json.tool artifacts/agents/bounded-twin/bounded_claim_certificates.json > /dev/null
       - name: Upload unverified AI research candidates for human review
         if: always()
         uses: actions/upload-artifact@v4
