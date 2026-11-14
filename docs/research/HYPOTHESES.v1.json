@@ -15,9 +15,9 @@
     {
       "model_key": "Riemann",
       "id": "RH-LI-001",
-      "title": "Li-coefficient positivity and rigorous numerical enclosure",
+      "title": "Li-coefficient positivity and interval-ready normalization",
       "hypothesis": "Search for a positivity mechanism proving every Li coefficient lambda_n >= 0, not just finitely many numerical instances.",
-      "use_case": "Test the first Li coefficient from the explicit Euler-constant formula as a normalization check before higher-n interval arithmetic.",
+      "use_case": "Numerically bracket the known first Li coefficient as a normalization check; full rigorous higher-n interval methods are not implemented.",
       "bounded_probe": "li_first_coefficient",
       "falsifier": "A rigorously negative Li coefficient at any index would refute RH; this initial positive numerical check does not certify any new index.",
       "next_lemma": "A uniformly rigorous positivity inequality for arbitrary n or an equivalent all-test-functions criterion.",
