@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "title": "SAT1 adversarial research decision pilot: double-rated evidence rubric",
+  "purpose": "Exploratory exercise on evidentiary caution in short research review scenarios, not a validated behavioral instrument.",
+  "scope": "SAT1_SEVEN_CASES_RESEARCH_DECISION_ONLY",
+  "source_cardbook": "docs/research/papers/SAT1_ADVERSARIAL_BEHAVIOR_CARDS.v1.json",
+  "case_ids": [
+    "BHV-01",
+    "BHV-02",
+    "BHV-03",
+    "BHV-04",
+    "BHV-05",
+    "BHV-06",
+    "BHV-07"
+  ],
+  "rater_count": 2,
+  "dimensions": [
+    "observation_one_present",
+    "observation_two_present",
+    "source_reference_relevant"
+  ],
+  "rubric": {
+    "observation_one_present": "1 only when the submitted explanatory text includes the first case-specific expected observation; otherwise 0.",
+    "observation_two_present": "1 only when the submitted explanatory text includes the second case-specific expected observation; otherwise 0.",
+    "source_reference_relevant": "1 only when the stated source is genuinely relevant to the specific assertion; never infer it was inspected."
+  },
+  "method": {
+    "design": "EXPLORATORY_UNVALIDATED_PILOT",
+    "sampling": "NOT_RECRUITED",
+    "consent": "OPERATOR_ATTESTATION_REQUIRED_NOT_AUTHENTICATED",
+    "rater_blinding": "CASE_AND_RESPONSIVE_JUSTIFICATION_VISIBLE_DECISION_LABEL_AND_PARTICIPANT_PSEUDONYM_HIDDEN",
+    "participant_task": "Seven written decision/explanation tasks bound to the exact Lean SHA-256 and casebook SHA-256",
+    "outcome": "Descriptive double-rater binary rubric agreement; no personal ability inference",
+    "agreement": "Observed percent agreement and Cohen kappa per dimension and pooled; undefined kappa emitted as null",
+    "adjudication": "NOT_AUTOMATED",
+    "preregistration": "IN_REPOSITORY_SPECIFICATION_ONLY_NOT_EXTERNALLY_REGISTERED",
+    "controls": "NO_CONTROL_GROUP_NO_VALIDATED_COMPARISON"
+  },
+  "policy": {
+    "study_conducted": "NOT_INDEPENDENTLY_VERIFIED",
+    "independence_authenticated": false,
+    "human_rater_authenticity": "NOT_AUTHENTICATED",
+    "behavioral_validation": "NOT_ESTABLISHED",
+    "mathematical_review": "NOT_PERFORMED",
+    "clay_solution": "NOT_CERTIFIED",
+    "auto_promotion": false
+  }
+}
