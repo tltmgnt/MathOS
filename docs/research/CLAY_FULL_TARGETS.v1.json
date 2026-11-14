@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0.0",
+  "source_scope": "Official Clay Mathematics Institute online problem descriptions and CMI prize rules; authored paraphrases are not formal claims of proof",
+  "coverage_metric": "10 required traceability fields per track, structural completeness only; not mathematical solution relevance or Clay approval",
+  "dimensions": [
+    "clay_problem_page",
+    "official_target",
+    "quantified_scope",
+    "permitted_solution_type",
+    "hypotheses_and_conditions",
+    "current_probe",
+    "probe_limit",
+    "missing_bridge",
+    "required_proof_artifact",
+    "external_review_gate"
+  ],
+  "policy": {
+    "canonical_certification": "NOT_CERTIFIED",
+    "original_probes": "BOUNDED_ONLY",
+    "proof_status": "NOT_ESTABLISHED",
+    "clay_prize_readiness": "NOT_ELIGIBLE",
+    "research_alignment_only": true
+  },
+  "clay_rules_page": "https://www.claymath.org/millennium-problems/rules/",
+  "cmI_gate": {
+    "qualifying_publication": false,
+    "two_years_elapsed": false,
+    "general_mathematical_acceptance": false,
+    "clay_consideration": false
+  },
+  "targets": [
+    {
+      "model_key": "Riemann",
+      "clay_problem_page": "https://www.claymath.org/millennium/riemann-hypothesis/",
+      "clay_status": "UNSOLVED",
+      "official_target": "For every nontrivial zero rho of the analytically continued Riemann zeta function, Re(rho)=1/2.",
+      "quantified_scope": "Every nontrivial zero in the critical strip, including multiplicities and arbitrarily large imaginary parts; no finite-height cutoff.",
+      "permitted_solution_type": "A universal theorem proving the zero-location assertion or a valid counterexample disproving it.",
+      "hypotheses_and_conditions": "Analytic continuation, functional equation, domain of the nontrivial zeros and all claimed spectral/determinant identities must be explicitly justified without using RH.",
+      "current_probe": "li_first_coefficient",
+      "probe_limit": "A floating-point evaluation of the known first Li coefficient; cannot establish positivity for every index or locate all nontrivial zeros.",
+      "missing_bridge": "Prove a zero-location equivalence with the exact required hypotheses and then prove its universal conclusion; for the MathOS spectral route construct a self-adjoint operator and noncircular correspondence covering all zero multiplicities.",
+      "direct_research_test": "Propose a precisely stated all-index Li-coefficient inequality or a complete spectral zero-identity, attempt to prove it, and audit circular dependencies; finite numerical checks are regression tests only.",
+      "required_proof_artifact": "A complete inspectable proof that implies the zero-location statement for every nontrivial zero, with justified analytic domains, convergence and all dependencies.",
+      "external_review_gate": "Publish an actual claimed solution in a qualifying outlet; allow at least two years and establish general acceptance before any Clay consideration.",
+      "repo_open_claims": [
+        "RH.operator",
+        "RH.zero_identity"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "P-versus-NP",
+      "clay_problem_page": "https://www.claymath.org/millennium/p-vs-np/",
+      "clay_status": "UNSOLVED",
+      "official_target": "Decide whether deterministic polynomial-time decision problems P equal nondeterministic polynomial-time decision problems NP.",
+      "quantified_scope": "All languages in the appropriate uniform complexity classes under standard finite bit encodings, not only fixed formulas or a restricted proof system.",
+      "permitted_solution_type": "Either a polynomial-time deterministic algorithm for an NP-complete language such as SAT with full correctness and bit-complexity proof (P=NP), or a general separation P!=NP.",
+      "hypotheses_and_conditions": "Fully specified machine/encoding and uniformity model, polynomial input-size bound, correctness on arbitrary encoded inputs; restricted resolution or circuit examples cannot by themselves separate P from NP.",
+      "current_probe": "k4_tseitin",
+      "probe_limit": "One six-variable unsatisfiable Tseitin formula and a short resolution refutation; no uniform worst-case polynomial SAT algorithm or unrestricted lower bound.",
+      "missing_bridge": "For the registered P=NP route, supply a deterministic SAT algorithm proved correct for every CNF and polynomial in total input bit length; a separate P!=NP route needs unrestricted algorithmic lower bounds.",
+      "direct_research_test": "Specify an exact candidate SAT algorithm and an infinite adversarial family, quantify total bit cost and verify correctness for all arbitrary inputs via proof; do not infer global complexity from finite benchmarks.",
+      "required_proof_artifact": "Complete formal argument in the chosen machine model proving polynomial-time decision of an NP-complete language or an unrestricted complexity-class separation.",
+      "external_review_gate": "Publish an actual claimed solution in a qualifying outlet; allow at least two years and establish general acceptance before any Clay consideration.",
+      "repo_open_claims": [
+        "PNP.sat_correctness",
+        "PNP.sat_runtime"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "clay_problem_page": "https://www.claymath.org/millennium/navier-stokes-equation/",
+      "clay_status": "ACTIVE",
+      "official_target": "Prove one of Clay's specified three-dimensional Navier-Stokes existence-and-smoothness or breakdown alternatives, with its full initial-data, forcing, domain and regularity assumptions.",
+      "quantified_scope": "Existence/smoothness on R^3 or the three-torus for every prescribed admissible smooth divergence-free initial datum with zero forcing, OR a valid counterexample to global smoothness satisfying one of the stated smooth-force breakdown formulations.",
+      "permitted_solution_type": "One of four official alternatives (A) unforced R3 smooth existence, (B) unforced periodic smooth existence, (C) forced R3 breakdown, or (D) forced periodic breakdown; all original conditions required.",
+      "hypotheses_and_conditions": "State viscosity nu>0, 3D domain, smoothness, divergence-free initial data, required decay/periodicity, permitted forcing and full PDE/pressure identities. Do not misreport a single smooth solution as a universal proof.",
+      "current_probe": "abc_perturbation_bound",
+      "probe_limit": "Conditional L2 perturbation estimate for an explicitly known periodic ABC solution; assumes a smooth perturbed solution already exists.",
+      "missing_bridge": "A universal theorem for all data in an official existence alternative, or a fully qualified forcing/data construction for an official breakdown alternative; the conditional ABC Gronwall bound alone is insufficient.",
+      "direct_research_test": "Choose the precise official alternative A/B/C/D and its quantified hypotheses; write the missing global continuation estimate or candidate breakdown with full force/regularity audit, then seek rigorous proof or counterexample.",
+      "required_proof_artifact": "One mathematically complete proof satisfying all hypotheses of at least one official alternative, with PDE existence/nonexistence established and the chosen domain/forcing matched exactly.",
+      "external_review_gate": "Follow Clay's published rules and evaluation of any announced solution; do not treat an announcement as an accepted solution without official acceptance.",
+      "repo_open_claims": [
+        "NS.critical_bound"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "Yang-Mills",
+      "clay_problem_page": "https://www.claymath.org/millennium/yang-mills-the-maths-gap/",
+      "clay_status": "UNSOLVED",
+      "official_target": "Construct a nontrivial quantum Yang-Mills theory on four-dimensional R4 for every compact simple gauge group and prove a strictly positive mass gap.",
+      "quantified_scope": "Each compact simple gauge group G; a nontrivial Euclidean/R4 quantum theory and strictly positive physical mass gap in the reconstructed Hilbert-space theory.",
+      "permitted_solution_type": "A constructive proof of existence plus axiomatic reconstruction plus a positive mass-gap theorem in the required continuum and infinite-volume setting.",
+      "hypotheses_and_conditions": "Actual non-Abelian gauge field, continuum and infinite-volume limits, reflection positivity/reconstruction conditions at least as strong as required, nontriviality and physical spectral estimates.",
+      "current_probe": "transfer_gap_obstruction",
+      "probe_limit": "A two-state matrix with regulator-dependent positive lattice gaps; not a non-Abelian gauge field nor a continuum physical mass-gap proof.",
+      "missing_bridge": "Construct the required four-dimensional quantum field theory and prove regulator-uniform physical mass and reconstruction axioms for every required compact simple gauge group.",
+      "direct_research_test": "Work with a fully specified finite-volume lattice gauge action and prove a uniform physical-unit correlation/transfer gap bound alongside positivity and tightness assumptions, then connect the continuum limit rigorously.",
+      "required_proof_artifact": "A complete mathematical construction of the nontrivial 4D quantum Yang-Mills theory for all required G, verified axioms and a positive physical mass gap.",
+      "external_review_gate": "Publish an actual claimed solution in a qualifying outlet; allow at least two years and establish general acceptance before any Clay consideration.",
+      "repo_open_claims": [
+        "YM.continuum",
+        "YM.axioms",
+        "YM.uniform_gap"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "Hodge",
+      "clay_problem_page": "https://www.claymath.org/millennium/hodge-conjecture/",
+      "clay_status": "UNSOLVED",
+      "official_target": "For every smooth complex projective variety, every rational Hodge class is a rational linear combination of classes of algebraic cycles of the corresponding codimension.",
+      "quantified_scope": "All smooth projective varieties over C, all relevant codimensions p and rational degree-2p classes of Hodge type (p,p), not just projective spaces.",
+      "permitted_solution_type": "Universal proof of the rational algebraic cycle class representation or a valid smooth projective rational-Hodge counterexample.",
+      "hypotheses_and_conditions": "Rational coefficients and Hodge (p,p) type are essential; do not substitute the false integral version or assume primitive class algebraicity.",
+      "current_probe": "projective_hodge",
+      "probe_limit": "Multiplication in the known cohomology ring of P4; no primitive rational Hodge cycle construction for general varieties.",
+      "missing_bridge": "Construct algebraic cycle representatives for every remaining rational Hodge class under complete geometric hypotheses, including primitive pieces and valid reductions.",
+      "direct_research_test": "Choose a genuinely nontrivial family with computable rational Hodge classes; calculate the cycle-class image and isolate a precise primitive class not covered by existing generators.",
+      "required_proof_artifact": "A general geometric proof or correctly specified counterexample, with cycle-class maps and rational coefficients rigorously handled.",
+      "external_review_gate": "Publish an actual claimed solution in a qualifying outlet; allow at least two years and establish general acceptance before any Clay consideration.",
+      "repo_open_claims": [
+        "HODGE.primitive_cycles",
+        "HODGE.reduction"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "clay_problem_page": "https://www.claymath.org/millennium/birch-and-swinnerton-dyer-conjecture/",
+      "clay_status": "UNSOLVED",
+      "official_target": "For every elliptic curve E over Q, the order of vanishing of L(E,s) at s=1 equals the Mordell-Weil rank of E(Q); MathOS additionally targets the refined leading-term formula.",
+      "quantified_scope": "All elliptic curves over Q, not just a fixed curve or finitely many good primes; for the refined version all prescribed arithmetic factors and normalizations.",
+      "permitted_solution_type": "Complete proof of the core rank/order-of-vanishing conjecture (and of the refined leading term if claiming full refined BSD), or a valid counterexample to the claimed generality.",
+      "hypotheses_and_conditions": "Correctly normalized Hasse-Weil L-function, analytic continuation and behavior at s=1; rational rank, regulator/period/Tamagawa/torsion and Sha hypotheses explicitly distinguished.",
+      "current_probe": "elliptic_local_counts",
+      "probe_limit": "Eight finite-field point counts for E:y2=x3-x; they provide local a_p data but cannot establish generic rank equality or Sha finiteness.",
+      "missing_bridge": "Prove equality of analytic and algebraic ranks for all elliptic curves over Q; for MathOS's stronger refined route also prove the full leading term and justify Sha finiteness.",
+      "direct_research_test": "For a declared nontrivial family, compute rigorously certified Selmer ranks and analytic orders near s=1, prove the comparison under complete hypotheses and identify where known rank-zero/one theorems stop.",
+      "required_proof_artifact": "Complete theorem on all elliptic curves over Q proving the rank equality; a separate complete refined BSD formula is required for MathOS's stronger target.",
+      "external_review_gate": "Publish an actual claimed solution in a qualifying outlet; allow at least two years and establish general acceptance before any Clay consideration.",
+      "repo_open_claims": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ],
+      "external_solution_known": false
+    },
+    {
+      "model_key": "Poincare",
+      "clay_problem_page": "https://www.claymath.org/millennium/poincare-conjecture/",
+      "clay_status": "SOLVED_EXTERNALLY",
+      "official_target": "Every closed, simply connected three-dimensional manifold is homeomorphic to the three-sphere, as established in Perelman's solution.",
+      "quantified_scope": "All closed simply connected 3-manifolds, not merely triangulations already known to represent S3.",
+      "permitted_solution_type": "The Millennium problem is already solved and awarded; MathOS may independently reconstruct the established Ricci-flow proof, but that is a separate research goal.",
+      "hypotheses_and_conditions": "Topological closedness, dimension three and simple connectivity must be justified, with Ricci-flow/surgery arguments checked if reproducing Perelman's proof.",
+      "current_probe": "simplicial_three_sphere",
+      "probe_limit": "Homology of the known boundary of a 4-simplex; homology alone does not imply simple connectivity or establish any universal classification.",
+      "missing_bridge": "Reconstruct the entire chain of relevant Hamilton-Perelman Ricci flow, noncollapsing, surgery/extinction and topological implication lemmas with sourced hypotheses.",
+      "direct_research_test": "Build an independently verified theorem-by-theorem dependency ledger for an existing complete proof, checking a substantive Ricci-flow lemma rather than only a simple triangulation.",
+      "required_proof_artifact": "A separately reviewed accurate reconstruction of the already accepted proof; not a new prize-eligible solution.",
+      "external_review_gate": "No second Millennium Prize is being sought for an already solved problem; distinguish an independent exposition/reconstruction from original accepted work.",
+      "repo_open_claims": [
+        "POINCARE.reconstruction"
+      ],
+      "external_solution_known": true
+    }
+  ]
+}
