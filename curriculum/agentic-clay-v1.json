@@ -1,0 +1,430 @@
+{
+  "schema_version": "1.0.0",
+  "name": "MathOS Agentic Clay Research Curriculum",
+  "duration_weeks": 24,
+  "hours_per_week": {
+    "minimum": 8,
+    "maximum": 12
+  },
+  "prior_curriculum": "curriculum/proof-analysis-verification.md",
+  "clay_target_registry": "docs/research/CLAY_FULL_TARGETS.v1.json",
+  "hypotheses_registry": "docs/research/HYPOTHESES.v1.json",
+  "canonical_obligations": "docs/proof-analysis/OBLIGATIONS.v1.json",
+  "agent_process": "docs/research/AGENTIC_RESEARCH_PROCESS.md",
+  "objective": "Teach mathematically precise, falsifiable and independently reviewable research using bounded AI-assisted experiments, without certifying unsolved problems.",
+  "completion_policy": {
+    "automatic_certification": false,
+    "learner_progress_is_mathematical_proof": false,
+    "completion_requires_human_assessment": true,
+    "canonical_certification": "NOT_CERTIFIED",
+    "canonical_math_state": "BLOCKED",
+    "offline_harness_is_not_ai_research": true,
+    "clay_prize_eligibility": false
+  },
+  "evaluation": {
+    "mechanical_checks": "source traceability, module/track structure, replay commands, bounded agent report invariants",
+    "human_gates": "subject-matter accuracy, mathematical proof validity, source novelty, formal proof scope, independent replication",
+    "rubric_points": {
+      "claim_precision": 15,
+      "assumptions": 15,
+      "independent_checks": 15,
+      "adversarial_review": 15,
+      "proof_scope": 20,
+      "provenance": 10,
+      "communication": 10
+    },
+    "claimed_passes_without_human_review": false
+  },
+  "modules": [
+    {
+      "id": "M01",
+      "weeks": [
+        1,
+        4
+      ],
+      "title": "Proof statements and Clay source literacy",
+      "goal": "Distinguish complete Clay targets from authored MathOS proof routes.",
+      "weekly": [
+        {
+          "week": 1,
+          "topic": "Quantifiers and counterexamples",
+          "assignment": "Rewrite one Clay target with all variables and quantifiers; identify a deliberately weaker statement.",
+          "artifact": "claim_scope.md"
+        },
+        {
+          "week": 2,
+          "topic": "Official problem assumptions",
+          "assignment": "Map dimensions, domains, boundary or algebraic conditions to the canonical Clay target.",
+          "artifact": "source_scope.json"
+        },
+        {
+          "week": 3,
+          "topic": "Logic and dependency graphs",
+          "assignment": "Reverse-engineer an existing open obligation; distinguish a necessary from a sufficient condition.",
+          "artifact": "dependency_audit.md"
+        },
+        {
+          "week": 4,
+          "topic": "First adversarial review",
+          "assignment": "Supply one explicit counterexample to an invalid generalization of the first use case.",
+          "artifact": "counterexample_review.md"
+        }
+      ],
+      "skills": [
+        "formal statement writing",
+        "quantifiers",
+        "source traceability"
+      ],
+      "acceptance": [
+        "statement has an unambiguous domain",
+        "full Clay target distinguished from the bounded example",
+        "a reviewer can replay the counterexample"
+      ],
+      "gate": "HUMAN_REVIEW_PENDING"
+    },
+    {
+      "id": "M02",
+      "weeks": [
+        5,
+        8
+      ],
+      "title": "Reproducible seven-track experiments",
+      "goal": "Verify exact finite/conditional baselines and their limitations.",
+      "weekly": [
+        {
+          "week": 5,
+          "topic": "Python test/research protocol",
+          "assignment": "Run the seven hypothesis pipeline; fingerprint canonical inputs and record Python version.",
+          "artifact": "seven_hypotheses_report.json"
+        },
+        {
+          "week": 6,
+          "topic": "Independent checks",
+          "assignment": "Replay the reverse-oracle test for the chosen track and explain its different method.",
+          "artifact": "independent_oracle.md"
+        },
+        {
+          "week": 7,
+          "topic": "Negative controls",
+          "assignment": "Change one carefully chosen assumption on an isolated copy and record the observed failure.",
+          "artifact": "negative_control.json"
+        },
+        {
+          "week": 8,
+          "topic": "Evidence limits",
+          "assignment": "Write the most important non-implication from the passing bounded probe to the full Clay target.",
+          "artifact": "evidence_boundary.md"
+        }
+      ],
+      "skills": [
+        "reproducibility",
+        "independent verification",
+        "negative controls"
+      ],
+      "acceptance": [
+        "test outputs reproducible",
+        "controls distinguish valid and invalid cases",
+        "no finite result promoted to universal theorem"
+      ],
+      "gate": "HUMAN_REVIEW_PENDING"
+    },
+    {
+      "id": "M03",
+      "weeks": [
+        9,
+        12
+      ],
+      "title": "Agentic planner–proposer–skeptic–reviewer",
+      "goal": "Operate the guarded AI-agent loop and identify unverified statements.",
+      "weekly": [
+        {
+          "week": 9,
+          "topic": "Agent process and roles",
+          "assignment": "Run an offline agent rehearsal on one selected track; verify it is not a live AI run.",
+          "artifact": "agentic_research_report.json"
+        },
+        {
+          "week": 10,
+          "topic": "Research prompts and precise lemmas",
+          "assignment": "Draft an exact candidate lemma with hypotheses, domain, proposed proof and falsifier.",
+          "artifact": "candidate_lemma.md"
+        },
+        {
+          "week": 11,
+          "topic": "Skeptic and repair cycle",
+          "assignment": "Challenge the proposed lemma with two counterexample searches and revise once.",
+          "artifact": "skeptic_review.md"
+        },
+        {
+          "week": 12,
+          "topic": "Responsible model use",
+          "assignment": "Audit model access, privacy, input provenance, role budgets and the human-review handoff.",
+          "artifact": "agent_safety_audit.md"
+        }
+      ],
+      "skills": [
+        "agent orchestration",
+        "mathematical skepticism",
+        "prompt injection boundaries"
+      ],
+      "acceptance": [
+        "offline simulation clearly labelled",
+        "candidate identified as unverified",
+        "no model-authored proof marked established"
+      ],
+      "gate": "HUMAN_REVIEW_PENDING"
+    },
+    {
+      "id": "M04",
+      "weeks": [
+        13,
+        16
+      ],
+      "title": "Specialist mathematical attack",
+      "goal": "Move beyond the baseline to an honestly scoped substantive lemma.",
+      "weekly": [
+        {
+          "week": 13,
+          "topic": "Literature and prior-work boundaries",
+          "assignment": "Find and verify three primary mathematical sources directly; record which claims each supports.",
+          "artifact": "literature_ledger.md"
+        },
+        {
+          "week": 14,
+          "topic": "Exact missing bridge",
+          "assignment": "Write one unproved lemma with all quantifiers and an explicit logical implication to the chosen Clay target.",
+          "artifact": "missing_bridge_lemma.md"
+        },
+        {
+          "week": 15,
+          "topic": "Falsification/limiting cases",
+          "assignment": "Try to refute the lemma using examples, scaling, quantifier stress tests or known theorems.",
+          "artifact": "falsification_notebook.md"
+        },
+        {
+          "week": 16,
+          "topic": "Track-focused research note",
+          "assignment": "Report a proof attempt with numbered steps and each unclosed assumption flagged.",
+          "artifact": "research_note.md"
+        }
+      ],
+      "skills": [
+        "domain expertise",
+        "scholarly sources",
+        "counterexample analysis"
+      ],
+      "acceptance": [
+        "source claims verified against originals",
+        "unproved bridge remains explicit",
+        "every conclusion has correct assumptions"
+      ],
+      "gate": "SUBJECT_EXPERT_REVIEW_PENDING"
+    },
+    {
+      "id": "M05",
+      "weeks": [
+        17,
+        20
+      ],
+      "title": "Formal proof and trusted verification",
+      "goal": "Separate compiler-checked lemmas from the main unproved conjecture.",
+      "weekly": [
+        {
+          "week": 17,
+          "topic": "Trusted computing base",
+          "assignment": "Read pinned Lean and MathOS formal sources; inventory assumptions and axioms.",
+          "artifact": "trusted_base.md"
+        },
+        {
+          "week": 18,
+          "topic": "Small theorem formalization",
+          "assignment": "Formalize a small supporting finite theorem or verify a precisely specified calculation.",
+          "artifact": "small_proof.lean"
+        },
+        {
+          "week": 19,
+          "topic": "Checker and adversarial tests",
+          "assignment": "Run the real checker on an independent machine/CI and search for hidden placeholders or unsound axioms.",
+          "artifact": "formal_check_record.json"
+        },
+        {
+          "week": 20,
+          "topic": "Proof-scope alignment",
+          "assignment": "Compare the formal theorem exactly with the research target, including every hypothesis omitted in the formalization.",
+          "artifact": "formal_scope_review.md"
+        }
+      ],
+      "skills": [
+        "Lean kernel",
+        "formal specification",
+        "axiom audits"
+      ],
+      "acceptance": [
+        "real kernel/checker evidence for claimed small result",
+        "no sorry/admit/unverified axioms in claimed proof",
+        "no unjustified promotion of target"
+      ],
+      "gate": "FORMAL_REVIEW_PENDING"
+    },
+    {
+      "id": "M06",
+      "weeks": [
+        21,
+        24
+      ],
+      "title": "Independent review and research handoff",
+      "goal": "Produce a reproducible, critical research packet for expert review.",
+      "weekly": [
+        {
+          "week": 21,
+          "topic": "Complete reproducibility packet",
+          "assignment": "Pin code revision, data/provenance, test versions and known failure modes.",
+          "artifact": "reproduction_manifest.json"
+        },
+        {
+          "week": 22,
+          "topic": "Independent peer challenge",
+          "assignment": "Have a second reviewer attempt the checks and document findings separately.",
+          "artifact": "independent_review.md"
+        },
+        {
+          "week": 23,
+          "topic": "Revision and truth-in-reporting",
+          "assignment": "Resolve criticism or explicitly record unresolved proof obligations and false starts.",
+          "artifact": "revision_log.md"
+        },
+        {
+          "week": 24,
+          "topic": "Capstone defense",
+          "assignment": "Present exactly what is established, what is conditional, and what remains Clay-unproved.",
+          "artifact": "final_research_handoff.md"
+        }
+      ],
+      "skills": [
+        "replication",
+        "peer critique",
+        "research ethics"
+      ],
+      "acceptance": [
+        "independent reviewer identity and scope documented",
+        "replay instructions reproduce bounded evidence",
+        "final status stays NOT_CERTIFIED unless a separate approved scientific process warrants otherwise"
+      ],
+      "gate": "HUMAN_ASSESSMENT_REQUIRED"
+    }
+  ],
+  "tracks": [
+    {
+      "model_key": "Riemann",
+      "prerequisites": [
+        "complex analysis",
+        "analytic number theory",
+        "spectral analysis"
+      ],
+      "starter": "Derive the Li coefficient normalization and reconstruct its numerical bounds independently.",
+      "beyond_starter": "An all-index Li inequality or noncircular spectral zero-identity, with every multiplicity accounted for.",
+      "principal_risk": "Checking only finitely many coefficients or assuming RH in the derivation.",
+      "first_probe": "li_first_coefficient",
+      "obligations": [
+        "RH.operator",
+        "RH.zero_identity"
+      ]
+    },
+    {
+      "model_key": "P-versus-NP",
+      "prerequisites": [
+        "algorithms",
+        "computational complexity",
+        "proof complexity"
+      ],
+      "starter": "Build and independently verify the 6-variable K4 Tseitin contradiction and resolution certificate.",
+      "beyond_starter": "A fully uniform SAT algorithm with polynomial total bit complexity OR an unrestricted algorithmic lower bound.",
+      "principal_risk": "Confusing lower bounds in a restricted proof system with P!=NP.",
+      "first_probe": "k4_tseitin",
+      "obligations": [
+        "PNP.sat_correctness",
+        "PNP.sat_runtime"
+      ]
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "prerequisites": [
+        "functional analysis",
+        "Sobolev spaces",
+        "nonlinear PDE"
+      ],
+      "starter": "Verify ABC Fourier identities and derive the conditional perturbation energy inequality.",
+      "beyond_starter": "A theorem for one exact Clay A/B/C/D alternative meeting all data, forcing, domain and regularity assumptions.",
+      "principal_risk": "Mistaking one smooth periodic solution or conditional estimate for global regularity.",
+      "first_probe": "abc_perturbation_bound",
+      "obligations": [
+        "NS.critical_bound"
+      ]
+    },
+    {
+      "model_key": "Yang-Mills",
+      "prerequisites": [
+        "Lie groups",
+        "gauge theory",
+        "constructive quantum field theory"
+      ],
+      "starter": "Diagonalize the toy transfer matrix and determine precisely how a regulator-dependent gap collapses.",
+      "beyond_starter": "A nontrivial four-dimensional continuum quantum gauge theory with axioms and positive physical mass gap for every required compact simple group.",
+      "principal_risk": "Confusing a two-state toy model or dimensionless lattice gap with physical continuum mass.",
+      "first_probe": "transfer_gap_obstruction",
+      "obligations": [
+        "YM.continuum",
+        "YM.axioms",
+        "YM.uniform_gap"
+      ]
+    },
+    {
+      "model_key": "Hodge",
+      "prerequisites": [
+        "algebraic topology",
+        "algebraic geometry",
+        "Hodge theory"
+      ],
+      "starter": "Calculate the hyperplane-class ring and pairings of projective four-space.",
+      "beyond_starter": "Construct and verify rational algebraic-cycle representatives for a nontrivial primitive Hodge-class family.",
+      "principal_risk": "Assuming the general Hodge conjecture from projective-space examples or confusing rational and integral versions.",
+      "first_probe": "projective_hodge",
+      "obligations": [
+        "HODGE.primitive_cycles",
+        "HODGE.reduction"
+      ]
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "prerequisites": [
+        "algebraic number theory",
+        "elliptic curves",
+        "Selmer groups"
+      ],
+      "starter": "Double-check elliptic-curve finite-field counts via Euler's Legendre-symbol criterion.",
+      "beyond_starter": "Establish analytic/algebraic rank compatibility beyond a finite local sample with exact hypotheses; distinguish refined leading-term and Sha work.",
+      "principal_risk": "Inferring global rank or Sha finiteness from local point counts.",
+      "first_probe": "elliptic_local_counts",
+      "obligations": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ]
+    },
+    {
+      "model_key": "Poincare",
+      "prerequisites": [
+        "algebraic topology",
+        "Riemannian geometry",
+        "Ricci flow"
+      ],
+      "starter": "Rebuild the mod-2 boundary maps of the four-simplex and compute the 3-sphere Betti numbers.",
+      "beyond_starter": "Reconstruct an actual Ricci-flow-with-surgery theorem chain and independently audit all geometric hypotheses.",
+      "principal_risk": "Misidentifying S3 homology with simple connectivity or claiming a new proof of an already solved conjecture.",
+      "first_probe": "simplicial_three_sphere",
+      "obligations": [
+        "POINCARE.reconstruction"
+      ]
+    }
+  ]
+}
