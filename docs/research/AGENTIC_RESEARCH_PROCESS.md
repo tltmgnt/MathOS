@@ -106,3 +106,75 @@ A human subject-matter specialist must perform the following before treating an 
 The seven problem-specific questions are drawn directly from \`docs/research/CLAY_FULL_TARGETS.v1.json\` and remain limited by their listed missing bridges: (1) all-zero Li/spectral correspondence on RH; (2) unrestricted SAT algorithm/complexity separation; (3) one exact official Navier–Stokes alternative; (4) physical-unit continuum 4D Yang–Mills; (5) primitive rational Hodge algebraic cycles; (6) elliptic analytic/algebraic rank and refined BSD; (7) independent reconstruction of the externally solved Poincaré proof.
 
 MathOS will learn the most from **falsifiable, precise sublemmas**, with failed attempts recorded instead of hidden. AI generation accelerates hypothesis search, not mathematical certification.
+
+## Bridge-focused dependency-graph integration (follow-up to PR #21)
+
+The research agent now uses the **audited proof topology** in
+`CLAY_PROOF_ROUTES.v1.json`, in addition to the seven Clay target definitions
+and the canonical 14-obligation register. Before any model call it runs both
+`audit_clay_alignment` and `audit_clay_proof_topology`. Invalid dependencies,
+false external-solution acceptance, or altered proof status abort the run.
+The source-hash report now includes the proof-route and external-claims ledgers.
+
+**Selection behavior:** `--track` specifies a problem. For a single problem,
+`--route-id` can select one of its registered OR routes, and `--claim-id`
+selects one *open dependency* on that route. A claim requires a route; both
+explicit selectors require a single track (not `all`). With no selectors,
+the agent chooses the first **author-listed** route and favors its explicitly
+missing bridge for the research attempt; Poincaré uses its canonical
+reconstruction obligation. This stable default is **not a mathematical
+priority/difficulty metric or an endorsement of proof sufficiency**.
+
+For example, to focus on the forced-breakdown route C rather than incorrectly
+continuing work on universal unforced regularity:
+
+```sh
+python -m mathos.research.agentic_clay --provider offline \
+  --track Navier-Stokes --route-id NS.C \
+  --claim-id BRIDGE.NS.C_forced_breakdown \
+  --rounds 1 --max-model-calls 4 \
+  --output-dir artifacts/agents/ns-c
+python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
+```
+
+The **live** provider uses the same selectors but only runs with explicitly
+configured credentials, on authorized manual dispatch. The GitHub Actions
+`Clay agentic research (guarded)` workflow exposes optional `route_id` and
+`claim_id` inputs. A pull request always uses the offline backend, without
+API secrets. No autonomous continuous API work or hidden model calls occur.
+
+### What the additional evidence gate actually checks
+
+The selected route and claim are passed verbatim (from validated local
+registries) to the planner, proposer, skeptic and reviewer. The candidate
+proposer must repeat the *exact* registered open claim ID in the lemma statement
+and begin its bridge-status field with `UNPROVEN: <claim_id>`. Otherwise the
+agent **fails closed**. This prevents accidental route drift, a missing
+dependency identifier, or a status-promotion string masquerading as a result.
+It does **not** confirm that the natural-language lemma is valid or new.
+
+The JSON packet now includes:
+
+- `research_focus` with official alternative, proposed route, exact open
+  claim, quantifiers, assumptions, counterexample checks, acceptance criteria,
+  other unresolved dependencies, and conditional completion sets;
+- `traceable_claim_id` and protected source hashes;
+- `route_sufficiency_validated=false`,
+  `counterexample_search_completed=false`, `novelty_checked=false`,
+  `formal_verification_completed=false`, and
+  `independent_mathematical_review=false`;
+- per-round `falsification_plan_executed=false`,
+  `novelty_search_performed=false`, `formal_proof_checked=false`, and
+  `expert_review_performed=false`.
+
+These are **truthful evidence labels**: the skeptic generates a *counterexample
+plan* but does not execute a general mathematical counterexample search. An AI
+reviewer is not an independent expert. A well-formed model output does not
+establish novelty, logical validity, or the route-to-Clay implication. All
+candidate packets remain `NOT_CERTIFIED` and cannot update the canonical
+register. Human mathematical validation and actual independently checked proof
+artifacts are necessary before any theorem-level claim can advance.
+
+**Scope of improvement:** stronger targeting, reproducible provenance, and
+failure detection for candidate research packets. **No mathematical theorem
+was proved by this software change.**
