@@ -78,3 +78,7 @@ A separate researcher must assess the study's sampling, informed consent, potent
 The [SAT1 mathematical reviewer invitation](https://github.com/tltmgnt/MathOS/issues/30) remains a **separate process**. It solicits actual mathematical review of the Lean result; a behavioral pilot is not a replacement.
 
 **Clay status:** `NOT_CERTIFIED` throughout.
+
+## Next step: independent handling of rater disagreements
+
+The separate [source-pinned disagreement adjudication protocol](SAT1_BEHAVIOR_ADJUDICATION.md) prepares a private third-reader handoff **only** for genuinely conflicting rubric judgments. It preserves original Cohen-kappa calculations, rejects participant data stored inside the repository and does not automatically authenticate a third reader or certify the research. Public [methods and ethics feedback issue #33](https://github.com/tltmgnt/MathOS/issues/33) requests outside critique without collecting participant responses.
