@@ -59,3 +59,7 @@ The repository also includes [SAT1_DESK_CRITIQUE.md](SAT1_DESK_CRITIQUE.md), an 
 - Clay and original MathOS proof registers: **unchanged NOT_CERTIFIED**, regardless of reviewer recommendation.
 
 **Real mathematical evaluation requires an actual independent mathematician to examine the claim. This repository cannot replace that person's work.**
+
+## Optional adversarial behavior-review use card
+
+For a separate, explicitly **unvalidated behavioral pilot**—not a substitute for a substantive mathematical review—use the [adversarial SAT1 research-behavior card](SAT1_ADVERSARIAL_BEHAVIOR_USE_CARD.md). It presents seven misleading and appropriately narrow claims to test how a participant chooses evidence and handles unsupported claims. Its automated scoring checks decision labels only; the casebook, simulated fixtures and any resulting scores are **not independent mathematical findings**. The public reviewer request remains [issue #30](https://github.com/tltmgnt/MathOS/issues/30).
