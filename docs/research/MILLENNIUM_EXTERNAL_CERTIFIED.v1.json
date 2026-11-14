@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "system": "MathOS Millennium external-recognition certification mirror",
+  "purpose": "Demonstrate CERTIFIED at Millennium-problem scope only when CMI has already officially recognized the resolution; this does not issue a CMI certificate or prove a new theorem.",
+  "policy": {
+    "certificate_label": "CERTIFIED",
+    "certificate_scope": "EXTERNALLY_RECOGNIZED_MILLENNIUM_RESOLUTION",
+    "certificate_issuer": "MathOS evidence mirror, NOT the Clay Mathematics Institute",
+    "source_of_mathematical_recognition": "Clay Mathematics Institute",
+    "basis": "OFFICIAL_SOLVED_LISTING_AND_2010_AWARD_ANNOUNCEMENT",
+    "source_verification_mode": "PINNED_OFFICIAL_RECORDS_NOT_LIVE_FETCH",
+    "auto_certify_new_solutions": false,
+    "auto_certify_mathos_reconstruction": false,
+    "enable_automatic_proof_promotion": false,
+    "claim_real_time_external_reverification": false,
+    "require_human_review_for_new_external_records": true,
+    "canonical_mathos_certification": "NOT_CERTIFIED",
+    "existing_mathos_tracks": "BLOCKED",
+    "external_poincare_result": "established_external"
+  },
+  "allowed_external_record": {
+    "model_key": "Poincare",
+    "canonical_claim_id": "POINCARE.published",
+    "assertion": "Every closed simply connected three-manifold is homeomorphic to the three-sphere.",
+    "existing_resolution_attribution": "Grigori Perelman",
+    "solved_on_official_listing": true,
+    "official_listing_url": "https://www.claymath.org/Millennium%20Problems/",
+    "official_problem_url": "https://www.claymath.org/millennium/poincare-conjecture/",
+    "clay_award_announcement_url": "https://www.claymath.org/wp-content/uploads/2022/06/Poincare-press-release.pdf",
+    "award_announcement_date": "2010-03-18",
+    "award_year": 2010,
+    "award_recipient": "Grigori Perelman",
+    "formal_mathos_reconstruction_status": "NOT_CERTIFIED",
+    "independent_mathos_proof_replayed": false,
+    "external_recognition_status": "CERTIFIED",
+    "evidence_type": "EXTERNAL_CMI_AWARD_AND_SOLVED_LISTING",
+    "evidence_review_note": "CMI officially lists Poincare as solved and announced the Millennium Prize award to Perelman on March 18, 2010; MathOS only mirrors these reviewed public records."
+  },
+  "other_models_expected_not_certified": [
+    "Birch-Swinnerton-Dyer",
+    "Hodge",
+    "Navier-Stokes",
+    "P-versus-NP",
+    "Riemann",
+    "Yang-Mills"
+  ]
+}
