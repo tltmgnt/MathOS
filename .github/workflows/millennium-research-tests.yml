@@ -14,6 +14,7 @@ on:
       - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'tests/test_lemma_verification.py'
+      - 'tests/test_theorem_assurance.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -22,6 +23,9 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'docs/research/LEMMA_VERIFICATION.md'
+      - 'docs/research/THEOREM_ASSURANCE.v1.json'
+      - 'docs/research/THEOREM_ASSURANCE.md'
+      - 'formal/SATSupport.lean'
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
@@ -43,6 +47,7 @@ on:
       - 'tests/test_agentic_curriculum.py'
       - 'tests/test_bridge_agent_focus.py'
       - 'tests/test_lemma_verification.py'
+      - 'tests/test_theorem_assurance.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -51,6 +56,9 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'docs/research/LEMMA_VERIFICATION.md'
+      - 'docs/research/THEOREM_ASSURANCE.v1.json'
+      - 'docs/research/THEOREM_ASSURANCE.md'
+      - 'formal/SATSupport.lean'
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
@@ -96,6 +104,7 @@ jobs:
           python -m json.tool artifacts/curriculum/curriculum_plan.json > /dev/null
           python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
           python -m unittest discover -s tests -p 'test_lemma_verification.py' -v
+          python -m unittest discover -s tests -p 'test_theorem_assurance.py' -v
           python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
           python -m mathos.research.agentic_clay --provider offline --track Navier-Stokes --route-id NS.C --claim-id BRIDGE.NS.C_forced_breakdown --rounds 1 --max-model-calls 4 --output-dir artifacts/agents/ns-c
@@ -103,6 +112,8 @@ jobs:
           python -m mathos.research.agentic_clay --provider offline --track P-versus-NP --route-id PNP.equality --claim-id PNP.sat_runtime --rounds 1 --max-model-calls 4 --output-dir artifacts/agents/pnp-algebra
           python -m mathos.research.lemma_verification --agent-report artifacts/agents/pnp-algebra/agentic_research_report.json --output-dir artifacts/lemmas
           python -m json.tool artifacts/lemmas/lemma_verification_report.json > /dev/null
+          python -m mathos.research.theorem_assurance --output-dir artifacts/theorems > /tmp/theorem-assurance-summary.json
+          python -m json.tool artifacts/theorems/theorem_assurance.json > /dev/null
           python -m mathos.research.clay_alignment --output-dir artifacts/clay
           python -m json.tool artifacts/clay/clay_target_alignment.json > /dev/null
           python -m mathos.research.clay_proof_topology --output-dir artifacts/clay
@@ -115,6 +126,13 @@ jobs:
         with:
           name: seven-hypothesis-evidence-py${{ matrix.python-version }}
           path: artifacts/hypotheses/seven_hypotheses_report.json
+          if-no-files-found: ignore
+      - name: Upload theorem assurance and review handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sat1-assurance-py${{ matrix.python-version }}
+          path: artifacts/theorems/
           if-no-files-found: ignore
       - name: Upload bounded mathematical lemma audit
         if: always()
