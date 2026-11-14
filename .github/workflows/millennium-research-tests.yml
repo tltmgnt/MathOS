@@ -10,6 +10,7 @@ on:
       - 'tests/test_first_use_case_reverse_engineering.py'
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
+      - 'tests/test_agentic_clay.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -18,6 +19,8 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
+      - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - '.github/workflows/agentic-clay-research.yml'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   pull_request:
@@ -29,6 +32,7 @@ on:
       - 'tests/test_first_use_case_reverse_engineering.py'
       - 'tests/test_clay_alignment.py'
       - 'tests/test_clay_proof_topology.py'
+      - 'tests/test_agentic_clay.py'
       - 'docs/research/HYPOTHESES.v1.json'
       - 'docs/research/SEVEN_HYPOTHESIS_LAB.md'
       - 'docs/research/FIRST_USE_CASE_REVERSE_ENGINEERING.md'
@@ -37,6 +41,8 @@ on:
       - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
       - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
       - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
+      - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
+      - '.github/workflows/agentic-clay-research.yml'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
       - '.github/workflows/millennium-research-tests.yml'
   workflow_dispatch:
@@ -70,6 +76,9 @@ jobs:
           python -m unittest discover -s tests -p 'test_first_use_case_reverse_engineering.py' -v
           python -m unittest discover -s tests -p 'test_clay_alignment.py' -v
           python -m unittest discover -s tests -p 'test_clay_proof_topology.py' -v
+          python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+          python -m mathos.research.agentic_clay --provider offline --track all --rounds 1 --max-model-calls 28 --output-dir artifacts/agents
+          python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
           python -m mathos.research.clay_alignment --output-dir artifacts/clay
           python -m json.tool artifacts/clay/clay_target_alignment.json > /dev/null
           python -m mathos.research.clay_proof_topology --output-dir artifacts/clay
