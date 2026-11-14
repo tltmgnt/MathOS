@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "SAT1_PILOT_DISAGREEMENT_ONLY",
+  "source_pilot_protocol": "docs/research/papers/SAT1_BEHAVIOR_PILOT_PROTOCOL.v1.json",
+  "case_ids": [
+    "BHV-01",
+    "BHV-02",
+    "BHV-03",
+    "BHV-04",
+    "BHV-05",
+    "BHV-06",
+    "BHV-07"
+  ],
+  "dimensions": [
+    "observation_one_present",
+    "observation_two_present",
+    "source_reference_relevant"
+  ],
+  "adjudication_policy": "HUMAN_EXPLICIT_DECISIONS_NO_AUTO_RESOLUTION",
+  "method": {
+    "disagreement_identification": "Only dimensions on which the two supplied rater records differ are sent for adjudication; all 21 paired judgments must already be complete and source-linked.",
+    "adjudicator_inputs": "A separately supplied third reader records an explicit binary judgment, case-specific mathematical justification, source actually inspected, self-attestation of conflicts and a pseudonym different from either rater.",
+    "analysis": "Agreement and Cohen kappa remain the primary observed double-rating results. Adjudication does not rewrite them or count as evidence of instrument validity or an independent expert mathematical review.",
+    "privacy": "Real participant text, rater reasoning and adjudicator responses must be kept in a private workspace outside the tracked MathOS repository and are never uploaded by protocol-only CI.",
+    "limitations": "Human identity, participant consent, professional qualifications, conflicts of interest, statistical study validity and the correctness of mathematical arguments cannot be authenticated by this program."
+  },
+  "policy": {
+    "human_consent_verified": false,
+    "rater_independence_verified": false,
+    "adjudicator_independence_verified": false,
+    "study_validated": false,
+    "mathematical_review_completed": false,
+    "clay_solution": "NOT_CERTIFIED",
+    "auto_certification": false
+  }
+}
