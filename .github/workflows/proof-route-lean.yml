@@ -4,10 +4,16 @@ on:
   push:
     paths:
       - 'formal/**'
+      - 'mathos/research/lemma_verification.py'
+      - 'docs/research/LEMMA_CANDIDATES.v1.json'
+      - 'tests/test_lemma_verification.py'
       - '.github/workflows/proof-route-lean.yml'
   pull_request:
     paths:
       - 'formal/**'
+      - 'mathos/research/lemma_verification.py'
+      - 'docs/research/LEMMA_CANDIDATES.v1.json'
+      - 'tests/test_lemma_verification.py'
       - '.github/workflows/proof-route-lean.yml'
   workflow_dispatch:
 
@@ -34,3 +40,14 @@ jobs:
           LEAN_PATH="$PWD/formal" lean -o formal/FiniteCompletionPruning.olean formal/FiniteCompletionPruning.lean
           LEAN_PATH="$PWD/formal" lean -o formal/FiniteCandidateGeneration.olean formal/FiniteCandidateGeneration.lean
           LEAN_PATH="$PWD/formal" lean formal/FiniteRouteDAG.lean
+      - name: Check generated exact counterexample witness using pinned Lean
+        run: |
+          python -m mathos.research.lemma_verification --verify-lean --output-dir artifacts/lemmas
+          python -m json.tool artifacts/lemmas/lemma_verification_report.json > /dev/null
+      - name: Upload kernel-check provenance and generated Lean handoffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lemma-lean-4-14-witness-evidence
+          path: artifacts/lemmas/
+          if-no-files-found: ignore
