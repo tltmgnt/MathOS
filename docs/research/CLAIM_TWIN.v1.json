@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Exact finite-claim certificate digital twin, not Millennium theorem certification",
+  "policy": {
+    "official_certification": "NOT_CERTIFIED",
+    "canonical_tracks": "BLOCKED",
+    "scope": "FINITE_EXACT_MODEL_ONLY",
+    "accepted_certificate_status": "CERTIFIED_BOUNDED",
+    "automatic_global_promotion": false,
+    "formal_kernel_proof": false,
+    "independent_expert_review": false,
+    "cryptographic_signature": false
+  },
+  "claims": [
+    {
+      "model_key": "Riemann",
+      "claim_id": "BOUND.RH.H16",
+      "kind": "harmonic_fraction",
+      "statement": "Exact rational evaluation of the finite harmonic sum H_16 = sum(k=1..16, 1/k).",
+      "parameters": {
+        "n": 16
+      },
+      "limitations": "This finite rational calculation says nothing about every nontrivial zeta zero or the Li-criterion for all indices.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "P-versus-NP",
+      "claim_id": "BOUND.PNP.K4",
+      "kind": "k4_resolution",
+      "statement": "The fixed odd-charge K4 Tseitin 3-CNF has no satisfying Boolean assignment.",
+      "parameters": {
+        "graph": "K4",
+        "odd_vertex": 0
+      },
+      "limitations": "One finite resolution refutation cannot establish P=NP or P!=NP.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "Navier-Stokes",
+      "claim_id": "BOUND.NS.EXPONENT",
+      "kind": "abc_exponent_samples",
+      "statement": "For nu=1, K=3 and q in {1,1/2,1/4,1/8}, the finite rational values 2K(1-q)/nu equal the supplied samples.",
+      "parameters": {
+        "nu": "1",
+        "K": "3",
+        "q": [
+          "1",
+          "1/2",
+          "1/4",
+          "1/8"
+        ]
+      },
+      "limitations": "These sample equalities do not prove the conditional PDE energy inequality or general global regularity.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "Yang-Mills",
+      "claim_id": "BOUND.YM.MATRIX",
+      "kind": "transfer_ratios",
+      "statement": "For n=1..8, the positive rational transfer matrices [[1,q],[q,1]] with q=2^-n have the reported exact subleading-to-leading eigenvalue ratios.",
+      "parameters": {
+        "n_first": 1,
+        "n_last": 8
+      },
+      "limitations": "This finite two-state model is not a four-dimensional quantum Yang-Mills theory or a physical mass-gap theorem.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "Hodge",
+      "claim_id": "BOUND.HODGE.RING",
+      "kind": "truncated_polynomial",
+      "statement": "Within the explicitly presented rational quotient algebra Q[h]/(h^5), h^5=0 and the h^4 coefficients of h^k h^(4-k) are 1 for k=0..4.",
+      "parameters": {
+        "dimension": 4,
+        "relation": "h^5=0"
+      },
+      "limitations": "Algebra inside this prescribed quotient does not prove it models arbitrary rational Hodge classes.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "Birch-Swinnerton-Dyer",
+      "claim_id": "BOUND.BSD.COUNTS",
+      "kind": "elliptic_counts",
+      "statement": "For the fixed elliptic curve y^2=x^3-x, the reported point counts over eight specified prime fields include one point at infinity.",
+      "parameters": {
+        "curve": "y^2=x^3-x",
+        "primes": [
+          5,
+          7,
+          11,
+          13,
+          17,
+          19,
+          23,
+          29
+        ]
+      },
+      "limitations": "Finite-field local point counts do not imply analytic rank, algebraic rank or finiteness of Sha.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    },
+    {
+      "model_key": "Poincare",
+      "claim_id": "BOUND.POINCARE.BOUNDARY",
+      "kind": "simplex_gf2",
+      "statement": "The simplicial mod-2 chain complex of the boundary of the four-simplex on five vertices has boundary ranks (4,6,4) and Betti numbers (1,0,0,1).",
+      "parameters": {
+        "vertices": 5,
+        "coefficients": "F2"
+      },
+      "limitations": "Finite homology of a known complex is not an independent reconstruction of Perelman's solved theorem.",
+      "scope": "FINITE_EXACT_MODEL_ONLY",
+      "complete_millennium_problem": false
+    }
+  ]
+}
