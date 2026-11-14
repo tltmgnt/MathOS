@@ -311,8 +311,7 @@ def verify_lemmas(
             raise ValueError("agent report is not an unverified research handoff")
         hashes = agent.get("source_sha256", {})
         if not isinstance(hashes, dict) or any(
-            hashes.get(key) != hashlib.sha256(original[key].strip() +
-                                             (b"\n" if not original[key].endswith(b"\n") else b"")).hexdigest()
+            hashes.get(key) != hashlib.sha256(original[key]).hexdigest()
             for key in ("routes", "clay_targets", "obligations", "hypotheses", "external")
         ):
             raise ValueError("agent evidence does not match registered source bytes")
@@ -331,6 +330,7 @@ def verify_lemmas(
             agent_packets[key] = packet
 
     ids: set[str] = set()
+    lean_filenames: set[str] = set()
     outputs = []
     payloads: list[tuple[str, str]] = []
     for candidate in candidates:
@@ -386,6 +386,9 @@ def verify_lemmas(
         else:
             status = "FINITE_SEARCH_INCONCLUSIVE"
         filename = cid.replace(".", "_").replace("-", "_") + ".lean"
+        if filename in lean_filenames:
+            raise ValueError("duplicate generated Lean filename")
+        lean_filenames.add(filename)
         generated = _lean_handoff(candidate, witness)
         payloads.append((filename, generated))
         packet_key = (candidate["model_key"], candidate["route_id"],
