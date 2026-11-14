@@ -5,6 +5,10 @@ on:
     paths:
       - 'mathos/research/**'
       - 'tests/test_agentic_clay.py'
+      - 'tests/test_bridge_agent_focus.py'
+      - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
+      - 'docs/research/CLAY_EXTERNAL_CLAIMS.v1.json'
+      - 'docs/research/CLAY_PROOF_TOPOLOGY.md'
       - 'docs/research/AGENTIC_RESEARCH_PROCESS.md'
       - 'docs/research/CLAY_FULL_TARGETS.v1.json'
       - 'docs/proof-analysis/OBLIGATIONS.v1.json'
@@ -31,6 +35,14 @@ on:
           - Hodge
           - Birch-Swinnerton-Dyer
           - Poincare
+      route_id:
+        description: 'Optional exact route ID for one track (e.g. NS.C)'
+        type: string
+        required: false
+      claim_id:
+        description: 'Optional open claim ID in the selected route (requires route_id)'
+        type: string
+        required: false
       rounds:
         description: 'Maximum adversarial revision rounds per track'
         type: choice
@@ -49,18 +61,25 @@ jobs:
     env:
       TRACK: ${{ inputs.track || 'all' }}
       ROUNDS: ${{ inputs.rounds || '1' }}
+      ROUTE_ID: ${{ inputs.route_id || '' }}
+      CLAIM_ID: ${{ inputs.claim_id || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Test agent handoffs, fail-closed gates, and mock provider
-        run: python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+        run: |
+          python -m unittest discover -s tests -p 'test_agentic_clay.py' -v
+          python -m unittest discover -s tests -p 'test_bridge_agent_focus.py' -v
       - name: Run deterministic offline process (not AI research)
         run: |
+          args=()
+          if [[ -n "$ROUTE_ID" ]]; then args+=(--route-id "$ROUTE_ID"); fi
+          if [[ -n "$CLAIM_ID" ]]; then args+=(--claim-id "$CLAIM_ID"); fi
           python -m mathos.research.agentic_clay \
             --provider offline --track "$TRACK" --rounds "$ROUNDS" \
-            --max-model-calls 56 --output-dir artifacts/agents
+            --max-model-calls 56 "${args[@]}" --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
       - name: Upload research-process smoke-test artifacts
         uses: actions/upload-artifact@v4
@@ -76,6 +95,8 @@ jobs:
     env:
       TRACK: ${{ inputs.track }}
       ROUNDS: ${{ inputs.rounds }}
+      ROUTE_ID: ${{ inputs.route_id || '' }}
+      CLAIM_ID: ${{ inputs.claim_id || '' }}
       OPENAI_MODEL: ${{ vars.MATHOS_OPENAI_MODEL }}
       OPENAI_API_KEY: ${{ secrets.MATHOS_OPENAI_API_KEY }}
     steps:
@@ -89,9 +110,12 @@ jobs:
           test -n "$OPENAI_API_KEY" || { echo 'MATHOS_OPENAI_API_KEY secret is required'; exit 1; }
       - name: Execute model-driven bounded research (never certify)
         run: |
+          args=()
+          if [[ -n "$ROUTE_ID" ]]; then args+=(--route-id "$ROUTE_ID"); fi
+          if [[ -n "$CLAIM_ID" ]]; then args+=(--claim-id "$CLAIM_ID"); fi
           python -m mathos.research.agentic_clay \
             --provider openai --track "$TRACK" --rounds "$ROUNDS" \
-            --max-model-calls 56 --output-dir artifacts/agents
+            --max-model-calls 56 "${args[@]}" --output-dir artifacts/agents
           python -m json.tool artifacts/agents/agentic_research_report.json > /dev/null
       - name: Upload unverified AI research candidates for human review
         if: always()
