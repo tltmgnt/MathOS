@@ -10,7 +10,7 @@
     "journal_submission": "NOT_SUBMITTED",
     "clay_solution": "NOT_CERTIFIED"
   },
-  "review_request_url": null,
+  "review_request_url": "https://github.com/tltmgnt/MathOS/issues/30",
   "reviews": [],
   "note": "A GitHub issue invitation and internal review protocol do not count as external assessment. External replies must be reviewed by a human and retain source/identity provenance."
 }
