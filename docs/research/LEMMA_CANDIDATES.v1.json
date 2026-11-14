@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0.0",
+  "policy": {
+    "certification": "NOT_CERTIFIED",
+    "clay_solution": "NOT_ESTABLISHED",
+    "mathematical_scope": "TOY_INTEGER_POLYNOMIALS_ONLY",
+    "proof_route_sufficiency": "NOT_VALIDATED",
+    "automatic_claim_promotion": false,
+    "independent_review": "NOT_PERFORMED"
+  },
+  "candidates": [
+    {
+      "model_key": "P-versus-NP",
+      "route_id": "PNP.equality",
+      "claim_id": "PNP.sat_runtime",
+      "scope_note": "This elementary polynomial calculation illustrates only bounded algebraic expression manipulation, not the correctness or complexity of a general SAT algorithm. It cannot establish P equals NP or lower bounds.",
+      "candidate_id": "ALG.PNP.distributivity",
+      "statement": "For all integers a,b,c,d, distributivity expands a two-term product into four terms.",
+      "variables": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "left": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "b"
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "name": "c"
+              },
+              {
+                "op": "var",
+                "name": "d"
+              }
+            ]
+          }
+        ]
+      },
+      "right": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "c"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "a"
+              },
+              {
+                "op": "var",
+                "name": "d"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "b"
+              },
+              {
+                "op": "var",
+                "name": "c"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "name": "b"
+              },
+              {
+                "op": "var",
+                "name": "d"
+              }
+            ]
+          }
+        ]
+      },
+      "search": {
+        "min": -2,
+        "max": 2
+      }
+    },
+    {
+      "model_key": "P-versus-NP",
+      "route_id": "PNP.equality",
+      "claim_id": "PNP.sat_runtime",
+      "scope_note": "This elementary polynomial calculation illustrates only bounded algebraic expression manipulation, not the correctness or complexity of a general SAT algorithm. It cannot establish P equals NP or lower bounds.",
+      "candidate_id": "ALG.PNP.false_square",
+      "statement": "Test the incorrect universal equality (x+y)^2 = x^2+y^2 over all integers.",
+      "variables": [
+        "x",
+        "y"
+      ],
+      "left": {
+        "op": "pow",
+        "base": {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "name": "x"
+            },
+            {
+              "op": "var",
+              "name": "y"
+            }
+          ]
+        },
+        "exponent": 2
+      },
+      "right": {
+        "op": "add",
+        "args": [
+          {
+            "op": "pow",
+            "base": {
+              "op": "var",
+              "name": "x"
+            },
+            "exponent": 2
+          },
+          {
+            "op": "pow",
+            "base": {
+              "op": "var",
+              "name": "y"
+            },
+            "exponent": 2
+          }
+        ]
+      },
+      "search": {
+        "min": 0,
+        "max": 2
+      }
+    }
+  ]
+}
