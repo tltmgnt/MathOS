@@ -153,5 +153,5 @@ theorem satSupport_certificate (m : Nat) :
 
 end MathOS
 
--- Explicit trusted-axiom dependency audit for external replay.
+-- Explicit theorem dependency audit for external replay.
 #print axioms MathOS.satSupport_certificate
