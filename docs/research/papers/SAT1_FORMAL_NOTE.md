@@ -101,3 +101,5 @@ Independent review should (i) replay the pinned Lean proof, (ii) compare the sta
 ---
 
 **Repository metadata:** `SAT1`; `P-versus-NP`; `PNP.equality`; `PNP.sat_runtime` (OPEN). Manuscript classification: **unsubmitted technical note / research review draft**. `NOT_CERTIFIED`, `NOT_INDEPENDENTLY_ASSESSED`, `NOT_PERFORMED`, `NOT_PROVEN`.
+
+**Final scope declaration:** This manuscript is not a complete solution to any Millennium Prize Problem. It has not been submitted to any academic journal, reviewer or the Clay Mathematics Institute. It establishes no unrestricted SAT complexity bound and makes no claim of a completed independent novelty review.
