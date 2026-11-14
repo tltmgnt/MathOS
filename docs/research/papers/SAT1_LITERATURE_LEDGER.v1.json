@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "manuscript": "docs/research/papers/SAT1_FORMAL_NOTE.md",
+  "as_of": "2026-11-13",
+  "policy": {
+    "reference_discovery": "INITIAL_TARGETED_DISCOVERY_ONLY",
+    "systematic_prior_art_search": "NOT_COMPLETED",
+    "full_text_expert_review": "NOT_PERFORMED",
+    "novelty_determination": "NOT_INDEPENDENTLY_ASSESSED",
+    "external_review": "NOT_PERFORMED",
+    "submission": "NOT_SUBMITTED",
+    "clay_solution": "NOT_ESTABLISHED",
+    "auto_promotion": false
+  },
+  "search_log": [
+    {
+      "id": "SEARCH01",
+      "query": "Cook 1971 complexity theorem proving procedures original publication DOI",
+      "method": "targeted_public_index_lookup",
+      "scope": "historical SAT complexity foundations",
+      "completeness": "NOT_SYSTEMATIC"
+    },
+    {
+      "id": "SEARCH02",
+      "query": "Clegg Edmonds Impagliazzo 1996 Groebner unsatisfiability",
+      "method": "targeted_public_index_lookup",
+      "scope": "algebraic proof systems",
+      "completeness": "NOT_SYSTEMATIC"
+    },
+    {
+      "id": "SEARCH03",
+      "query": "Grochow Pitassi 2014 circuit complexity proof complexity PIT",
+      "method": "targeted_public_index_lookup",
+      "scope": "separation between representation and computational complexity",
+      "completeness": "NOT_SYSTEMATIC"
+    },
+    {
+      "id": "SEARCH04",
+      "query": "Clay Mathematics Institute Millennium Prize rules 2018",
+      "method": "official_site_lookup",
+      "scope": "publication and prize eligibility rules; not novelty screening",
+      "completeness": "NOT_SYSTEMATIC"
+    }
+  ],
+  "references": [
+    {
+      "id": "R1",
+      "citation": "Stephen A. Cook (1971), The Complexity of Theorem-Proving Procedures, STOC 1971, pp. 151–158",
+      "url": "https://doi.org/10.1145/800157.805047",
+      "relevance": "Background on propositional complexity; not a source for a claimed SAT1 novelty result.",
+      "metadata_checked": true,
+      "independent_full_text_analysis": false,
+      "proves_specific_sat1_fact": false
+    },
+    {
+      "id": "R2",
+      "citation": "Matthew Clegg, Jeffery Edmonds, Russell Impagliazzo (1996), Using the Groebner Basis Algorithm to Find Proofs of Unsatisfiability, STOC 1996, pp. 174–183",
+      "url": "https://doi.org/10.1145/237814.237860",
+      "relevance": "Background on algebraic propositional proof systems and the importance of the representation/model.",
+      "metadata_checked": true,
+      "independent_full_text_analysis": false,
+      "proves_specific_sat1_fact": false
+    },
+    {
+      "id": "R3",
+      "citation": "Joshua A. Grochow, Toniann Pitassi (2014), Circuit Complexity, Proof Complexity and Polynomial Identity Testing, ECCC TR14-052",
+      "url": "https://eccc.weizmann.ac.il/report/2014/052/",
+      "relevance": "Related discussion of algebraic circuit and proof complexity; not evidence that an elementary monomial-count gives a SAT complexity lower bound.",
+      "metadata_checked": true,
+      "independent_full_text_analysis": false,
+      "proves_specific_sat1_fact": false
+    },
+    {
+      "id": "R4",
+      "citation": "Clay Mathematics Institute, Rules for the Millennium Prize Problems (revised 2018)",
+      "url": "https://www.claymath.org/millennium-problems/rules/",
+      "relevance": "Eligibility/process information only; no mathematical validity endorsement.",
+      "metadata_checked": true,
+      "independent_full_text_analysis": false,
+      "proves_specific_sat1_fact": false
+    }
+  ],
+  "open_review_tasks": [
+    {
+      "task_id": "LIT01",
+      "question": "Is the exact three-choice word enumeration already stated in standard algebra/combinatorics sources?",
+      "status": "OPEN_REQUIRES_HUMAN"
+    },
+    {
+      "task_id": "LIT02",
+      "question": "What is the closest formalized existing polynomial-ring support theorem and what libraries contain it?",
+      "status": "OPEN_REQUIRES_HUMAN"
+    },
+    {
+      "task_id": "LIT03",
+      "question": "Which algebraic proof complexity lower bounds concern expanded monomial representations versus general circuits and machine runtimes?",
+      "status": "OPEN_REQUIRES_HUMAN"
+    },
+    {
+      "task_id": "LIT04",
+      "question": "Is the manuscript useful as a formalization/exposition note for its intended venue?",
+      "status": "OPEN_REQUIRES_HUMAN"
+    }
+  ]
+}
