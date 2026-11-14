@@ -240,3 +240,18 @@ With pinned Lean 4.14.0 installed, add `--verify-lean` to replay the
 exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
+
+## Independent mathematical review invitation (SAT1)
+
+[Open reviewer call #30](https://github.com/tltmgnt/MathOS/issues/30)
+invites external mathematicians to examine the scoped SAT1 Lean choice-word
+theorem, its literature context, and its weak connection to SAT complexity.
+See the [external-review protocol](docs/research/papers/SAT1_INDEPENDENT_REVIEW_PROTOCOL.md)
+and [author-side desk critique](docs/research/papers/SAT1_DESK_CRITIQUE.md).
+
+The [independent-review register](docs/research/papers/SAT1_INDEPENDENT_REVIEW_REGISTER.v1.json)
+begins with **zero expert reviews**; opening a public request does **not** mean
+an independent evaluation has occurred. `lean_axiom_audit` checks transitive
+Lean assumptions under the pinned toolchain. The external review intake
+tool records submitted reports but **never** authenticates independence or
+promotes any Millennium proof status automatically.
