@@ -80,9 +80,9 @@ theorem satTerms_nodup (m : Nat) : (satTerms m).Nodup := by
     change (((satTerms m).map (SATFactorChoice.x :: ·)) ++
        ((satTerms m).map (SATFactorChoice.y :: ·)) ++
        ((satTerms m).map (SATFactorChoice.xy :: ·))).Nodup
-    apply List.nodup_append.mpr
+    apply (List.nodup_append).mpr
     constructor
-    · apply List.nodup_append.mpr
+    · apply (List.nodup_append).mpr
       refine ⟨sat_map_nodup _ _ ih, sat_map_nodup _ _ ih, ?_⟩
       intro a ha b hb heq
       subst b
