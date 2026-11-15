@@ -255,3 +255,14 @@ an independent evaluation has occurred. `lean_axiom_audit` checks transitive
 Lean assumptions under the pinned toolchain. The external review intake
 tool records submitted reports but **never** authenticates independence or
 promotes any Millennium proof status automatically.
+
+<!-- pea-assurance:start -->
+## Psychometric Epistemic Assurance (experimental)
+
+[PEA measurement tools](pea_assurance/README.md) · [Research specification](docs/researchos/PEA_RESEARCH.md)
+
+Proposed Psychometrician × ResearchOS × TECT integration: offline calibration,
+agreement and scoped advisory decisions. Includes synthetic tests and a proposed
+blinded pilot; independent empirical validation and live controller integration
+remain outstanding.
+<!-- pea-assurance:end -->
