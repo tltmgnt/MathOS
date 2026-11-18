@@ -74,13 +74,17 @@ theorem ymIndependentWeightClosed (t n : Nat) :
     ymIndependentWeight t n = (t + 1) ^ n := by
   induction n with
   | zero => rfl
-  | succ n ih => simp [ymIndependentWeight, ih, pow_succ]
+  | succ n ih =>
+    simp only [ymIndependentWeight, ih]
+    rfl
 
 theorem ymIndependentSignedWeightClosed (t n : Nat) :
     ymIndependentSignedWeight t n = (t - 1) ^ n := by
   induction n with
   | zero => rfl
-  | succ n ih => simp [ymIndependentSignedWeight, ih, pow_succ]
+  | succ n ih =>
+    simp only [ymIndependentSignedWeight, ih]
+    rfl
 
 /-- For t=k^2+1 (k>=1), the normalized Wilson ratio is
 k^2 / (k^2+2), with a strictly positive denominator difference.
