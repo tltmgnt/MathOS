@@ -1,0 +1,498 @@
+{
+  "schema_version": 1,
+  "protocol": "MathOS-Arithmetic-Followup-v1",
+  "claim_scope": "22 previously documented experiments plus 28 additional executed, non-independent arithmetic evaluation conditions; no evidence of general mathematical reasoning",
+  "original_experiment_count": 22,
+  "additional_experiment_range": [
+    23,
+    50
+  ],
+  "additional_condition_count": 28,
+  "execution_status": "28_OF_28_RUN_FOR_BOTH_MODELS",
+  "independent_external_replication": false,
+  "empirical_generalization_established": false,
+  "github_pr": "https://github.com/tltmgnt/MathOS/pull/42",
+  "github_workflow_run": "https://github.com/tltmgnt/MathOS/actions/runs/44332836125",
+  "model_execution_source_commit": "17887db55c4fd1ec4a6a3512fb19370df291ea6d",
+  "model_execution_source_sha256": "221c945ceb3ec6036ace377ee5d7be9d26b886aead0ea3a528599ff20d737b0c",
+  "protocol_seed": 406,
+  "cases_per_experiment_per_model": 12,
+  "paired_experiment_ids": [
+    38,
+    39,
+    40,
+    41,
+    42,
+    43
+  ],
+  "decoding": {
+    "do_sample": false,
+    "max_new_tokens": 8
+  },
+  "parser": "Anchored strict-leading integer; decimals/percentages/comma-separated values rejected",
+  "experiment_ids": [
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50
+  ],
+  "experiment_results": {
+    "distilgpt2": {
+      "model_revision": "2290a62682d06624634c1f46a6ad5be0f47f38aa",
+      "model_evaluated_experiments": 28,
+      "primary_cases": 336,
+      "raw_generations": 408,
+      "primary_correct": 7,
+      "primary_parsed": 32,
+      "pair_cases": 72,
+      "paired_secondary_parsed": 12,
+      "both_paired_outputs_parsed": 0,
+      "paired_consistency_rate": null,
+      "fixed_zero_baseline_correct": 12,
+      "fixed_nine_baseline_correct": 0,
+      "by_experiment": [
+        {
+          "id": 23,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 24,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 25,
+          "correct": 0,
+          "parsed": 3,
+          "count": 12
+        },
+        {
+          "id": 26,
+          "correct": 0,
+          "parsed": 5,
+          "count": 12
+        },
+        {
+          "id": 27,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 28,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 29,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 30,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 31,
+          "correct": 0,
+          "parsed": 1,
+          "count": 12
+        },
+        {
+          "id": 32,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 33,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 34,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 35,
+          "correct": 7,
+          "parsed": 7,
+          "count": 12
+        },
+        {
+          "id": 36,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 37,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 38,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 39,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 40,
+          "correct": 0,
+          "parsed": 2,
+          "count": 12
+        },
+        {
+          "id": 41,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 42,
+          "correct": 0,
+          "parsed": 2,
+          "count": 12
+        },
+        {
+          "id": 43,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 44,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 45,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 46,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 47,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 48,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 49,
+          "correct": 0,
+          "parsed": 12,
+          "count": 12
+        },
+        {
+          "id": 50,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        }
+      ]
+    },
+    "sshleifer/tiny-gpt2": {
+      "model_revision": "5f91d94bd9cd7190a9f3216ff93cd1dd95f2c7be",
+      "model_evaluated_experiments": 28,
+      "primary_cases": 336,
+      "raw_generations": 408,
+      "primary_correct": 0,
+      "primary_parsed": 0,
+      "pair_cases": 72,
+      "paired_secondary_parsed": 0,
+      "both_paired_outputs_parsed": 0,
+      "paired_consistency_rate": null,
+      "fixed_zero_baseline_correct": 12,
+      "fixed_nine_baseline_correct": 0,
+      "by_experiment": [
+        {
+          "id": 23,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 24,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 25,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 26,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 27,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 28,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 29,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 30,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 31,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 32,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 33,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 34,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 35,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 36,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 37,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 38,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 39,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 40,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 41,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 42,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 43,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 44,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 45,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 46,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 47,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 48,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 49,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        },
+        {
+          "id": 50,
+          "correct": 0,
+          "parsed": 0,
+          "count": 12
+        }
+      ]
+    }
+  },
+  "artifact_retention_days": 30,
+  "github_artifacts": [
+    {
+      "model": "distilgpt2",
+      "ids": "023-029",
+      "id": 14439238311,
+      "zip_sha256": "cf105a8d3e668ee122485a4c223e8752e498c2a34224ac728dc228d4312e75df"
+    },
+    {
+      "model": "distilgpt2",
+      "ids": "030-036",
+      "id": 14440306611,
+      "zip_sha256": "cdd2e4f7064b918f2d4855ad39a3c2f7d909a0b3b8ac24a801f73be14d7a79be"
+    },
+    {
+      "model": "distilgpt2",
+      "ids": "037-043",
+      "id": 14440860544,
+      "zip_sha256": "c19e4f3f15b39e555a88baeca4c6121754ca27b9462af4cb0efecb9178652fe6"
+    },
+    {
+      "model": "distilgpt2",
+      "ids": "044-050",
+      "id": 14438943896,
+      "zip_sha256": "3e0db08d17ef2f65376fe7fb595b2a5a14dc54426ede8f4cc27e2b93c66728a5"
+    },
+    {
+      "model": "sshleifer/tiny-gpt2",
+      "ids": "023-029",
+      "id": 14440650950,
+      "zip_sha256": "4e95e2a7efbef580b6c2092a7d8bdfa9e82b176a668ec4f806f3d3663fb71119"
+    },
+    {
+      "model": "sshleifer/tiny-gpt2",
+      "ids": "030-036",
+      "id": 14439024371,
+      "zip_sha256": "0f7f96338a87d2ec97e1984afee4cf530c245d00a6f4f2724550684bf888c598"
+    },
+    {
+      "model": "sshleifer/tiny-gpt2",
+      "ids": "037-043",
+      "id": 14441025115,
+      "zip_sha256": "e7d9a847ee5cf3217d04194440b1204678235e508f63b1c9abc335b9031b4a74"
+    },
+    {
+      "model": "sshleifer/tiny-gpt2",
+      "ids": "044-050",
+      "id": 14438699446,
+      "zip_sha256": "04c783f8442cd968f20b0c131c026eb69c1fe91e69cf6527bc16721010433706"
+    }
+  ],
+  "verification_notes": [
+    "Compared 56 JSON model reports against exact ID coverage, case counts, status, source digest and immutable model SHA.",
+    "Recomputed accuracy, parse rates, fixed zero/nine baseline counts and pair relationships from each raw record.",
+    "Verified identical prompts and expected answers for both models per experiment.",
+    "A Python/artifact consistency audit is not an independent scientific replication or a peer review."
+  ],
+  "limitations": [
+    "Only 12 cases per condition; conditions are correlated and grouped by shared protocol",
+    "Models are pretrained non-instruction-tuned GPT-2 variants, not general representative models",
+    "Greedy decoding and strict integer parsing exclude many possible answers",
+    "No proof that examples are held out from pretraining",
+    "Artifact retention limited to 30 days unless externally archived",
+    "No independent evaluation, preregistration registry outside repository, or causal conclusion"
+  ]
+}
