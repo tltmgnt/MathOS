@@ -37,7 +37,7 @@ theorem bsdCharacter_pair_cancel
 /-- Cleared-denominator form of y^2=x^3-d^2x for
 x=a/b^2 and y=c/b^3. The denominator must be NONZERO when this is
 interpreted as a rational point; it is b=2 in the concrete witness. -/
-def bsdClearedPointIdentity (d a b c : Int) : Prop :=
+def bsdClearedPointIdentity (d a b c : Nat) : Prop :=
   c * c = a * a * a - d * d * a * (b * b * b * b)
 
 theorem bsdE5_point_numerators :
