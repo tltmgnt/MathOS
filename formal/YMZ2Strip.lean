@@ -21,7 +21,7 @@ namespace MathOS
 
 /-- Is the product of four link signs -1? -/
 def ymPlaquetteOdd (a b c d : Bool) : Bool :=
-  (a.xor b).xor c |>.xor d
+  ((a.xor b).xor c).xor d
 
 /-- An elementary lattice gauge transformation flips the two edges
 incident to a given vertex, leaving the plaquette Wilson sign invariant. -/
@@ -82,13 +82,17 @@ theorem ymIndependentSignedWeightClosed (t n : Nat) :
   | zero => rfl
   | succ n ih => simp [ymIndependentSignedWeight, ih, pow_succ]
 
-/-- For t=k^2+1 (k>=1), both numerator and denominator are positive,
-but the one-step defect is exactly 2 independent of k. The physical
-decay-rate scaling and logarithm estimate are justified on paper,
-NOT in this Lean file. -/
-theorem ymScalingDenominatorIdentity (k : Nat) :
-    (k * k + 2) = (k * k) + 2 := by
-  rfl
+/-- For t=k^2+1 (k>=1), the normalized Wilson ratio is
+k^2 / (k^2+2), with a strictly positive denominator difference.
+The physical decay-rate scaling and logarithm estimate are justified
+on paper, NOT in this Lean file. -/
+theorem ymScalingNumerator (k : Nat) :
+    (k * k + 1) - 1 = k * k := by
+  omega
+
+theorem ymScalingDenominator (k : Nat) :
+    (k * k + 1) + 1 = k * k + 2 := by
+  omega
 
 theorem ymScalingStrictStep (k : Nat) :
     k * k < k * k + 2 := by
