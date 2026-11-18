@@ -28,6 +28,21 @@ MathOS combines implemented research components with a broader proposed mathemat
 
 See [machine-readable implementation status](docs/portfolio/STATUS.json), [integration boundaries](docs/portfolio/INTEGRATION.md), and [proof review evaluation limits](docs/PROOF_REVIEW_EVALUATION.md). Software checks, empirical benefit, and deployment acceptance are separate milestones.
 
+## Quick start (bounded offline example)
+
+From a checkout of this repository, use Python 3.11 to run the deterministic linear-equation CLI:
+
+```sh
+python -m mathos.cli "2x + 5 = 13"
+python -m unittest discover -s tests -p 'test_mathos_cli.py' -v
+```
+
+The CLI is limited to supported linear equations; it does not prove arbitrary theorems. The optional model-backed paths require separate dependencies and configuration, and their generated responses are **unverified** unless independently checked. This repository does not currently advertise a built PyPI distribution.
+
+## Publication and citation status
+
+For the [publication-readiness checklist](docs/PUBLICATION_READINESS.md), use a specific source commit and select **either** a scoped software release **or** an academic-review/submission track. A draft `v0.1.0` GitHub Release exists but has **not** been published. It describes an earlier set of 22 arithmetic experiments and must not be represented as a release of all current `main` features without reconciling the version and scope. Author-approved citation metadata, independent replication and manuscript acceptance are not established by this repository.
+
 ## How a lab can evaluate MathOS
 
 Start with one bounded task: for example, reviewing the dependencies of an AI-assisted mathematical argument. Use the existing workflow as an experimental aid, with an accountable researcher reviewing conclusions.
@@ -146,16 +161,22 @@ See [`coordination-bottleneck.md`](coordination-bottleneck.md).
 
 ```text
 MathOS/
+├── LICENSE                    # Apache-2.0 text
 ├── README.md
 ├── CONTRIBUTING.md
-├── LICENSE-PLACEHOLDER.md
 ├── docs/
-│   ├── architecture.md
-│   └── reasoning-standard.md
-├── curriculum/
-│   └── TOPO-406-proof-explanation-transfer.md
-├── coordination-bottleneck.md
-└── result-contract.json
+│   ├── PUBLICATION_READINESS.md
+│   ├── research/               # experiments, report and SAT1 review materials
+│   ├── portfolio/              # scoped implementation/integration status
+│   └── releases/               # release candidate notes
+├── mathos/                     # core, CLI, proof review and research tools
+├── mathosx/                    # bounded finite proof/discovery proposals
+├── formal/                     # Lean proof artifacts
+├── experiments/                # arithmetic and activation experiments
+├── curriculum/                 # TOPO-406 exercises and evidence
+├── validation/                 # offline study manifest template
+├── verification/               # provenance/integrity scripts
+└── tests/                      # unit and integration checks
 ```
 
 ## Status
@@ -179,6 +200,10 @@ These are development and evaluation goals, not evidence of completed validation
 - [ ] Add agent-specific interfaces and orchestration
 - [ ] Add audit logs, permissions, and human approval gates
 - [ ] Document security, privacy, and model/data provenance
+
+## Licensing
+
+The repository contains the [Apache License 2.0](LICENSE). Before republishing datasets, model artifacts or third-party materials, verify their separate terms and attribution obligations. See the [publication checklist](docs/PUBLICATION_READINESS.md).
 
 ## Contributing
 
