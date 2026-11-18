@@ -42,6 +42,7 @@ def bsdClearedPointIdentity (d a b c : Nat) : Prop :=
 
 theorem bsdE5_point_numerators :
     bsdClearedPointIdentity 5 25 2 75 := by
+  unfold bsdClearedPointIdentity
   decide
 
 theorem bsdE5_denominator_nonzero : (2 : Int) ≠ 0 := by
