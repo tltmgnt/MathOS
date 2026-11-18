@@ -256,6 +256,10 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 007: BSD inert-prime local-factor blind spot
+
+[Research attempt 007](docs/research/MILLENNIUM_ATTACK_007.md) turns to the **Birch and Swinnerton-Dyer conjecture**. Two classical elliptic curves, `E1: y²=x³−x` and `E5: y²=x³−25x`, have distinct rational ranks (0 and 1, **established externally**) but identical good local point counts `#E(F_p)=p+1` for **every prime p≡3 (mod 4)**. The elementary proof pairs values of the odd cubic using the quadratic character; there are infinitely many such primes. A [pinned Lean theorem](formal/BSDInertPrimeBlindspot.lean) checks only the **conditional** odd-character cancellation and an exact E5 rational point, while [the finite-field checker](mathos/research/bsd_inert_007.py) independently enumerates finitely many good reductions. **This does not construct the elliptic L-functions, prove global ranks, establish the BSD conjecture, or claim mathematical novelty.**
+
 ## Millennium research attempt 005: Riemann Li-positive-prefix obstruction
 
 [Research attempt 005](docs/research/MILLENNIUM_ATTACK_005.md) turns to the **Riemann Hypothesis**. For any finite prefix length, an exact mathematical construction gives a **synthetic**, conjugation/reflection-symmetric multiset of six candidate zero locations, with four off the critical line, whose first N **Li-style** expressions are all positive. The accompanying [Lean proof](formal/LiPrefixObstruction.lean) checks an all-index Gaussian-integer congruence, and a rational-arithmetic program supplies finite-instance certificates. **These are not genuine Riemann zeta zeros or actual Li coefficients and do not prove or disprove RH.** The work establishes a limit of finite positivity checks under symmetry alone, not an analytic theorem about zeta.
