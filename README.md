@@ -256,6 +256,10 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 005: Riemann Li-positive-prefix obstruction
+
+[Research attempt 005](docs/research/MILLENNIUM_ATTACK_005.md) turns to the **Riemann Hypothesis**. For any finite prefix length, an exact mathematical construction gives a **synthetic**, conjugation/reflection-symmetric multiset of six candidate zero locations, with four off the critical line, whose first N **Li-style** expressions are all positive. The accompanying [Lean proof](formal/LiPrefixObstruction.lean) checks an all-index Gaussian-integer congruence, and a rational-arithmetic program supplies finite-instance certificates. **These are not genuine Riemann zeta zeros or actual Li coefficients and do not prove or disprove RH.** The work establishes a limit of finite positivity checks under symmetry alone, not an analytic theorem about zeta.
+
 ## Millennium research attempt 004: general CNF arithmetization
 
 [Research attempt 004](docs/research/MILLENNIUM_ATTACK_004.md) extends the formally checked Boolean arithmetic interpretation to **every finite signed-CNF formula**, including shared variables, negations, empty clauses, and contradictory instances. A separate theorem counts the arithmetic gates in the factored evaluation circuit linearly in formula size; an independent finite enumeration checks 17,113 formula–assignment evaluations. **Evaluating a given assignment does not efficiently find one.** This is not a proof of `P=NP` or `P≠NP`, nor a new Millennium Prize solution.
