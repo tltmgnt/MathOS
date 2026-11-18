@@ -7,6 +7,9 @@ on:
       - 'mathos/research/bsd_inert_007.py'
       - 'tests/test_bsd_inert_007.py'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - 'mathos/research/hodge_diagonal_006.py'
+      - 'tests/test_hodge_diagonal_006.py'
+      - 'docs/research/MILLENNIUM_ATTACK_006.md'
       - 'mathos/research/riemann_li_prefix_005.py'
       - 'tests/test_riemann_li_prefix_005.py'
       - 'docs/research/MILLENNIUM_ATTACK_005.md'
@@ -35,6 +38,9 @@ on:
       - 'mathos/research/bsd_inert_007.py'
       - 'tests/test_bsd_inert_007.py'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - 'mathos/research/hodge_diagonal_006.py'
+      - 'tests/test_hodge_diagonal_006.py'
+      - 'docs/research/MILLENNIUM_ATTACK_006.md'
       - 'mathos/research/riemann_li_prefix_005.py'
       - 'tests/test_riemann_li_prefix_005.py'
       - 'docs/research/MILLENNIUM_ATTACK_005.md'
@@ -86,6 +92,7 @@ jobs:
           lean formal/DisjointORSemantics.lean
           lean formal/GeneralCNFArithmetization.lean
           lean formal/LiPrefixObstruction.lean
+          lean formal/HodgeDiagonalIntersections.lean
           lean formal/BSDInertPrimeBlindspot.lean
       - name: Check BSD conditional inert-prime character theorem and finite counts
         run: |
@@ -98,6 +105,19 @@ jobs:
         with:
           name: millennium007-bsd-inert-primes-lean-4-14
           path: artifacts/millennium007/
+          if-no-files-found: ignore
+
+      - name: Check genus-one Hodge intersection matrix consequence (not conjecture proof)
+        run: |
+          python -m unittest discover -s tests -p 'test_hodge_diagonal_006.py' -v
+          python -m mathos.research.hodge_diagonal_006 --max-genus 12 --output artifacts/millennium006/intersection_audit.json
+          python -m json.tool artifacts/millennium006/intersection_audit.json > /dev/null
+      - name: Upload bounded Hodge diagonal intersection matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium006-hodge-diagonal-intersection-lean-4-14
+          path: artifacts/millennium006/
           if-no-files-found: ignore
 
       - name: Check bounded synthetic Riemann Li-prefix obstruction (no actual zeta zeros)
