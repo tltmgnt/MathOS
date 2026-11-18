@@ -66,6 +66,17 @@ Success in one category does not guarantee success in the other.
 
 This clip provides context for MathOS’s emphasis on turning a result into understanding: checking correctness, explaining the method, and identifying how it can be used elsewhere.
 
+## MathOS ×: self-improving discovery (guarded preview)
+
+The [MathOS × discovery engine](docs/research/DISCOVERY_ENGINE.md) adds 56 explicit mathematical research questions across seven candidate frontiers, four research directions, and two depths. Offline tests calculate exact finite causal-abstraction defects and parity obstruction certificates. Human-reviewed useful/not_useful evidence updates future question priorities without modifying code or promoting mathematical claims.
+
+```sh
+python -m mathos.research.discovery --limit 8
+python -m unittest discover -s tests -p 'test_discovery.py' -v
+```
+
+This is a bounded, human-in-the-loop learning scheduler—not an autonomous theorem prover, proof of mathematical novelty, or automatic code-updating agent.
+
 ## The MathOS reasoning loop
 
 1. **Observe** — Gather relevant evidence about structure, capacity, dependencies, incentives, and outcomes.
