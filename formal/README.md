@@ -169,3 +169,29 @@ External novelty assessment and independent mathematical review are
 [`THEOREM_ASSURANCE.md`](../docs/research/THEOREM_ASSURANCE.md)
 for the explicit research and trust boundaries. The canonical
 Millennium obligation register remains `NOT_CERTIFIED`.
+
+## Benchmark and replay
+
+The Lean benchmark checks submitted tactic scripts against a fixed set of
+propositions using the pinned Lean toolchain. It records the Lean version,
+generated source digests, per-task verdicts, transitive axioms, and totals.
+A missing submission remains in the denominator. Warning-producing proofs
+and proofs that depend on axioms outside the policy are rejected.
+
+```sh
+python -m mathos.research.lean_benchmark run benchmarks/lean/smoke.json > lean-run.json
+python -m mathos.research.lean_benchmark replay lean-run.json
+```
+
+Each key in `systems` identifies a model/version or baseline, and each value
+maps task IDs to tactic scripts. Keep the task set fixed when comparing
+systems and retain model settings and generation provenance with your study.
+The smoke suite uses handwritten controls. It establishes the runner's
+behavior on three core Lean propositions.
+
+Use trusted inputs. Lean evaluates code during checking. Isolate
+model-generated or third-party Lean code in a disposable environment
+without credentials or network access before evaluation. A replay executes
+the embedded input again and compares the reported Lean build and per-task
+results. Checksums detect changes to the saved bundle. They do not establish
+its author or authenticity.

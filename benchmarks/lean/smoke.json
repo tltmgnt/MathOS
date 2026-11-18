@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "lean_version": "4.14.0",
+  "tasks": {
+    "implication_identity": "∀ P : Prop, P → P",
+    "zero_add": "∀ n : Nat, 0 + n = n",
+    "addition_commutes": "∀ a b : Nat, a + b = b + a"
+  },
+  "systems": {
+    "explicit_proof_baseline": {
+      "implication_identity": "intro P h\nexact h",
+      "zero_add": "exact Nat.zero_add",
+      "addition_commutes": "exact Nat.add_comm"
+    },
+    "reflexivity_baseline": {
+      "implication_identity": "rfl",
+      "zero_add": "rfl",
+      "addition_commutes": "rfl"
+    },
+    "placeholder_control": {
+      "implication_identity": "sorry"
+    }
+  }
+}
