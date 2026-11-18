@@ -1,0 +1,46 @@
+name: MathOS Lean benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/lean/**'
+      - 'mathos/research/lean_benchmark.py'
+      - 'tests/test_lean_benchmark.py'
+      - '.github/workflows/lean-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install repository's pinned Lean release
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check contract and run Lean
+        run: |
+          python -m unittest discover -s tests -p 'test_lean_benchmark.py'
+          python -m mathos.research.lean_benchmark run benchmarks/lean/smoke.json > lean-run.json
+          python - <<'PY'
+          import json
+          with open("lean-run.json") as stream:
+              results = json.load(stream)["results"]
+          expected = {"explicit_proof_baseline": 3, "reflexivity_baseline": 0, "placeholder_control": 0}
+          actual = {key: value["checked"] for key, value in results.items()}
+          if actual != expected:
+              raise SystemExit(f"Expected {expected}, got {actual}")
+          PY
+          python -m mathos.research.lean_benchmark replay lean-run.json > lean-replay.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mathos-lean-benchmark-run
+          path: lean-*.json
