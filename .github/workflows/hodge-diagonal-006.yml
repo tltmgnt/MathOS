@@ -1,0 +1,59 @@
+name: Millennium 006 — Hodge diagonal intersection obstruction
+
+on:
+  pull_request:
+    paths:
+      - 'formal/HodgeDiagonalIntersections.lean'
+      - 'mathos/research/hodge_diagonal_006.py'
+      - 'tests/test_hodge_diagonal_006.py'
+      - 'docs/research/MILLENNIUM_ATTACK_006.md'
+      - '.github/workflows/hodge-diagonal-006.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hodge-diagonal-conditional-matrix:
+    name: Pinned Lean and exact conditional intersection matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Lean 4.14.0
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check genus-one abstract intersection theorem
+        run: |
+          lean --version
+          lean formal/HodgeDiagonalIntersections.lean
+      - name: Audit exact general-genus rational matrix consequences
+        run: |
+          python -m unittest discover -s tests -p 'test_hodge_diagonal_006.py' -v
+          python -m mathos.research.hodge_diagonal_006 --max-genus 12 --output artifacts/millennium006/intersection_audit.json
+          python -m json.tool artifacts/millennium006/intersection_audit.json > /dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("artifacts/millennium006/intersection_audit.json").read_text())
+          assert d["status"] == "ABSTRACT_EXACT_INTERSECTION_AUDIT_ONLY"
+          assert d["official_conjecture_proved"] is False
+          assert d["independent_geometry_formalized"] is False
+          assert d["independent_external_review"] is False
+          assert len(d["results"]) == 13
+          assert all(r["determinant"] == 2*r["genus"] for r in d["results"])
+          PY
+      - name: Upload bounded exact intersection matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium006-hodge-conditional-intersection-not-full-proof
+          path: artifacts/millennium006/
+          if-no-files-found: ignore
+          retention-days: 30

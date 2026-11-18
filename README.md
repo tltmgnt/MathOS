@@ -256,6 +256,10 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 006: Hodge diagonal-cycle obstruction
+
+[Research attempt 006](docs/research/MILLENNIUM_ATTACK_006.md) moves to the **Hodge Conjecture**. For any smooth projective curve of positive genus, its diagonal divisor in the self-product is not a rational linear combination of the two fiber divisors: the classical intersection matrix has determinant `2g`, with a discrepancy of `2g` against the two-fiber span. A [Lean theorem](formal/HodgeDiagonalIntersections.lean) verifies the conditional linear-algebra consequence for genus one and [exact rational regression](mathos/research/hodge_diagonal_006.py) audits arbitrary genus values. **Geometric intersection numbers are assumed as standard external input, not formally proved by the code.** The diagonal is already algebraic, the codimension-one Hodge case is already solved by Lefschetz, and this is **not a proof of the full Hodge conjecture or a new mathematical discovery**.
+
 ## Millennium research attempt 005: Riemann Li-positive-prefix obstruction
 
 [Research attempt 005](docs/research/MILLENNIUM_ATTACK_005.md) turns to the **Riemann Hypothesis**. For any finite prefix length, an exact mathematical construction gives a **synthetic**, conjugation/reflection-symmetric multiset of six candidate zero locations, with four off the critical line, whose first N **Li-style** expressions are all positive. The accompanying [Lean proof](formal/LiPrefixObstruction.lean) checks an all-index Gaussian-integer congruence, and a rational-arithmetic program supplies finite-instance certificates. **These are not genuine Riemann zeta zeros or actual Li coefficients and do not prove or disprove RH.** The work establishes a limit of finite positivity checks under symmetry alone, not an analytic theorem about zeta.
