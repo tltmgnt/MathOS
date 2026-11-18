@@ -1,0 +1,62 @@
+name: Millennium 007 — BSD inert-prime local-factor blind spot
+
+on:
+  pull_request:
+    paths:
+      - 'formal/BSDInertPrimeBlindspot.lean'
+      - 'mathos/research/bsd_inert_007.py'
+      - 'tests/test_bsd_inert_007.py'
+      - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - '.github/workflows/bsd-inert-007.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bsd-inert-local-factors:
+    name: Pinned Lean and independent finite-field counts (not BSD)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned Lean 4.14.0
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify odd cubic, conditional character cancellation and rational point
+        run: |
+          lean --version
+          lean formal/BSDInertPrimeBlindspot.lean
+      - name: Exact independent point counts and non-promotion regression
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_inert_007.py' -v
+          python -m mathos.research.bsd_inert_007 --prime-limit 101 --output artifacts/millennium007/bsd_inert_007.json
+          python -m json.tool artifacts/millennium007/bsd_inert_007.json > /dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("artifacts/millennium007/bsd_inert_007.json").read_text())
+          assert d["status"] == "EXACT_BOUNDED_LOCAL_AUDIT_NOT_BSD"
+          assert d["establishes_general_bsd_rank_equality"] is False
+          assert d["establishes_analytic_rank_or_l_function"] is False
+          assert d["establishes_sha_finiteness"] is False
+          assert d["establishes_refined_leading_term"] is False
+          assert d["mathematical_novelty_established"] is False
+          assert d["two_curve_inert_factor_coincidences"] == d["tested_inert_primes"]
+          assert d["tested_inert_primes"] >= 10
+          assert d["rational_point_certificate"]["point_on_curve_verified_exactly"]
+          PY
+      - name: Preserve bounded BSD local-factor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium007-bsd-inert-local-factors-not-BSD-proof
+          path: artifacts/millennium007/
+          if-no-files-found: ignore
+          retention-days: 30
