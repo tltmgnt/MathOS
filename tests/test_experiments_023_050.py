@@ -123,7 +123,7 @@ class TestFollowupExperimentRegistry(unittest.TestCase):
             self.assertTrue(all(r["status"] == "BASELINES_ONLY_NO_MODEL" for r in reports))
             self.assertTrue(all(r["model_revision"] is None for r in reports))
             self.assertTrue(all(rec["prediction"] is None for r in reports for rec in r["records"]))
-            self.assertTrue(all(r["metrics"]["primary"]["parsed_count"] == 0 for r in reports))
+            self.assertTrue(all(r["metrics"]["primary"] is None for r in reports))
             manifest = json.loads((Path(directory) / "batch_manifest.json").read_text())
             self.assertEqual(manifest["completed_model_evaluations"], 0)
             self.assertEqual(manifest["baseline_only_experiment_records"], 28)
