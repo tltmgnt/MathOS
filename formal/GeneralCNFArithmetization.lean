@@ -125,7 +125,9 @@ theorem cnfClauseOrGates_length (clause : List CnfLiteral) :
     cnfClauseOrGates clause = clause.length := by
   induction clause with
   | nil => rfl
-  | cons l rest ih => simp [cnfClauseOrGates, ih]
+  | cons l rest ih =>
+    simp only [cnfClauseOrGates, List.length_cons, ih]
+    omega
 
 /-- Every clause uses one numeric AND gate, including the empty clause. -/
 def cnfTotalGates : List (List CnfLiteral) → Nat
