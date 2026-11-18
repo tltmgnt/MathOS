@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-18.
 **Track:** **Riemann Hypothesis** (a different Millennium problem from the prior P-versus-NP attacks).
-**Status:** \`BOUNDED_RESEARCH\` / \`NOT_CERTIFIED\` / \`NO_RH_PROOF_OR_COUNTEREXAMPLE\`.
+**Status:** `BOUNDED_RESEARCH` / `NOT_CERTIFIED` / `NO_RH_PROOF_OR_COUNTEREXAMPLE`.
 **Scope:** A rigorous, **synthetic** finite-zero-multiset construction demonstrating an obstacle to inferring an all-index Li inequality from a finite prefix. This does **not** construct or assert any new zero of the actual Riemann zeta function. No claim of mathematical novelty.
 
 The [Clay Mathematics Institute's RH problem](https://www.claymath.org/millennium/Riemann-Hypothesis/) requires **every** nontrivial zero of analytically continued zeta to satisfy real part 1/2 (or a genuine counterexample). [Li's established criterion](https://mathworld.wolfram.com/LisCriterion.html), with details in [Lagarias, *Li coefficients for automorphic L-functions*](https://www.numdam.org/articles/10.5802/aif.2311/), is that **all** genuine Li coefficients indexed by every positive integer must be nonnegative. The sum over actual zeta zeros requires specific convergence and pairing.
@@ -93,12 +93,12 @@ Conjugate pairing makes every sum real. All three properties are established. **
 
 The standard-library-only [riemann_li_prefix_005.py](../../mathos/research/riemann_li_prefix_005.py) computes rational-pair complex powers using Python's Fraction type, with no floating-point sign testing. It checks exact base coefficients, the quartet's actual contribution, the strict rational perturbation bound and full symmetry, then emits a **synthetic-only** status.
 
-\`\`\`sh
+```sh
 lean formal/LiPrefixObstruction.lean
 python -m unittest discover -s tests -p 'test_riemann_li_prefix_005.py' -v
 python -m mathos.research.riemann_li_prefix_005 \
   --prefix 8 --output artifacts/millennium005/finite_li_prefix.json
-\`\`\`
+```
 
 For N=8, exact rational arithmetic gives
 
@@ -118,6 +118,6 @@ The [GitHub Actions workflow](../../.github/workflows/riemann-li-prefix-005.yml)
 
 ## Full Clay obstruction still open
 
-A solution to the **actual** RH requires all actual nontrivial zeros on the line, or a genuine counterexample. Alternatively, a valid all-index proof of positivity of the genuine xi-function's Li coefficients—with fully justified analytic continuation, zero sums and convergence—would suffice. This attack supplies **neither**. No self-adjoint operator with the required zero-spectrum correspondence has been constructed, so MathOS's \`RH.operator\` and \`RH.zero_identity\` obligations remain open.
+A solution to the **actual** RH requires all actual nontrivial zeros on the line, or a genuine counterexample. Alternatively, a valid all-index proof of positivity of the genuine xi-function's Li coefficients—with fully justified analytic continuation, zero sums and convergence—would suffice. This attack supplies **neither**. No self-adjoint operator with the required zero-spectrum correspondence has been constructed, so MathOS's `RH.operator` and `RH.zero_identity` obligations remain open.
 
 No novelty, discovery of actual zeta zeros, mathematical validation of RH, public research publication or external prize eligibility is claimed. **Never promote this synthetic theorem into an RH proof or counterexample.**
