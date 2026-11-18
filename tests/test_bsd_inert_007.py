@@ -91,8 +91,10 @@ class BSDInertPrimeTests(unittest.TestCase):
             "independent_external_review_completed",
         ):
             self.assertFalse(r[key], key)
-        self.assertIn("external", r["known_rank_input_from_external_literature_only"]["E1"].lower()
-                      + " external")
+        self.assertIn("rank 0", r["known_rank_input_from_external_literature_only"]["E1"])
+        self.assertIn("LMFDB", r["known_rank_input_from_external_literature_only"]["E1"])
+        self.assertIn("rank 1", r["known_rank_input_from_external_literature_only"]["E5"])
+        self.assertIn("Silverberg", r["known_rank_input_from_external_literature_only"]["E5"])
 
     def test_invalid_input_and_bad_reduction_rejected(self):
         for bad in (-1, 1, 2, 4, 9, True, "7", 7.0):
