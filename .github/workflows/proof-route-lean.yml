@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'formal/**'
+      - 'mathos/research/ym_z2_strip_008.py'
+      - 'tests/test_ym_z2_strip_008.py'
+      - 'docs/research/MILLENNIUM_ATTACK_008.md'
       - 'mathos/research/bsd_inert_007.py'
       - 'tests/test_bsd_inert_007.py'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
@@ -35,6 +38,9 @@ on:
   pull_request:
     paths:
       - 'formal/**'
+      - 'mathos/research/ym_z2_strip_008.py'
+      - 'tests/test_ym_z2_strip_008.py'
+      - 'docs/research/MILLENNIUM_ATTACK_008.md'
       - 'mathos/research/bsd_inert_007.py'
       - 'tests/test_bsd_inert_007.py'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
@@ -93,6 +99,7 @@ jobs:
           lean formal/GeneralCNFArithmetization.lean
           lean formal/LiPrefixObstruction.lean
           lean formal/HodgeDiagonalIntersections.lean
+          lean formal/YMZ2Strip.lean
           lean formal/BSDInertPrimeBlindspot.lean
       - name: Check BSD conditional inert-prime character theorem and finite counts
         run: |
@@ -105,6 +112,19 @@ jobs:
         with:
           name: millennium007-bsd-inert-primes-lean-4-14
           path: artifacts/millennium007/
+          if-no-files-found: ignore
+
+      - name: Check finite 2D Z2 Wilson strip identities without Yang-Mills promotion
+        run: |
+          python -m unittest discover -s tests -p 'test_ym_z2_strip_008.py' -v
+          python -m mathos.research.ym_z2_strip_008 --max-width 5 --scaling-max-k 16 --output artifacts/millennium008/z2_strip_audit.json
+          python -m json.tool artifacts/millennium008/z2_strip_audit.json > /dev/null
+      - name: Upload exact bounded Z2 Wilson strip toy-model evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium008-2D-Z2-strip-lean-4-14
+          path: artifacts/millennium008/
           if-no-files-found: ignore
 
       - name: Check genus-one Hodge intersection matrix consequence (not conjecture proof)
