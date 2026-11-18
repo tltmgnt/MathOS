@@ -256,6 +256,10 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 003: exact restricted SAT semantics
+
+[Research attempt 003](docs/research/MILLENNIUM_ATTACK_003.md) adds a narrowly scoped Lean theorem relating a **Boolean evaluation** of the disjoint `(x_i + y_i - x_i y_i)` product to a conjunction of disjoint OR clauses for every finite assignment, with an explicit satisfying witness. A standard-library regression exhaustively checks the finite cases up to six clauses. This is not a general polynomial-ring theorem, a uniform SAT-complexity result, mathematical novelty, or a solution to P versus NP. Clay's official 2026 listing has five unsolved problems, Navier–Stokes active under assessment after a September announcement, and Poincaré already solved externally; MathOS has no newly certified Millennium resolution.
+
 ## Independent mathematical review invitation (SAT1)
 
 [Open reviewer call #30](https://github.com/tltmgnt/MathOS/issues/30)
