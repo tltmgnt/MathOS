@@ -37,6 +37,8 @@ jobs:
           retention-days: 30
 
   controlled-model-evaluations:
+    # Expensive model reruns are explicitly manual after the initial verified research run.
+    if: github.event_name == 'workflow_dispatch'
     name: Evaluate ${{ matrix.model }} / batch ${{ matrix.shard }}
     needs: protocol-and-baselines
     runs-on: ubuntu-latest
