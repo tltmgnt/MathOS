@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'formal/**'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'tests/test_riemann_li_prefix_005.py'
+      - 'docs/research/MILLENNIUM_ATTACK_005.md'
       - 'mathos/research/disjoint_or_bridge.py'
       - 'mathos/research/general_cnf_arithmetization.py'
       - 'tests/test_general_cnf_arithmetization.py'
@@ -26,6 +29,9 @@ on:
   pull_request:
     paths:
       - 'formal/**'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'tests/test_riemann_li_prefix_005.py'
+      - 'docs/research/MILLENNIUM_ATTACK_005.md'
       - 'mathos/research/disjoint_or_bridge.py'
       - 'mathos/research/general_cnf_arithmetization.py'
       - 'tests/test_general_cnf_arithmetization.py'
@@ -73,6 +79,20 @@ jobs:
           lean formal/SATSupport.lean
           lean formal/DisjointORSemantics.lean
           lean formal/GeneralCNFArithmetization.lean
+          lean formal/LiPrefixObstruction.lean
+      - name: Check bounded synthetic Riemann Li-prefix obstruction (no actual zeta zeros)
+        run: |
+          python -m unittest discover -s tests -p 'test_riemann_li_prefix_005.py' -v
+          python -m mathos.research.riemann_li_prefix_005 --prefix 8 --output artifacts/millennium005/finite_li_prefix.json
+          python -m json.tool artifacts/millennium005/finite_li_prefix.json > /dev/null
+      - name: Upload exact synthetic Riemann Li-prefix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium005-synthetic-li-prefix-lean-4-14
+          path: artifacts/millennium005/
+          if-no-files-found: ignore
+
       - name: Check disjoint OR semantics and bounded independent Boolean regression
         run: |
           python -m unittest discover -s tests -p 'test_disjoint_or_bridge.py' -v
