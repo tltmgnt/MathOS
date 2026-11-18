@@ -28,6 +28,10 @@ MathOS combines implemented research components with a broader proposed mathemat
 
 See [machine-readable implementation status](docs/portfolio/STATUS.json), [integration boundaries](docs/portfolio/INTEGRATION.md), and [proof review evaluation limits](docs/PROOF_REVIEW_EVALUATION.md). Software checks, empirical benefit, and deployment acceptance are separate milestones.
 
+## Experiments 023–050: executable research extension (not yet a published release)
+
+The [follow-up arithmetic protocol](docs/research/EXPERIMENTS_023_050.md) registers 28 bounded conditions extending the original 22 experiments. It has deterministic baseline controls, optional pinned-model evaluation for DistilGPT2 and tiny-GPT2, and a dedicated GitHub Actions workflow that preserves full model responses. **Registering 28 experiments does not establish 28 completed model evaluations**; check the linked evidence gate and current workflow artifacts before claiming 50 executed experiments. The original v0.1.0 GitHub release draft is still unpublished and covers the original 22.
+
 ## How a lab can evaluate MathOS
 
 Start with one bounded task: for example, reviewing the dependencies of an AI-assisted mathematical argument. Use the existing workflow as an experimental aid, with an accountable researcher reviewing conclusions.
