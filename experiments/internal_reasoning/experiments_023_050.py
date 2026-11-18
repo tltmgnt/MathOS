@@ -338,7 +338,7 @@ def run_experiments(
             "python_version": platform.python_version(),
             "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "decoding": {"do_sample": False, "max_new_tokens": MAX_NEW_TOKENS} if backend == "model" else None,
-            "metrics": evaluate(records),
+            "metrics": ({**evaluate(records), "primary": None, "paired": None} if backend == "baseline" else evaluate(records)),
             "records": records,
             "limitations": [
                 "One fixed small generated sample per experiment; no statistical power claim",
