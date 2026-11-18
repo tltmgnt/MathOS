@@ -256,6 +256,10 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 007: BSD inert-prime local-factor blind spot
+
+[Research attempt 007](docs/research/MILLENNIUM_ATTACK_007.md) turns to the **Birch and Swinnerton-Dyer conjecture**. Two classical elliptic curves, `E1: y²=x³−x` and `E5: y²=x³−25x`, have distinct rational ranks (0 and 1, **established externally**) but identical good local point counts `#E(F_p)=p+1` for **every prime p≡3 (mod 4)**. The elementary proof pairs values of the odd cubic using the quadratic character; there are infinitely many such primes. A [pinned Lean theorem](formal/BSDInertPrimeBlindspot.lean) checks only the **conditional** odd-character cancellation and an exact E5 rational point, while [the finite-field checker](mathos/research/bsd_inert_007.py) independently enumerates finitely many good reductions. **This does not construct the elliptic L-functions, prove global ranks, establish the BSD conjecture, or claim mathematical novelty.**
+
 ## Millennium research attempt 006: Hodge diagonal-cycle obstruction
 
 [Research attempt 006](docs/research/MILLENNIUM_ATTACK_006.md) moves to the **Hodge Conjecture**. For any smooth projective curve of positive genus, its diagonal divisor in the self-product is not a rational linear combination of the two fiber divisors: the classical intersection matrix has determinant `2g`, with a discrepancy of `2g` against the two-fiber span. A [Lean theorem](formal/HodgeDiagonalIntersections.lean) verifies the conditional linear-algebra consequence for genus one and [exact rational regression](mathos/research/hodge_diagonal_006.py) audits arbitrary genus values. **Geometric intersection numbers are assumed as standard external input, not formally proved by the code.** The diagonal is already algebraic, the codimension-one Hodge case is already solved by Lefschetz, and this is **not a proof of the full Hodge conjecture or a new mathematical discovery**.
