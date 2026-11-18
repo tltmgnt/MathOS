@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'formal/**'
+      - 'mathos/research/disjoint_or_bridge.py'
+      - 'tests/test_disjoint_or_bridge.py'
+      - 'docs/research/MILLENNIUM_ATTACK_003.md'
       - 'mathos/research/lemma_verification.py'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'tests/test_lemma_verification.py'
@@ -20,6 +23,9 @@ on:
   pull_request:
     paths:
       - 'formal/**'
+      - 'mathos/research/disjoint_or_bridge.py'
+      - 'tests/test_disjoint_or_bridge.py'
+      - 'docs/research/MILLENNIUM_ATTACK_003.md'
       - 'mathos/research/lemma_verification.py'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'tests/test_lemma_verification.py'
@@ -60,6 +66,19 @@ jobs:
           LEAN_PATH="$PWD/formal" lean formal/FiniteRouteDAG.lean
           lean formal/SATSupport.lean
           lean formal/DisjointORSemantics.lean
+      - name: Check disjoint OR semantics and bounded independent Boolean regression
+        run: |
+          python -m unittest discover -s tests -p 'test_disjoint_or_bridge.py' -v
+          python -m mathos.research.disjoint_or_bridge --max-n 6 --output artifacts/millennium003/finite_regression.json
+          python -m json.tool artifacts/millennium003/finite_regression.json > /dev/null
+      - name: Upload bounded Millennium research attempt 003 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium003-disjoint-or-boolean-bridge
+          path: artifacts/millennium003/
+          if-no-files-found: ignore
+
       - name: Check generated exact counterexample witness using pinned Lean
         run: |
           python -m mathos.research.lemma_verification --verify-lean --output-dir artifacts/lemmas
