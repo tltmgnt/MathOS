@@ -2,7 +2,7 @@
 
 **Registry status:** 28 distinct, executable experiment **protocols** (MathOS-EXP-023 through MathOS-EXP-050).  
 **Prior results:** MathOS-EXP-001 through MathOS-EXP-022 are documented in [the v0.1 research report](MATHOS_RESEARCH_REPORT_v0.1.md).  
-**New model-result status:** **NOT ESTABLISHED UNTIL THE MODEL JOBS FINISH AND THEIR ARTIFACTS ARE CHECKED.** Defining or baseline-running these 28 IDs is not the same as having completed 28 model experiments.
+**Execution status (2026-11-18):** **28/28 experimental conditions were executed on each of the two models**, with all eight model jobs and the baseline job successful. The [observed results report](EXPERIMENTS_023_050_RESULTS.md) links the exact workflow run and [checksum-bearing manifest](../../evidence/internal_reasoning/EXPERIMENTS_023_050_SUMMARY.json). Execution is not independent replication or evidence of general mathematical understanding.
 
 The frozen protocol source is [experiments_023_050.py](../../experiments/internal_reasoning/experiments_023_050.py). These are exploratory arithmetic tests on **DistilGPT2** and **sshleifer/tiny-gpt2**, not demonstrations of mathematical understanding, large-model capabilities, scientific replication or independent proof. The preregistered comparison is deliberately limited to strict-start integer parsing, per-condition accuracy, parsed-only absolute error, two fixed constant-answer baselines (zero and nine), and—where applicable—paired semantic consistency.
 
