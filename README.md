@@ -30,7 +30,7 @@ See [machine-readable implementation status](docs/portfolio/STATUS.json), [integ
 
 ## Experiments 023–050: executable research extension (not yet a published release)
 
-The [follow-up arithmetic protocol](docs/research/EXPERIMENTS_023_050.md) registers 28 bounded conditions extending the original 22 experiments. It has deterministic baseline controls, optional pinned-model evaluation for DistilGPT2 and tiny-GPT2, and a dedicated GitHub Actions workflow that preserves full model responses. **Registering 28 experiments does not establish 28 completed model evaluations**; check the linked evidence gate and current workflow artifacts before claiming 50 executed experiments. The original v0.1.0 GitHub release draft is still unpublished and covers the original 22.
+The [follow-up arithmetic protocol](docs/research/EXPERIMENTS_023_050.md) adds 28 bounded conditions to the original 22. All 28 were [executed on both specified GPT-2 models](docs/research/EXPERIMENTS_023_050_RESULTS.md) on November 18, 2026, and [model revisions, metrics and artifact checksums were recorded](evidence/internal_reasoning/EXPERIMENTS_023_050_SUMMARY.json). This makes **50 numbered experiments with recorded execution**, not 50 independent scientific studies or validated mathematical reasoning. The v0.1.0 GitHub release draft is **still unpublished**, and its body has not yet been revised to include the new results.
 
 ## How a lab can evaluate MathOS
 
