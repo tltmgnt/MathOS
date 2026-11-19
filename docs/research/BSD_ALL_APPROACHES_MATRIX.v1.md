@@ -6,10 +6,10 @@ This is a **structured search map**, not an assertion that every conceivable mat
 
 ## Official problem and end states
 
-For every elliptic curve (E/\\mathbb{Q}), the **core BSD rank conjecture** predicts
+For every elliptic curve \(E/\mathbb{Q}\), the **core BSD rank conjecture** predicts
 
 \[
-\\operatorname{ord}_{s=1}L(E,s)=\\operatorname{rank}E(\\mathbb{Q}).
+\operatorname{ord}_{s=1}L(E,s)=\operatorname{rank}E(\mathbb{Q}).
 \]
 
 At the level of logical outcomes there are two mutually exclusive classes:
@@ -72,7 +72,7 @@ UNCONDITIONAL bridge proving r_an(E) = r_alg(E)
                 CORE BSD PROVED
 ```
 
-An alternative direct approach proves **both inequalities** (r_{alg}(E)\\le r_{an}(E)) and (r_{an}(E)\\le r_{alg}(E)) **for all E**, with no circular appeal to BSD. Proving Sha finiteness alone does not fill either missing analytic/algebraic bridge.
+An alternative direct approach proves **both inequalities** \(r_{\mathrm{alg}}(E)\le r_{\mathrm{an}}(E)\) and \(r_{\mathrm{an}}(E)\le r_{\mathrm{alg}}(E)\) **for all E**, with no circular appeal to BSD. Proving Sha finiteness alone does not fill either missing analytic/algebraic bridge.
 
 ### Stronger refined MathOS route
 
@@ -135,7 +135,7 @@ This is a **logical dependency overview**, not a mathematically validated suffic
 
 ## What MathOS 007 currently excludes
 
-The original MathOS 007 example proves that matching local factors for all primes (p\\equiv3\\pmod4), even though this prime set is infinite, **does not determine rational rank**. The companion draft [PR #48](https://github.com/tltmgnt/MathOS/pull/48) documents a more precise mod-20 classification. Neither result identifies the order of vanishing of the **complete** (L(E,s)), proves high-rank BSD, or establishes novelty.
+The original MathOS 007 example proves that matching local factors for all primes \(p\equiv3\pmod4\), even though this prime set is infinite, **does not determine rational rank**. The companion draft [PR #48](https://github.com/tltmgnt/MathOS/pull/48) documents a more precise mod-20 classification. Neither result identifies the order of vanishing of the **complete** (L(E,s)), proves high-rank BSD, or establishes novelty.
 
 ## Current external evidence and references (not a systematic novelty review)
 
