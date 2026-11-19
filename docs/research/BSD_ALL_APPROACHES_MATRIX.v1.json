@@ -1,0 +1,273 @@
+{
+  "schema_version": "1.0.0",
+  "project": "MathOS Millennium research attempt 007",
+  "as_of": "2026-11-19",
+  "claim": "Birch–Swinnerton-Dyer core rank equality for every elliptic curve over Q",
+  "certification": "NOT_CERTIFIED",
+  "mathematical_novelty": "NOT_ESTABLISHED",
+  "universal_proof": "NOT_ESTABLISHED",
+  "all_approaches_exhaustive": false,
+  "scope_notice": "A comprehensive finite research taxonomy, NOT an enumeration of every imaginable mathematical idea.",
+  "existing_canonical_route": "BSD.rank_refined",
+  "official_core_vs_refined": "Core all-curves rank equality is distinct from the stronger optional refined leading-term route.",
+  "registered_claims": [
+    "BSD.analytic_selmer",
+    "BSD.sha_finiteness",
+    "BSD.leading_term"
+  ],
+  "reference_urls": [
+    "https://www.claymath.org/millennium/birch-and-swinnerton-dyer-conjecture/",
+    "https://www.claymath.org/events/the-birch-and-swinnerton-dyer-conjecture-and-related-problems-recent-results/",
+    "https://www.math.columbia.edu/~chaoli/docs/BSD.html",
+    "https://www.sciencedirect.com/science/article/pii/S0021869326000281"
+  ],
+  "routes": [
+    {
+      "id": "BSD.M01",
+      "name": "Analytic L-function / complex derivatives",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "All E/Q only if arbitrary vanishing order can be controlled",
+      "lever": "Relate the order and leading derivative of the complete L(E,s) at s=1 to canonical global arithmetic quantities.",
+      "bridge": "Prove unconditional upper and lower comparisons with Mordell–Weil rank, uniformly in analytic rank >=2.",
+      "failure": "Finite Euler coefficients, numerically small L-values, or parity cannot certify order of vanishing.",
+      "exper": "For a declared rank-2 curve, identify a provable exact derivative/height identity and list missing assumptions.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M02",
+      "name": "Descent and Selmer bounds",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "Selected curves, primes and families",
+      "lever": "Use n-Selmer and descent to bound algebraic rank and determine torsion.",
+      "bridge": "Control Sha obstructions and connect algebraic rank bounds to complex analytic order for every E/Q.",
+      "failure": "An upper bound on rank does not determine analytic order; finite descents may leave unresolved Sha.",
+      "exper": "Reproduce a complete 2-descent for E1/E5 and compare proved rank bounds to certified analytic data.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M03",
+      "name": "Gross–Zagier / Kolyvagin (low rank)",
+      "state": "KNOWN_SPECIAL_CASE",
+      "scope": "Analytic rank 0 or 1",
+      "lever": "Heegner heights and Euler systems yield rank equality and Sha finiteness in these cases.",
+      "bridge": "A genuinely new mechanism for arbitrary higher vanishing orders; the known theorem cannot simply be re-used as all-rank proof.",
+      "failure": "An argument that only produces one independent rational point cannot certify arbitrary rank.",
+      "exper": "Formalize a known rank-one instance, documenting each cited theorem and hypothesis.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M04",
+      "name": "Higher-rank Euler/Kolyvagin systems",
+      "state": "EXPLORATORY",
+      "scope": "Candidate route for analytic rank >=2",
+      "lever": "Find rank-sensitive compatible cohomology classes and sufficiently strong Selmer control.",
+      "bridge": "Existence, nontriviality, higher-rank bounds and noncircular link to higher complex derivatives for every E/Q.",
+      "failure": "Classes may vanish or bound only special primes and curves; 'higher-rank' labels do not confer needed rank inequalities.",
+      "exper": "State a candidate higher-rank norm-compatibility and reciprocity law with a falsifiable concrete example.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M05",
+      "name": "Higher Gross–Zagier/height formulas",
+      "state": "EXPLORATORY",
+      "scope": "High analytic rank families",
+      "lever": "Generalize derivative-to-height identities beyond first derivatives, with independent cycles/points.",
+      "bridge": "A nondegenerate global height determinant matching the order for arbitrary E/Q.",
+      "failure": "Derivative formulas under special sign or CM hypotheses do not automatically cover all curves.",
+      "exper": "Locate a rank-2 specialization with a theorem-level equality and verify its hypotheses without assuming BSD.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.leading_term"
+      ]
+    },
+    {
+      "id": "BSD.M06",
+      "name": "Iwasawa main conjectures",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "p-adic and residual representation restrictions, selected ranks",
+      "lever": "Compare p-adic L-functions with Selmer modules; current literature gives new cases and selected p-parts of BSD.",
+      "bridge": "Remove all local/residual/rank restrictions and bridge p-adic comparisons to every complex analytic vanishing order.",
+      "failure": "A p-part of a formula, or result at one ordinary prime, is not the full complex or integral BSD formula.",
+      "exper": "Audit exact local hypotheses of a published main-conjecture theorem; list excluded cases E,p.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ]
+    },
+    {
+      "id": "BSD.M07",
+      "name": "p-adic heights and regulators",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "Ordinary/supersingular and exceptional-zero regimes vary",
+      "lever": "Relate p-adic derivatives, heights, Selmer ranks and regulators.",
+      "bridge": "Unconditional nondegeneracy, exceptional-zero accounting and archimedean comparison in all ranks.",
+      "failure": "A zero of a p-adic L-function can arise from local exceptional factors and need not measure complex analytic rank.",
+      "exper": "Compare ordinary vs supersingular and exceptional-zero hypotheses for one curve and one p.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.leading_term"
+      ]
+    },
+    {
+      "id": "BSD.M08",
+      "name": "Bloch–Kato / motivic / ETNC routes",
+      "state": "EXPLORATORY",
+      "scope": "Elliptic curve motives and generalizations",
+      "lever": "Connect motivic cohomology, special values and Selmer arithmetic in a general conjectural framework.",
+      "bridge": "Prove applicable noncircular comparison theorems without assuming conjectures equivalent to the desired BSD conclusion.",
+      "failure": "Replacing BSD with Bloch–Kato or ETNC as a premise is a conditional reformulation, not a proof.",
+      "exper": "Draft precise implication with all source theorems separated from open conjectures.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.leading_term",
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M09",
+      "name": "Finiteness of Tate–Shafarevich groups",
+      "state": "EXPLORATORY",
+      "scope": "All E/Q required for general refined route",
+      "lever": "Prove Sha(E) finite through duality, descent or new uniform arithmetic estimates.",
+      "bridge": "Uniform finiteness at every relevant prime for arbitrary E; still need separate complex analytic rank link.",
+      "failure": "Sha finiteness by itself does not prove analytic rank equals algebraic rank.",
+      "exper": "Produce an explicit family of Selmer classes and isolate the exact missing finiteness bound.",
+      "targets": [
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M10",
+      "name": "Automorphic / trace formula / spectral routes",
+      "state": "EXPLORATORY",
+      "scope": "Modular automorphic L-functions attached to E/Q",
+      "lever": "Find spectral or trace identities translating central vanishing into arithmetic rank.",
+      "bridge": "A spectral identity strong enough to determine exact multiplicity for every E and connect it to rational points.",
+      "failure": "Modularity provides continuation and a functional equation but not rank equality.",
+      "exper": "Write a proposed trace identity as a theorem with domains, multiplicities, and a counterexample search.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M11",
+      "name": "Twists, congruences and specialization",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "Some families and congruence subgroups",
+      "lever": "Transfer knowledge between related elliptic curves using twists, Hecke congruences and specialization.",
+      "bridge": "A rigorous all-curves coverage theorem with control of rank and leading terms through exceptional fibers.",
+      "failure": "A theorem for a dense or positive-proportion family is not a theorem for every E/Q.",
+      "exper": "Prove exact coverage for a finite candidate family and list omitted curves; test degeneration at excluded primes.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.leading_term"
+      ]
+    },
+    {
+      "id": "BSD.M12",
+      "name": "Arithmetic statistics and average rank",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "Statistical statements over families",
+      "lever": "Prove average Selmer/rank statements and large families of known cases.",
+      "bridge": "Replace density or average claims with an all-curves theorem, or a universal reduction covering every excluded case.",
+      "failure": "Probability 1 or density 1 does not imply a property of every curve.",
+      "exper": "Record the exact height ordering and exceptional-set quantifiers of an existing rank result.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M13",
+      "name": "Direct computation and certified examples",
+      "state": "ACTIVE_PARTIAL",
+      "scope": "Specified elliptic curves / bounded conductors",
+      "lever": "Use exact point search, descents, modular symbols and certified analytic interval arithmetic.",
+      "bridge": "A uniform proof covering unbounded conductors and arbitrary ranks, not merely a growing table of examples.",
+      "failure": "Numerical L-derivative zero tests and finite prime counts cannot prove an all-curves theorem.",
+      "exper": "Replicate E1/E5 local counts, then extend to a high-rank example with certified algebraic/analytic evidence.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness"
+      ]
+    },
+    {
+      "id": "BSD.M14",
+      "name": "Partial Euler-factor agreement (MathOS 007)",
+      "state": "INSUFFICIENT_ALONE",
+      "scope": "Infinitely many primes in proper congruence classes",
+      "lever": "Identify precisely what selected local arithmetic information does not determine.",
+      "bridge": "A new theorem using sufficient complete global information, not merely a partial Euler product.",
+      "failure": "E1 and E5 have differing known ranks but matching counts for every p≡3 mod4; the argument cannot imply BSD.",
+      "exper": "Use the MathOS 007 classical counterexample as an adversarial negative control for every local-data proposal.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M15",
+      "name": "Formal theorem verification",
+      "state": "SUPPORTING_TOOL",
+      "scope": "Precisely encoded statements only",
+      "lever": "Lean or other proof assistants can verify well-stated algebraic, analytic and arithmetic lemmas.",
+      "bridge": "A mathematically complete general theorem must first be identified, encoded, proved without hidden assumptions and linked to the official target.",
+      "failure": "Passing finite tests or formalizing a conditional identity does not prove missing hypotheses.",
+      "exper": "Extend Lean beyond conditional character cancellation to an actual finite-field point-count theorem with explicit finite-field axioms.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M16",
+      "name": "Logical counterexample (disproof branch)",
+      "state": "LOGICAL_ALTERNATIVE",
+      "scope": "One elliptic curve E/Q",
+      "lever": "Establish a single rigorously verified inequality between analytic and algebraic ranks.",
+      "bridge": "Unconditional proof of both exact ranks/orders for the same E with no numerical or conjectural gap.",
+      "failure": "Large computed discrepancy, inconclusive descent, or assumed Sha finiteness is not a counterexample.",
+      "exper": "Write a complete certificate format for analytic order and Mordell–Weil rank before choosing cases.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M17",
+      "name": "Direct universal rank bridge",
+      "state": "TARGET_RESTATEMENT",
+      "scope": "Every elliptic curve E/Q",
+      "lever": "Prove both r_alg≤r_an and r_an≤r_alg unconditionally by separate, noncircular arguments.",
+      "bridge": "Both inequalities for all E, including analytic rank >=2 and all bad reduction types.",
+      "failure": "Stating either inequality as a conjectural lemma without proof is circular.",
+      "exper": "Inventory every inequality from published results and identify exact high-rank missing hypotheses.",
+      "targets": [
+        "BSD.analytic_selmer"
+      ]
+    },
+    {
+      "id": "BSD.M18",
+      "name": "Universal refined leading-term formula",
+      "state": "TARGET_RESTATEMENT",
+      "scope": "All curves with the precise refined BSD normalizations",
+      "lever": "Relate the first nonzero complex L-derivative to periods, regulators, torsion, Tamagawa numbers and Sha.",
+      "bridge": "Prove Sha finiteness and every factor/normalization for all curves, plus analytic/algebraic rank equality.",
+      "failure": "A p-part, special-curve computation or formula assuming finiteness cannot establish the unrestricted refined claim.",
+      "exper": "Audit all factors for E1 and E5 and identify which are sourced rather than proved.",
+      "targets": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ]
+    }
+  ]
+}
