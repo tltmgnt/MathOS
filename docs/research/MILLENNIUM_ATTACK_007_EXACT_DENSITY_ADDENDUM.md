@@ -6,7 +6,7 @@ This note extends [MathOS research attempt 007](MILLENNIUM_ATTACK_007.md) with a
 \[
 E_1: y^2=x^3-x,\qquad E_5:y^2=x^3-25x
 \]
-have equal point counts. It does not claim a mathematically new theorem. Its proof combines standard facts about quadratic twists, rational 2-torsion, quadratic reciprocity, and Dirichlet's theorem.
+have equal point counts. It does not claim a mathematically new theorem. Its proof combines standard facts about quadratic twists, rational 2-torsion, quadratic reciprocity, and the prime number theorem for arithmetic progressions.
 
 ## Proposition (exact agreement and disagreement classes)
 
@@ -59,7 +59,7 @@ If \(p\bmod20\in\{13,17\}\), then \(a_5(p)=-a_1(p)\), giving
 \[
 N_5(p)-N_1(p)=2a_1(p)\equiv4\pmod8.
 \]
-Finally, Dirichlet's theorem gives equal natural density \(1/\varphi(20)=1/8\) to primes in each of the eight reduced residue classes modulo \(20\). Six classes agree and two disagree, proving the densities. \(\square\)
+Finally, the prime number theorem for arithmetic progressions gives equal natural density \(1/\varphi(20)=1/8\) to primes in each of the eight reduced residue classes modulo \(20\). Six classes agree and two disagree, proving the densities. \(\square\)
 
 For example, \(p=13\) gives \(N_1(13)=8\) and \(N_5(13)=20\); \(p=17\) gives \(16\) and \(20\).
 
