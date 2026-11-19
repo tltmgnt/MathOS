@@ -1,0 +1,36 @@
+name: BSD milestone 03 exact algebra audit (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_RANK_THREE_BASE_CHANGE_MILESTONE_03.md'
+      - 'mathos/research/bsd_rank_three_family.py'
+      - 'tests/test_bsd_rank_three_family.py'
+      - '.github/workflows/bsd-rank-three-family.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_RANK_THREE_BASE_CHANGE_MILESTONE_03.md'
+      - 'mathos/research/bsd_rank_three_family.py'
+      - 'tests/test_bsd_rank_three_family.py'
+      - '.github/workflows/bsd-rank-three-family.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-algebra-only:
+    name: Check Z[U] invariants and sections (not generic rank or BSD)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run exact arithmetic and non-promotion checks
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_rank_two_family.py' -v
+          python -m unittest discover -s tests -p 'test_bsd_analytic_milestone_02.py' -v
+          python -m unittest discover -s tests -p 'test_bsd_rank_three_family.py' -v
+          python -m mathos.research.bsd_rank_three_family
