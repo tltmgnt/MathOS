@@ -1,0 +1,34 @@
+name: BSD route matrix structural audit (not a proof)
+
+on:
+  pull_request:
+    paths:
+      - 'docs/research/BSD_ALL_APPROACHES_MATRIX.v1.md'
+      - 'docs/research/BSD_ALL_APPROACHES_MATRIX.v1.json'
+      - 'tests/test_bsd_route_matrix.py'
+      - '.github/workflows/bsd-route-matrix.yml'
+  push:
+    paths:
+      - 'docs/research/BSD_ALL_APPROACHES_MATRIX.v1.md'
+      - 'docs/research/BSD_ALL_APPROACHES_MATRIX.v1.json'
+      - 'tests/test_bsd_route_matrix.py'
+      - '.github/workflows/bsd-route-matrix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix-structure-only:
+    name: Structural audit only; does not verify BSD
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate JSON syntax
+        run: python -m json.tool docs/research/BSD_ALL_APPROACHES_MATRIX.v1.json > /dev/null
+      - name: Enforce non-certifying schema
+        run: python -m unittest discover -s tests -p 'test_bsd_route_matrix.py' -v
