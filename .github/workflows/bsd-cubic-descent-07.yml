@@ -1,0 +1,57 @@
+name: BSD 07 ResearchOS TECT X cubic 2-descent bound (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_CUBIC_DESCENT_INFINITE_UPPER_07.md'
+      - 'docs/research/papers/BSD_CUBIC_DESCENT_07_TECTX.json'
+      - 'mathos/research/bsd_cubic_descent_07.py'
+      - 'mathos/research/BSD_CUBIC_DESCENT_07_MAGMA.m'
+      - 'tests/test_bsd_cubic_descent_07.py'
+      - '.github/workflows/bsd-cubic-descent-07.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_CUBIC_DESCENT_INFINITE_UPPER_07.md'
+      - 'docs/research/papers/BSD_CUBIC_DESCENT_07_TECTX.json'
+      - 'mathos/research/bsd_cubic_descent_07.py'
+      - 'mathos/research/BSD_CUBIC_DESCENT_07_MAGMA.m'
+      - 'tests/test_bsd_cubic_descent_07.py'
+      - '.github/workflows/bsd-cubic-descent-07.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact_arithmetic_only:
+    name: Congruence and integer rank-bound arithmetic; not a Selmer computation
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check exact arithmetic with four scoped regression tests
+        run: python -m unittest discover -s tests -p 'test_bsd_cubic_descent_07.py' -v
+      - name: Generate bounded exact integer evidence for u=0,24,-24
+        run: |
+          python -m mathos.research.bsd_cubic_descent_07 --k 0 > /tmp/mathos-u0.json
+          python -m mathos.research.bsd_cubic_descent_07 --k 1 > /tmp/mathos-u24.json
+          python -m mathos.research.bsd_cubic_descent_07 --k -1 > /tmp/mathos-u-24.json
+          python -m json.tool /tmp/mathos-u24.json > /dev/null
+      - name: Enforce no-assurance-promotion TECT X JSON
+        run: |
+          python -m json.tool docs/research/papers/BSD_CUBIC_DESCENT_07_TECTX.json > /dev/null
+          python - <<'PY'
+          import json
+          p='docs/research/papers/BSD_CUBIC_DESCENT_07_TECTX.json'
+          d=json.load(open(p))
+          assert d['canonical_assurance_state']=='UNVERIFIED'
+          assert d['canonical_controller_executed'] is False
+          assert len(d['gates'])==5
+          for k in ('upper_bound_uniform_constant','upper_bound_3_for_infinite_subset',
+                    'exact_rank_three_infinite_fibers','analytic_rank_three_infinite_fibers',
+                    'independent_mathematical_novelty_assessed','BSD_proved'):
+              assert d[k] is False,k
+          PY
