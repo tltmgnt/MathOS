@@ -111,10 +111,11 @@ def audit(panels: int=256) -> dict:
     d=I(*[Fraction(x) for x in cert["diagonal_weil_entry"]])
     c=I(*[Fraction(x) for x in cert["short_weil_cross_entry"]])
     e=I(*[Fraction(x) for x in cert["new_long_weil_entry"]])
-    # Use previous truly certified base moment, not a rounded point estimate.
-    from mathos.research.riemann_weil_prime_two_interval import audit as two_audit
-    prior_two=two_audit(panels)
-    base_pole=I(*[Fraction(x) for x in prior_two["arithmetic"]["pole_diagonal"]])
+    # Re-evaluate the same exact base exponential moment with outward
+    # rational boxes; avoids a redundant expensive full 2D certification.
+    from mathos.research.riemann_weil_prime_two_interval import _moments
+    _,moment=_moments(2*panels)
+    base_pole=2*moment*moment
     pole=base_pole*(iv.exp(F(NEW_CENTER)/2)+iv.exp(-F(NEW_CENTER)/2))/2
     gamma=_arch_cross(panels)
     primes,prime_parts=_prime_cross(4*panels)
