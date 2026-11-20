@@ -1,0 +1,35 @@
+name: BSD milestone 02 classical analytic implication audit (not BSD)
+
+on:
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_ANALYTIC_DOUBLE_ZEROS_MILESTONE_02.md'
+      - 'mathos/research/bsd_analytic_milestone_02.py'
+      - 'tests/test_bsd_analytic_milestone_02.py'
+      - '.github/workflows/bsd-analytic-milestone-02.yml'
+  push:
+    paths:
+      - 'docs/research/papers/BSD_ANALYTIC_DOUBLE_ZEROS_MILESTONE_02.md'
+      - 'mathos/research/bsd_analytic_milestone_02.py'
+      - 'tests/test_bsd_analytic_milestone_02.py'
+      - '.github/workflows/bsd-analytic-milestone-02.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  classical-logic-only:
+    name: External-theorem logical consequence and polynomial identities only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Regression of exact polynomials and limited theorem logic
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_rank_two_family.py' -v
+          python -m unittest discover -s tests -p 'test_bsd_analytic_milestone_02.py' -v
+          python -m mathos.research.bsd_analytic_milestone_02
