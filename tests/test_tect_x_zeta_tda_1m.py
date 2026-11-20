@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from tect_x_zeta_tda_1m import (
+from mathos.research.tect_x_zeta_tda_1m import (
     FAMILIES, audit, circle_control, monotone_h0_deaths,
     norm_features, parameter_features, rips_betti01,
 )
