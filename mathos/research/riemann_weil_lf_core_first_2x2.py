@@ -174,7 +174,11 @@ def audit(
     primes,prime_parts=prime_cross(prime_panels)
     arch=-gamma_cross(gamma_panels,covariance_panels)
     cross=pole+primes+arch
-    clo,chi=endpoints(cross)
+    # All public rational proof margins MUST use precisely the
+    # serialized outward endpoints; never test a hidden-precision
+    # margin which a third-party checker cannot reproduce.
+    serialized_cross=outward(cross)
+    clo,chi=map(Fraction,serialized_cross)
     crossabs=max(abs(clo),abs(chi))
     raw_margin=diaglo-crossabs
     normal_margin=raw_margin/(masshi*masshi)
@@ -209,7 +213,7 @@ def audit(
             "offdiagonal_pole_interval":outward(pole),
             "offdiagonal_prime_interval":outward(primes),
             "offdiagonal_archimedean_interval":outward(arch),
-            "offdiagonal_full_raw_Weil_interval":outward(cross),
+            "offdiagonal_full_raw_Weil_interval":serialized_cross,
             "diagonal_full_raw_Weil_interval":previous["arithmetic"]["raw_complete_Weil_interval"],
             "normalizing_mass_interval":previous["arithmetic"]["raw_mass_m0_interval"],
             "full_normalized_Gram_2x2":[
