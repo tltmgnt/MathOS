@@ -86,7 +86,7 @@ class WeilLFDenseCoreWorkflowTests(unittest.TestCase):
             if e["i"]==e["j"]:
                 bump=family(8)[e["i"]]
                 h=Fraction(bump["half_support_width"])
-                self.assertEqual(e["support"],[str(-2*h),str(2*h)])
+                self.assertEqual([Fraction(x) for x in e["support"]],[-2*h,2*h])
                 self.assertEqual(e["prime_powers"],
                                  exact_prime_power_inventory(-2*h,2*h))
         # Unlike the old narrow lattice, the widest dense-core bumps
