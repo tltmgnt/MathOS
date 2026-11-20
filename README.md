@@ -15,6 +15,12 @@ MathOS connects mathematical reasoning, Topological Gap Analysis Ω, DTI Ω, and
 
 > **Core principle:** A result becomes useful knowledge when we can check it, explain why it works, identify where it applies, and recognize where it fails.
 
+## RH-Ω: integrated Riemann Hypothesis research assurance
+
+The [RH-Ω research pipeline](docs/research/RH_OMEGA.md) adds eight bounded RH checks, ten deterministic role-specific research records, Lean/Coq logical proof checks, adversarial tests, source fingerprints, and a TECT finite-to-global acceptance gate. It builds on the [existing RH proof-obligation register](docs/research/rh_proof_obligations.json) and computational experiments instead of duplicating them.
+
+Run `python -m mathos.research.rh_omega`. **The Riemann Hypothesis remains OPEN**; finite Li coefficients, numerical Weil Grams, theta-reflection samples, and green formal-policy CI checks do not prove it.
+
 ## What exists and what remains to be established
 
 MathOS combines implemented research components with a broader proposed mathematical framework. **Independent external validation of the broader framework is not yet established.** Local tests and synthetic examples support only the behavior and cases they actually check.
