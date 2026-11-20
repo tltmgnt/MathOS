@@ -1,0 +1,38 @@
+name: MathOS BSD 05 TECT x5 exact rank-formula audit (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_RANK_EXACT_MILESTONE_05.md'
+      - 'docs/research/papers/BSD_RANK_EXACT_MILESTONE_05_TECT5.json'
+      - 'mathos/research/bsd_rank_exact_05.py'
+      - 'tests/test_bsd_rank_exact_05.py'
+      - '.github/workflows/bsd-rank-exact-tect5.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_RANK_EXACT_MILESTONE_05.md'
+      - 'docs/research/papers/BSD_RANK_EXACT_MILESTONE_05_TECT5.json'
+      - 'mathos/research/bsd_rank_exact_05.py'
+      - 'tests/test_bsd_rank_exact_05.py'
+      - '.github/workflows/bsd-rank-exact-tect5.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  five_scoped_checks:
+    name: Five scoped research checks; no original-theorem/TECT/BSD certification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate TECT five-pass record and published-theorem algebra
+        run: |
+          python -m json.tool docs/research/papers/BSD_RANK_EXACT_MILESTONE_05_TECT5.json > /dev/null
+          python -m unittest discover -s tests -p 'test_bsd_rank_exact_05.py' -v
+          python -m mathos.research.bsd_rank_exact_05 > /tmp/bsd05.json
+          python -m json.tool /tmp/bsd05.json > /dev/null

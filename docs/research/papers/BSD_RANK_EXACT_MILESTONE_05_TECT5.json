@@ -1,0 +1,65 @@
+{
+  "schema_version": "mathos-tect5-review-v1",
+  "date": "2026-11-19",
+  "scope": "Exact generic algebraic rank of E over Q(U), not specialized rank, analytic equality or BSD",
+  "claim_id": "MATHOS.BSD.05.GENERIC_RANK_Q_U_EQ_3",
+  "claim_statement": "For E_U: y^2+y=x^3+U(U+1)x^2/2-(U(U+1)+2)x/2, rank E(Q(U))=3 as an application of Battistoni-Bettin-Delaunay, Theorem 1 (2021 preprint).",
+  "canonical_runtime": "tltmgnt/ResearchOs/tect_runtime",
+  "actual_canonical_runtime_executed": false,
+  "TECT_state": "UNVERIFIED",
+  "versioned_source_refs": [
+    "https://arxiv.org/pdf/2109.00738",
+    "https://www.math.columbia.edu/~chaoli/docs/EllipticSurfaces.html",
+    "docs/research/papers/BSD_RANK_EXACT_MILESTONE_05.md",
+    "mathos/research/bsd_rank_exact_05.py",
+    "docs/research/papers/BSD_RANK_THREE_BASE_CHANGE_MILESTONE_03.md"
+  ],
+  "explicit_nonclaims": {
+    "independent_expert_review_completed": false,
+    "new_to_literature_novelty_established": false,
+    "exact_rank_for_infinitely_many_specializations_proved": false,
+    "exact_analytic_rank_for_infinite_family_proved": false,
+    "BSD_proved": false,
+    "canonical_TECT_state_promoted": false
+  },
+  "gates": [
+    {
+      "number": 1,
+      "name": "Statement and source provenance",
+      "outcome": "SCOPED_PASS",
+      "checks": "Specified field Q(U), exact published theorem, source edition and formula case; does not state all rational specializations.",
+      "limitations": "Independent expert review and source-signature authentication not done."
+    },
+    {
+      "number": 2,
+      "name": "Exact computational proof inputs",
+      "outcome": "SCOPED_PASS",
+      "checks": "Factor F, compute resultants and factor count; check quartic irreducibility mod 3 and modular gcd discriminant.",
+      "limitations": "Algebra checks alone do not prove a general published theorem."
+    },
+    {
+      "number": 3,
+      "name": "Published-theorem hypotheses",
+      "outcome": "SCOPED_PASS",
+      "checks": "Verify degree 2 A,B, monic degree 3 C, both Upsilon terms, gcd degrees, non-square of A, theorem rank count.",
+      "limitations": "The theorem is external; the application has not been independently refereed."
+    },
+    {
+      "number": 4,
+      "name": "Alternative geometric falsification",
+      "outcome": "SCOPED_PASS",
+      "checks": "Rational elliptic surface, eight I1 finite fibers, I4 infinity, Shioda–Tate geometric rank 5; distinct from rational rank 3.",
+      "limitations": "Uses standard external geometric classification and Shioda–Tate theorem."
+    },
+    {
+      "number": 5,
+      "name": "Novelty, specialization, analytic-rank overclaim",
+      "outcome": "UNCERTAIN",
+      "checks": "Test rank drops at u=1 and -2; verify generic rank does not imply exact specialized rank; no analytic equality asserted.",
+      "limitations": "No independently established novelty or infinite exact specialized rank/analytic comparison."
+    }
+  ],
+  "count": 5,
+  "independently_reproduced_by_separate_mathematician": false,
+  "policy": "Five ResearchOS/TECT-inspired adversarial research passes, not canonical TECT execution or assurance."
+}
