@@ -32,8 +32,17 @@
       "topology": "UNRESOLVED: define the LF inductive-limit topology and the topology used for the target domain; these are not interchangeable.",
       "assumptions": "A precise underlying space, inclusion map, test-function normalization and approximation mode must be fixed.",
       "dependencies": [],
-      "discharge": "Provide a rigorous density theorem including topology and admissible approximation nets or sequences.",
-      "evidence": []
+      "discharge": "Provide a rigorous density theorem including topology and admissible approximation nets or sequences. Auxiliary C_c-infinity(R) LF density construction documented, but mismatch with global Weil domain unresolved.",
+      "evidence": [
+        {
+          "path": "docs/research/RH_LF_DENSITY_CORE.md",
+          "role": "Auxiliary LF density analytic argument on D(R) only; does not resolve Weil test space topology"
+        },
+        {
+          "path": "mathos/research/rh_lf_dense_core.py",
+          "role": "Bounded numerical construction, not density proof"
+        }
+      ]
     },
     {
       "id": "G2",
