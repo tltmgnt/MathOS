@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "status": "curriculum_metadata_only",
+  "automatic_certification": false,
+  "external_validation_established": false,
+  "courses": [
+    {
+      "id": "bridge",
+      "title": "Mathematical reasoning bridge",
+      "level": "beginner",
+      "duration_weeks": 4,
+      "prerequisites": [],
+      "syllabus": "curriculum/academy/BEGINNER_BRIDGE.md",
+      "verification": "python -m unittest discover -s tests -p test_curriculum_academy.py -v",
+      "evidence_type": "learner_work_reviewed_by_human",
+      "outcome": "Distinguish examples from proofs, write quantified claims and reproduce finite checks"
+    },
+    {
+      "id": "zeta-tda",
+      "title": "AI, zeta functions and TDA",
+      "level": "intermediate",
+      "duration_weeks": 6,
+      "prerequisites": [
+        "bridge"
+      ],
+      "syllabus": "curriculum/tect_x_zeta_tda_standalone/README.md",
+      "verification": "python -m unittest discover -s curriculum/tect_x_zeta_tda_standalone -p test_lab.py -v",
+      "evidence_type": "human_scored_capstone",
+      "outcome": "Compute bounded examples and describe gaps between finite evidence and universal theorems"
+    },
+    {
+      "id": "topology",
+      "title": "Topology compatibility laboratory",
+      "level": "intermediate",
+      "duration_weeks": 1,
+      "prerequisites": [
+        "bridge"
+      ],
+      "syllabus": "docs/portfolio/TOPOLOGY_CURRICULUM_V2.md",
+      "verification": "python curriculum/lab.py --verify",
+      "evidence_type": "human_scored_lab",
+      "outcome": "Evaluate structural invariants and compare TDA with simpler baselines"
+    },
+    {
+      "id": "proof",
+      "title": "Proof analysis and verification",
+      "level": "advanced",
+      "duration_weeks": 24,
+      "prerequisites": [
+        "bridge"
+      ],
+      "syllabus": "curriculum/proof-analysis-verification.md",
+      "verification": "python -m unittest discover -s tests -p test_agentic_curriculum.py -v",
+      "evidence_type": "expert_reviewed_proof_dossier",
+      "outcome": "Audit Lean proof assumptions, dependency soundness and reproducibility"
+    },
+    {
+      "id": "agentic-clay",
+      "title": "Agentic Clay research apprenticeship",
+      "level": "research",
+      "duration_weeks": 24,
+      "prerequisites": [
+        "proof"
+      ],
+      "syllabus": "curriculum/agentic-clay-24-week.md",
+      "verification": "python -m mathos.research.agentic_curriculum --track all",
+      "evidence_type": "external_review_required",
+      "outcome": "Produce a scoped research dossier without claiming Millennium certification"
+    },
+    {
+      "id": "topo406",
+      "title": "Proof, explanation and transfer standards",
+      "level": "cross_cutting",
+      "duration_weeks": 1,
+      "prerequisites": [
+        "bridge"
+      ],
+      "syllabus": "curriculum/TOPO-406-proof-explanation-transfer.md",
+      "verification": "python -m unittest discover -s tests -p test_curriculum_academy.py -v",
+      "evidence_type": "human_reviewed_traceability",
+      "outcome": "Classify claim evidence, falsification and transfer limitations"
+    }
+  ],
+  "quality_dimensions": [
+    {
+      "id": "breadth",
+      "gate": "All curricula have identified outcomes and prerequisite paths",
+      "external": false
+    },
+    {
+      "id": "rigor",
+      "gate": "Human proof-scope review and counterexamples documented",
+      "external": true
+    },
+    {
+      "id": "reproducibility",
+      "gate": "Offline examples pass CI at pinned commit; independent replay documented",
+      "external": true
+    },
+    {
+      "id": "specialization",
+      "gate": "Seven Clay tracks each have source, scope and missing-proof handoff",
+      "external": true
+    },
+    {
+      "id": "accessibility",
+      "gate": "Beginner no-code and code routes tested with real novice learners",
+      "external": true
+    },
+    {
+      "id": "external_validation",
+      "gate": "Preregistered independent multi-site educational outcomes replicated",
+      "external": true
+    }
+  ]
+}
