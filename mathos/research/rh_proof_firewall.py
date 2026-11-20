@@ -78,6 +78,9 @@ def validate(registry: dict) -> dict:
     for gate, kind in REQUIRED.items():
         _require(gate in by_id and by_id[gate].get("kind") == kind,
                  f"missing or misclassified gate {gate}")
+    _require("G5P" in by_id
+             and by_id["G5P"].get("kind") == "family_wide_positivity",
+             "missing separate all-family positivity obligation G5P")
     _require("BASELINE" in by_id
              and by_id["BASELINE"].get("kind") == "finite_comparison",
              "missing finite baseline")
@@ -98,12 +101,23 @@ def validate(registry: dict) -> dict:
 
     for cid in by_id:
         visit(cid)
-    _require(set(by_id["G5"]["dependencies"]) >= {"G1", "G2", "G3", "G4"},
-             "global transfer must depend on density, admissibility, continuity, arithmetic")
+    _require(set(by_id["G5"]["dependencies"]) >= {"G1", "G2", "G3", "G4", "G5P"},
+             "global transfer must also depend on positivity across the ENTIRE dense family")
+    _require(set(by_id["G5P"]["dependencies"]) >= {"G1", "G2", "G4"},
+             "whole-family positivity must depend on density, admissibility and arithmetic")
     _require("G5" in by_id["G6"]["dependencies"],
              "independent verification must depend on global transfer")
-    _require("BASELINE" not in by_id["G5"]["dependencies"],
-             "finite baseline cannot discharge global transfer")
+    def transitive_dependencies(cid: str) -> set[str]:
+        result: set[str] = set()
+        for dep in by_id[cid]["dependencies"]:
+            result.add(dep)
+            result.update(transitive_dependencies(dep))
+        return result
+
+    _require("BASELINE" not in transitive_dependencies("G5"),
+             "finite baseline cannot directly or indirectly discharge global transfer")
+    _require("BASELINE" not in transitive_dependencies("G5P"),
+             "finite baseline cannot directly or indirectly establish full-family positivity")
     _require(all(by_id[x]["status"] not in {"PROVED", "FORMALLY_VERIFIED"}
                  for x in GATES), "global gate prematurely promoted")
     return {
@@ -111,6 +125,7 @@ def validate(registry: dict) -> dict:
         "global_claim": "RH",
         "global_claim_status": "OPEN",
         "gate_statuses": {g: by_id[g]["status"] for g in GATES},
+        "family_wide_positivity_status": by_id["G5P"]["status"],
         "unresolved_gates": [g for g in GATES
                              if by_id[g]["status"] not in {"PROVED", "FORMALLY_VERIFIED"}],
         "finite_baseline_is_global_proof": False,
