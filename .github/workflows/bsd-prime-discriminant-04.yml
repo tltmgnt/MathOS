@@ -1,0 +1,36 @@
+name: BSD milestone 04 exact root-number audit (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_PRIME_DISCRIMINANT_MILESTONE_04.md'
+      - 'mathos/research/bsd_prime_discriminant_04.py'
+      - 'tests/test_bsd_prime_discriminant_04.py'
+      - '.github/workflows/bsd-prime-discriminant-04.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_PRIME_DISCRIMINANT_MILESTONE_04.md'
+      - 'mathos/research/bsd_prime_discriminant_04.py'
+      - 'tests/test_bsd_prime_discriminant_04.py'
+      - '.github/workflows/bsd-prime-discriminant-04.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-exact-root-sign:
+    name: Finite integer and local-sign audit only (not analytic rank)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test exact finite certificates and no-proof-promotion labels
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_rank_three_family.py' -v
+          python -m unittest discover -s tests -p 'test_bsd_prime_discriminant_04.py' -v
+          python -m mathos.research.bsd_prime_discriminant_04 --start -8 --end 7 > /tmp/bsd04.json
+          python -m json.tool /tmp/bsd04.json >/dev/null
