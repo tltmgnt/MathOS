@@ -1,0 +1,32 @@
+name: TECT-X BSD nonisotrivial Selmer proof-scope audit
+
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/tect_x_rank3_family_certificate.py'
+      - 'mathos/research/tect_x_rank4_fiber_certificate.py'
+      - 'tests/test_tect_x_noni_selmer.py'
+      - 'docs/research/TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md'
+      - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - '.github/workflows/tect-x-bsd-nonisotrivial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-field-certificates:
+    name: Exact rank lower bounds only (no infinite Selmer-3 claim)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Adversarial finite-field regression tests
+        run: python -m unittest discover -s tests -p 'test_tect_x_noni_selmer.py' -v
+      - name: Family-wide three-point certificate
+        run: python -m mathos.research.tect_x_rank3_family_certificate
+      - name: First-fiber four-point certificate
+        run: python -m mathos.research.tect_x_rank4_fiber_certificate
