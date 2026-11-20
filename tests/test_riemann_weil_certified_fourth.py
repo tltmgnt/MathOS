@@ -19,7 +19,7 @@ class FourthWeilTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         iv.dps=60
-        cls.report=audit(8192)
+        cls.report=audit(65536)
 
     def test_fourth_center_is_actual_distinct_arithmetic_test(self):
         self.assertEqual(NEW_CENTER,Fraction(21,5))
@@ -82,6 +82,15 @@ class FourthWeilTests(unittest.TestCase):
         self.assertTrue(r["all_pivots_positive"])
         self.assertGreater(Fraction(r["schur_pivots"][0][0]),0)
 
+    def test_old_generalized_gap_fails_on_real_fourth_direction(self):
+        r=self.report["verified_matrix"]
+        self.assertEqual(r["previous_3D_bound"],"1/50000000")
+        self.assertFalse(r["previous_3D_generalized_lower_bound_survives"])
+        low,high=map(Fraction,r["failed_previous_3D_bound_schur_interval"])
+        self.assertLess(high,0)
+        self.assertLess(low,high)
+        self.assertEqual(r["strict_generalized_lambda_lower"],"1/1000000000")
+
     def test_prime_archimedean_errors_all_bounded(self):
         errors=self.report["analytic_certification"]["new_entry_errors"]
         self.assertEqual(len(errors),4)
@@ -109,7 +118,7 @@ class FourthWeilTests(unittest.TestCase):
                 self.assertFalse(v,k)
 
     def test_invalid_panels_rejected(self):
-        for n in [1,1024,4096,8193,0,8192.0,True]:
+        for n in [1,1024,4096,8192,16384,0,65536.0,True]:
             with self.subTest(panels=n),self.assertRaises(ValueError):
                 audit(n)
 
@@ -118,7 +127,7 @@ class FourthWeilTests(unittest.TestCase):
             path=Path(folder)/"fourth.json"
             subprocess.run([
                 sys.executable,"-m","mathos.research.riemann_weil_certified_fourth",
-                "--panels","8192","--output",str(path),
+                "--panels","65536","--output",str(path),
             ],capture_output=True,text=True,check=True)
             data=json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(data["schema"],"mathos_tectx_weil_certified_fourth_direction/1")
