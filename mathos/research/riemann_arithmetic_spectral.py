@@ -122,6 +122,14 @@ def build_report(max_index: int = 2048, epsilon: float = 1.0) -> dict:
     heat_arithmetic = math.fsum(math.exp(-heat_t * v) for v in shifted[:heat_n])
     if heat_arithmetic > heat_base + 1e-12:
         raise AssertionError("heat-trace monotonicity violated")
+    # Independent prime-power indexing of exactly the same finite heat difference.
+    prime_power_delta = math.fsum(
+        math.exp(-heat_t * v) * math.expm1(-heat_t * epsilon * arithmetic_shift(n))
+        for n, v in enumerate(base[:heat_n], 1)
+        if von_mangoldt(n) > 0
+    )
+    if not math.isclose(heat_arithmetic - heat_base, prime_power_delta, abs_tol=1e-12):
+        raise AssertionError("prime-power trace difference identity failed")
     first = base[0]
     if not first > TAU * math.e > FIRST_ZETA_ZERO_REFERENCE:
         raise AssertionError("documented first-zero mismatch invariant failed")
@@ -148,6 +156,9 @@ def build_report(max_index: int = 2048, epsilon: float = 1.0) -> dict:
             "heat_prefix_length": heat_n,
             "finite_heat_trace_unperturbed": heat_base,
             "finite_heat_trace_arithmetic": heat_arithmetic,
+            "finite_prime_power_trace_difference": prime_power_delta,
+            "prime_power_trace_identity": "Tr(exp(-t H_epsilon))-Tr(exp(-t H_0))=sum_{p prime,k>=1} exp(-t lambda_(p^k)(0))*(exp(-t epsilon log(p)/(1+log(p^k+1)))-1), t>0",
+            "prime_power_trace_identity_scope": "Exact convergent identity for constructed toy operator, NOT the Riemann explicit formula",
             "trace_identity_status": "NOT_DERIVED",
             "prime_explicit_formula_status": "NOT_DERIVED",
             "first_eigenvalue": first,
