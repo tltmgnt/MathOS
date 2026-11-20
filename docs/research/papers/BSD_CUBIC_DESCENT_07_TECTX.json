@@ -1,0 +1,66 @@
+{
+  "schema_version": "researchos-tectx-bsd-v1",
+  "date": "2026-11-19",
+  "milestone": "MATHOS-BSD-07",
+  "title": "Cubic 2-descent parameter-dependent rank upper bound on u=24 Z",
+  "claim_id": "MATHOS.BSD.07.2DESCENT_B24K",
+  "claim_scope": "For every integer k, rank(E_{24k}(Q)) <= 5+3omega(D(24k))+3ceil(log2 N(24k)); rank3 exact infinite is NOT proved.",
+  "repository": "tltmgnt/MathOS",
+  "canonical_controller": "tltmgnt/ResearchOs/tect_runtime",
+  "canonical_controller_executed": false,
+  "canonical_assurance_state": "UNVERIFIED",
+  "proof_method": "standard x-theta 2-descent injection, norm kernel, S-units, cubic ideal class group, Minkowski, ideal-count bound",
+  "parametric_family": "y^2+y=x^3+u(u+1)x^2/2-(u(u+1)+2)x/2",
+  "explicit_infinite_parameters": "u=24*k (k ranges over all integers)",
+  "exact_upper_bound_computer_certifiable_for_each_k": true,
+  "upper_bound_uniform_constant": false,
+  "upper_bound_3_for_all_k": false,
+  "upper_bound_3_for_infinite_subset": false,
+  "exact_rank_three_infinite_fibers": false,
+  "analytic_rank_three_infinite_fibers": false,
+  "independent_mathematical_novelty_assessed": false,
+  "independent_external_expert_authentication": false,
+  "new_theorem_in_literature_established": false,
+  "BSD_proved": false,
+  "gates": [
+    {
+      "gate": 1,
+      "name": "Claim and external theorem provenance",
+      "state": "SCOPED_PASS",
+      "scope": "Original MathOS E_u, not Zywina comparator; cubic descent and Minkowski cited, not independently reproved."
+    },
+    {
+      "gate": 2,
+      "name": "Symbolic algebra and field properties",
+      "state": "SCOPED_PASS",
+      "scope": "Exact coordinate transform, Z[s] discriminant, mod3 irreducibility for u=24k."
+    },
+    {
+      "gate": 3,
+      "name": "Adversarial Galois/squareclass check",
+      "state": "SCOPED_PASS",
+      "scope": "D(u)=5 mod8, positive, S3 cubic totally real and no rational 2-torsion on entire arithmetic progression."
+    },
+    {
+      "gate": 4,
+      "name": "Kummer upper bound and numeric sanity",
+      "state": "EXTERNAL_THEOREM_AND_EXACT_ARITHMETIC",
+      "scope": "Norm kernel/S-unit/class group bound applies universally; integer B(-24)=74, B(0)=23, B(24)=71. No class group or 2-Selmer dimension actually computed."
+    },
+    {
+      "gate": 5,
+      "name": "Competitive scientific target and proof-status protection",
+      "state": "BLOCKED",
+      "scope": "No uniform bound <=3 for any proven infinite subset, no exact rank3 specialization theorem or analytic equality; no independent novelty."
+    }
+  ],
+  "independent_reproductions": 0,
+  "tests_scope": "symbolic polynomial arithmetic, integer factoring for sample parameters, nonpromotion fields only",
+  "human_review_required": true,
+  "references": [
+    "https://github.com/MichaelStollBayreuth/EllipticCurves",
+    "https://docs.magma-maths.org/v2.30-1/ArithmeticGeometry/EllipticCurvesOverQAndNumberFields/mordell-weil.html",
+    "https://doi.org/10.1017/S0004972724001175",
+    "https://github.com/tltmgnt/MathOS/pull/55"
+  ]
+}
