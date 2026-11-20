@@ -1,0 +1,116 @@
+{
+  "schema_version": "mathos-bsd08-observed-evidence-v1",
+  "run_id": 44654855201,
+  "job_id": 136018446386,
+  "source_commit": "a1dcf76596971782ae32a682443c42aecbd01642",
+  "workflow_url": "https://github.com/tltmgnt/MathOS/actions/runs/44654855201",
+  "evidence_artifact": {
+    "id": 14593136191,
+    "name": "MathOS-BSD08-PARI-Tect-cas-evidence",
+    "archive_sha256": "3bae7379ff0f60397b059109e956bcf5868fc5c299dc16006db63d31c2736681",
+    "expires_at": "2026-12-20T01:36:58Z"
+  },
+  "execution_time_utc": "2026-11-20T01:36:57Z",
+  "backend": "PARI/GP",
+  "backend_version": "2.17.3-1",
+  "model": "E_u: y^2+y=x^3+u(u+1)/2*x^2-(u(u+1)+2)/2*x",
+  "method": "GP ellrank(E,0[,known_points]); elltors(E); finite 2-descent and Cassels-pairing",
+  "source_documentation": "https://pari.math.u-bordeaux.fr/dochtml/html/Elliptic_curves.html#ellrank",
+  "interpretation": "The method returns unconditional rank_lower <= rank <= rank_upper; C = rank_upper + dimension rational 2-torsion + Sha pairing correction.",
+  "cas_executed": true,
+  "run_conclusion": "success",
+  "records": [
+    {
+      "u": 0,
+      "lower": 1,
+      "upper": 1,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 1,
+      "computed_rank_if_bounds_equal": 1,
+      "result": "OBSERVED",
+      "exit_code": 0
+    },
+    {
+      "u": 1,
+      "lower": 2,
+      "upper": 2,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 2,
+      "computed_rank_if_bounds_equal": 2,
+      "result": "OBSERVED",
+      "exit_code": 0
+    },
+    {
+      "u": 2,
+      "lower": 3,
+      "upper": 3,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 3,
+      "computed_rank_if_bounds_equal": 3,
+      "result": "OBSERVED",
+      "exit_code": 0
+    },
+    {
+      "u": 3,
+      "lower": 3,
+      "upper": 3,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 3,
+      "computed_rank_if_bounds_equal": 3,
+      "result": "OBSERVED",
+      "exit_code": 0
+    },
+    {
+      "u": 24,
+      "lower": 4,
+      "upper": 4,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 4,
+      "computed_rank_if_bounds_equal": 4,
+      "result": "OBSERVED",
+      "exit_code": 0
+    },
+    {
+      "u": -24,
+      "lower": 4,
+      "upper": 4,
+      "sha_pairing_correction": 0,
+      "torsion2_dim": 0,
+      "selmer2_dim": 4,
+      "computed_rank_if_bounds_equal": 4,
+      "result": "OBSERVED",
+      "exit_code": 0
+    }
+  ],
+  "researchos_tect_controller": {
+    "repository": "tltmgnt/ResearchOs",
+    "commit": "4692b75db52c91ab36622bda36d1c26247433d2a",
+    "replay_verified": true,
+    "claim": "mathos-bsd08-observed-cas-computation",
+    "state": "SUPPORTED",
+    "independently_authenticated_human_review": false,
+    "assured": false
+  },
+  "conclusions": {
+    "computed_exact_ranks_at_selected_parameters": true,
+    "parameters_u24_and_negative24_have_rank_four_according_to_cas": true,
+    "uniform_bound_at_most_three_for_all_24Z_refuted_by_rank_four_example_under_cas_correctness": true,
+    "infinite_subset_with_uniform_upper_bound_three_established": false,
+    "infinite_exact_rank_three_original_mathos_family_established": false,
+    "new_theorem_or_priority_established": false,
+    "analytic_rank_three_infinite_established": false,
+    "BSD_proved": false
+  },
+  "limitations": [
+    "Raw GP output and TECT replay are external GitHub artifacts, not embedded mathematical proof certificates.",
+    "An independently developed CAS is not equivalent to an independent human mathematical proof.",
+    "Only six integer parameters were executed; a finite sample does not imply any infinite-set result.",
+    "Pari upper bound for u=24 and u=-24 is 4, so full 24Z cannot have uniform upper bound three.",
+    "GitHub artifact expires; this versioned record preserves metadata and run link without claiming immutable retention."
+  ]
+}
