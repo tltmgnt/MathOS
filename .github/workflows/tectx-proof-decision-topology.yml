@@ -1,0 +1,64 @@
+name: TECT-X proof-decision topology and RH nonpromotion
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/tectx_proof_decision_topology.py'
+      - 'tests/test_tectx_proof_decision_topology.py'
+      - 'docs/research/TECTX_PROOF_DECISION_TOPOLOGY.md'
+      - '.github/workflows/tectx-proof-decision-topology.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/tectx_proof_decision_topology.py'
+      - 'tests/test_tectx_proof_decision_topology.py'
+      - 'docs/research/TECTX_PROOF_DECISION_TOPOLOGY.md'
+      - '.github/workflows/tectx-proof-decision-topology.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proof-decision-fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Run proof topology and adversarial nonpromotion tests
+        run: python -m unittest discover -s tests -p 'test_tectx_proof_decision_topology.py' -v
+      - name: Generate evidence ledger and exact norm compatibility example
+        run: |
+          python -m mathos.research.tectx_proof_decision_topology --output artifacts/riemann/tectx_proof_decision_topology.json
+          python -m json.tool artifacts/riemann/tectx_proof_decision_topology.json >/dev/null
+      - name: Independently check no-RH proof promotion and finite-norm logical boundary
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/tectx_proof_decision_topology.json', encoding='utf-8') as f:
+              r=json.load(f)
+          assert r['schema']=='mathos_tectx_proof_decision_topology/1'
+          assert r['highest_evidence_level']=='FINITE_THEOREM'
+          assert r['finite_evidence_only']
+          assert not r['global_proof_candidate_declared']
+          assert not r['global_proof_externally_verified']
+          assert not r['Riemann_hypothesis_proved']
+          assert len(r['decision_ontology']['families'])==10
+          assert r['decision_ontology']['ten_families_are_overlapping_attributes']
+          assert not r['decision_ontology']['claim_of_exhaustive_ontology']
+          assert set(r['missing_proof_gaps'])=={
+              'G1_FINITE_TO_INFINITE',
+              'G2_SUPPORT_WINDOWS',
+              'G4_SPECTRAL_STABILITY',
+              'G6_LOGICAL_COMPLETION'
+          }
+          w=r['window_demo']
+          assert all(Fraction(x['error_times_norm_squared'])==4 for x in w['windows'])
+          assert not w['finite_sample_proves_limit']
+          assert not w['mathematically_verified_limit']
+          assert not r['governance']['finite_certificates_promoted_to_global']
+          assert not r['governance']['automatic_RH_solution_declaration']
+          PY
