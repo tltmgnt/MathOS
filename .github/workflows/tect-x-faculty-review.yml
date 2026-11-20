@@ -1,0 +1,47 @@
+name: TECT-X faculty review human-in-loop MVP
+
+on:
+  pull_request:
+    paths:
+      - 'apps/tect_x_faculty_review/**'
+      - '.github/workflows/tect-x-faculty-review.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  academic-review-gates:
+    name: Invitation security, independent review, editorial scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: apps/tect_x_faculty_review
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install app and testing dependencies
+        run: python -m pip install -r requirements.txt pytest httpx
+      - name: Verify original source and curriculum review seed
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import json
+          source=Path('source/ResearchOS_TECT_X_Standalone_Zeta_TDA_Curriculum.docx')
+          assert source.read_bytes()[:2]==b'PK'
+          with ZipFile(source) as z:
+              assert 'word/document.xml' in z.namelist()
+          seed=json.loads(Path('data/seed_claims.json').read_text(encoding='utf-8'))
+          assert len(seed['claims'])==14
+          assert sum(c['category']=='lesson' for c in seed['claims'])==12
+          assert all(c['status']=='open_for_review' for c in seed['claims'])
+          print('Original DOCX and source-grounded 12-lesson review seed verified')
+          PY
+      - name: Adversarial human-in-loop workflow tests
+        run: python -m pytest -q tests/test_workflow.py
+      - name: Compile app backend
+        run: python -m py_compile app.py
