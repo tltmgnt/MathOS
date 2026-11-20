@@ -7,6 +7,9 @@ on:
       - 'docs/research/RH_PROOF_FIREWALL.md'
       - 'docs/research/RH_TRANSFER_MILESTONE.md'
       - 'formal/RHTransferLogic.lean'
+      - 'mathos/research/rh_lf_dense_core.py'
+      - 'tests/test_rh_lf_dense_core.py'
+      - 'docs/research/RH_LF_DENSITY_CORE.md'
       - 'tests/test_rh_proof_firewall.py'
       - '.github/workflows/rh-proof-firewall.yml'
   push:
@@ -17,6 +20,9 @@ on:
       - 'docs/research/RH_PROOF_FIREWALL.md'
       - 'docs/research/RH_TRANSFER_MILESTONE.md'
       - 'formal/RHTransferLogic.lean'
+      - 'mathos/research/rh_lf_dense_core.py'
+      - 'tests/test_rh_lf_dense_core.py'
+      - 'docs/research/RH_LF_DENSITY_CORE.md'
       - 'tests/test_rh_proof_firewall.py'
       - '.github/workflows/rh-proof-firewall.yml'
   workflow_dispatch:
@@ -42,6 +48,20 @@ jobs:
         run: lean formal/RHTransferLogic.lean
       - name: Adversarial proof-firewall regressions
         run: python -m unittest discover -s tests -p 'test_rh_proof_firewall.py' -v
+      - name: Test constructive LF bump core numerical boundary
+        run: python -m unittest discover -s tests -p 'test_rh_lf_dense_core.py' -v
+      - name: Build bounded LF bump example without RH promotion
+        run: |
+          python -m mathos.research.rh_lf_dense_core --output artifacts/rh/lf_bump_core.json
+          python - <<'PY'
+          import json
+          with open('artifacts/rh/lf_bump_core.json',encoding='utf-8') as fh:
+              a=json.load(fh)
+          assert a["claim_scope"]=="FINITE_NUMERICAL_DEMONSTRATION_NOT_WEIL_DENSITY"
+          assert not a["RH_relevant_Weil_density_proved"]
+          assert not a["Riemann_hypothesis_proved"]
+          assert not a["all_derivative_LF_convergence_checked_by_code"]
+          PY
       - name: Validate registry and export scope-safe metadata
         run: python -m mathos.research.rh_proof_firewall --report artifacts/rh/proof_obligations.json
       - name: Enforce no proof promotion
