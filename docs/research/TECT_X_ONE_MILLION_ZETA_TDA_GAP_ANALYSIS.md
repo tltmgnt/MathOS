@@ -5,6 +5,12 @@
 **Arithmetic breakthrough claimed:** **No**  
 **Input:** Four explicit families, 250,000 mathematically distinct functions each.
 
+## Motivating video: AI, brute force, and mathematical insight
+
+The user-provided screenshot identifies Superintelligence's 21 March 2026 YouTube short, [*AI & Math: Solving Riemann Hypothesis by Brute Force? #shorts*](https://www.youtube.com/watch?v=M7eQUHH-oWI). Its visible description asks whether computation alone can resolve the Riemann hypothesis or whether insight is necessary. This is **motivation**, not an evidentiary claim about actual zeta zeros or the video's spoken arguments. We did not review a full transcript.
+
+This experiment provides one bounded test of that distinction: one million **function descriptions and feature measurements** do not constitute one million zero proofs; selected numerical TDA clusters need invariant descriptors before they can support analytic conclusions. The [video-reference and proof-gap protocol](TECT_X_VIDEO_REFERENCE_AI_RH_BRUTE_FORCE.md) records the source, method, counterchecks, and strict no-certification policy.
+
 ## Executive finding
 
 A deterministic computation of **1,000,000 distinct zeta functions** across four mathematically specified families was run successfully. It establishes three useful but **largely known** connections, plus a serious topological-identifiability warning:
