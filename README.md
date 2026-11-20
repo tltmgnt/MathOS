@@ -20,6 +20,11 @@ MathOS connects mathematical reasoning, Topological Gap Analysis Ω, DTI Ω, and
 The [Millennium Ω framework](docs/millennium-omega/README.md) adds seven explicit research engine adapters, six deterministic Ω agent stages, TECT research-status governance, scoped Lean 4/Coq policy examples, adversarial tests and a dedicated CI workflow. It reuses the existing seven-track MathOS probes and proof-obligation register rather than claiming new Millennium proofs.
 
 Run `python -m mathos.millennium_omega` for a research-only evidence packet. **The six open Millennium problems remain unproved by MathOS; Poincaré is recognized externally but has not been independently reconstructed here.** CI success is not a mathematical certification.
+## RH-Ω: integrated Riemann Hypothesis research assurance
+
+The [RH-Ω research pipeline](docs/research/RH_OMEGA.md) adds eight bounded RH checks, ten deterministic role-specific research records, Lean/Coq logical proof checks, adversarial tests, source fingerprints, and a TECT finite-to-global acceptance gate. It builds on the [existing RH proof-obligation register](docs/research/rh_proof_obligations.json) and computational experiments instead of duplicating them.
+
+Run `python -m mathos.research.rh_omega`. **The Riemann Hypothesis remains OPEN**; finite Li coefficients, numerical Weil Grams, theta-reflection samples, and green formal-policy CI checks do not prove it.
 
 ## What exists and what remains to be established
 

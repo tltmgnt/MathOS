@@ -1,0 +1,103 @@
+name: RH Omega integrated research and assurance
+
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/rh_omega.py'
+      - 'tests/test_rh_omega.py'
+      - 'scripts/rh_omega_benchmark.py'
+      - 'formal/RHTransferLogic.lean'
+      - 'formal/coq/RHOmegaFinitePrefix.v'
+      - 'docs/research/RH_OMEGA*'
+      - 'docs/research/rh_proof_obligations.json'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'mathos/research/riemann_weil_gram.py'
+      - 'mathos/research/riemann_theta_fredholm.py'
+      - '.github/workflows/rh-omega.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/rh_omega.py'
+      - 'tests/test_rh_omega.py'
+      - 'scripts/rh_omega_benchmark.py'
+      - 'formal/RHTransferLogic.lean'
+      - 'formal/coq/RHOmegaFinitePrefix.v'
+      - 'docs/research/RH_OMEGA*'
+      - 'docs/research/rh_proof_obligations.json'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'mathos/research/riemann_weil_gram.py'
+      - 'mathos/research/riemann_theta_fredholm.py'
+      - '.github/workflows/rh-omega.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rh-research-firewall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test existing RH proof-state firewall
+        run: python -m unittest discover -s tests -p 'test_rh_proof_firewall.py' -v
+      - name: Test RH-Omega adversarial controls and evidence boundaries
+        run: python -m unittest discover -s tests -p 'test_rh_omega.py' -v
+      - name: Generate research packet, validate independent replay, benchmark
+        run: |
+          mkdir -p artifacts/rh-omega
+          python -m mathos.research.rh_omega --output artifacts/rh-omega/report.json
+          python -m mathos.research.rh_omega --audit artifacts/rh-omega/report.json --output artifacts/rh-omega/acceptance.json
+          python scripts/rh_omega_benchmark.py --repetitions 2 --output artifacts/rh-omega/benchmark.json
+          python - <<'PY'
+          import json
+          with open("artifacts/rh-omega/report.json", encoding="utf-8") as handle:
+              p = json.load(handle)
+          with open("artifacts/rh-omega/acceptance.json", encoding="utf-8") as handle:
+              a = json.load(handle)
+          assert p["global_claim_status"] == "OPEN"
+          assert p["certification"] == "NOT_CERTIFIED"
+          assert len(p["checks"]) == 8 and len(p["agents"]) == 10
+          assert a["decision"] == "RESEARCH_ONLY"
+          assert a["this_is_not_mathematical_verification"]
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-omega-bounded-evidence
+          path: artifacts/rh-omega/
+          if-no-files-found: ignore
+
+  lean-conditional-logic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install existing pinned Lean 4.14.0
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check existing finite-to-global and conditional transfer lemmas
+        run: lean formal/RHTransferLogic.lean
+
+  coq-finite-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Coq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends coq
+      - name: Check logical finite-prefix counterexample (not RH)
+        run: coqc -q formal/coq/RHOmegaFinitePrefix.v
