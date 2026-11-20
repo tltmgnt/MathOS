@@ -1,0 +1,52 @@
+name: TECT-X actual Weil prime-two support crossing
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_prime_two_window.py'
+      - 'tests/test_riemann_weil_prime_two_window.py'
+      - 'docs/research/TECTX_WEIL_PRIME_TWO_WINDOW.md'
+      - '.github/workflows/riemann-weil-prime-two-window.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_prime_two_window.py'
+      - 'tests/test_riemann_weil_prime_two_window.py'
+      - 'docs/research/TECTX_WEIL_PRIME_TWO_WINDOW.md'
+      - '.github/workflows/riemann-weil-prime-two-window.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prime-two-window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Check exact prime-2 and archimedean cross bounds
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_prime_two_window.py' -v
+      - name: Build rational prime-active arithmetic Weil report
+        run: |
+          python -m mathos.research.riemann_weil_prime_two_window --output artifacts/riemann/weil_prime_two_window.json
+          python -m json.tool artifacts/riemann/weil_prime_two_window.json >/dev/null
+      - name: Independently verify rational signs and global positivity gate
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/weil_prime_two_window.json',encoding='utf-8') as f:
+              r=json.load(f)
+          assert r['status']=='PRIME_TWO_ACTUAL_WEIL_CROSS_ENCLOSED_NOT_PSD_RH_OPEN'
+          e=r['exact_rational_arithmetic_enclosures']['off_diagonal']
+          assert Fraction(e['at_log2_strict_lower'])==Fraction(2,225)
+          assert Fraction(e['prime2_strict_upper'])==-Fraction(23,5625)
+          assert Fraction(e['archimedean_strict_upper'])==-Fraction(1,33750)
+          assert Fraction(e['full_Weil_cross_strict_upper'])==Fraction(1,2)-Fraction(23,5625)-Fraction(1,33750)
+          assert r['prime_power_support']['only_possible_prime_power']==2
+          assert not r['exact_rational_arithmetic_enclosures']['matrix_psd_certified']
+          assert not any(r['assurance'].values())
+          PY
