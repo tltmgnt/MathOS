@@ -1,0 +1,97 @@
+name: BSD 08 independently executed PARI 2-descent + canonical TECT replay
+
+on:
+  push:
+    paths:
+      - 'mathos/research/bsd_selmer_selected_08.gp'
+      - 'mathos/research/bsd_selmer_selected_08.py'
+      - 'tests/test_bsd_selmer_selected_08.py'
+      - 'docs/research/papers/BSD_SELMER_MILESTONE_08.md'
+      - '.github/workflows/bsd-selmer-selected-08.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/bsd_selmer_selected_08.gp'
+      - 'mathos/research/bsd_selmer_selected_08.py'
+      - 'tests/test_bsd_selmer_selected_08.py'
+      - 'docs/research/papers/BSD_SELMER_MILESTONE_08.md'
+      - '.github/workflows/bsd-selmer-selected-08.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gp_exact_selmer:
+    name: PARI/GP unconditional 2-descent on selected original MathOS fibers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python parser and status-guard tests (synthetic fixtures only)
+        run: python -m unittest discover -s tests -p 'test_bsd_selmer_selected_08.py' -v
+      - name: Install independent PARI/GP computer algebra system
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq pari-gp
+          command -v gp
+          dpkg-query -W pari-gp | tee /tmp/pari-version.txt
+      - name: Run externally implemented PARI 2-descent (not an infinite theorem)
+        shell: bash
+        run: |
+          mkdir -p /tmp/mathos08
+          cp /tmp/pari-version.txt /tmp/mathos08/pari-version.txt
+          for u in 0 1 2 3; do
+            sed "s/__U__/$u/g" mathos/research/bsd_selmer_selected_08.gp > /tmp/mathos08/current.gp
+            set +e
+            timeout 125s gp -q < /tmp/mathos08/current.gp > "/tmp/mathos08/u$u.gp.log" 2>&1
+            rc=$?
+            set -e
+            echo "$rc" > "/tmp/mathos08/u$u.exit"
+            echo "PARI two-descent u=$u exit_code=$rc"
+            grep '^MATHOS08|' "/tmp/mathos08/u$u.gp.log" || true
+          done
+          cp mathos/research/bsd_selmer_selected_08.gp /tmp/mathos08/source.gp
+          sha256sum /tmp/mathos08/*.gp.log /tmp/mathos08/source.gp > /tmp/mathos08/SHA256SUMS.txt
+      - name: Parse strictly, retain inconclusive computations
+        run: |
+          python -m mathos.research.bsd_selmer_selected_08 report \
+            --root /tmp/mathos08 --source-sha "$GITHUB_SHA" --output /tmp/mathos08/report.json
+          python -m json.tool /tmp/mathos08/report.json > /dev/null
+          python -m mathos.research.bsd_selmer_selected_08 tect-scenario \
+            --report /tmp/mathos08/report.json --output /tmp/mathos08/tect-scenario.json
+          cat /tmp/mathos08/report.json
+      - name: Execute PINNED canonical ResearchOs TECT controller and verify replay
+        shell: bash
+        run: |
+          git clone --quiet https://github.com/tltmgnt/ResearchOs.git /tmp/researchos-tectx
+          git -C /tmp/researchos-tectx checkout --quiet 4692b75db52c91ab36622bda36d1c26247433d2a
+          echo '4692b75db52c91ab36622bda36d1c26247433d2a' > /tmp/mathos08/researchos-tect-controller-commit.txt
+          set +e
+          PYTHONPATH=/tmp/researchos-tectx python -m tect_runtime evaluate \
+            /tmp/mathos08/tect-scenario.json --output /tmp/mathos08/tect-bundle \
+            > /tmp/mathos08/tect-evaluate-output.json
+          rc=$?
+          set -e
+          # Intentionally not ASSURED: the controller returns code 1 for
+          # unverified/supported claims without reproduction or attack proofs.
+          test "$rc" -eq 1
+          PYTHONPATH=/tmp/researchos-tectx python -m tect_runtime verify \
+            /tmp/mathos08/tect-bundle > /tmp/mathos08/tect-verify.json
+          python - <<'PY'
+          import json
+          p='/tmp/mathos08/tect-bundle/report.json'
+          r=json.load(open(p))
+          states={k:v['state'] for k,v in r['state']['claims'].items()}
+          assert states
+          assert set(states.values()) <= {'UNVERIFIED','SUPPORTED'},states
+          print('ResearchOS TECT canonical offline replay:',states)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MathOS-BSD08-PARI-Tect-cas-evidence
+          path: /tmp/mathos08/
+          retention-days: 30
