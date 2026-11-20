@@ -1,0 +1,34 @@
+name: BSD rank-two family exact audit (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_RANK_TWO_FAMILY_MILESTONE_01.md'
+      - 'mathos/research/bsd_rank_two_family.py'
+      - 'tests/test_bsd_rank_two_family.py'
+      - '.github/workflows/bsd-rank-two-family.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_RANK_TWO_FAMILY_MILESTONE_01.md'
+      - 'mathos/research/bsd_rank_two_family.py'
+      - 'tests/test_bsd_rank_two_family.py'
+      - '.github/workflows/bsd-rank-two-family.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-invariants-only:
+    name: Exact polynomial audit, not a rank or BSD proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check invariants and conservative research status
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_rank_two_family.py' -v
+          python -m mathos.research.bsd_rank_two_family
