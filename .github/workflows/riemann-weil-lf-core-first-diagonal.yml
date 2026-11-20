@@ -1,0 +1,80 @@
+name: TECT-X actual normalized LF-dense Weil first diagonal
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_lf_core_first_diagonal.py'
+      - 'tests/test_riemann_weil_lf_core_first_diagonal.py'
+      - 'docs/research/TECTX_WEIL_LF_CORE_FIRST_DIAGONAL.md'
+      - '.github/workflows/riemann-weil-lf-core-first-diagonal.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_lf_core_first_diagonal.py'
+      - 'tests/test_riemann_weil_lf_core_first_diagonal.py'
+      - 'docs/research/TECTX_WEIL_LF_CORE_FIRST_DIAGONAL.md'
+      - '.github/workflows/riemann-weil-lf-core-first-diagonal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-canonical-Weil-first-diagonal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Pin directed interval backend
+        run: python -m pip install --disable-pip-version-check mpmath==1.3.0
+      - name: Test actual normalized Weil diagonal, singularity cancellation and negative controls
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_lf_core_first_diagonal.py' -v
+      - name: Regenerate fully arithmetic rational interval first core diagonal
+        run: |
+          python -m mathos.research.riemann_weil_lf_core_first_diagonal \
+            --half-panels 256 --dyadic-panels 256 \
+            --output artifacts/riemann/weil_lf_core_first_diagonal.json
+          python -m json.tool artifacts/riemann/weil_lf_core_first_diagonal.json >/dev/null
+      - name: Independently recombine rational pole prime gamma bounds and reject global claims
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/weil_lf_core_first_diagonal.json',encoding='utf-8') as f:
+              r=json.load(f)
+          assert r['schema']=='mathos_tectx_weil_LF_core_first_diagonal/1'
+          assert r['status']=='FIRST_CANONICAL_LF_CORE_WEIL_DIAGONAL_POSITIVE_NOT_ALL_INDEX'
+          assert r['test_function']['core_index']==0
+          assert r['test_function']['center']=='0/1'
+          assert r['test_function']['support']==['-1/2','1/2']
+          a=r['arithmetic']
+          assert a['prime_powers']==[{'n':2,'von_mangoldt_base':2}]
+          assert a['half_panels']==256 and a['dyadic_band_panels']==256
+          assert a['near_zero_integral_upper']=='1/8192'
+          mass_l,mass_u=map(Fraction,a['raw_mass_m0_interval'])
+          assert mass_l>0 and mass_u>=mass_l
+          pole_l,pole_u=map(Fraction,a['raw_pole_interval'])
+          prime_l,prime_u=map(Fraction,a['raw_prime2_interval'])
+          arch_l,arch_u=map(Fraction,a['raw_archimedean_interval'])
+          assert pole_l>0 and prime_u<0 and arch_u<0
+          assert Fraction(a['raw_positive_regularized_J_interval'][0])>=0
+          # Recompose from serialised OUTWARD intervals, rather than
+          # trusting the claimed scalar/eigenvalue fields directly.
+          lower=pole_l+prime_l+arch_l
+          upper=pole_u+prime_u+arch_u
+          assert lower>0 and lower<=upper
+          assert lower/(mass_u**2)>Fraction(1,1000)
+          normalized_l,normalized_u=map(Fraction,a['normalized_complete_Weil_interval'])
+          assert normalized_l>Fraction(1,1000)
+          assert normalized_u>=normalized_l
+          assert Fraction(a['proved_normalized_strict_lower'])==Fraction(1,1000)
+          f=r['assurance']
+          assert f['this_one_core_diagonal_positive']
+          assert not f['all_first_prefix_gram_entries_evaluated']
+          assert not f['every_finite_LF_core_Gram_psd']
+          assert not f['global_Weil_positivity']
+          assert not f['Riemann_hypothesis_proved']
+          assert not f['full_positive_Weil_Hilbert_completion']
+          PY
