@@ -24,7 +24,7 @@ The earlier MathOS result gives exact generic algebraic rank \(3\) over \(\mathb
 
 ## 2. Selected-fiber, unconditional 2-descent
 
-For \(u\in\{0,1,2,3\}\), an **external** PARI/GP program receives the exact Weierstrass coefficients
+For \(u\in\{0,1,2,3,24,-24\}\), an **external** PARI/GP program receives the exact Weierstrass coefficients
 
 \[
 [a_1,a_2,a_3,a_4,a_6]
@@ -51,6 +51,28 @@ The GP audit obtains \(\dim E(\mathbb Q)[2]\) from the independent \`elltors(E)\
 **A successful machine-executed upper bound** is a conditional-on-software-correctness computer-assisted certificate for **that specified curve**, not a standalone, independently peer-reviewed proof or a theorem about infinitely many parameters. If \(\dim \operatorname{Sel}_2(E_u)\le3\) and three points have independently proved positive rank, then \(\operatorname{rank}E_u(\mathbb Q)=3\) for that \(u\). The simple inequalities never give an analytic-rank equality without additional mathematics.
 
 **Execution transparency:** Exact numerical outcomes are in the linked GitHub Actions run's uploaded \`MathOS-BSD08-PARI-Tect-cas-evidence\` artifact, not fabricated in this manuscript. If any solver invocation times out or errors, its status is \`INCONCLUSIVE\` and **must not be counted as a rank certificate**. Any later summary must cite the actual run ID and raw logs.
+
+
+## 2A. **Actually observed PARI/GP result** — six specializations
+
+The GitHub Actions run [44654855201](https://github.com/tltmgnt/MathOS/actions/runs/44654855201) executed **PARI/GP 2.17.3-1** on six specified fibers, including the two intended arithmetic-progression probes \(u=\pm24\). All six exact computer-algebra invocations exited with status zero; the program independently reported rank intervals, \(2\)-Selmer dimensions and the number of non-torsion points it returned. The raw CAS logs, source and hash manifest, parsed JSON, and actual canonical TECT replay bundle are preserved in that workflow's **MathOS-BSD08-PARI-Tect-cas-evidence** artifact. The source commit used was \`a1dcf76596971782ae32a682443c42aecbd01642\`. An immutable observation snapshot with raw log hashes is in [computed evidence JSON](BSD_SELMER_08_COMPUTED_EVIDENCE.v1.json).
+
+| \(u\) | \(D(u)\) | PARI rank interval | \(2\)-Selmer dimension | Returned independent points |
+|---:|---:|:---:|---:|---:|
+| \(0\) | 37 | [1,1] | 1 | 1 |
+| \(1\) | 389 | [2,2] | 2 | 2 |
+| \(2\) | 5,077 | [3,3] | 3 | 3 |
+| \(3\) | 43,669 | [3,3] | 3 | 3 |
+| \(24\) | 131,772,276,037 | **[4,4]** | **4** | 4 |
+| \(-24\) | 94,536,886,789 | **[4,4]** | **4** | 4 |
+
+For all six runs \(\dim E_u(\mathbb Q)[2]=0\) and PARI's Cassels correction \(\sigma=0\), so its output satisfied \(C=r_{\rm upper}\) with no inference from numerical \(L\)-values. The exact rank-three cases \(u=2,3\) reproduce the externally recorded rank-three benchmarks via an independently developed 2-descent implementation; the rank-four examples \(u=24,-24\) are **newly certified within this MathOS audit** but are **not asserted to be previously unknown in the mathematical literature**. They do not provide a theorem for infinitely many parameters.
+
+**Important falsification:** The original proposal to prove \(\operatorname{rank}E_{24k}(\mathbb Q)\le3\) for **every** \(k\in\mathbb Z\) is **false**: the two computed rank-four counterexamples are \(k=1\) and \(k=-1\). The revised question is whether there exists a *proper infinite subset* \(S\subset24\mathbb Z\) for which the \(2\)-Selmer dimension is uniformly at most three. **No such infinite subset has been proved.**
+
+The canonical ResearchOs controller was genuinely executed at pinned commit \`4692b75db52c91ab36622bda36d1c26247433d2a\`. It returned the narrowly scoped claim state **SUPPORTED** and replayed its hash-linked evidence successfully. This is **not** \`VALIDATED\` or \`ASSURED\`: no independent reviewer, separate reproduction, or proof of infinitude is represented by the TECT receipt.
+
+---
 
 ## 3. ResearchOS / TECT X — authentic offline controller execution
 
@@ -105,12 +127,12 @@ The known rank-three fibers \(u=2,3\) lie outside \(A=24\mathbb Z\); they are **
 
 ## 5. Files and reproduction
 
-- \`mathos/research/bsd_selmer_selected_08.gp\` — actual PARI/GP input, four selected parameters (\(0,1,2,3\)); source is versioned in MathOS.
+- \`mathos/research/bsd_selmer_selected_08.gp\` — actual PARI/GP input, six selected parameters (\(0,1,2,3,24,-24\)); source is versioned in MathOS.
 - \`mathos/research/bsd_selmer_selected_08.py\` — fail-closed provenance parser and canonical TECT scenario builder.
 - \`tests/test_bsd_selmer_selected_08.py\` — **synthetic fixtures explicitly identified as synthetic**, malicious-record rejection tests, and no-promotion checks.
 - \`.github/workflows/bsd-selmer-selected-08.yml\` — PARI installation, actual 2-descent runs, artifact upload, pinned canonical ResearchOs controller and replay verification.
 
-The parser anticipates \(u=\pm24\) as optional later tests but **does not claim those fibers were run** in the standard workflow.
+The reproducible standard workflow now executes \(u=\pm24\) alongside the four small benchmark fibers. The two rank-four outcomes block a uniform rank ≤3 claim on the entire progression.
 
 Source references: [PARI/GP elliptic curves documentation](https://pari.math.u-bordeaux.fr/dochtml/html/Elliptic_curves.html#ellrank); [Magma independent 2-Selmer specification](https://docs.magma-maths.org/v2.30-1/ArithmeticGeometry/EllipticCurvesOverQAndNumberFields/mordell-weil.html); [ResearchOs TECT specification](https://github.com/tltmgnt/ResearchOs/blob/main/TECT_SPEC.md); [MathOS 07 manuscript](BSD_CUBIC_DESCENT_INFINITE_UPPER_07.md).
 
