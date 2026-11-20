@@ -1,0 +1,40 @@
+name: BSD 06 ResearchOS TECT X published rank-three benchmark (not BSD)
+
+on:
+  push:
+    paths:
+      - 'docs/research/papers/BSD_RANK3_INFINITE_SOURCE_BENCHMARK_06.md'
+      - 'docs/research/papers/BSD_RANK3_INFINITE_TECTX.v1.json'
+      - 'mathos/research/bsd_rank3_infinite_tectx.py'
+      - 'tests/test_bsd_rank3_infinite_tectx.py'
+      - '.github/workflows/bsd-rank3-infinite-tectx.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/BSD_RANK3_INFINITE_SOURCE_BENCHMARK_06.md'
+      - 'docs/research/papers/BSD_RANK3_INFINITE_TECTX.v1.json'
+      - 'mathos/research/bsd_rank3_infinite_tectx.py'
+      - 'tests/test_bsd_rank3_infinite_tectx.py'
+      - '.github/workflows/bsd-rank3-infinite-tectx.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provenance_and_exact_arithmetic:
+    name: Exact Q[T] and Kummer check only; not published-theorem reproduction
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate source-attributed ResearchOS TECT X five-gate record
+        run: python -m json.tool docs/research/papers/BSD_RANK3_INFINITE_TECTX.v1.json > /dev/null
+      - name: Exact algebra and squareclass tests
+        run: python -m unittest discover -s tests -p 'test_bsd_rank3_infinite_tectx.py' -v
+      - name: Finite lower rank evidence only
+        run: |
+          python -m mathos.research.bsd_rank3_infinite_tectx --numerator 3 --denominator 1 > /tmp/bsd06.json
+          python -m json.tool /tmp/bsd06.json > /dev/null
