@@ -101,7 +101,7 @@ M4(D)=sum_(j=0)^4 binom(4,j)*H_j(D)*g_(4-j).
 The implementation uses the exact rational `M4(D)` for **each new entry**, rather than applying a small-center derivative bound outside its domain. The archimedean Simpson error is then enclosed by
 
 ```
-(45/180)*(45/N)^4*M4(D)/pi, N=8192.
+(45/180)*(45/N)^4*M4(D)/pi, N=65536.
 ```
 
 This is combined with the digamma remainder, an analytic Gaussian tail beyond 45, and `delta4`, with all finite arithmetic performed in directed interval mode. The existing 3×3 entries retain their tighter independent enclosures from the predecessor.
@@ -115,10 +115,10 @@ L_ij=sqrt(pi/a)/2 * [exp(-(c_i-c_j)²/(4a))
                     +exp(-(c_i+c_j)²/(4a))].
 ```
 
-Fix the previously certified generalized lower bound
+The previously certified three-dimensional generalized lower bound does not survive the fourth direction. For the four-dimensional positivity test use the smaller candidate bound
 
 ```
-kappa=1/50,000,000.
+kappa=1/1,000,000,000.
 ```
 
 The target is positive definiteness of the full **actual** matrix
@@ -133,15 +133,15 @@ Partition `M=[A B;B^T C]` with old `A` the certified three-dimensional subspace 
 S=C-B^T A^(-1)B.
 ```
 
-The program uses interval `LDL^T` for `A`, a directed interval triangular solve and a directed interval Schur evaluation. Certification is accepted **only if every old and new pivot has a strictly positive lower bound**. Independently checking all four pivots of `M` and of `L` helps detect implementation inconsistencies.
+The program uses interval `LDL^T` for `A`, a directed interval triangular solve and a directed interval Schur evaluation. Certification is accepted **only if every old and new pivot has a strictly positive lower bound**. Independently checking all four pivots of `M` and of `L` helps detect implementation inconsistencies. The same interval arithmetic also computes the **new-direction Schur complement at the old three-dimensional constant `1/50,000,000`** and requires its entire enclosure to lie **strictly below zero**. Thus the old constant provably fails for this enlarged span, while the reduced four-dimensional constant is separately accepted only if the new Schur pivot is positive.
 
 If this succeeds, the exact finite-dimensional conclusion is
 
 ```
-W(q_v²) > (1/50,000,000) * ||q_v||_(L²(R))²
+W(q_v²) > (1/1,000,000,000) * ||q_v||_(L²(R))²
 ```
 
-for every nonzero real vector in this particular four-dimensional span. This bound is **not** claimed to be uniform across arbitrary future directions.
+for every nonzero real vector in this particular four-dimensional span. This strictly weaker four-dimensional bound is **not** claimed to be uniform across arbitrary future directions. The drop from the three-dimensional bound is part of the research result, not an implementation regression.
 
 ## 5. Reproduce
 
@@ -149,10 +149,10 @@ for every nonzero real vector in this particular four-dimensional span. This bou
 python -m pip install mpmath==1.3.0
 python -m unittest discover -s tests -p 'test_riemann_weil_certified_fourth.py' -v
 python -m mathos.research.riemann_weil_certified_fourth \
-  --panels 8192 --output artifacts/riemann/weil_certified_fourth.json
+  --panels 65536 --output artifacts/riemann/weil_certified_fourth.json
 ```
 
-The certificate contains interval entries of the full 4×4 Weil and reference L² matrices, all new entry error components, the exact rational new prime tail, and positive LDL and Schur pivots. It retains explicit false flags for dimension five and above, global positivity, the Weil Hilbert completion and RH.
+The certificate contains interval entries of the full 4×4 Weil and reference L² matrices, all new entry error components, the exact rational new prime tail, and positive LDL and Schur pivots for the reduced lower bound, plus a **negative** Schur interval for the previous three-dimensional constant. It retains explicit false flags for dimension five and above, global positivity, the Weil Hilbert completion and RH.
 
 **Warning:** A successful local numerical or CI run is not an independent formal verification of the analytic estimates. Those estimates are part of the mathematical proof obligation and must be reviewed separately.
 
