@@ -41,16 +41,33 @@ phi(8s)phi(8t)
 
 The analytic archimedean kernel is positive and decreasing for positive arguments, and φ is monotone decreasing in |u|. Exact rational boxes and pinned outward interval evaluation enclose the integral, including the true pole term and all arithmetic primes. The diagonal inherits the fully regularized archimedean interval from PR #87; no divergent kernel is evaluated at zero.
 
-## Two independent finite-dimensional positivity gates
+## Rigorous rational midpoint + interval-residual spectral gate
 
-Let d_low be the certified lower bound of the diagonal, and C,E,J the certified upper bounds on the absolute values of the three successive cross entries c,e,g. Gershgorin yields
+A first direct interval LDL decomposition correctly **failed closed**: its fourth pivot interval crossed zero because the repeated interval entries in its elimination formulas generated excessive dependency error. This does not prove the true matrix indefinite. The revised certificate avoids this unsound inference.
 
-[
-lambda_{min}(G)ge
-d_{mathrm{low}}-max{C+E+J,,2C+E}.
-]
+All entries of the **actual** 4×4 arithmetic Weil matrix are first enclosed by outward rational endpoints. Let `A` be the exact rational midpoint of those entry intervals and `E=G-A`. Let `r_ij` be the exact rational half-width of entry `ij`; then
 
-The implementation requires the *exact rational* lower bound to be strictly greater than 1/10000. Independently, it checks all four interval LDL pivots of G−(1/10000)I are strictly positive, rejecting every ambiguous or nonpositive pivot. Only a complete passing CI run justifies the fixed-space conclusion λ_min(G)>1/10000.
+\[
+\|E\|_2\le \|E\|_\infty\le
+\epsilon:=\max_i\sum_j r_{ij}.
+\]
+
+Fix `κ=1/10000`. The code checks an **exact Fraction LDL decomposition** of the rational symmetric matrix `S=A-κI`, requiring every pivot to be strictly positive. It then computes the entire rational inverse `S^{-1}` with exact Gaussian elimination and determines `C=\|S^{-1}\|_\infty`. Since `S\succ0` and is symmetric,
+
+\[
+\lambda_{\min}(S)=\frac1{\|S^{-1}\|_2}
+\ge\frac1{\|S^{-1}\|_\infty}=\frac1C.
+\]
+
+Consequently, for **every real symmetric matrix** consistent with the arithmetic entry intervals,
+
+\[
+\lambda_{\min}(G)>\kappa
+\quad\text{whenever}\quad
+\frac1C-\epsilon>0.
+\]
+
+This is a valid verified finite-dimensional spectral inequality, and the exact rational inequality is checked **again** in CI after serializing the certificate. The computed Gershgorin bound is retained only as a diagnostic; it is **not** required to be positive because it can be overly conservative. Any failure of midpoint LDL, the exact inverse, or the inverse-error margin aborts the certification. The rational midpoint is never treated as the exact Weil Gram.
 
 ## Reproduction
 
@@ -60,7 +77,7 @@ python -m unittest discover -s tests -p 'test_riemann_weil_prime_eight_nine_elev
 python -m mathos.research.riemann_weil_prime_eight_nine_eleven_gram4 --panels 256 --output artifacts/riemann/weil_prime_8_9_11_gram4.json
 ```
 
-The JSON contains outward rational endpoints for every matrix entry, the full new pole/archimedean/prime-power components, exact rational support tests, the Gershgorin lower margin, all shifted LDL pivots and explicit rejection of any global PSD/RH claim.
+The JSON contains outward rational endpoints for every matrix entry, the full new pole/archimedean/prime-power components, exact rational support tests, the diagnostic Gershgorin estimate, midpoint LDL pivots and exact inverse-error margin and explicit rejection of any global PSD/RH claim.
 
 ## Fundamental limit
 
