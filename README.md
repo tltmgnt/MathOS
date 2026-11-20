@@ -42,6 +42,9 @@ The CLI is limited to supported linear equations; it does not prove arbitrary th
 ## Publication and citation status
 
 For the [publication-readiness checklist](docs/PUBLICATION_READINESS.md), use a specific source commit and select **either** a scoped software release **or** an academic-review/submission track. A draft `v0.1.0` GitHub Release exists but has **not** been published. It describes an earlier set of 22 arithmetic experiments and must not be represented as a release of all current `main` features without reconciling the version and scope. Author-approved citation metadata, independent replication and manuscript acceptance are not established by this repository.
+## Experiments 023–050: executable research extension (not yet a published release)
+
+The [follow-up arithmetic protocol](docs/research/EXPERIMENTS_023_050.md) adds 28 bounded conditions to the original 22. All 28 were [executed on both specified GPT-2 models](docs/research/EXPERIMENTS_023_050_RESULTS.md) on November 18, 2026, and [model revisions, metrics and artifact checksums were recorded](evidence/internal_reasoning/EXPERIMENTS_023_050_SUMMARY.json). This makes **50 numbered experiments with recorded execution**, not 50 independent scientific studies or validated mathematical reasoning. The v0.1.0 GitHub release draft is **still unpublished**, and its body has not yet been revised to include the new results.
 
 ## How a lab can evaluate MathOS
 
@@ -277,6 +280,30 @@ exact limited theorem. **The manuscript is not submitted, independently
 reviewed, proven novel, or a solution to P versus NP.** Passing CI
 prepares a reproducible research handoff, not an accepted mathematical paper.
 
+## Millennium research attempt 007: BSD inert-prime local-factor blind spot
+
+[Research attempt 007](docs/research/MILLENNIUM_ATTACK_007.md) turns to the **Birch and Swinnerton-Dyer conjecture**. Two classical elliptic curves, `E1: y²=x³−x` and `E5: y²=x³−25x`, have distinct rational ranks (0 and 1, **established externally**) but identical good local point counts `#E(F_p)=p+1` for **every prime p≡3 (mod 4)**. The elementary proof pairs values of the odd cubic using the quadratic character; there are infinitely many such primes. A [pinned Lean theorem](formal/BSDInertPrimeBlindspot.lean) checks only the **conditional** odd-character cancellation and an exact E5 rational point, while [the finite-field checker](mathos/research/bsd_inert_007.py) independently enumerates finitely many good reductions. **This does not construct the elliptic L-functions, prove global ranks, establish the BSD conjecture, or claim mathematical novelty.**
+
+## Millennium research attempt 008: finite Z2 gauge strip, not a 4D Yang–Mills mass gap
+
+[Research attempt 008](docs/research/MILLENNIUM_ATTACK_008.md) attacks a **Yang–Mills proof-method limitation** using an exactly solvable **two-dimensional, finite abelian Z2 lattice gauge strip**. For a one-by-n open strip with relative positive plaquette weight t≥1, the exact Wilson-loop expectation is `((t−1)/(t+1))^n`, established by an all-n elementary parity-counting proof. For the explicit trajectory `a=1/k, t=k²+1`, the loop exponent per **physical long-side length** tends to zero, although each finite model has positive per-plaquette decay. The strip's physical width shrinks; the *area-normalized* decay coefficient instead approaches 2, so **neither rate is a physical spectral mass-gap conclusion**. [Pinned Lean](formal/YMZ2Strip.lean) checks single-plaquette gauge invariance and independent-parity polynomial recurrences; [exact enumeration](mathos/research/ym_z2_strip_008.py) checks finite strip configurations and correct units. **No 4D non-Abelian continuum Yang–Mills field, physical Hilbert space or mass gap is constructed.**
+
+## Millennium research attempt 006: Hodge diagonal-cycle obstruction
+
+[Research attempt 006](docs/research/MILLENNIUM_ATTACK_006.md) moves to the **Hodge Conjecture**. For any smooth projective curve of positive genus, its diagonal divisor in the self-product is not a rational linear combination of the two fiber divisors: the classical intersection matrix has determinant `2g`, with a discrepancy of `2g` against the two-fiber span. A [Lean theorem](formal/HodgeDiagonalIntersections.lean) verifies the conditional linear-algebra consequence for genus one and [exact rational regression](mathos/research/hodge_diagonal_006.py) audits arbitrary genus values. **Geometric intersection numbers are assumed as standard external input, not formally proved by the code.** The diagonal is already algebraic, the codimension-one Hodge case is already solved by Lefschetz, and this is **not a proof of the full Hodge conjecture or a new mathematical discovery**.
+
+## Millennium research attempt 005: Riemann Li-positive-prefix obstruction
+
+[Research attempt 005](docs/research/MILLENNIUM_ATTACK_005.md) turns to the **Riemann Hypothesis**. For any finite prefix length, an exact mathematical construction gives a **synthetic**, conjugation/reflection-symmetric multiset of six candidate zero locations, with four off the critical line, whose first N **Li-style** expressions are all positive. The accompanying [Lean proof](formal/LiPrefixObstruction.lean) checks an all-index Gaussian-integer congruence, and a rational-arithmetic program supplies finite-instance certificates. **These are not genuine Riemann zeta zeros or actual Li coefficients and do not prove or disprove RH.** The work establishes a limit of finite positivity checks under symmetry alone, not an analytic theorem about zeta.
+
+## Millennium research attempt 004: general CNF arithmetization
+
+[Research attempt 004](docs/research/MILLENNIUM_ATTACK_004.md) extends the formally checked Boolean arithmetic interpretation to **every finite signed-CNF formula**, including shared variables, negations, empty clauses, and contradictory instances. A separate theorem counts the arithmetic gates in the factored evaluation circuit linearly in formula size; an independent finite enumeration checks 17,113 formula–assignment evaluations. **Evaluating a given assignment does not efficiently find one.** This is not a proof of `P=NP` or `P≠NP`, nor a new Millennium Prize solution.
+
+## Millennium research attempt 003: exact restricted SAT semantics
+
+[Research attempt 003](docs/research/MILLENNIUM_ATTACK_003.md) adds a narrowly scoped Lean theorem relating a **Boolean evaluation** of the disjoint `(x_i + y_i - x_i y_i)` product to a conjunction of disjoint OR clauses for every finite assignment, with an explicit satisfying witness. A standard-library regression exhaustively checks the finite cases up to six clauses. This is not a general polynomial-ring theorem, a uniform SAT-complexity result, mathematical novelty, or a solution to P versus NP. Clay's official 2026 listing has five unsolved problems, Navier–Stokes active under assessment after a September announcement, and Poincaré already solved externally; MathOS has no newly certified Millennium resolution.
+
 ## Independent mathematical review invitation (SAT1)
 
 [Open reviewer call #30](https://github.com/tltmgnt/MathOS/issues/30)
@@ -302,3 +329,8 @@ agreement and scoped advisory decisions. Includes synthetic tests and a proposed
 blinded pilot; independent empirical validation and live controller integration
 remain outstanding.
 <!-- pea-assurance:end -->
+
+
+## TECT-X: preliminary Selmer-infinitude manuscript (submission blocked)
+
+The [preliminary LaTeX note](docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex) audits exact rank-lower-bound certificates in a nonisotrivial elliptic family and an **elementary conditional** average-size implication. It does **not** prove infinitely many 2-Selmer-dimension-three fibers. The three underlying points and Pell-type family are already in Patel--Chakraborty--Chattopadhyay (2026, [published DOI](https://doi.org/10.21136/CMJ.2026.0080-26)); they are not claimed as new. See the [explicit missing proof obligations](docs/research/papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md), [publication readiness audit](docs/research/papers/TECT_X_PUBLICATION_READINESS.md), and [machine-readable blocked gate](docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json). Neither software tests nor a successful LaTeX build constitute independent mathematical proof review.

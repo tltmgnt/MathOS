@@ -4,6 +4,24 @@ on:
   push:
     paths:
       - 'formal/**'
+      - 'mathos/research/ym_z2_strip_008.py'
+      - 'tests/test_ym_z2_strip_008.py'
+      - 'docs/research/MILLENNIUM_ATTACK_008.md'
+      - 'mathos/research/bsd_inert_007.py'
+      - 'tests/test_bsd_inert_007.py'
+      - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - 'mathos/research/hodge_diagonal_006.py'
+      - 'tests/test_hodge_diagonal_006.py'
+      - 'docs/research/MILLENNIUM_ATTACK_006.md'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'tests/test_riemann_li_prefix_005.py'
+      - 'docs/research/MILLENNIUM_ATTACK_005.md'
+      - 'mathos/research/disjoint_or_bridge.py'
+      - 'mathos/research/general_cnf_arithmetization.py'
+      - 'tests/test_general_cnf_arithmetization.py'
+      - 'docs/research/MILLENNIUM_ATTACK_004.md'
+      - 'tests/test_disjoint_or_bridge.py'
+      - 'docs/research/MILLENNIUM_ATTACK_003.md'
       - 'mathos/research/lemma_verification.py'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'tests/test_lemma_verification.py'
@@ -20,6 +38,24 @@ on:
   pull_request:
     paths:
       - 'formal/**'
+      - 'mathos/research/ym_z2_strip_008.py'
+      - 'tests/test_ym_z2_strip_008.py'
+      - 'docs/research/MILLENNIUM_ATTACK_008.md'
+      - 'mathos/research/bsd_inert_007.py'
+      - 'tests/test_bsd_inert_007.py'
+      - 'docs/research/MILLENNIUM_ATTACK_007.md'
+      - 'mathos/research/hodge_diagonal_006.py'
+      - 'tests/test_hodge_diagonal_006.py'
+      - 'docs/research/MILLENNIUM_ATTACK_006.md'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'tests/test_riemann_li_prefix_005.py'
+      - 'docs/research/MILLENNIUM_ATTACK_005.md'
+      - 'mathos/research/disjoint_or_bridge.py'
+      - 'mathos/research/general_cnf_arithmetization.py'
+      - 'tests/test_general_cnf_arithmetization.py'
+      - 'docs/research/MILLENNIUM_ATTACK_004.md'
+      - 'tests/test_disjoint_or_bridge.py'
+      - 'docs/research/MILLENNIUM_ATTACK_003.md'
       - 'mathos/research/lemma_verification.py'
       - 'docs/research/LEMMA_CANDIDATES.v1.json'
       - 'tests/test_lemma_verification.py'
@@ -59,6 +95,90 @@ jobs:
           LEAN_PATH="$PWD/formal" lean -o formal/FiniteCandidateGeneration.olean formal/FiniteCandidateGeneration.lean
           LEAN_PATH="$PWD/formal" lean formal/FiniteRouteDAG.lean
           lean formal/SATSupport.lean
+          lean formal/DisjointORSemantics.lean
+          lean formal/GeneralCNFArithmetization.lean
+          lean formal/LiPrefixObstruction.lean
+          lean formal/HodgeDiagonalIntersections.lean
+          lean formal/YMZ2Strip.lean
+          lean formal/BSDInertPrimeBlindspot.lean
+      - name: Check BSD conditional inert-prime character theorem and finite counts
+        run: |
+          python -m unittest discover -s tests -p 'test_bsd_inert_007.py' -v
+          python -m mathos.research.bsd_inert_007 --prime-limit 101 --output artifacts/millennium007/bsd_inert_007.json
+          python -m json.tool artifacts/millennium007/bsd_inert_007.json > /dev/null
+      - name: Upload scoped BSD inert-prime arithmetic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium007-bsd-inert-primes-lean-4-14
+          path: artifacts/millennium007/
+          if-no-files-found: ignore
+
+      - name: Check finite 2D Z2 Wilson strip identities without Yang-Mills promotion
+        run: |
+          python -m unittest discover -s tests -p 'test_ym_z2_strip_008.py' -v
+          python -m mathos.research.ym_z2_strip_008 --max-width 5 --scaling-max-k 16 --output artifacts/millennium008/z2_strip_audit.json
+          python -m json.tool artifacts/millennium008/z2_strip_audit.json > /dev/null
+      - name: Upload exact bounded Z2 Wilson strip toy-model evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium008-2D-Z2-strip-lean-4-14
+          path: artifacts/millennium008/
+          if-no-files-found: ignore
+
+      - name: Check genus-one Hodge intersection matrix consequence (not conjecture proof)
+        run: |
+          python -m unittest discover -s tests -p 'test_hodge_diagonal_006.py' -v
+          python -m mathos.research.hodge_diagonal_006 --max-genus 12 --output artifacts/millennium006/intersection_audit.json
+          python -m json.tool artifacts/millennium006/intersection_audit.json > /dev/null
+      - name: Upload bounded Hodge diagonal intersection matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium006-hodge-diagonal-intersection-lean-4-14
+          path: artifacts/millennium006/
+          if-no-files-found: ignore
+
+      - name: Check bounded synthetic Riemann Li-prefix obstruction (no actual zeta zeros)
+        run: |
+          python -m unittest discover -s tests -p 'test_riemann_li_prefix_005.py' -v
+          python -m mathos.research.riemann_li_prefix_005 --prefix 8 --output artifacts/millennium005/finite_li_prefix.json
+          python -m json.tool artifacts/millennium005/finite_li_prefix.json > /dev/null
+      - name: Upload exact synthetic Riemann Li-prefix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium005-synthetic-li-prefix-lean-4-14
+          path: artifacts/millennium005/
+          if-no-files-found: ignore
+
+      - name: Check disjoint OR semantics and bounded independent Boolean regression
+        run: |
+          python -m unittest discover -s tests -p 'test_disjoint_or_bridge.py' -v
+          python -m mathos.research.disjoint_or_bridge --max-n 6 --output artifacts/millennium003/finite_regression.json
+          python -m json.tool artifacts/millennium003/finite_regression.json > /dev/null
+      - name: Check all-formula general CNF arithmetization and finite regressions
+        run: |
+          python -m unittest discover -s tests -p 'test_general_cnf_arithmetization.py' -v
+          python -m mathos.research.general_cnf_arithmetization --max-variables 3 --max-clauses 2 --max-clause-length 2 --output artifacts/millennium004/finite_general_cnf.json
+          python -m json.tool artifacts/millennium004/finite_general_cnf.json > /dev/null
+      - name: Upload bounded Millennium research attempt 004 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium004-arbitrary-cnf-semantic-bridge
+          path: artifacts/millennium004/
+          if-no-files-found: ignore
+
+      - name: Upload bounded Millennium research attempt 003 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium003-disjoint-or-boolean-bridge
+          path: artifacts/millennium003/
+          if-no-files-found: ignore
+
       - name: Check generated exact counterexample witness using pinned Lean
         run: |
           python -m mathos.research.lemma_verification --verify-lean --output-dir artifacts/lemmas

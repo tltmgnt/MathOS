@@ -1,0 +1,62 @@
+name: Millennium 008 — Yang-Mills Z2 strip scope audit
+
+on:
+  pull_request:
+    paths:
+      - 'formal/YMZ2Strip.lean'
+      - 'mathos/research/ym_z2_strip_008.py'
+      - 'tests/test_ym_z2_strip_008.py'
+      - 'docs/research/MILLENNIUM_ATTACK_008.md'
+      - '.github/workflows/ym-z2-strip-008.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ym-toy-strip-proof:
+    name: Pinned Lean, exact 2D Z2 lattice-gauge checks (NOT 4D YM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned Lean 4.14.0
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify Boolean plaquette gauge invariance and parity-weight recurrence
+        run: |
+          lean --version
+          lean formal/YMZ2Strip.lean
+      - name: Exact finite 2D Z2 link enumeration and rational continuum-scale guard
+        run: |
+          python -m unittest discover -s tests -p 'test_ym_z2_strip_008.py' -v
+          python -m mathos.research.ym_z2_strip_008 --max-width 5 --scaling-max-k 16 --output artifacts/millennium008/z2_strip_audit.json
+          python -m json.tool artifacts/millennium008/z2_strip_audit.json > /dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("artifacts/millennium008/z2_strip_audit.json").read_text())
+          assert d["status"] == "EXACT_TWO_DIMENSIONAL_Z2_TOY_AUDIT_ONLY"
+          assert d["total_link_configurations_checked"] == 224694
+          assert len(d["cases"]) == 18
+          assert d["finite_abelian_not_compact_simple"]
+          assert d["proves_4d_yang_mills_exists"] is False
+          assert d["constructs_continuum_qft"] is False
+          assert d["constructs_physical_hilbert_space"] is False
+          assert d["establishes_positive_physical_spectral_gap"] is False
+          assert d["novel_mathematics_claimed"] is False
+          PY
+      - name: Upload exact bounded 2D gauge-model evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium008-2D-Z2-gauge-only-not-YM-proof
+          path: artifacts/millennium008/
+          if-no-files-found: ignore
+          retention-days: 30

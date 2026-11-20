@@ -1,0 +1,58 @@
+name: Millennium 005 — Riemann Li-prefix obstruction (synthetic)
+
+on:
+  pull_request:
+    paths:
+      - 'formal/LiPrefixObstruction.lean'
+      - 'mathos/research/riemann_li_prefix_005.py'
+      - 'tests/test_riemann_li_prefix_005.py'
+      - 'docs/research/MILLENNIUM_ATTACK_005.md'
+      - '.github/workflows/riemann-li-prefix-005.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rh-synthetic-prefix:
+    name: Pinned Lean and rational-number certificate (not an RH proof)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Lean 4.14.0
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check all-index Gaussian numerator congruence
+        run: |
+          lean --version
+          lean formal/LiPrefixObstruction.lean
+      - name: Check exact synthetic off-line Li-style finite-prefix guard
+        run: |
+          python -m unittest discover -s tests -p 'test_riemann_li_prefix_005.py' -v
+          python -m mathos.research.riemann_li_prefix_005 --prefix 8 --output artifacts/millennium005/finite_li_prefix.json
+          python -m json.tool artifacts/millennium005/finite_li_prefix.json > /dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("artifacts/millennium005/finite_li_prefix.json").read_text())
+          assert d["status"] == "EXACT_SYNTHETIC_COUNTERMODEL_ONLY"
+          assert d["all_prefix_coefficients_positive"] is True
+          assert d["canonical_mathos_certification"] == "NOT_CERTIFIED"
+          assert d["full_rh_proved"] is False and d["rh_disproved"] is False
+          assert d["zeta_zero_claim"] is False
+          PY
+      - name: Upload exact rational synthetic counterexample packet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium005-rh-synthetic-li-prefix-not-zeta
+          path: artifacts/millennium005/
+          if-no-files-found: ignore
+          retention-days: 30

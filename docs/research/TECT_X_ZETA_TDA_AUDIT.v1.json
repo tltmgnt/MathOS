@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "experiment": "ResearchOS TECT-X 1M zeta-TDA bounded audit",
+  "execution_date_local": "2026-11-19",
+  "status": "BOUNDED_NUMERICAL_TOPOLOGICAL_AUDIT_NOT_CERTIFIED",
+  "family_count": 4,
+  "variant_count": 1000000,
+  "variants_per_family": 250000,
+  "families": [
+    "Hurwitz zeta",
+    "cycle Laplacian spectral zeta",
+    "cycle Ihara zeta",
+    "full-shift Artin-Mazur dynamical zeta"
+  ],
+  "distinctness": "By exact parameter-dependent formulas, not numerical injectivity tests",
+  "evaluated_scalar_features_per_variant": 2,
+  "zero_sets_computed": 0,
+  "million_point_h1_persistence_computed": false,
+  "rips_h01_sample_size_per_family": 128,
+  "radii": [
+    0.03,
+    0.06,
+    0.12,
+    0.18,
+    0.25,
+    0.4,
+    0.55
+  ],
+  "any_h1_in_declared_family_sample_radii": false,
+  "positive_control_circle_h1_detected": true,
+  "permutation_artifact_h1_counts_at_radius_0_12": {
+    "hurwitz": {
+      "positive_permutations": 12,
+      "permutations": 12
+    },
+    "cycle_spectral": {
+      "positive_permutations": 2,
+      "permutations": 12
+    },
+    "full_shift_dynamical": {
+      "positive_permutations": 2,
+      "permutations": 12
+    }
+  },
+  "adaptive_ihara_sample_unique_descriptors": 1,
+  "genuine_function_count_in_ihara_family": 250000,
+  "numerical_environment": "NumPy 2.3.5, SciPy 1.17.0, IEEE 754 double precision",
+  "full_csv_gzip_sha256": "b20ba6396d85f358a5fa94098a0c91978970756fa3cc0fde4c60d7fc9b3ca9b8",
+  "note": "File checksum refers to an external run artifact, not a GitHub-tracked dataset. Reproduction can vary slightly across numerical library versions.",
+  "links": {
+    "methodology": "docs/research/TECT_X_ONE_MILLION_ZETA_TDA_GAP_ANALYSIS.md",
+    "generator": "mathos/research/tect_x_zeta_tda_1m.py",
+    "tests": "tests/test_tect_x_zeta_tda_1m.py",
+    "companion_existing_rh_countermodel": "docs/research/MILLENNIUM_ATTACK_005.md"
+  },
+  "scientific_claims": {
+    "riemann_hypothesis_proved": false,
+    "nontrivial_zeta_zero_certified": false,
+    "topological_zero_correspondence_proved": false,
+    "new_mathematical_novelty_established": false,
+    "bsd_or_selmer_rank_proved": false,
+    "independent_math_review_completed": false
+  },
+  "media_reference": {
+    "title": "AI & Math: Solving Riemann Hypothesis by Brute Force? #shorts",
+    "creator": "Superintelligence",
+    "published_date": "2026-03-21",
+    "youtube_video_id": "M7eQUHH-oWI",
+    "url": "https://www.youtube.com/watch?v=M7eQUHH-oWI",
+    "provenance": "User-supplied screenshot title and description; public indexed video title, creator, date and URL",
+    "transcript_reviewed": false,
+    "content_scope": "Only title and screenshot-visible description are represented; no speech quotation or unverified claims about presenter arguments",
+    "role": "Research question and methodological motivation only, not experimental evidence or proof",
+    "video_or_screenshot_redistributed": false,
+    "source_note": "docs/research/TECT_X_VIDEO_REFERENCE_AI_RH_BRUTE_FORCE.md",
+    "changes_scientific_certification": false
+  }
+}
