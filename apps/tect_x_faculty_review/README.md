@@ -51,6 +51,7 @@ Do **not** state that Professor Terence Tao or any other professor is collaborat
 ## Verification
 
 ```bash
+python -m pip install -r requirements-dev.txt
 python -m pytest -q tests/test_workflow.py
 ```
 
