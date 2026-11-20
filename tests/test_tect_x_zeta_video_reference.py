@@ -52,7 +52,7 @@ class TestExternalVideoReference(unittest.TestCase):
             "independent_math_review_completed",
         ):
             self.assertIs(flags[key], False, key)
-        self.assertIn("finite Li-prefix", self.video_note)
+        self.assertIn("Li-prefix countermodel", self.video_note)
         self.assertIn("not a theorem", self.video_note)
 
 
