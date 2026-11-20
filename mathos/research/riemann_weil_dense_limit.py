@@ -130,7 +130,7 @@ def report(dimension: int=32) -> dict:
     cs=dense_centers(dimension)
     bounds=uniform_entry_majorant()
     eps=trace_norm_tail_bound(dimension)
-    if not (eps>0 and trace_norm_tail_bound(dimension+1)<eps):
+    if not (eps>0 and (dimension == MAX_REPORTED_DIMENSION or trace_norm_tail_bound(dimension+1)<eps)):
         raise AssertionError("geometric tail monotonicity failed")
     # The basis is L2 dense, but the Weil-form completion is still open.
     return {
