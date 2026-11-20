@@ -1,0 +1,134 @@
+{
+  "schema": "mathos.rh.proof_obligations/1",
+  "global_claim": "RH",
+  "global_claim_status": "OPEN",
+  "criterion": "Weil positivity criterion; the precise admissible domain, normalization and topology must be formalized before an extension claim is made.",
+  "claims": [
+    {
+      "id": "BASELINE",
+      "kind": "finite_comparison",
+      "status": "EXPERIMENTAL",
+      "statement": "Finite Gaussian-cosine Weil Gram computations supply only approximate diagnostic values.",
+      "topology": "Finite-dimensional Euclidean parameter spans; not the full LF test space.",
+      "assumptions": "Numerical quadrature and finite prime-power cutoff have unbounded total rigorous error.",
+      "dependencies": [],
+      "discharge": "Independent interval arithmetic with rigorous cutoffs would certify individual finite cases only.",
+      "evidence": [
+        {
+          "path": "mathos/research/riemann_weil_gram.py",
+          "role": "existing finite diagnostic"
+        },
+        {
+          "path": "docs/research/TECTX_RH_WEIL_GRAM_POSITIVITY.md",
+          "role": "scope and limits"
+        }
+      ]
+    },
+    {
+      "id": "G1",
+      "kind": "density",
+      "status": "CONJECTURED",
+      "statement": "Precisely specified compactly supported smooth test functions with chosen symmetries are dense in the exact admissible Weil-criterion test domain.",
+      "topology": "UNRESOLVED: define the LF inductive-limit topology and the topology used for the target domain; these are not interchangeable.",
+      "assumptions": "A precise underlying space, inclusion map, test-function normalization and approximation mode must be fixed.",
+      "dependencies": [],
+      "discharge": "Provide a rigorous density theorem including topology and admissible approximation nets or sequences. Auxiliary C_c-infinity(R) LF density construction documented, but mismatch with global Weil domain unresolved.",
+      "evidence": [
+        {
+          "path": "docs/research/RH_LF_DENSITY_CORE.md",
+          "role": "Auxiliary LF density analytic argument on D(R) only; does not resolve Weil test space topology"
+        },
+        {
+          "path": "mathos/research/rh_lf_dense_core.py",
+          "role": "Bounded numerical construction, not density proof"
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "kind": "admissibility",
+      "status": "CONJECTURED",
+      "statement": "Approximation preserves all test-space conditions required by the chosen Weil positivity criterion.",
+      "topology": "UNRESOLVED: topology must control the needed symmetry, support and positive-cone constraints.",
+      "assumptions": "The exact test-function involution and support restrictions must be fixed.",
+      "dependencies": [
+        "G1"
+      ],
+      "discharge": "Prove compatible approximation while preserving the actual admissibility constraints, or exhibit an obstruction.",
+      "evidence": []
+    },
+    {
+      "id": "G3",
+      "kind": "continuity",
+      "status": "CONJECTURED",
+      "statement": "The Weil quadratic form admits a justified positivity-preserving limiting argument along the chosen admissible approximants.",
+      "topology": "UNRESOLVED: require actual continuity, upper semicontinuity, or an equivalent negative-witness theorem in the relevant topology; lower semicontinuity alone is insufficient.",
+      "assumptions": "No continuity follows merely from abstract density.",
+      "dependencies": [
+        "G1",
+        "G2"
+      ],
+      "discharge": "Prove continuity or the correct upper-semicontinuity/sign-stability implication for the exact Weil quadratic form. Lower semicontinuity alone fails.",
+      "evidence": []
+    },
+    {
+      "id": "G4",
+      "kind": "arithmetic_support",
+      "status": "CONJECTURED",
+      "statement": "The infinite arithmetic terms and relevant support restrictions can be controlled uniformly along the admissible approximations.",
+      "topology": "UNRESOLVED: specify support growth and seminorm control needed by the explicit formula.",
+      "assumptions": "Finite prime cutoffs and floating quadrature are insufficient for global arithmetic control.",
+      "dependencies": [
+        "G1",
+        "G2"
+      ],
+      "discharge": "Prove quantitative prime-power and archimedean tail bounds uniform in the required approximation regime.",
+      "evidence": []
+    },
+    {
+      "id": "G5",
+      "kind": "global_transfer",
+      "status": "CONDITIONAL",
+      "statement": "Assuming G1-G4 and G5P, transfer nonnegativity of the actual Weil form from the entire dense admissible family to the whole Weil-criterion domain.",
+      "topology": "UNRESOLVED: prove continuity compatibility between family and full test-space topology.",
+      "assumptions": "All G1-G4 hypotheses and separately established G5P are unproved; finite experiments cannot establish G5P.",
+      "dependencies": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5P"
+      ],
+      "discharge": "Provide exact analytic transfer with correct topology and sign stability; separately establish G5P.",
+      "evidence": []
+    },
+    {
+      "id": "G6",
+      "kind": "independent_verification",
+      "status": "CONDITIONAL",
+      "statement": "An independent trusted kernel checks a complete formalization of all prerequisites and the final RH-equivalent implication.",
+      "topology": "Must match the exact topology specified and used by G1-G5.",
+      "assumptions": "A green metadata CI run is NOT kernel certification or mathematical peer review.",
+      "dependencies": [
+        "G5"
+      ],
+      "discharge": "Integrate a trusted proof assistant, pin dependencies, audit axioms and theorem statements, and obtain independent review.",
+      "evidence": []
+    },
+    {
+      "id": "G5P",
+      "kind": "family_wide_positivity",
+      "status": "CONJECTURED",
+      "statement": "The Weil quadratic form is nonnegative on EVERY test in the chosen fully admissible compact-bump family, not just a finite numerical basis.",
+      "topology": "The exact domain, involution, and topology specified by G1-G3; finite basis spans are not sufficient.",
+      "assumptions": "The Weil form and infinite arithmetic terms are well-defined on the entire family. Numerical eigenvalues and finite prime cutoffs do not establish this.",
+      "dependencies": [
+        "G1",
+        "G2",
+        "G4"
+      ],
+      "discharge": "Prove a uniform analytic nonnegativity theorem for all admissible compact bumps, or find a negative witness.",
+      "evidence": []
+    }
+  ]
+}
