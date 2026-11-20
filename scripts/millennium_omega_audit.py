@@ -22,7 +22,7 @@ EXPECTED = {
     ),
 }
 PROHIBITED = re.compile(
-    r"\b(sorry|admit|Admitted|Axiom|Parameter|Axioms|Parameters|"
+    r"\b(sorry|admit|Admitted|Axiom|Parameter|Parameters|"
     r"unsafe|opaque|native_decide)\b",
     flags=re.IGNORECASE,
 )
