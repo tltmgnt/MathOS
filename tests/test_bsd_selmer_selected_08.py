@@ -1,5 +1,6 @@
 """Tests use SYNTHETIC fixtures; they are not measured PARI rank certificates."""
 import base64
+import json
 import hashlib
 from pathlib import Path
 import tempfile
@@ -99,6 +100,38 @@ class BSDSelmer08Tests(unittest.TestCase):
             scenario=create_tect_scenario(report(Path(temp)))
             self.assertEqual(len(scenario["operations"]),2)
             self.assertEqual(scenario["operations"][-1]["data"]["target"],"UNVERIFIED")
+
+    def test_observed_evidence_was_from_real_cas_run_not_fixture(self):
+        root=Path(__file__).resolve().parents[1]
+        record=json.loads(
+            (root/"docs/research/papers/BSD_SELMER_MILESTONE_08_OBSERVED.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(record["run_id"],44654855201)
+        self.assertEqual(record["backend_version"],"2.17.3-1")
+        self.assertTrue(record["cas_executed"])
+        self.assertEqual(record["researchos_tect_controller"]["state"],"SUPPORTED")
+        self.assertFalse(record["researchos_tect_controller"]["assured"])
+        by_parameter={r["u"]:r for r in record["records"]}
+        self.assertEqual(set(by_parameter),{0,1,2,3,24,-24})
+        self.assertEqual(
+            {u:(r["lower"],r["upper"]) for u,r in by_parameter.items()},
+            {0:(1,1),1:(2,2),2:(3,3),3:(3,3),24:(4,4),-24:(4,4)}
+        )
+        for r in by_parameter.values():
+            self.assertEqual(r["selmer2_dim"],
+                             r["upper"]+r["torsion2_dim"]+r["sha_pairing_correction"])
+            self.assertEqual(r["lower"],r["upper"])
+            self.assertEqual(r["exit_code"],0)
+        self.assertIs(
+            record["conclusions"]["uniform_bound_at_most_three_for_all_24Z_refuted_by_rank_four_example_under_cas_correctness"],True
+        )
+        for claim in ("infinite_subset_with_uniform_upper_bound_three_established",
+                      "infinite_exact_rank_three_original_mathos_family_established",
+                      "new_theorem_or_priority_established",
+                      "analytic_rank_three_infinite_established","BSD_proved"):
+            self.assertIs(record["conclusions"][claim],False,claim)
 
 
 if __name__=="__main__":
