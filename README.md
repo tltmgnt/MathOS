@@ -15,6 +15,12 @@ MathOS connects mathematical reasoning, Topological Gap Analysis Ω, DTI Ω, and
 
 > **Core principle:** A result becomes useful knowledge when we can check it, explain why it works, identify where it applies, and recognize where it fails.
 
+## Millennium Ω research assurance (proposed implementation)
+
+The [Millennium Ω framework](docs/millennium-omega/README.md) adds seven explicit research engine adapters, six deterministic Ω agent stages, TECT research-status governance, scoped Lean 4/Coq policy examples, adversarial tests and a dedicated CI workflow. It reuses the existing seven-track MathOS probes and proof-obligation register rather than claiming new Millennium proofs.
+
+Run `python -m mathos.millennium_omega` for a research-only evidence packet. **The six open Millennium problems remain unproved by MathOS; Poincaré is recognized externally but has not been independently reconstructed here.** CI success is not a mathematical certification.
+
 ## What exists and what remains to be established
 
 MathOS combines implemented research components with a broader proposed mathematical framework. **Independent external validation of the broader framework is not yet established.** Local tests and synthetic examples support only the behavior and cases they actually check.
