@@ -51,6 +51,19 @@ ROLE_BASIS = {
     "evidence": ("tect_evidence_acceptance",),
     "consensus": ("adversarial_proof_testing", "tect_evidence_acceptance"),
 }
+ROLE_FINDINGS = {
+    "analytic": "The known xi functional equation is a source fact; this run checks only a finite theta-reflection sample.",
+    "zero": "Riemann-von Mangoldt samples estimate N(T); no nontrivial zero has been located or certified.",
+    "prime": "Euler product is scoped to Re(s)>1; finite prime-power cutoffs leave open uniform analytic tails.",
+    "spectral": "The theta/Fredholm parameter family is not a fixed self-adjoint Hilbert-Pólya realization.",
+    "positivity": "The exact synthetic Li prefix and finite Weil Gram do not establish all-index or all-test positivity.",
+    "conjecture": "Candidate: actual Li coefficients are nonnegative for every n>=1; this is unproved.",
+    "counterexample": "Finite-prefix and lower-semicontinuity countermodels invalidate two tempting proof shortcuts.",
+    "formal_verification": "Lean and Coq cover bounded logical implications; this runner has no RH kernel certificate.",
+    "evidence": "Canonical G1-G6 and G5P stay open, with traceable source fingerprints and scoped numerical data.",
+    "consensus": "No independent expert review has occurred; ten role records are not an expert consensus.",
+}
+
 PROVENANCE_FILES = (
     "docs/research/rh_proof_obligations.json",
     "mathos/research/riemann_li_prefix_005.py",
@@ -257,8 +270,7 @@ def run(*, registry_path: Path = DEFAULT_REGISTRY, root: Path = ROOT,
             "role": role,
             "mode": "DETERMINISTIC_RESEARCH_REVIEW_NOT_LIVE_AI",
             "inputs": list(ROLE_BASIS[role]),
-            "finding": ("No globally valid RH proof or counterexample has been established; "
-                        "retain missing analytic and formal proof bridges."),
+            "finding": ROLE_FINDINGS[role],
             "consensus_of_independent_experts": False,
             "rh_proved": False,
         }
@@ -393,7 +405,7 @@ def audit(report: dict[str, Any], *, root: Path = ROOT,
         and a["inputs"] == list(ROLE_BASIS[role])
         and a["consensus_of_independent_experts"] is False
         and a["rh_proved"] is False
-        and isinstance(a["finding"], str) and bool(a["finding"])
+        and a["finding"] == ROLE_FINDINGS[role]
         for a, role in zip(agents, ROLES)
     ), "invalid agents or false consensus")
     assurance = report["assurance"]
