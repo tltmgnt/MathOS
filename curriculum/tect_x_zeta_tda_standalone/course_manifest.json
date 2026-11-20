@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "name": "AI, Zeta Functions, and Topological Data Analysis — Standalone Curriculum",
+  "owner": "ResearchOS / TECT-X educational edition",
+  "version": "2026-11-19",
+  "standalone": true,
+  "prerequisite": "Basic algebra and geometry; no coding required",
+  "duration": {
+    "weeks": 6,
+    "meetings_per_week": 2,
+    "minutes_per_meeting": 90,
+    "contact_hours": 18
+  },
+  "units": [
+    "Proof versus finite enumeration",
+    "Zeta-function taxonomy",
+    "Exact cycle spectral identities",
+    "Ihara feature identifiability and graph-vs-descriptor topology",
+    "Vietoris–Rips persistent homology",
+    "Experiment-to-proof research integrity"
+  ],
+  "files": [
+    "README.md",
+    "LESSONS.md",
+    "EXERCISES.md",
+    "INSTRUCTOR_KEY.md",
+    "lab.py",
+    "test_lab.py",
+    "course_manifest.json"
+  ],
+  "requirements": {
+    "python": "3.11+",
+    "third_party_packages": [],
+    "network_required": false,
+    "researchos_runtime_required": false,
+    "external_dataset_required": false
+  },
+  "source": {
+    "optional_video_title": "AI & Math: Solving Riemann Hypothesis by Brute Force? #shorts",
+    "creator": "Superintelligence",
+    "publication_date": "2026-03-21",
+    "url": "https://www.youtube.com/watch?v=M7eQUHH-oWI",
+    "only_title_and_visible_description_reviewed": true,
+    "full_transcript_reviewed": false,
+    "copied_media": false
+  },
+  "certification": {
+    "type": "educational course completion only",
+    "rh_proved": false,
+    "bsd_proved": false,
+    "selmer_infinitude_proved": false,
+    "mathematical_novelty_claimed": false
+  }
+}
