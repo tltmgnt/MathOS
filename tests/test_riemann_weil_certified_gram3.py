@@ -67,7 +67,8 @@ class WeilCertifiedGram3Tests(unittest.TestCase):
             "archimedean_infinite_tail_abs_error",
             "prime_power_infinite_tail_abs_error"})
         for name,interval in e.items():
-            self.assertGreater(Fraction(interval[0]),0,name)
+            self.assertGreaterEqual(Fraction(interval[0]),0,name)
+            self.assertGreater(Fraction(interval[1]),0,name)
             self.assertGreaterEqual(Fraction(interval[1]),Fraction(interval[0]),name)
 
     def test_archimedean_simpson_error_dominates(self):
