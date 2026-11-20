@@ -55,7 +55,7 @@ class SpectralObstructionTests(unittest.TestCase):
         self.assertEqual(len(report["fixed_log_interval"]["exact_sample_rows"]), 10)
         self.assertFalse(any(report["assurance"].values()))
         self.assertTrue(report["fixed_log_interval"]["comparison_is_analytic"])
-        self.assertIn("Riemann-von Mangoldt", report["fixed_log_interval"]["zeta_counting_input"])
+        self.assertTrue(any("Riemann-von Mangoldt" in theorem for theorem in report["external_theorems_assumed"]))
 
     def test_source_digest_is_stable(self):
         self.assertEqual(build_report(3)["source_sha256"], build_report(4)["source_sha256"])
