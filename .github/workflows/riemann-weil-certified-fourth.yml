@@ -19,7 +19,7 @@ permissions:
 jobs:
   actual-4d-arithmetic-schur:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -33,7 +33,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_riemann_weil_certified_fourth.py' -v
       - name: Produce portable exact rational fourth-direction evidence
         run: |
-          python -m mathos.research.riemann_weil_certified_fourth --panels 8192 --output artifacts/riemann/weil_certified_fourth.json
+          python -m mathos.research.riemann_weil_certified_fourth --panels 65536 --output artifacts/riemann/weil_certified_fourth.json
           python -m json.tool artifacts/riemann/weil_certified_fourth.json >/dev/null
       - name: Independently check exact rational Schur and no-RH-promotion gates
         run: |
@@ -49,6 +49,9 @@ jobs:
           s=r['verified_matrix']['fourth_direction_schur']
           assert s['old_dim']==3 and s['new_dim']==1 and s['all_pivots_positive']
           assert all(Fraction(a)>0 for a,b in s['schur_pivots'])
+          assert r['verified_matrix']['strict_generalized_lambda_lower']=='1/1000000000'
+          assert not r['verified_matrix']['previous_3D_generalized_lower_bound_survives']
+          assert Fraction(r['verified_matrix']['failed_previous_3D_bound_schur_interval'][1])<0
           assert all(Fraction(a)>0 for a,b in r['verified_matrix']['shifted_G_minus_kappa_L_pivots'])
           assert all(Fraction(a)>0 for a,b in r['verified_matrix']['L2_pivots'])
           flags=r['assurance']
