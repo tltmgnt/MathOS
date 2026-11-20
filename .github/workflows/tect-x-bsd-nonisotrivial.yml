@@ -9,6 +9,10 @@ on:
       - 'docs/research/TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md'
       - 'docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex'
       - 'docs/research/papers/TECT_X_PUBLICATION_READINESS.md'
+      - 'docs/research/papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md'
+      - 'docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json'
+      - 'mathos/research/tect_x_submission_gate.py'
+      - 'tests/test_tect_x_submission_gate.py'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
       - '.github/workflows/tect-x-bsd-nonisotrivial.yml'
   workflow_dispatch:
@@ -28,6 +32,10 @@ jobs:
           python-version: '3.11'
       - name: Adversarial finite-field regression tests
         run: python -m unittest discover -s tests -p 'test_tect_x_noni_selmer.py' -v
+      - name: Verify explicit publication blockers and no-overclaim regressions
+        run: |
+          python -m unittest discover -s tests -p 'test_tect_x_submission_gate.py' -v
+          python -m mathos.research.tect_x_submission_gate
       - name: Family-wide three-point certificate
         run: python -m mathos.research.tect_x_rank3_family_certificate
       - name: First-fiber four-point certificate
