@@ -4,6 +4,35 @@
 **Manuscript:** [TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex](TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex)  
 **Date:** 19 November 2026
 
+## New literature finding: rank-three Pell family and points are prior art
+
+The model `y²=x³−a²x+b²`, the Pell condition `a²−3b²=1` and
+**all three original rational points** `(0,b)`, `(a,b)`, `(-1,2b)`
+are explicitly documented by Patel, Chakraborty and Chattopadhyay,
+*Two infinite families of elliptic curves with Mordell–Weil rank at
+least 3*, Czechoslovak Mathematical Journal (published online
+26 October 2026), DOI [10.21136/CMJ.2026.0080-26](https://doi.org/10.21136/CMJ.2026.0080-26).
+Its proof treats an integer Pell subfamily and includes `26+15√3`
+as a seed. Our rational parameterization and modular certificate may
+provide a distinct presentation but cannot be marketed as the
+original discovery of the model, points or rank-three mechanism.
+
+A related published study by the same authors,
+*On the Mordell–Weil rank and 2-Selmer group of a family of elliptic
+curves*, Ramanujan J. **69** (2026), article 46,
+[DOI 10.1007/s11139-026-01317-5](https://doi.org/10.1007/s11139-026-01317-5),
+must be reviewed for overlap of exact descent techniques.
+Zywina's [2026 theorem](https://arxiv.org/abs/2602.10865) already
+establishes infinitely many geometrically distinct rank-three
+curves in general; that conclusion is not novel here.
+
+**Journal submission as a NEW Selmer-infinitude theorem remains
+strictly blocked** until a genuine, independently checked
+unconditional Selmer-dimension-three infinitude proof exists.
+
+See [target theorem proof modules](TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md)
+and [machine-readable submission gate](TECT_X_SUBMISSION_STATUS.v1.json).
+
 ## Theorems actually supplied
 
 1. For (n=5+759m) with (m\ge0), the elliptic curves
@@ -21,6 +50,14 @@
    (m<X) is eventually at most (16-\varepsilon), then at least
    ((\varepsilon/8)X) fibers have Selmer dimension exactly three,
    exact rank three and (\Sha[2]=0).
+
+## Automated status audit (not a proof checker)
+
+Run `python -m mathos.research.tect_x_submission_gate` to print
+the current blockers and `python -m mathos.research.tect_x_submission_gate
+--require-ready` to return a nonzero exit status until they are
+discharged. Independent human proof review is indispensable even
+after all declarations are updated. CI also checks the blocked state.
 
 ## Non-claims / material publication blockers
 
