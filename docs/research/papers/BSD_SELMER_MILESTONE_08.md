@@ -125,7 +125,7 @@ For every member of \(S_3\) outside the **finite** set where Silverman's special
 
 The known rank-three fibers \(u=2,3\) lie outside \(A=24\mathbb Z\); they are **validation controls**, not members of the proposed infinite progression. It remains a separate research problem to identify a tractable infinite subfamily with uniformly bounded 2-Selmer ranks.
 
-## 3. Recorded independent CAS execution — six selected fibers
+## 5. Recorded independent CAS execution — six selected fibers
 
 An actual [GitHub Actions run 44654855201](https://github.com/tltmgnt/MathOS/actions/runs/44654855201), using **PARI/GP 2.17.3-1**, completed successfully and executed the original MathOS family at the six parameters below. Its PARI logs emitted one valid \`MATHOS08\` record each. The pinned ResearchOs TECT offline controller independently replayed the evidence ledger, reaching **SUPPORTED for the narrow claim "these computations were observed"**; it did **not** certify mathematical originality or a general theorem.
 
@@ -144,7 +144,7 @@ An actual [GitHub Actions run 44654855201](https://github.com/tltmgnt/MathOS/act
 
 **Scientific caveat:** The computation is source-auditable, repeatable and stronger than the coarse bounds \(B(24)=71\), \(B(-24)=74\) in Milestone 07. However, it remains a single-CAS computational result awaiting an independently implemented second calculation or a specialist's explicit descent certificate. It is not yet an independent formal proof of the rank, nor a peer-reviewed discovery. No result above yields an exact **analytic** rank equality.
 
-## 4. A concrete noncircular route to an infinite rank-three subset
+## 6. A concrete noncircular route to an infinite rank-three subset
 
 Define
 
@@ -157,7 +157,7 @@ Every \(u\in S_{3}^{\rm Sel}\) outside the (not explicitly determined) finite ba
 
 To turn the criterion into a theorem, one would need a uniform family-level control of local Kummer images and cubic class-group 2-torsion for an explicitly defined infinite subclass; analytic-rank equality remains an additional independent requirement. We have **not** produced such a uniform argument. Do not infer infinitude from the six numerical points.
 
-## 5. Files and reproduction
+## 7. Files and reproduction
 
 - \`mathos/research/bsd_selmer_selected_08.gp\` — actual PARI/GP input, six selected parameters (\(0,1,2,3,24,-24\)); source is versioned in MathOS.
 - \`mathos/research/bsd_selmer_selected_08.py\` — fail-closed provenance parser and canonical TECT scenario builder.
