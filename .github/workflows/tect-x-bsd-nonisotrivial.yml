@@ -7,6 +7,8 @@ on:
       - 'mathos/research/tect_x_rank4_fiber_certificate.py'
       - 'tests/test_tect_x_noni_selmer.py'
       - 'docs/research/TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md'
+      - 'docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex'
+      - 'docs/research/papers/TECT_X_PUBLICATION_READINESS.md'
       - 'docs/research/MILLENNIUM_ATTACK_007.md'
       - '.github/workflows/tect-x-bsd-nonisotrivial.yml'
   workflow_dispatch:
@@ -30,3 +32,23 @@ jobs:
         run: python -m mathos.research.tect_x_rank3_family_certificate
       - name: First-fiber four-point certificate
         run: python -m mathos.research.tect_x_rank4_fiber_certificate
+
+  draft-manuscript-typesetting:
+    name: Typeset preliminary note (not proof verification)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile LaTeX manuscript
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex
+          working_directory: docs/research/papers
+          args: -pdf -file-line-error -interaction=nonstopmode -halt-on-error
+      - name: Preserve draft PDF for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: tect-x-preliminary-manuscript-not-peer-reviewed
+          path: docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.pdf
+          if-no-files-found: error
+          retention-days: 30
