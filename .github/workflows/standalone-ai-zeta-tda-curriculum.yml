@@ -1,0 +1,49 @@
+name: Standalone AI, Zeta and TDA curriculum
+
+on:
+  pull_request:
+    paths:
+      - 'curriculum/tect_x_zeta_tda_standalone/**'
+      - '.github/workflows/standalone-ai-zeta-tda-curriculum.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  standalone-education:
+    name: Standard-library lab, controls, and no-proof safeguards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests for exact arithmetic and TDA controls
+        run: python -m unittest discover -s curriculum/tect_x_zeta_tda_standalone -p 'test_lab.py' -v
+      - name: Run reproducible offline demo
+        run: |
+          python curriculum/tect_x_zeta_tda_standalone/lab.py --radius 1 > /tmp/course_lab.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          course_dir=Path("curriculum/tect_x_zeta_tda_standalone")
+          manifest=json.loads((course_dir/"course_manifest.json").read_text())
+          d=json.loads(Path("/tmp/course_lab.json").read_text())
+          assert manifest["standalone"] is True
+          assert manifest["duration"]["contact_hours"] == 18
+          assert not manifest["requirements"]["third_party_packages"]
+          assert manifest["requirements"]["external_dataset_required"] is False
+          assert manifest["source"]["full_transcript_reviewed"] is False
+          assert all((course_dir/name).exists() for name in manifest["files"])
+          assert d["status"] == "BOUNDED_EDUCATIONAL_DEMO_NOT_RH_PROOF"
+          assert d["square_at_radius"]["betti_0"] == 1
+          assert d["square_at_radius"]["betti_1"] == 1
+          assert d["square_filled_at_sqrt2"]["betti_1"] == 0
+          assert d["line_at_radius_one"]["betti_1"] == 0
+          assert d["rh_proved"] is False
+          assert d["bsd_proved"] is False
+          assert d["selmer_infinitude_proved"] is False
+          print("Standalone course verified: no dependency, no theorem promotion")
+          PY
