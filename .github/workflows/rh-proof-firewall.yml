@@ -1,0 +1,46 @@
+name: RH proof obligations and finite-to-global firewall
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/rh_proof_firewall.py'
+      - 'docs/research/rh_proof_obligations.json'
+      - 'docs/research/RH_PROOF_FIREWALL.md'
+      - 'tests/test_rh_proof_firewall.py'
+      - '.github/workflows/rh-proof-firewall.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/rh_proof_firewall.py'
+      - 'docs/research/rh_proof_obligations.json'
+      - 'docs/research/RH_PROOF_FIREWALL.md'
+      - 'tests/test_rh_proof_firewall.py'
+      - '.github/workflows/rh-proof-firewall.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fail-closed-proof-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Adversarial proof-firewall regressions
+        run: python -m unittest discover -s tests -p 'test_rh_proof_firewall.py' -v
+      - name: Validate registry and export scope-safe metadata
+        run: python -m mathos.research.rh_proof_firewall --report artifacts/rh/proof_obligations.json
+      - name: Enforce no proof promotion
+        run: |
+          python - <<'PY'
+          import json
+          with open('artifacts/rh/proof_obligations.json', encoding='utf-8') as fh:
+              report = json.load(fh)
+          assert report["global_claim_status"] == "OPEN"
+          assert report["unresolved_gates"] == ["G1","G2","G3","G4","G5","G6"]
+          assert report["checks_only_metadata_not_mathematical_truth"]
+          assert not report["finite_baseline_is_global_proof"]
+          PY
