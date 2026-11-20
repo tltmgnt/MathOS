@@ -1,0 +1,64 @@
+name: TECT-X rigorous prime-two Weil 2x2 interval LDL
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_prime_two_interval.py'
+      - 'tests/test_riemann_weil_prime_two_interval.py'
+      - 'docs/research/TECTX_WEIL_PRIME_TWO_INTERVAL_LDL.md'
+      - '.github/workflows/riemann-weil-prime-two-interval.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_prime_two_interval.py'
+      - 'tests/test_riemann_weil_prime_two_interval.py'
+      - 'docs/research/TECTX_WEIL_PRIME_TWO_INTERVAL_LDL.md'
+      - '.github/workflows/riemann-weil-prime-two-interval.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prime-two-validated-actual-weil-gram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Pin outward interval backend
+        run: python -m pip install --disable-pip-version-check mpmath==1.3.0
+      - name: Run prime-active full Weil rational-box and LDL adversarial tests
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_prime_two_interval.py' -v
+      - name: Generate independently replayable full interval certificate
+        run: |
+          python -m mathos.research.riemann_weil_prime_two_interval --panels 256 --output artifacts/riemann/weil_prime_two_interval_psd.json
+          python -m json.tool artifacts/riemann/weil_prime_two_interval_psd.json >/dev/null
+      - name: Verify rational eigenvalue and both LDL pivots without floating point
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/weil_prime_two_interval_psd.json',encoding='utf-8') as file:
+              r=json.load(file)
+          assert r['status']=='FIXED_PRIME_TWO_2X2_WEIL_POSITIVE_GLOBAL_RH_OPEN'
+          a=r['arithmetic']
+          d0,d1=map(Fraction,a['diagonal_Weil_entry'])
+          c0,c1=map(Fraction,a['cross_Weil_entry'])
+          floor=Fraction(a['proved_eigenvalue_floor_rational'])
+          assert floor==Fraction(137,5000)
+          assert 0<d0<=d1
+          assert c0<=c1<0
+          assert d0-max(abs(c0),abs(c1))>floor
+          assert len(a['interval_LDL_pivots'])==2
+          assert all(Fraction(lo)>0 for lo,hi in a['interval_LDL_pivots'])
+          assert Fraction(a['prime_cross'][1])<0
+          assert Fraction(a['arch_cross'][1])<0
+          flags=r['trust_boundary']
+          assert flags['positive_definite_fixed_2x2']
+          assert not flags['positive_all_support_windows']
+          assert not flags['all_index_Weil_PSD']
+          assert not flags['Riemann_hypothesis_proved']
+          assert not flags['full_Weil_Hilbert_space_constructed']
+          PY
