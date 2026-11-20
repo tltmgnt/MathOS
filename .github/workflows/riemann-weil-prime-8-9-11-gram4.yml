@@ -53,12 +53,17 @@ jobs:
           assert Fraction(a['new_pole_interval'][0])>0
           floor=Fraction(1,10000)
           assert Fraction(a['claimed_strict_lambda_lower'])==floor
-          assert Fraction(a['verified_gershgorin_floor_exact'])>floor
+          cert=a['rational_midpoint_residual_certificate']
+          inv=Fraction(cert['inverse_infinity_norm_exact'])
+          err=Fraction(cert['interval_error_infinity_norm_exact'])
+          margin=Fraction(cert['strict_margin_above_shift_exact'])
+          assert cert['proved_positive_definiteness'] and inv*err<1
+          assert margin>0 and margin==1/inv-err
           M=a['full_symmetric_weil_matrix']
           assert len(M)==4 and all(len(row)==4 for row in M)
           assert all(M[i][j]==M[j][i] for i in range(4) for j in range(4))
-          p=a['shifted_G_minus_kappa_I_LDL_pivots']
-          assert len(p)==4 and all(Fraction(lo)>0 for lo,hi in p)
+          p=a['shifted_midpoint_rational_LDL_pivots']
+          assert len(p)==4 and all(Fraction(v)>0 for v in p)
           flags=r['assurance']
           assert flags['actual_compact_four_dimensional_Weil_PSD']
           assert not flags['all_dimensional_Weil_PSD']
