@@ -52,14 +52,14 @@
       "id": "G3",
       "kind": "continuity",
       "status": "CONJECTURED",
-      "statement": "The Weil quadratic form admits a justified positivity-preserving limit along the chosen approximants.",
-      "topology": "UNRESOLVED: specify continuity or the correct lower-semicontinuity of the form under approximation.",
+      "statement": "The Weil quadratic form admits a justified positivity-preserving limiting argument along the chosen admissible approximants.",
+      "topology": "UNRESOLVED: require actual continuity, upper semicontinuity, or an equivalent negative-witness theorem in the relevant topology; lower semicontinuity alone is insufficient.",
       "assumptions": "No continuity follows merely from abstract density.",
       "dependencies": [
         "G1",
         "G2"
       ],
-      "discharge": "Give a theorem, quantitative bound or valid semicontinuity argument for this exact distributional form.",
+      "discharge": "Prove continuity or the correct upper-semicontinuity/sign-stability implication for the exact Weil quadratic form. Lower semicontinuity alone fails.",
       "evidence": []
     },
     {
@@ -80,16 +80,17 @@
       "id": "G5",
       "kind": "global_transfer",
       "status": "CONDITIONAL",
-      "statement": "Assuming G1-G4 and nonnegative Weil form on a sufficiently rich dense admissible family, infer global Weil positivity on the criterion domain.",
+      "statement": "Assuming G1-G4 and G5P, transfer nonnegativity of the actual Weil form from the entire dense admissible family to the whole Weil-criterion domain.",
       "topology": "UNRESOLVED: prove continuity compatibility between family and full test-space topology.",
-      "assumptions": "Positivity on the entire dense family is not supplied by any finite experiment; this is an ADDITIONAL unproved premise.",
+      "assumptions": "All G1-G4 hypotheses and separately established G5P are unproved; finite experiments cannot establish G5P.",
       "dependencies": [
         "G1",
         "G2",
         "G3",
-        "G4"
+        "G4",
+        "G5P"
       ],
-      "discharge": "State and prove a logically valid exact transfer theorem and separately prove its family-wide positivity premise.",
+      "discharge": "Provide exact analytic transfer with correct topology and sign stability; separately establish G5P.",
       "evidence": []
     },
     {
@@ -103,6 +104,21 @@
         "G5"
       ],
       "discharge": "Integrate a trusted proof assistant, pin dependencies, audit axioms and theorem statements, and obtain independent review.",
+      "evidence": []
+    },
+    {
+      "id": "G5P",
+      "kind": "family_wide_positivity",
+      "status": "CONJECTURED",
+      "statement": "The Weil quadratic form is nonnegative on EVERY test in the chosen fully admissible compact-bump family, not just a finite numerical basis.",
+      "topology": "The exact domain, involution, and topology specified by G1-G3; finite basis spans are not sufficient.",
+      "assumptions": "The Weil form and infinite arithmetic terms are well-defined on the entire family. Numerical eigenvalues and finite prime cutoffs do not establish this.",
+      "dependencies": [
+        "G1",
+        "G2",
+        "G4"
+      ],
+      "discharge": "Prove a uniform analytic nonnegativity theorem for all admissible compact bumps, or find a negative witness.",
       "evidence": []
     }
   ]
