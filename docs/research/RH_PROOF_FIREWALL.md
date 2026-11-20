@@ -31,6 +31,12 @@ nets or sequences are currently **unspecified research obligations**.
 | G5 | Valid global transfer, **assuming separately proved G5P whole-family positivity** |
 | G6 | Independent trusted-kernel checking with statement/axiom audit |
 
+A constructive, topology-specific auxiliary density argument for rational
+bump spans in the usual LF test-function space is documented in
+[RH_LF_DENSITY_CORE.md](RH_LF_DENSITY_CORE.md). It **does not** discharge
+G1 for the actual Weil criterion, whose domain and topology must still
+be proved compatible.
+
 An additional G5P obligation is tracked separately: positivity on the
 **entire** dense family is mathematically essential and not certified.
 See [the conditional transfer milestone](RH_TRANSFER_MILESTONE.md) for
