@@ -67,6 +67,33 @@ class BSDSelmer08Tests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(payload).hexdigest(),receipt["sha256"])
             # This is a parser fixture and cannot be treated as independent run data.
 
+
+    def test_observed_pinned_evidence_is_scoped_and_internally_consistent(self):
+        import json
+        from pathlib import Path
+        path = (Path(__file__).resolve().parents[1]
+                / "docs/research/papers/BSD_SELMER_08_COMPUTED_EVIDENCE.v1.json")
+        observed = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(observed["workflow_run_id"],44654855201)
+        self.assertEqual(observed["cas_version"],"pari-gp 2.17.3-1")
+        self.assertEqual(observed["canonical_tect_observed_claim_state"],"SUPPORTED")
+        self.assertIs(observed["canonical_tect_runtime_executed"],True)
+        self.assertIs(observed["external_human_peer_review"],False)
+        self.assertIs(observed["proven_infinite_subset_of_24Z_with_uniform_selmer_2_rank_at_most_3"],False)
+        self.assertIs(observed["original_mathos_parameter_set_24Z_all_have_rank_at_most_3"],False)
+        values={int(x["u"]):x for x in observed["observed_certificates"]}
+        self.assertEqual(set(values),{0,1,2,3,24,-24})
+        for u,r in ((0,1),(1,2),(2,3),(3,3),(24,4),(-24,4)):
+            c=values[u]
+            self.assertEqual(c["rank_lower"],c["rank_upper"])
+            self.assertEqual(c["rank_upper"],c["selmer_2_dimension"])
+            self.assertEqual(c["rank_upper"],r)
+            self.assertEqual(c["points_returned"],r)
+            self.assertEqual(c["solver_exit_code"],0)
+            self.assertEqual(len(c["stdout_sha256"]),64)
+        self.assertIs(observed["exact_rank3_over_infinite_subset_proved"],False)
+        self.assertIs(observed["BSD_proved"],False)
+
     def test_without_observation_only_unverified(self):
         with tempfile.TemporaryDirectory() as temp:
             scenario=create_tect_scenario(report(Path(temp)))
