@@ -72,7 +72,8 @@ jobs:
           assert Fraction(a['proved_normalized_strict_lower'])==Fraction(1,1000)
           f=r['assurance']
           assert f['this_one_core_diagonal_positive']
-          assert not f['all_first_prefix_gram_entries_evaluated']
+          assert f['first_prefix_1x1_Gram_fully_enclosed']
+          assert not f['all_finite_prefix_Gram_entries_evaluated']
           assert not f['every_finite_LF_core_Gram_psd']
           assert not f['global_Weil_positivity']
           assert not f['Riemann_hypothesis_proved']
