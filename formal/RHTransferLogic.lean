@@ -56,13 +56,14 @@ theorem abstract_sign_transfer
     (positive_on_entire_family : ∀ d, D d → 0 ≤ Q d) :
     ∀ x, 0 ≤ Q x := by
   intro x
-  by_contra h
-  have hneg : Q x < 0 := by omega
-  obtain ⟨N, hstable⟩ := negative_stability x hneg
-  have hpos := positive_on_entire_family (approx x N)
-    (approx_admissible x N)
-  have hbad := hstable N N (Nat.le_refl N)
-  omega
+  by_cases hx : 0 ≤ Q x
+  · exact hx
+  · have hneg : Q x < 0 := by omega
+    obtain ⟨N, hstable⟩ := negative_stability x hneg
+    have hpos : 0 ≤ Q (approx x N) :=
+      positive_on_entire_family (approx x N) (approx_admissible x N)
+    have hbad : Q (approx x N) < 0 := hstable N (Nat.le_refl N)
+    omega
 
 end MathOS.RH
 
