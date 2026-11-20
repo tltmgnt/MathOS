@@ -26,10 +26,16 @@ nets or sequences are currently **unspecified research obligations**.
 | --- | --- |
 | G1 | Exact density theorem for the stated space and topology |
 | G2 | Preservation of the needed admissibility constraints |
-| G3 | Continuity or suitable lower-semicontinuity of Weil positivity |
+| G3 | Continuity, upper semicontinuity, or a proved negative-witness property; lower semicontinuity alone is insufficient |
 | G4 | Uniform arithmetic support, tails and error control |
-| G5 | Valid global transfer, **plus separately established positivity on the entire dense family** |
+| G5 | Valid global transfer, **assuming separately proved G5P whole-family positivity** |
 | G6 | Independent trusted-kernel checking with statement/axiom audit |
+
+An additional G5P obligation is tracked separately: positivity on the
+**entire** dense family is mathematically essential and not certified.
+See [the conditional transfer milestone](RH_TRANSFER_MILESTONE.md) for
+the precise sign-stability hypothesis and a counterexample to the
+incorrect lower-semicontinuity shortcut.
 
 The existing fixed-width Gaussian-cosine calculation in
 `mathos/research/riemann_weil_gram.py` remains an **uncertified finite
@@ -44,8 +50,9 @@ FORMALLY_VERIFIED promotions until **independent trusted-kernel integration**
 exists. A reviewer cannot turn an open theorem into a proof by editing JSON,
 adding a URL, or making tests green. The global RH status is locked OPEN.
 
-G5 must depend on G1–G4, G6 must depend on G5, and the finite baseline
-cannot be used as a proof dependency of G5. Dependency graphs must be acyclic.
+G5 must depend on G1–G4 **and G5P**, G6 must depend on G5, and G5P
+must depend on G1, G2 and G4. The finite baseline cannot be used as a
+direct or indirect proof dependency of G5 or G5P. Dependency graphs must be acyclic.
 This is a **metadata firewall**, not a soundness proof or a complete dependency
 checker: even a passing registry may contain false mathematics.
 
