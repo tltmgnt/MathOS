@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "project": "ResearchOS/TECT-X",
+  "last_reviewed": "2026-11-19",
+  "manuscript": "docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex",
+  "exact_target": "Infinitely many n=5+759m with dim_F2 Sel_2(E_n/Q)=3, for E_n: y^2=x^3-a_n^2 x+b_n^2, a_n=(n^2+27)/(27-n^2), b_n=6n/(27-n^2)",
+  "status": "BLOCKED_OPEN_MAIN_THEOREM",
+  "claims": {
+    "three_independent_point_classes": {
+      "established": true,
+      "scope": "All n=5+759m",
+      "source": "docs/research/TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md"
+    },
+    "first_fiber_rank_at_least_four": {
+      "established": true,
+      "scope": "n=5",
+      "source": "mathos/research/tect_x_rank4_fiber_certificate.py"
+    },
+    "conditional_mean16_implication": {
+      "established": true,
+      "scope": "If eventual mean Selmer size <16",
+      "source": "docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex"
+    },
+    "unconditional_infinite_selmer3": {
+      "established": false,
+      "scope": "The target theorem, not proved",
+      "source": null
+    },
+    "arithmetic_statistics_average_below16": {
+      "established": false,
+      "scope": "Thin progression",
+      "source": null
+    },
+    "exact_global_local_descent_matrix": {
+      "established": false,
+      "scope": "Uniform cubic-field descent",
+      "source": null
+    }
+  },
+  "prior_art": {
+    "pell_family_and_three_points": "Patel–Chakraborty–Chattopadhyay, Czechoslovak Mathematical Journal, 2026, DOI 10.21136/CMJ.2026.0080-26",
+    "nearby_2_selmer_article": "Patel–Chakraborty–Chattopadhyay, Ramanujan Journal 69, article 46 (2026), DOI 10.1007/s11139-026-01317-5",
+    "existing_exact_rank_three_infinitude": "Zywina, arXiv:2602.10865 (2026)",
+    "novelty_audit_complete": false
+  },
+  "gates": {
+    "main_theorem_proved": false,
+    "global_descent_verified": false,
+    "independent_specialist_review": false,
+    "novelty_and_priority_confirmed": false,
+    "authorship_and_rights_confirmed": false,
+    "journal_format_and_bibliography_checked": false
+  },
+  "gate_evidence": {
+    "main_theorem_proved": null,
+    "global_descent_verified": null,
+    "independent_specialist_review": null,
+    "novelty_and_priority_confirmed": null,
+    "authorship_and_rights_confirmed": null,
+    "journal_format_and_bibliography_checked": null
+  },
+  "publication": {
+    "journal_submission_authorized": false,
+    "submitted": false
+  },
+  "note": "Software flags and citations are not mathematical proofs or independent peer review. Submission explicitly blocked pending proof and human review."
+}

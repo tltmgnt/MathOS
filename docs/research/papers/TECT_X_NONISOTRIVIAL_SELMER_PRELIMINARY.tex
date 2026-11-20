@@ -1,0 +1,382 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\F}{\mathbb F}
+\newcommand{\Sel}{\operatorname{Sel}}
+\newcommand{\Sha}{\mathop{\mathrm{Sha}}}
+\newcommand{\rank}{\operatorname{rank}}
+
+\title{A Pell-Type Nonisotrivial Elliptic Family:\\
+Finite-Field Rank Certificates and an Open 2-Selmer Infinitude Problem}
+\author{\textit{Author attribution pending human confirmation}\\
+\small ResearchOS / TECT-X mathematical research audit}
+\date{19 November 2026\\[0.2em]\small Preliminary draft --- not submitted or peer reviewed}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We revisit a rational parameterization of the Pell-type elliptic
+curve construction studied by Patel, Chakraborty and Chattopadhyay.
+The three underlying rational points and a rank-at-least-three
+construction have already appeared in their 2026 work; they are not
+claimed as new here. We give an exact modular-independence certificate
+for the points along a specified arithmetic progression, yielding a
+rank lower bound of three throughout the progression. An additional rational point on its first
+fiber gives an independently checkable rank-at-least-four certificate.
+We then prove an elementary conditional arithmetic-statistics
+statement: an average 2-Selmer size strictly smaller than $16$ along
+the progression would force a positive proportion of the curves to
+have 2-Selmer dimension and Mordell--Weil rank exactly three.
+\emph{No such average bound, global Selmer exhaustion theorem,
+analytic-rank statement or Birch--Swinnerton-Dyer formula is proved here.}
+The conditional counting implication is elementary; no novelty claim is
+made for it. This document is an audit and research scaffold, not a
+journal-ready paper claiming a Selmer-infinitude theorem.
+\end{abstract}
+
+\section{Prior work, authorship, and originality boundary}
+The elliptic equation $y^2=x^3-a^2x+b^2$, the Pell relation
+$a^2-3b^2=1$, and the three points $(0,b)$, $(a,b)$ and
+$(-1,2b)$ appear explicitly in the published work of Patel,
+Chakraborty and Chattopadhyay \cite{PatelEtAl2026Pell};
+the rank-at-least-three conclusion is not new as a general
+construction. The present rational parameterization and modular
+certificate must be compared rigorously against that work before
+any claim of novelty is made. Their related paper also treats
+2-Selmer groups in a different polynomial family
+\cite{PatelEtAl2026Selmer}. Zywina's work already establishes
+infinitely many geometrically distinct elliptic curves of exact
+rank three over number fields \cite{Zywina2026}; the distinct
+unresolved target here is \emph{Selmer dimension three in this
+specific progression}.
+
+No result of this note currently establishes that target.
+A genuinely new paper would require a proof of infinitely many
+specializations with the three known classes exhausting the
+2-Selmer group, plus a complete priority and independence review.
+
+\section{Scope and main results}\label{sec:main}
+
+For an integer $n\ge5$ put
+\begin{equation}\label{eq:params}
+ a_n=\frac{n^2+27}{27-n^2},\qquad
+ b_n=\frac{6n}{27-n^2},\qquad
+ E_n:\ y^2=x^3-a_n^2x+b_n^2.
+\end{equation}
+Our parameter set is
+\begin{equation}\label{eq:progression}
+ n=5+759m,\qquad m=0,1,2,\ldots.
+\end{equation}
+The three rational points are
+\begin{equation}\label{eq:points}
+ P_n=(0,b_n),\quad Q_n=(a_n,b_n),\quad R_n=(-1,2b_n).
+\end{equation}
+
+\begin{theorem}[Three independent rational sections]\label{thm:three}
+For every $n$ in \eqref{eq:progression}, $E_n$ is an elliptic curve
+with $E_n(\Q)[2]=0$. The three classes
+$[P_n],[Q_n],[R_n]\in E_n(\Q)/2E_n(\Q)$ are linearly independent
+over $\F_2$. Consequently,
+\[
+ \rank E_n(\Q)\ge3,\qquad
+ \dim_{\F_2}\Sel_2(E_n/\Q)\ge3.
+\]
+The rational function $j(E_n)$ is nonconstant; in particular, the
+progression gives infinitely many distinct $\Q$-isomorphism classes
+(and infinitely many distinct geometric $j$-invariants).
+\end{theorem}
+
+\begin{proposition}[An exceptional rank-at-least-four fiber]\label{prop:four}
+At $n=5$ the curve and four rational points are
+\[
+ E_5:\ y^2=x^3-676x+225,
+\quad P=(0,15),\ Q=(26,15),\ R=(-1,30),\ T=(-18,81).
+\]
+Their classes are linearly independent in $E_5(\Q)/2E_5(\Q)$.
+Hence $\rank E_5(\Q)\ge4$ and
+$\dim_{\F_2}\Sel_2(E_5/\Q)\ge4$.
+\end{proposition}
+
+Define, for positive integers $X$,
+\begin{equation}\label{eq:averages}
+ A(X)=\frac1X\sum_{m=0}^{X-1}
+ \#\Sel_2(E_{5+759m}/\Q),
+\quad
+ N_3(X)=\#\{0\le m<X:\dim_{\F_2}\Sel_2(E_{5+759m}/\Q)=3\}.
+\end{equation}
+
+\begin{theorem}[Conditional mean-size criterion]\label{thm:mean}
+For every positive integer $X$,
+\[
+ N_3(X)\ \ge\ \frac{16-A(X)}8\,X.
+\]
+In particular, if there exist $\varepsilon>0$ and $X_0$ such that
+$A(X)\le16-\varepsilon$ for all $X\ge X_0$, then
+$N_3(X)\ge(\varepsilon/8)X$ for all $X\ge X_0$.
+For every curve counted by $N_3(X)$,
+\[
+ \rank E_n(\Q)=3\quad\text{and}\quad \Sha(E_n/\Q)[2]=0.
+\]
+\end{theorem}
+
+The hypothesis of Theorem~\ref{thm:mean} is \emph{not} proved,
+and the statement is an implication, not a theorem asserting the
+existence of infinitely many Selmer-dimension-three specializations.
+
+\section{Proof of the rational-section results}
+
+The identity
+\begin{equation}\label{eq:pell}
+ a_n^2-3b_n^2=1
+\end{equation}
+is immediate on inserting \eqref{eq:params}.
+It gives $P_n,Q_n,R_n\in E_n(\Q)$:
+for $Q_n$, the right side is $b_n^2$, and for $R_n$ it
+is $-1+a_n^2+b_n^2=4b_n^2$.
+The short-Weierstrass discriminant is
+\begin{align}
+ \Delta(E_n)
+ &=16(4a_n^6-27b_n^4)\notag\\
+ &=16(108b_n^6+81b_n^4+36b_n^2+4)>0.\label{eq:delta}
+\end{align}
+Thus every parameter in \eqref{eq:progression} gives a smooth
+elliptic curve.
+
+For $p\in\{3,11,23\}$, the denominator $27-n^2$ is a $p$-adic
+unit throughout \eqref{eq:progression}, and
+\[
+ (a_n,b_n)\equiv(26,15)\pmod p.
+\]
+The discriminant of $E_5$ equals $19748739664$, which is prime
+to these three primes. Thus the reductions are good and independent
+of the parameter $m$.
+
+Modulo $11$ the 2-division cubic is $x^3+6x+5$. A check of
+the eleven residue classes gives no root. Since the curve has
+good reduction at $11$, it follows that $E_n(\Q)[2]=0$.
+
+To prove the independence of $P_n,Q_n,R_n$, consider a nonempty
+binary sum that would lie in $2E_n(\Q)$. Its reduction at a good
+prime must lie in $2E_n(\F_p)$.
+At $p=3$, the group is
+\[
+ E_n(\F_3)=\{O,(0,0),(1,0),(2,0)\}
+ \cong(\mathbb Z/2\mathbb Z)^2,
+\]
+so $2E_n(\F_3)=\{O\}$. The marked points reduce to
+$\bar P_n=(0,0)$ and $\bar Q_n=\bar R_n=(2,0)$.
+Among the seven nonempty binary combinations,
+only $Q_n+R_n$ could therefore be a double over $\Q$.
+
+Modulo $23$ the cubic factors as
+\[
+ x^3-26^2x+15^2\equiv(x-4)(x^2+4x+7).
+\]
+The group $E_n(\F_{23})$ has $20$ elements and its doubling
+image is exactly
+\begin{align*}
+ 2E_n(\F_{23})=\{&
+ O,(4,0),(20,8),(20,15),(5,11),(5,12),\\
+ &(10,10),(10,13),(22,7),(22,16)\}.
+\end{align*}
+The addition law gives $\overline{Q_n+R_n}=(2,10)$, which
+is not in this image. The remaining possibility is excluded.
+The three classes are independent modulo doubling.
+As there is no rational 2-torsion, the Mordell--Weil theorem
+implies $\rank E_n(\Q)\ge3$, and the Kummer exact sequence yields
+the Selmer lower bound.
+
+Finally, the $j$-invariant is
+\[
+ j(E_n)=1728\frac{4a_n^6}{4a_n^6-27b_n^4}.
+\]
+Since $b_n\ne0$ for $n\ge5$, this value is never $1728$,
+while $b_n\to0$ and $a_n^2\to1$ as $n\to\infty$,
+so $j(E_n)\to1728$. A sequence of rational numbers with this
+limit, none equal to the limit, cannot take only finitely many
+values. This proves nonisotriviality and the last assertion of
+Theorem~\ref{thm:three}. \qed
+
+\medskip
+\noindent\emph{Proof of Proposition~\ref{prop:four}.}
+Direct substitution confirms all four points in the statement.
+The same good reductions at $3$ and $23$, together with good
+reduction at $5$, give the following exact sieve of the $15$
+nonzero binary sums; masks use bit weights $1,2,4,8$ for
+$P,Q,R,T$, respectively:
+\[
+\begin{array}{c|c|l}
+p & \#E_5(\F_p) & \text{nonzero masks still potentially doubled}\\ \hline
+3 &4 & 6,9,15\\
+5 &8 &6\\
+23&20&\varnothing
+\end{array}
+\]
+At $p=5$ the doubling image is $\{O,(0,0)\}$;
+at $p=23$ it is the ten-element set listed above.
+Thus no nonempty binary sum is a double in $E_5(\Q)$.
+Since $E_5(\Q)[2]=0$, the free rank is at least four,
+and the Kummer sequence gives the asserted Selmer lower bound.
+\hfill$\square$
+
+\section{The conditional arithmetic-statistics argument}
+
+\noindent\emph{Proof of Theorem~\ref{thm:mean}.}
+Theorem~\ref{thm:three} shows that all Selmer dimensions
+in the progression are at least three. Thus their cardinalities
+belong to $\{8,16,32,64,\ldots\}$. Precisely $N_3(X)$ of
+the first $X$ groups have cardinality $8$; each of the
+others has cardinality at least $16$. Therefore
+\[
+ XA(X)\ge 8N_3(X)+16(X-N_3(X))
+       =16X-8N_3(X).
+\]
+Rearranging proves the claimed inequality.
+If $\dim_{\F_2}\Sel_2(E_n/\Q)=3$, then the Kummer
+exact sequence
+\[
+0\longrightarrow E_n(\Q)/2E_n(\Q)
+\longrightarrow\Sel_2(E_n/\Q)
+\longrightarrow\Sha(E_n/\Q)[2]\longrightarrow0
+\]
+and Theorem~\ref{thm:three} give rank exactly $3$
+and $\Sha(E_n/\Q)[2]=0$. \hfill$\square$
+
+\begin{remark}[A genuine gap, not a statistical estimate]
+The condition $\limsup_{X\to\infty}A(X)<16$ is an
+unproved hypothesis. The preceding counting inequality
+does not produce it. Nor can an average-size theorem
+for all elliptic curves ordered by height automatically
+be restricted to this thin arithmetic progression.
+\end{remark}
+
+\section{Cubic-field descent formulation and open problem}
+
+Set $d_n=n^2-27$ and $A_n=n^2+27$. Clearing denominators,
+the change of coordinates $U=d_n x$, $Z=d_n^2 y$ turns
+$E_n$ into
+\begin{equation}\label{eq:cubic}
+ Z^2=d_n\,h_n(U),\qquad
+ h_n(U)=U^3-A_n^2 U+36n^2d_n.
+\end{equation}
+The discriminant of the monic cubic $h_n$ is
+\[
+ \operatorname{disc}(h_n)
+ =4\big((n^2+27)^6-8748n^4(n^2-27)^2\big).
+\]
+The irreducibility of the 2-division cubic modulo $11$
+shows that
+$K_n=\Q[U]/(h_n(U))=\Q(u_n)$, where $h_n(u_n)=0$, is a cubic number field.
+In the usual cubic \'etale-algebra model for 2-descent,
+the images of the marked points have representatives
+\[
+ [-d_nu_n],\quad
+ [-d_n(A_n+u_n)],\quad
+ [-d_n(d_n+u_n)]
+ \quad\text{in }K_n^\times/K_n^{\times2}.
+\]
+Their independence follows from Theorem~\ref{thm:three};
+it does not imply that they exhaust the Selmer group.
+
+For each $n$, full 2-descent would require determination of
+the admissibly ramified norm-one squareclasses, including
+the varying cubic-field class-group 2-torsion, and the
+local Kummer images at every relevant place
+\cite{Schaefer2003}. Only after these are explicitly
+constructed can one speak of an exact local-condition
+matrix $\lambda_n$ whose kernel realizes $\Sel_2(E_n/\Q)$.
+
+\begin{quote}
+\textbf{Open problem (not a claim of this note).}
+Prove that an explicitly specified infinite subset of
+$n=5+759m$ has
+$\dim_{\F_2}\Sel_2(E_n/\Q)=3$.
+A sufficient arithmetic-statistics hypothesis is
+$\limsup_{X\to\infty}A(X)<16$.
+\end{quote}
+
+The known general mean-size-$3$ result for 2-Selmer
+groups of elliptic curves ordered by height
+\cite{BhargavaShankar2015} does not provide this
+thin-family estimate. Results on families with marked
+points \cite{BhargavaHo2022} and rank nonjump
+\cite{Zywina2025}, as well as the more recent
+prescribed-rank theorem \cite{Zywina2026}, supply
+important context but do not establish the above
+Selmer exhaustion in this family.
+
+\section{Reproducibility, independence and submission boundaries}
+
+The exact finite checks underlying
+Theorem~\ref{thm:three} and Proposition~\ref{prop:four}
+are tracked in the MathOS source tree by
+\texttt{mathos/research/tect\_x\_rank3\_family\_certificate.py}
+and
+\texttt{mathos/research/tect\_x\_rank4\_fiber\_certificate.py},
+with adversarial regression checks in
+\texttt{tests/test\_tect\_x\_noni\_selmer.py}.
+These tests verify finite-field computations; they do
+\emph{not} replace proofs of global arithmetic results.
+
+The present document is a \emph{preliminary research
+manuscript}, not a completed proof of infinitude
+of exact-rank-three fibers or of Birch--Swinnerton-Dyer.
+Independent specialist proof review, a full literature
+and novelty audit, and authorship clearance are
+pending. Its elementary conditional mean-size
+criterion is not represented as a new deep theorem.
+
+\begin{thebibliography}{99}
+\bibitem{PatelEtAl2026Pell}
+P.~Patel, D.~Chakraborty, and J.~Chattopadhyay,
+\emph{Two infinite families of elliptic curves with Mordell--Weil rank
+at least $3$}, Czechoslovak Math. J., published online
+26 October 2026, DOI: \url{https://doi.org/10.21136/CMJ.2026.0080-26}.
+
+\bibitem{PatelEtAl2026Selmer}
+P.~Patel, D.~Chakraborty, and J.~Chattopadhyay,
+\emph{On the Mordell--Weil rank and $2$-Selmer group of a family of
+elliptic curves}, Ramanujan J. \textbf{69} (2026), article 46,
+DOI: \url{https://doi.org/10.1007/s11139-026-01317-5}.
+
+\bibitem{Schaefer2003}
+E.~F.~Schaefer and M.~Stoll, \emph{How to do a $p$-descent on an elliptic curve},
+Trans.\ Amer.\ Math.\ Soc.\ \textbf{356} (2004), 1209--1231.
+\url{https://eref.uni-bayreuth.de/id/eprint/6228/}.
+
+\bibitem{BhargavaShankar2015}
+M.~Bhargava and A.~Shankar,
+\emph{Binary quartic forms having bounded invariants, and the
+boundedness of the average rank of elliptic curves},
+Ann.\ of Math.\ \textbf{181} (2015), 191--242.
+\url{https://annals.math.princeton.edu/2015/181-1/p03}.
+
+\bibitem{BhargavaHo2022}
+M.~Bhargava and W.~Ho,
+\emph{On average sizes of Selmer groups and ranks in
+families of elliptic curves having marked points},
+\url{https://arxiv.org/abs/2207.03309}
+(preprint; check current bibliographic status before submission).
+
+\bibitem{Zywina2025}
+D.~Zywina,
+\emph{An elliptic surface with infinitely many fibers
+for which the rank does not jump},
+\url{https://arxiv.org/abs/2502.01026} (2025).
+
+\bibitem{Zywina2026}
+D.~Zywina, \emph{On the infinitude of elliptic curves
+over a number field with prescribed small rank},
+\url{https://arxiv.org/abs/2602.10865} (2026).
+\end{thebibliography}
+
+\end{document}
