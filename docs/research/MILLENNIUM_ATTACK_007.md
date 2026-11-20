@@ -132,3 +132,13 @@ The two curves have different **full** L-functions; matching infinitely many Eul
 - **BSD.leading_term:** fully normalized leading-coefficient formula with periods, regulators and local factors.
 
 **Research conclusion:** Any proposed BSD proof using only the Euler factors at primes \(p\equiv3\bmod4\) is missing information, since these two familiar curves agree at every such prime but have distinct established ranks. This is **a classical special-family diagnostic, not new research novelty or an obstruction to the actual conjecture**. The next meaningful theorem would need a noncircular bridge from sufficiently rich global L-function/ Selmer information to rational rank for genuinely new families, subject to external mathematical review.
+
+
+## TECT-X follow-up: nonisotrivial rank lower bounds (not Selmer-3 infinitude)
+
+An independent exact-arithmetic follow-up studies the nonisotrivial family `E_n: y^2=x^3-a_n^2 x+b_n^2`, `n=5+759m`. The three rational sections are independent modulo doubling for every parameter, so `rank E_n(Q) >= 3`. At `n=5`, four explicit points are independent modulo doubling (reductions at `3,5,23`), proving `rank E_5(Q) >= 4` and `dim_F2 Sel_2(E_5/Q) >= 4`. This **does not** establish rank exactly three or 2-Selmer dimension three on infinitely many nonisotrivial fibers; elimination of additional Selmer classes remains open.
+
+- [TECT-X proof scope and exact arithmetic audit](TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md)
+- `python -m mathos.research.tect_x_rank3_family_certificate`
+- `python -m mathos.research.tect_x_rank4_fiber_certificate`
+- `python -m unittest discover -s tests -p 'test_tect_x_noni_selmer.py' -v`
