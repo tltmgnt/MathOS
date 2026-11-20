@@ -68,7 +68,7 @@ class TraceIdentityGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             logdet_positive_jacobi([2.], [1.], 0)
         with self.assertRaises(ValueError):
-            finite_symmetric_determinant(19, *jacobi_coefficients(16))
+            finite_symmetric_determinant(100, *jacobi_coefficients(16))
 
     def test_invalid_sizes(self):
         for count in [0, 2, 4097, 32.0, True]:
