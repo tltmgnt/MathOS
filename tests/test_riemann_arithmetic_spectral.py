@@ -50,6 +50,10 @@ class ArithmeticSpectralTests(unittest.TestCase):
                         heat["finite_heat_trace_unperturbed"])
         self.assertTrue(heat["first_ordinate_mismatch"])
         self.assertEqual(heat["trace_identity_status"], "NOT_DERIVED")
+        self.assertAlmostEqual(
+            heat["finite_heat_trace_arithmetic"] - heat["finite_heat_trace_unperturbed"],
+            heat["finite_prime_power_trace_difference"], delta=1e-12)
+        self.assertIn("NOT the Riemann explicit formula", heat["prime_power_trace_identity_scope"])
 
     def test_both_variants_match_count_bracket(self):
         for epsilon in [0.0, 0.25, 1.0]:
