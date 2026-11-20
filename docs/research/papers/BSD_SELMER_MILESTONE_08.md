@@ -125,6 +125,38 @@ For every member of \(S_3\) outside the **finite** set where Silverman's special
 
 The known rank-three fibers \(u=2,3\) lie outside \(A=24\mathbb Z\); they are **validation controls**, not members of the proposed infinite progression. It remains a separate research problem to identify a tractable infinite subfamily with uniformly bounded 2-Selmer ranks.
 
+## 3. Recorded independent CAS execution — six selected fibers
+
+An actual [GitHub Actions run 44654855201](https://github.com/tltmgnt/MathOS/actions/runs/44654855201), using **PARI/GP 2.17.3-1**, completed successfully and executed the original MathOS family at the six parameters below. Its PARI logs emitted one valid \`MATHOS08\` record each. The pinned ResearchOs TECT offline controller independently replayed the evidence ledger, reaching **SUPPORTED for the narrow claim "these computations were observed"**; it did **not** certify mathematical originality or a general theorem.
+
+| u | PARI lower rank | PARI upper rank | pairing correction | dim E(Q)[2] | 2-Selmer dimension |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 1 | 1 | 0 | 0 | 1 |
+| 1 | 2 | 2 | 0 | 0 | 2 |
+| 2 | 3 | 3 | 0 | 0 | 3 |
+| 3 | 3 | 3 | 0 | 0 | 3 |
+| 24 | 4 | 4 | 0 | 0 | 4 |
+| -24 | 4 | 4 | 0 | 0 | 4 |
+
+**Source provenance:** [machine-readable observed data](BSD_SELMER_MILESTONE_08_OBSERVED.json); run ID \`44654855201\`; original GitHub job ID \`136018446386\`; source SHA \`a1dcf76596971782ae32a682443c42aecbd01642\`; workflow artifact \`14593136191\` (SHA-256 \`3bae7379ff0f60397b059109e956bcf5868fc5c299dc16006db63d31c2736681\`). Workflow artifacts can expire; the evidence file stores the provenance and rank outputs, not a formal arithmetic certificate. The code was checked under \`ellrank\`'s **unconditional** method, not an invocation of BSD-dependent analytic-rank routines.
+
+**Key falsification:** The integer progression \(u=24k\) includes \(u=24\) and \(u=-24\). The independent PARI implementation returned an exact Mordell–Weil rank interval \([4,4]\) at both parameters (conditional on trusting CAS implementation). Therefore **a claim that all \(u\in24\mathbb Z\) have rank at most three is false**. The existence of some proper **infinite subset** of \(24\mathbb Z\) with exact rank three is **still open** in this project. These two rank-four fibers do not disprove that weaker existence claim.
+
+**Scientific caveat:** The computation is source-auditable, repeatable and stronger than the coarse bounds \(B(24)=71\), \(B(-24)=74\) in Milestone 07. However, it remains a single-CAS computational result awaiting an independently implemented second calculation or a specialist's explicit descent certificate. It is not yet an independent formal proof of the rank, nor a peer-reviewed discovery. No result above yields an exact **analytic** rank equality.
+
+## 4. A concrete noncircular route to an infinite rank-three subset
+
+Define
+
+\[
+S_{3}^{\rm Sel}:=\{24k: k\in\mathbb Z,\;
+\dim_{\mathbb F_2}\operatorname{Sel}_2(E_{24k}/\mathbb Q)\le3\}.
+\]
+
+Every \(u\in S_{3}^{\rm Sel}\) outside the (not explicitly determined) finite bad-specialization set has **exact algebraic rank three**: the three-section lower bound holds there, and the upper bound is at most the 2-Selmer dimension because the 2-division cubic is irreducible throughout \(24\mathbb Z\). Importantly, **the infinitude of \(S_3^{\rm Sel}\) has not been shown**. The recorded \(u=\pm24\) have 2-Selmer dimension four, so neither belongs to this candidate set; \(u=0\) has 2-Selmer dimension one, so it belongs to the low-Selmer criterion but is a rank-drop specialization. This does not contradict the finite-exception principle.
+
+To turn the criterion into a theorem, one would need a uniform family-level control of local Kummer images and cubic class-group 2-torsion for an explicitly defined infinite subclass; analytic-rank equality remains an additional independent requirement. We have **not** produced such a uniform argument. Do not infer infinitude from the six numerical points.
+
 ## 5. Files and reproduction
 
 - \`mathos/research/bsd_selmer_selected_08.gp\` — actual PARI/GP input, six selected parameters (\(0,1,2,3,24,-24\)); source is versioned in MathOS.
