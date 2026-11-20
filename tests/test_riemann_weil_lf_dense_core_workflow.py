@@ -87,7 +87,13 @@ class WeilLFDenseCoreWorkflowTests(unittest.TestCase):
                 bump=family(8)[e["i"]]
                 h=Fraction(bump["half_support_width"])
                 self.assertEqual(e["support"],[str(-2*h),str(2*h)])
-                self.assertEqual(e["prime_powers"],[])
+                self.assertEqual(e["prime_powers"],
+                                 exact_prime_power_inventory(-2*h,2*h))
+        # Unlike the old narrow lattice, the widest dense-core bumps
+        # already encounter prime 2 even on the diagonal.
+        self.assertEqual(next(e["prime_powers"] for e in r["arithmetic"]["upper_triangle"]
+                              if e["i"]==0 and e["j"]==0),
+                         [{"n":2,"von_mangoldt_base":2}])
 
     def test_density_is_analytic_not_computer_proved(self):
         a=self.r["core"]
