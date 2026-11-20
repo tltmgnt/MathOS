@@ -29,8 +29,8 @@ for u in params do
     P := E![0, 0, 1];
     R := E![1, 0, 1];
     T := E![-1, u, 1];
-    printf "Three known points satisfy the curve: %o\n",
-        (P in E) and (R in E) and (T in E);
+    // Coercion to E above validates the curve equations.
+    printf "Three explicit points on E: %o, %o, %o\n", P, R, T;
 
     // NOTE: no automatic promotion even when upper==3; one must separately
     // certify a rank-three lower bound and report the exact input/output.
