@@ -1,0 +1,54 @@
+name: TECT-X Weil vanishing negative floor RH equivalence
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_vanishing_floor_gate.py'
+      - 'tests/test_riemann_weil_vanishing_floor_gate.py'
+      - 'docs/research/TECTX_WEIL_VANISHING_FLOOR_RH_EQUIVALENCE.md'
+      - '.github/workflows/riemann-weil-vanishing-floor.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_vanishing_floor_gate.py'
+      - 'tests/test_riemann_weil_vanishing_floor_gate.py'
+      - 'docs/research/TECTX_WEIL_VANISHING_FLOOR_RH_EQUIVALENCE.md'
+      - '.github/workflows/riemann-weil-vanishing-floor.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  vanishing-floor-and-prime-support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Test exact prime-support and no-RH theorem gate
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_vanishing_floor_gate.py' -v
+      - name: Generate arithmetic support report
+        run: |
+          python -m mathos.research.riemann_weil_vanishing_floor_gate --count 8 --output artifacts/riemann/vanishing_floor_gate.json
+          python -m json.tool artifacts/riemann/vanishing_floor_gate.json > /dev/null
+      - name: Verify exact rational supports and strictly reject RH promotion
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/vanishing_floor_gate.json', encoding='utf-8') as f:
+              r=json.load(f)
+          assert r['status']=='ALL_INDEX_VANISHING_FLOOR_EQUIVALENT_TO_RH_NOT_PROVED'
+          assert r['arithmetic_support']['pair_count']==36
+          for pair in r['arithmetic_support']['pair_bounds']:
+              left,right=map(Fraction,pair['support'])
+              B=Fraction(pair['max_abs_log_coordinate'])
+              assert left<=right and B>=abs(left) and B>=abs(right)
+              assert pair['rigorous_integer_prime_power_cap']>=1
+          assert r['vanishing_floor_theorem']['RH_equivalent_if_canonical_Weil_test_core']
+          assert not r['vanishing_floor_theorem']['all_index_hypothesis_proved']
+          assert not r['arithmetic_support']['Gram_eigenvalue_certification_performed']
+          assert not any(r['assurance'].values())
+          PY
