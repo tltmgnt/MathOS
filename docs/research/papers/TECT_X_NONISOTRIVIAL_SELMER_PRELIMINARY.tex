@@ -15,20 +15,22 @@
 \newcommand{\Sha}{\mathop{\mathrm{Sha}}}
 \newcommand{\rank}{\operatorname{rank}}
 
-\title{Three Independent Rational Sections in a Nonisotrivial Elliptic Family\\
-and a Conditional 2-Selmer Density Criterion}
-\author{ResearchOS / TECT-X working research note\\
-\small Authorship, original-contribution attribution and specialist review pending}
+\title{A Pell-Type Nonisotrivial Elliptic Family:\\
+Finite-Field Rank Certificates and an Open 2-Selmer Infinitude Problem}
+\author{\textit{Author attribution pending human confirmation}\\
+\small ResearchOS / TECT-X mathematical research audit}
 \date{19 November 2026\\[0.2em]\small Preliminary draft --- not submitted or peer reviewed}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-We exhibit a nonisotrivial family of elliptic curves over $\Q$ with three
-explicit rational points whose images in the Mordell--Weil group modulo
-doubling are independent for every member of a specified arithmetic
-progression. In particular, the Mordell--Weil rank is at least three
-throughout that progression. An additional rational point on its first
+We revisit a rational parameterization of the Pell-type elliptic
+curve construction studied by Patel, Chakraborty and Chattopadhyay.
+The three underlying rational points and a rank-at-least-three
+construction have already appeared in their 2026 work; they are not
+claimed as new here. We give an exact modular-independence certificate
+for the points along a specified arithmetic progression, yielding a
+rank lower bound of three throughout the progression. An additional rational point on its first
 fiber gives an independently checkable rank-at-least-four certificate.
 We then prove an elementary conditional arithmetic-statistics
 statement: an average 2-Selmer size strictly smaller than $16$ along
@@ -37,8 +39,30 @@ have 2-Selmer dimension and Mordell--Weil rank exactly three.
 \emph{No such average bound, global Selmer exhaustion theorem,
 analytic-rank statement or Birch--Swinnerton-Dyer formula is proved here.}
 The conditional counting implication is elementary; no novelty claim is
-made for it.
+made for it. This document is an audit and research scaffold, not a
+journal-ready paper claiming a Selmer-infinitude theorem.
 \end{abstract}
+
+\section{Prior work, authorship, and originality boundary}
+The elliptic equation $y^2=x^3-a^2x+b^2$, the Pell relation
+$a^2-3b^2=1$, and the three points $(0,b)$, $(a,b)$ and
+$(-1,2b)$ appear explicitly in the published work of Patel,
+Chakraborty and Chattopadhyay \cite{PatelEtAl2026Pell};
+the rank-at-least-three conclusion is not new as a general
+construction. The present rational parameterization and modular
+certificate must be compared rigorously against that work before
+any claim of novelty is made. Their related paper also treats
+2-Selmer groups in a different polynomial family
+\cite{PatelEtAl2026Selmer}. Zywina's work already establishes
+infinitely many geometrically distinct elliptic curves of exact
+rank three over number fields \cite{Zywina2026}; the distinct
+unresolved target here is \emph{Selmer dimension three in this
+specific progression}.
+
+No result of this note currently establishes that target.
+A genuinely new paper would require a proof of infinitely many
+specializations with the three known classes exhausting the
+2-Selmer group, plus a complete priority and independence review.
 
 \section{Scope and main results}\label{sec:main}
 
@@ -311,7 +335,19 @@ and novelty audit, and authorship clearance are
 pending. Its elementary conditional mean-size
 criterion is not represented as a new deep theorem.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
+\bibitem{PatelEtAl2026Pell}
+P.~Patel, D.~Chakraborty, and J.~Chattopadhyay,
+\emph{Two infinite families of elliptic curves with Mordell--Weil rank
+at least $3$}, Czechoslovak Math. J., published online
+26 October 2026, DOI: \url{https://doi.org/10.21136/CMJ.2026.0080-26}.
+
+\bibitem{PatelEtAl2026Selmer}
+P.~Patel, D.~Chakraborty, and J.~Chattopadhyay,
+\emph{On the Mordell--Weil rank and $2$-Selmer group of a family of
+elliptic curves}, Ramanujan J. \textbf{69} (2026), article 46,
+DOI: \url{https://doi.org/10.1007/s11139-026-01317-5}.
+
 \bibitem{Schaefer2003}
 E.~F.~Schaefer and M.~Stoll, \emph{How to do a $p$-descent on an elliptic curve},
 Trans.\ Amer.\ Math.\ Soc.\ \textbf{356} (2004), 1209--1231.
