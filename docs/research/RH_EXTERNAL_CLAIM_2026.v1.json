@@ -1,0 +1,44 @@
+{
+  "schema": "mathos.rh.external_claim_audit/1",
+  "source": {
+    "claimant": "Levent Alpöge (with Claude)",
+    "announcement_date": "2026-11-20",
+    "announcement_url": "https://alpo.ge/remark.pdf",
+    "source_archive_sha256": "9631b4f020199e580ba86178cb56c6e9b09f690c2369a80dc4334aa93f49c7fc",
+    "mirror_repository": "CocoSgt/riemann-hypothesis-lean",
+    "mirror_commit": "7cbf7a0c32fca1badf05931879a37c3f8a2b03b4",
+    "lean_version": "leanprover/lean4:v4.33.1",
+    "mathlib_commit": "0df444a360eaa60ab8c11dca51a86af692955474"
+  },
+  "pinned_blob_sha1": {
+    "src/Main.lean": "dbd5db70bc11b35f18fa5751216ab335321e7bfc",
+    "src/Statements.lean": "1cd1bce93344065936b2b392b23306254e0785ef",
+    "src/Supplements/Kernels/MainTheorems.lean": "6a542d7ce969a791fd12ce575f587e6bc29044bf",
+    "lean-toolchain": "a8afa7d1b02d96f0671eba854a8dc4b416beb473",
+    "lakefile.toml": "07e85dc8afcf28b4885a8f092154c8b74c8cf800",
+    "Mathlib/NumberTheory/LSeries/RiemannZeta.lean": "3c92195fce20df7fda41cfd823b3266f83cf3070"
+  },
+  "third_party_report": {
+    "observer": "Andrew Sutherland (MIT)",
+    "url": "https://math.mit.edu/~drew/grh/",
+    "as_of_utc": "2026-11-20T19:45:00Z",
+    "headline_modules_compiled": 175187,
+    "leanchecker_all_modules": "reported_pass",
+    "nanoda_export": "reported_accept",
+    "headline_theorem_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "full_lake_comparator": "in_progress_at_snapshot",
+    "sandboxed_rebuild": "not_reported_at_snapshot"
+  },
+  "policy": {
+    "official_cmi_status": "UNSOLVED_AT_SNAPSHOT",
+    "mathos_global_claim_status": "OPEN",
+    "mathematically_independently_reviewed_by_mathos": false,
+    "full_proof_replayed_by_this_tool": false,
+    "automatic_promotion": false,
+    "audit_scope": "PINNED_HEADLINE_SOURCE_AND_EXTERNAL_REPORT_ONLY"
+  }
+}
