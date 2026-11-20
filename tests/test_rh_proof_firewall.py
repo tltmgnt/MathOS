@@ -42,6 +42,20 @@ class ProofFirewallTests(unittest.TestCase):
     def test_reject_baseline_promotion_to_global_bridge(self):
         self.mutate(lambda r: r["claims"][5]["dependencies"].append("BASELINE"))
 
+    def test_reject_missing_family_wide_positivity_dependency(self):
+        self.mutate(lambda r: r["claims"][5].update(
+            dependencies=["G1", "G2", "G3", "G4"]))
+
+    def test_reject_indirect_baseline_dependency(self):
+        self.mutate(lambda r: r["claims"][1].update(dependencies=["BASELINE"]))
+
+    def test_reject_missing_family_wide_positivity_claim(self):
+        self.mutate(lambda r: r["claims"].pop())
+
+    def test_report_family_wide_positivity_is_unresolved(self):
+        self.assertEqual(validate(self.registry)["family_wide_positivity_status"],
+                         "CONJECTURED")
+
     def test_reject_unknown_dependency(self):
         self.mutate(lambda r: r["claims"][2].update(dependencies=["UNKNOWN"]))
 
