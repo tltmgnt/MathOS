@@ -1,0 +1,68 @@
+name: TECT-X verified Weil generalized Schur and L2 estimate
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_generalized_schur.py'
+      - 'tests/test_riemann_weil_generalized_schur.py'
+      - 'docs/research/TECTX_WEIL_GENERALIZED_SCHUR_CERT.md'
+      - '.github/workflows/riemann-weil-generalized-schur.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_generalized_schur.py'
+      - 'tests/test_riemann_weil_generalized_schur.py'
+      - 'docs/research/TECTX_WEIL_GENERALIZED_SCHUR_CERT.md'
+      - '.github/workflows/riemann-weil-generalized-schur.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fixed-weil-generalized-schur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Pin outward interval arithmetic dependency
+        run: python -m pip install --disable-pip-version-check mpmath==1.3.0
+      - name: Run strict interval generalized Weil and nested Schur tests
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_generalized_schur.py' -v
+      - name: Produce portable full rational certificate
+        run: |
+          python -m mathos.research.riemann_weil_generalized_schur --panels 8192 --output artifacts/riemann/weil_generalized_schur.json
+          python -m json.tool artifacts/riemann/weil_generalized_schur.json > /dev/null
+      - name: Independently check serialized rational gap, witnesses, and fail-closed flags
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/weil_generalized_schur.json', encoding='utf-8') as file:
+              r=json.load(file)
+          assert r['status']=='VERIFIED_FIXED_3D_GENERALIZED_GAP_AND_NESTED_SCHUR_GLOBAL_OPEN'
+          c=r['certified_generalized_eigenvalue']
+          lo=Fraction(c['strict_lower'])
+          hi=Fraction(c['strict_upper'])
+          assert lo==Fraction(1,50_000_000)
+          assert hi==Fraction(1,1_000_000)
+          assert lo<hi
+          for key in ['L2_pivots','shifted_G_minus_kappa_L_pivots']:
+              assert len(c[key])==3
+              assert all(Fraction(a)>0 and Fraction(b)>=Fraction(a) for a,b in c[key])
+          assert Fraction(c['Rayleigh_G_minus_upper_L_interval'][1])<0
+          e=r['nested_verified_schur']
+          assert [t['old_dim'] for t in e['extension_results']]==[1,2]
+          for t in e['extension_results']:
+              assert t['all_pivots_positive']
+              assert all(Fraction(a)>0 for a,b in t['schur_pivots'])
+          assert not e['fourth_or_higher_dimensional_actual_Weil_blocks_certified']
+          flags=r['assurance']
+          assert flags['fixed_three_span_generalized_positivity_certified']
+          assert not flags['dimension_independent_L2_coercivity']
+          assert not flags['all_admissible_Weil_tests_positive']
+          assert not flags['complete_Weil_Hilbert_space_constructed']
+          assert not flags['riemann_hypothesis_proved']
+          PY
