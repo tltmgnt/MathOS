@@ -61,16 +61,22 @@ class PrimeEightNineElevenGram4Tests(unittest.TestCase):
                 self.assertLessEqual(lo,hi)
         self.assertEqual(M[0][3],a["new_full_weil_entry"])
 
-    def test_strict_rational_gershgorin_floor(self):
+    def test_strict_exact_rational_midpoint_residual_bound(self):
         a=self.certificate["arithmetical_certification"]
         self.assertEqual(a["claimed_strict_lambda_lower"],"1/10000")
-        self.assertGreater(Fraction(a["verified_gershgorin_floor_exact"]),SPECTRAL_FLOOR)
+        proof=a["rational_midpoint_residual_certificate"]
+        self.assertTrue(proof["proved_positive_definiteness"])
+        inverse=Fraction(proof["inverse_infinity_norm_exact"])
+        error=Fraction(proof["interval_error_infinity_norm_exact"])
+        margin=Fraction(proof["strict_margin_above_shift_exact"])
+        self.assertGreater(margin,0)
+        self.assertEqual(margin,1/inverse-error)
+        self.assertLess(inverse*error,1)
 
-    def test_four_shifted_interval_LDL_pivots(self):
-        p=self.certificate["arithmetical_certification"]["shifted_G_minus_kappa_I_LDL_pivots"]
+    def test_four_exact_midpoint_LDL_pivots(self):
+        p=self.certificate["arithmetical_certification"]["shifted_midpoint_rational_LDL_pivots"]
         self.assertEqual(len(p),4)
-        self.assertTrue(all(Fraction(a)>0 and Fraction(b)>=Fraction(a)
-                            for a,b in p))
+        self.assertTrue(all(Fraction(a)>0 for a in p))
 
     def test_no_universal_PSD_or_RH_claims(self):
         f=self.certificate["assurance"]
@@ -98,7 +104,7 @@ class PrimeEightNineElevenGram4Tests(unittest.TestCase):
             ],check=True,capture_output=True,text=True)
             c=json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(c["schema"],"mathos_tectx_weil_prime_8_9_11_gram4/1")
-            self.assertGreater(Fraction(c["arithmetical_certification"]["verified_gershgorin_floor_exact"]),SPECTRAL_FLOOR)
+            self.assertGreater(Fraction(c["arithmetical_certification"]["rational_midpoint_residual_certificate"]["strict_margin_above_shift_exact"]),0)
             self.assertFalse(c["assurance"]["Riemann_hypothesis_proved"])
 
 
