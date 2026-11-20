@@ -66,11 +66,11 @@ Capstone deliverable: 1,200–1,800 words or a 10–12 minute presentation with 
 
 From this directory:
 
-\`\`\`sh
+```sh
 python lab.py
 python lab.py --radius 1
 python -m unittest discover -s . -p 'test_lab.py' -v
-\`\`\`
+```
 
 The lab computes small cycle spectral sums, closed-form checks, fixed/adaptive Ihara probes, and a 4-point square's Vietoris–Rips Betti numbers. Its only imports are from the Python standard library; no network and no proprietary data. The program is a **finite learning tool**, not a zeta-zero finder.
 
