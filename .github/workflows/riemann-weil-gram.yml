@@ -1,0 +1,49 @@
+name: TECT-X Weil explicit-formula finite Gram audit
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_gram.py'
+      - 'tests/test_riemann_weil_gram.py'
+      - 'docs/research/TECTX_RH_WEIL_GRAM_POSITIVITY.md'
+      - '.github/workflows/riemann-weil-gram.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_gram.py'
+      - 'tests/test_riemann_weil_gram.py'
+      - 'docs/research/TECTX_RH_WEIL_GRAM_POSITIVITY.md'
+      - '.github/workflows/riemann-weil-gram.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finite-arithmetic-weil-gram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Test Weil explicit-formula normalization and adversarial cases
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_gram.py' -v
+      - name: Build finite Gaussian-cosine arithmetic Gram
+        run: |
+          python -m mathos.research.riemann_weil_gram --a 0.02 --centers 0,0.2,0.5 --max-t 45 --panels 4096 --prime-bound 512 --output artifacts/riemann/weil_gram.json
+          python -m json.tool artifacts/riemann/weil_gram.json > /dev/null
+      - name: Enforce finite Weil evidence boundary
+        run: |
+          python - <<'PY'
+          import json
+          with open('artifacts/riemann/weil_gram.json', encoding='utf-8') as src:
+              r=json.load(src)
+          assert r['status']=='FINITE_UNCERTIFIED_WEIL_FORM_TEST_NOT_RH'
+          assert not any(r['assurance'].values())
+          assert not r['numerics']['can_certify_Weil_psd']
+          assert not r['finite_Weil_Gram']['claim_of_global_psd']
+          assert not r['independent_positive_L2_comparison']['is_the_Weil_form']
+          assert not r['conditional_Hilbert_space']['global_positivity_proved']
+          assert not r['conditional_Hilbert_space']['self_adjoint_zeta_operator_constructed']
+          PY
