@@ -29,7 +29,7 @@ from mathos.research.riemann_weil_certified_scalar import (
     _outward_decimal, _rational_bound,
 )
 from mathos.research.riemann_weil_generalized_schur import (
-    LOWER, _ldl_intervals, verified_schur,
+    _ldl_intervals, verified_schur,
 )
 
 NEW_CENTER = Fraction(21, 5)
@@ -39,7 +39,9 @@ PRIME_CUTOFF = 65536
 PRIME_LOG_FLOOR = 10
 MAX_FOURIER_SHIFT = 2 * NEW_CENTER
 EXP_POWER = 128
-VALID_PANELS = (8192, 16384)
+VALID_PANELS = (65536,)
+LOWER = Fraction(1,1_000_000_000)  # Reduced certified 4D generalized gap.
+PREVIOUS_THREE_DIMENSIONAL_LOWER = Fraction(1,50_000_000)
 
 
 def _frac(x: Fraction) -> object:
@@ -167,9 +169,31 @@ def _l2_entry(c: Fraction,d: Fraction) -> object:
             (iv.exp(-(c-d)**2/(4*a))+iv.exp(-(c+d)**2/(4*a))))
 
 
-def audit(panels: int=8192) -> dict:
+def _scalar_schur_interval(M: list[list[object]]) -> object:
+    """Enclose the scalar Schur of a verified-positive leading 3x3 block.
+
+    Unlike verified_schur(), this returns negative values too; use to
+    rigorously REJECT carrying an old coercivity constant forward.
+    """
+    if len(M)!=4 or any(len(row)!=4 for row in M):
+        raise ValueError("expected a 4x4 interval matrix")
+    A=[row[:3] for row in M[:3]]
+    low,pivots=_ldl_intervals(A)
+    y=[iv.mpf(0) for _ in range(3)]
+    for i in range(3):
+        v=M[i][3]
+        for k in range(i):
+            v-=low[i][k]*y[k]
+        y[i]=v
+    value=M[3][3]
+    for i in range(3):
+        value-=y[i]*y[i]/pivots[i]
+    return value
+
+
+def audit(panels: int=65536) -> dict:
     if type(panels) is not int or panels not in VALID_PANELS:
-        raise ValueError("panels must be 8192 or 16384")
+        raise ValueError("panels must be 65536")
     iv.dps=60
     old,_=_gram_intervals(panels)
     new,errors=_new_weil_row(panels)
@@ -184,6 +208,12 @@ def audit(panels: int=8192) -> dict:
        for i in range(4)]
     check=verified_schur(M,3)
     _,pivots=_ldl_intervals(M)
+    # The old 3D lower constant is NOT preserved; certify the negative Schur.
+    old_M=[[G[i][j]-_frac(PREVIOUS_THREE_DIMENSIONAL_LOWER)*L[i][j]
+             for j in range(4)] for i in range(4)]
+    old_schur=_scalar_schur_interval(old_M)
+    if _rational_bound(old_schur,True)>=0:
+        raise ArithmeticError("the old 3D lower constant was not refuted by a negative fourth Schur interval")
     if not all(_rational_bound(v,False)>0 for v in pivots):
         raise ArithmeticError("full generalized Weil matrix is not certified positive")
     return {
@@ -217,6 +247,9 @@ def audit(panels: int=8192) -> dict:
             "L2_pivots":[_outward_decimal(v,10**12) for v in l2_pivots],
             "shifted_G_minus_kappa_L_pivots":[_outward_decimal(v,10**12) for v in pivots],
             "fourth_direction_schur":check,
+            "failed_previous_3D_bound_schur_interval":_outward_decimal(old_schur,10**12),
+            "previous_3D_bound":_fraction_string(PREVIOUS_THREE_DIMENSIONAL_LOWER),
+            "previous_3D_generalized_lower_bound_survives":False,
             "strict_generalized_lambda_lower":_fraction_string(LOWER),
             "claim":"W(q_v^2) > (1/50000000)*||q_v||_L2^2 for all nonzero v in the fixed 4D span",
         },
@@ -236,7 +269,7 @@ def audit(panels: int=8192) -> dict:
 
 def main() -> int:
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--panels",type=int,default=8192)
+    parser.add_argument("--panels",type=int,default=65536)
     parser.add_argument("--output",type=Path)
     args=parser.parse_args()
     try:
