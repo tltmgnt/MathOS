@@ -305,3 +305,8 @@ agreement and scoped advisory decisions. Includes synthetic tests and a proposed
 blinded pilot; independent empirical validation and live controller integration
 remain outstanding.
 <!-- pea-assurance:end -->
+
+
+## TECT-X: preliminary Selmer-infinitude manuscript (submission blocked)
+
+The [preliminary LaTeX note](docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex) audits exact rank-lower-bound certificates in a nonisotrivial elliptic family and an **elementary conditional** average-size implication. It does **not** prove infinitely many 2-Selmer-dimension-three fibers. The three underlying points and Pell-type family are already in Patel--Chakraborty--Chattopadhyay (2026, [published DOI](https://doi.org/10.21136/CMJ.2026.0080-26)); they are not claimed as new. See the [explicit missing proof obligations](docs/research/papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md), [publication readiness audit](docs/research/papers/TECT_X_PUBLICATION_READINESS.md), and [machine-readable blocked gate](docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json). Neither software tests nor a successful LaTeX build constitute independent mathematical proof review.
