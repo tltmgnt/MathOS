@@ -1,0 +1,63 @@
+name: TECT-X certified actual fourth Weil Schur direction
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/riemann_weil_certified_fourth.py'
+      - 'tests/test_riemann_weil_certified_fourth.py'
+      - 'docs/research/TECTX_WEIL_CERTIFIED_FOURTH_SCHUR.md'
+      - '.github/workflows/riemann-weil-certified-fourth.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/riemann_weil_certified_fourth.py'
+      - 'tests/test_riemann_weil_certified_fourth.py'
+      - 'docs/research/TECTX_WEIL_CERTIFIED_FOURTH_SCHUR.md'
+      - '.github/workflows/riemann-weil-certified-fourth.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-4d-arithmetic-schur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install pinned outward interval arithmetic
+        run: python -m pip install --disable-pip-version-check mpmath==1.3.0
+      - name: Validate real fourth Gaussian Weil direction and adversarial gates
+        run: python -m unittest discover -s tests -p 'test_riemann_weil_certified_fourth.py' -v
+      - name: Produce portable exact rational fourth-direction evidence
+        run: |
+          python -m mathos.research.riemann_weil_certified_fourth --panels 65536 --output artifacts/riemann/weil_certified_fourth.json
+          python -m json.tool artifacts/riemann/weil_certified_fourth.json >/dev/null
+      - name: Independently check exact rational Schur and no-RH-promotion gates
+        run: |
+          python - <<'PY'
+          import json
+          from fractions import Fraction
+          with open('artifacts/riemann/weil_certified_fourth.json', encoding='utf-8') as f:
+              r=json.load(f)
+          assert r['status']=='FIXED_4D_ACTUAL_WEIL_GENERALIZED_SCHUR_CERTIFIED_GLOBAL_OPEN'
+          assert r['basis']['centers']==['0/1','1/5','1/2','21/5']
+          assert r['analytic_certification']['prime_power_cutoff']==65536
+          assert 0<Fraction(r['analytic_certification']['new_prime_power_tail_bound_exact'])<Fraction(1,10**8)
+          s=r['verified_matrix']['fourth_direction_schur']
+          assert s['old_dim']==3 and s['new_dim']==1 and s['all_pivots_positive']
+          assert all(Fraction(a)>0 for a,b in s['schur_pivots'])
+          assert r['verified_matrix']['strict_generalized_lambda_lower']=='1/1000000000'
+          assert not r['verified_matrix']['previous_3D_generalized_lower_bound_survives']
+          assert Fraction(r['verified_matrix']['failed_previous_3D_bound_schur_interval'][1])<0
+          assert all(Fraction(a)>0 for a,b in r['verified_matrix']['shifted_G_minus_kappa_L_pivots'])
+          assert all(Fraction(a)>0 for a,b in r['verified_matrix']['L2_pivots'])
+          flags=r['assurance']
+          assert flags['actual_fourth_direction_cross_terms_enclosed']
+          assert flags['fixed_four_span_generalized_positivity']
+          assert not flags['fifth_or_higher_actual_Weil_directions_certified']
+          assert not flags['full_Weil_positivity_proved']
+          assert not flags['riemann_hypothesis_proved']
+          PY
