@@ -133,7 +133,23 @@ Partition `M=[A B;B^T C]` with old `A` the certified three-dimensional subspace 
 S=C-B^T A^(-1)B.
 ```
 
-The program uses interval `LDL^T` for `A`, a directed interval triangular solve and a directed interval Schur evaluation. Certification is accepted **only if every old and new pivot has a strictly positive lower bound**. Independently checking all four pivots of `M` and of `L` helps detect implementation inconsistencies. The same interval arithmetic also computes the **new-direction Schur complement at the old three-dimensional constant `1/50,000,000`** and requires its entire enclosure to lie **strictly below zero**. Thus the old constant provably fails for this enlarged span, while the reduced four-dimensional constant is separately accepted only if the new Schur pivot is positive.
+The program verifies the old block `A\succ0` by interval `LDL^T`, but **does not form an unstable interval inverse**. Instead, it uses a rational witness `x\in\mathbb Q^3` and the exact residual identity
+
+```text
+r = b-A*x,
+S = C - 2*b^T*x + x^T*A*x - r^T*A^(-1)*r.
+```
+
+If `A\succeq\alpha I` with `\alpha>0`, then, with rigorous outward interval evaluation of `C-2b^Tx+x^TAx` and each component of `r`,
+
+```text
+lower(core) - upper(||r||_2²)/alpha
+    <= S <= upper(core).
+```
+
+The old 3×3 certified bound `G_3\succ10^-6I` (PR #78), the independent positive `L_3`, and the Gaussian estimate `trace(L_3)<45` establish `A\succ(10^-6-45*kappa)I`. The program **rechecks** the old `G_3-10^-6 I` interval LDL pivots and `L_3` diagonal upper bounds rather than assuming the spectral floor numerically.
+
+The rational approximate solution is only a candidate witness; the final conclusion uses the verified residual and analytic old-block lower bound. This avoids interval dependency blow-up when the old matrix is ill-conditioned. Certification is accepted **only if every old and new pivot has a strictly positive lower bound**. Independently checking all four pivots of `M` and of `L` helps detect implementation inconsistencies. The same interval arithmetic also computes the **new-direction Schur complement at the old three-dimensional constant `1/50,000,000`** and requires its entire enclosure to lie **strictly below zero**. Thus the old constant provably fails for this enlarged span, while the reduced four-dimensional constant is separately accepted only if the new Schur pivot is positive.
 
 If this succeeds, the exact finite-dimensional conclusion is
 
