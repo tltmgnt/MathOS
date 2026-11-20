@@ -301,7 +301,8 @@ def audit(
         },
         "assurance":{
             "this_one_core_diagonal_positive":True,
-            "all_first_prefix_gram_entries_evaluated":False,
+            "first_prefix_1x1_Gram_fully_enclosed":True,
+            "all_finite_prefix_Gram_entries_evaluated":False,
             "every_finite_LF_core_Gram_psd":False,
             "global_Weil_positivity":False,
             "full_positive_Weil_Hilbert_completion":False,
