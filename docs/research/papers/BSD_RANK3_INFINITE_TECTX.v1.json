@@ -1,0 +1,93 @@
+{
+  "schema_version": "researchos-tectx-bsd-v1",
+  "milestone": "MATHOS-BSD-06",
+  "created_at": "2026-11-19",
+  "claim_scope": "Infinite exact rank three for explicit Zywina 2026 source family; MathOS E_U remains unproved",
+  "source_repository": "tltmgnt/MathOS",
+  "canonical_controller_repository": "tltmgnt/ResearchOs",
+  "canonical_controller_execution": false,
+  "canonical_assurance_state": "UNVERIFIED",
+  "source_reference": {
+    "title": "On the infinitude of elliptic curves over a number field with prescribed small rank",
+    "author": "David Zywina",
+    "date": "2026-02-11",
+    "arxiv": "https://arxiv.org/abs/2602.10865",
+    "pdf": "https://davidzywina.github.io/papers/LowRanks.pdf",
+    "relevant_sections": [
+      "Theorem 4.1",
+      "Lemmas 5.13–5.15",
+      "Section 6.4"
+    ],
+    "publication_status": "Public 2026 preprint; independent journal acceptance not asserted"
+  },
+  "core_claims": [
+    {
+      "id": "SOURCE.EXISTENCE",
+      "statement": "Published source proves infinitely many exact rank-three fibers for the Zywina surface",
+      "status": "SUPPORTED_BY_EXTERNAL_THEOREM",
+      "independent_reproduction": false
+    },
+    {
+      "id": "CERTIFICATE.SET",
+      "statement": "Source construction gives infinitely many t satisfying both local 2-isogeny Selmer upper and exhibited point-image lower bounds",
+      "status": "SOURCE_BASED_DERIVATION",
+      "independent_reproduction": false
+    },
+    {
+      "id": "MATHOS.TRANSFER",
+      "statement": "Same infinite exact rank-three result for existing MathOS E_U family",
+      "status": "UNPROVED",
+      "independent_reproduction": false
+    },
+    {
+      "id": "ORIGINALITY",
+      "statement": "New theorem or new math novelty established by MathOS",
+      "status": "NOT_ESTABLISHED",
+      "independent_reproduction": false
+    }
+  ],
+  "gates": [
+    {
+      "gate": 1,
+      "name": "Provenance and quantitative source",
+      "status": "SOURCE_CONFIRMED",
+      "scope": "Arxiv author/paper, theorem 4.1, lemma 5.14, rank-three example §6.4"
+    },
+    {
+      "gate": 2,
+      "name": "Exact model and rational-point algebra",
+      "status": "EXACT_IDENTITY",
+      "scope": "Polynomial coefficient, discriminant, 2-isogeny model and five point equations"
+    },
+    {
+      "gate": 3,
+      "name": "Finite Kummer images",
+      "status": "BOUNDED_LOWER",
+      "scope": "Exact rational squareclass parity and GF(2) span on individual rational t, no Selmer upper computation"
+    },
+    {
+      "gate": 4,
+      "name": "Infinitely many exact-rank-three fibers",
+      "status": "EXTERNAL_THEOREM_ONLY",
+      "scope": "Entire infinitude proof remains sourced to Zywina; no independent implementation of Kai prime-pattern or descent argument"
+    },
+    {
+      "gate": 5,
+      "name": "Transfer to original MathOS family",
+      "status": "BLOCKED",
+      "scope": "Original E_U has no rational 2-torsion section and no rational discriminant roots; theorem cannot be transplanted"
+    }
+  ],
+  "required_to_promote_original_mathos_claim": [
+    "Explicit new parameter condition for E_U",
+    "Independently verified algebraic rank upper bound ≤3 valid on an infinite set",
+    "Proof the set is infinite without circular assumptions",
+    "External expert review; source-level authentication for claimed independent verification"
+  ],
+  "original_family_exact_rank_infinite_set_proved": false,
+  "published_source_family_exact_rank_infinite_set_proved_by_source": true,
+  "new_ranks_certified_by_code": false,
+  "exact_analytic_rank_infinite_set_proved": false,
+  "independent_novelty_established": false,
+  "bsd_proved": false
+}
