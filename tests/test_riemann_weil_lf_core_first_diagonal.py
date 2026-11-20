@@ -99,8 +99,9 @@ class LFCoreFirstActualWeilDiagonalTests(unittest.TestCase):
     def test_finite_one_entry_never_promotes_to_all_index_or_RH(self):
         f=self.r["assurance"]
         self.assertTrue(f["this_one_core_diagonal_positive"])
+        self.assertTrue(f["first_prefix_1x1_Gram_fully_enclosed"])
         for k,v in f.items():
-            if k!="this_one_core_diagonal_positive":
+            if k not in ("this_one_core_diagonal_positive","first_prefix_1x1_Gram_fully_enclosed"):
                 self.assertFalse(v,k)
         self.assertEqual(self.r["status"],
                          "FIRST_CANONICAL_LF_CORE_WEIL_DIAGONAL_POSITIVE_NOT_ALL_INDEX")
