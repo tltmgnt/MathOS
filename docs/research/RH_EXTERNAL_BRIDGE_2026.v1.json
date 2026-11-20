@@ -1,0 +1,25 @@
+{
+  "schema": "mathos.rh.external_bridge_audit/1",
+  "source_repository": "CocoSgt/riemann-hypothesis-lean",
+  "source_commit": "7cbf7a0c32fca1badf05931879a37c3f8a2b03b4",
+  "target": "UpperTheory.FinalTheorems.everyCharacter → Formalism.VW.rh_of_every → Mathlib RiemannHypothesis",
+  "pinned_git_blobs": {
+    "src/Development/AutomorphicArithmetic/CharacterBoxes/MainConclusion.lean": "ee340012ab19713a8acfecf8adc6a331cbc2f1a4",
+    "src/Development/AutomorphicArithmetic/CharacterBoxes/EveryCharacter.lean": "6ac769568b67f85f33565ba3e1eef7b91f53c55f",
+    "src/Development/AutomorphicArithmetic/CharacterBoxes/RiemannHypothesisOfEveryCharacter.lean": "c6dfef5bfa62aa0ef1cd1481833e1cd2475cbbbc",
+    "src/Formalism/GammaFactorNonvanishing/CritLine.lean": "95fa4da5c50119db164aa93944d106f22fdb576d",
+    "src/Formalism/GammaFactorNonvanishing/RhOfRight.lean": "3604637147a33e72248faddd775ea750e7846ead",
+    "src/Development/AutomorphicArithmetic/Foundations/GaloisRepresentations/IntegralStructures/RowSrc.lean": "f769999ac5e49241993e5efbf81e4d2cded18acd",
+    "src/Development/AutomorphicArithmetic/Foundations/LocalLanglands/LocalCentralUnits/RecTExists.lean": "268786576f96cb5a2cea5fab2da4cf4f291c1116",
+    "src/Development/AutomorphicArithmetic/AutomorphicVarieties/ModularityArgument/ThresholdArguments/DenseThresholdCases/VwinOfRow.lean": "4cba179acd45ac08d3cad21f51c9b9d62715a9a4"
+  },
+  "policy": {
+    "review_level": "SOURCE_LINK_TRACE_ONLY",
+    "canonical_rh_status": "OPEN",
+    "mathos_certification": "NOT_CERTIFIED",
+    "transitive_kernel_replayed_here": false,
+    "deep_automorphic_proof_independently_reviewed": false,
+    "independent_mathematical_acceptance": false,
+    "automatically_update_canonical_register": false
+  }
+}
