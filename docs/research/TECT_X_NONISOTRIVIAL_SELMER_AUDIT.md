@@ -53,3 +53,9 @@ A finite computation for sampled parameters, or local splitting conditions from 
 
 - D. Zywina, *An elliptic surface with infinitely many fibers for which the rank does not jump* (2025), https://arxiv.org/abs/2502.01026 . Explains the nonisotrivial nonjump difficulty and uses highly specialized 2-descent for a rank-0 family.
 - Sage documentation, `selmer_rank` and `simon_two_descent`, https://doc.sagemath.org/html/en/reference/arithmetic_curves/sage/schemes/elliptic_curves/ell_rational_field.html .
+
+## Preliminary manuscript and publication gate (November 2026)
+
+- [LaTeX preliminary research note](papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex) gives complete finite-field rank lower-bound arguments, the rank-at-least-four first fiber, and the **conditional** mean-16-to-density implication. It does **not** claim a new statistical estimate or Selmer-3 infinitude.
+- [Publication readiness and independent review checklist](papers/TECT_X_PUBLICATION_READINESS.md) enumerates explicit mathematical and editorial blockers.
+- Targeted GitHub Actions compile the LaTeX draft for review and execute the existing exact-arithmetic regressions. A successful build is a typesetting check, **not** mathematical certification.
