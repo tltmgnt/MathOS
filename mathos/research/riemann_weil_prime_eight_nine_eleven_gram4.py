@@ -102,6 +102,70 @@ def _matrix(d: object,c: object,e: object,g: object) -> list[list[object]]:
     return [[d,c,e,g],[c,d,c,e],[e,c,d,c],[g,e,c,d]]
 
 
+def _exact_rational_midpoint_certificate(
+    M: list[list[object]], target: Fraction
+) -> dict:
+    """Prove ALL exact symmetric G in interval boxes satisfy G>target I.
+
+    Midpoint matrix A is rational; exact rational LDL proves A-target I>0.
+    Compute its exact rational inverse and bound ||inverse||_infinity.
+    Every interval perturbation E satisfies ||E||_2<=||E||_infinity
+    (E is symmetric). Hence
+       lambda_min(G-target I) >= 1/||inverse||_infinity - ||E||_infinity.
+    This is a verified midpoint LDL + bounded residual certificate,
+    not an unstable direct interval LDL factorization.
+    """
+    if len(M)!=4 or any(len(row)!=4 for row in M):
+        raise ValueError("requires 4x4 interval matrix")
+    endpoints=[[tuple(Fraction(x) for x in out(v,12)) for v in row] for row in M]
+    for i in range(4):
+        for j in range(4):
+            if endpoints[i][j]!=endpoints[j][i]:
+                raise ArithmeticError("non-Hermitian entry bounds")
+    mid=[[(a+b)/2 for a,b in row] for row in endpoints]
+    rad=[[(b-a)/2 for a,b in row] for row in endpoints]
+    A=[[mid[i][j]-(target if i==j else 0) for j in range(4)]
+       for i in range(4)]
+    L=[[Fraction(int(i==j)) for j in range(4)] for i in range(4)]
+    pivots=[]
+    for i in range(4):
+        d=A[i][i]-sum(L[i][k]**2*pivots[k] for k in range(i))
+        if d<=0:
+            raise ArithmeticError(f"rational midpoint LDL pivot {i} nonpositive")
+        pivots.append(d)
+        for j in range(i+1,4):
+            L[j][i]=(A[j][i]-sum(L[j][k]*L[i][k]*pivots[k]
+                                  for k in range(i)))/d
+    augmented=[A[i][:]+[Fraction(int(i==j)) for j in range(4)]
+               for i in range(4)]
+    for i in range(4):
+        pivot=augmented[i][i]
+        if pivot==0:
+            raise ArithmeticError("exact rational inverse pivot zero")
+        augmented[i]=[v/pivot for v in augmented[i]]
+        for j in range(4):
+            if j!=i:
+                scale=augmented[j][i]
+                augmented[j]=[augmented[j][k]-scale*augmented[i][k]
+                              for k in range(8)]
+    inverse=[row[4:] for row in augmented]
+    norminv=max(sum(abs(v) for v in row) for row in inverse)
+    normerr=max(sum(v for v in row) for row in rad)
+    margin=1/norminv-normerr
+    if margin<=0:
+        raise ArithmeticError(
+            "exact midpoint inverse-error certificate inconclusive: "+
+            f"inverse_norm={norminv}; error_norm={normerr}; margin={margin}")
+    return {
+        "rational_midpoint_LDL_pivots":[str(v) for v in pivots],
+        "inverse_infinity_norm_exact":str(norminv),
+        "interval_error_infinity_norm_exact":str(normerr),
+        "strict_margin_above_shift_exact":str(margin),
+        "proved_positive_definiteness":True,
+        "proof":"rational midpoint LDL>0 and ||S^-1||_inf*||G-mid||_inf<1; symmetric Weyl bound gives lambda_min(G)>shift+margin",
+    }
+
+
 def audit(panels: int=256) -> dict:
     if type(panels) is not int or panels not in VALID_PANELS:
         raise ValueError("panels must be 256 or 512")
@@ -128,15 +192,11 @@ def audit(panels: int=256) -> dict:
           2*abs_hi(c)+abs_hi(e),
           abs_hi(c)+abs_hi(e)+abs_hi(g)]
     gersh=_rational_bound(d,False)-max(rows)
-    # Independently check the strict shifted G-kappa I>0 via LDL.
-    shift=I(SPECTRAL_FLOOR,SPECTRAL_FLOOR)
-    shifted=[[M[i][j]-shift if i==j else M[i][j]
-              for j in range(4)] for i in range(4)]
-    _,pivots=_ldl_intervals(shifted)
-    if gersh <= SPECTRAL_FLOOR:
-        raise ArithmeticError("rational Gershgorin 4D floor is inconclusive")
-    if not all(_rational_bound(v,False)>0 for v in pivots):
-        raise ArithmeticError("shifted 4D interval LDL did not certify positive pivots")
+    # Dependency-inflated interval LDL is not relied upon: use exact
+    # rational LDL on midpoint + a rigorous operator-norm interval error.
+    # Gershgorin remains a useful independently computed diagnostic,
+    # but its failure to reach the shift is NOT treated as indefiniteness.
+    certificate=_exact_rational_midpoint_certificate(M,SPECTRAL_FLOOR)
     return {
         "schema":"mathos_tectx_weil_prime_8_9_11_gram4/1",
         "status":"FIXED_PRIME_ACTIVE_4D_WEIL_GRAM_CERTIFIED_GLOBAL_RH_OPEN",
@@ -154,9 +214,10 @@ def audit(panels: int=256) -> dict:
             "new_prime_total_interval":out(primes),
             "new_full_weil_entry":out(g),
             "full_symmetric_weil_matrix":[[out(v) for v in row] for row in M],
-            "verified_gershgorin_floor_exact":str(gersh),
+            "gershgorin_lower_diagnostic_exact":str(gersh),
+            "rational_midpoint_residual_certificate":certificate,
             "claimed_strict_lambda_lower":"1/10000",
-            "shifted_G_minus_kappa_I_LDL_pivots":[out(v) for v in pivots],
+            "shifted_midpoint_rational_LDL_pivots":certificate["rational_midpoint_LDL_pivots"],
             "no_zeta_zeros_as_input":True,
         },
         "assurance":{
