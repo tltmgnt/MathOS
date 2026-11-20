@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "claims": {
+    "a": {"state": "open", "routes": []},
+    "b": {"state": "open", "routes": []},
+    "route": {"state": "derived", "routes": [["a", "b"], ["a"]]},
+    "target": {"state": "derived", "routes": [["route"]]}
+  },
+  "premises": ["a"],
+  "goal": "target"
+}
