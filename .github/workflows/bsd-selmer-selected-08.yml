@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p /tmp/mathos08
           cp /tmp/pari-version.txt /tmp/mathos08/pari-version.txt
-          for u in 0 1 2 3; do
+          for u in 0 1 2 3 24 -24; do
             sed "s/__U__/$u/g" mathos/research/bsd_selmer_selected_08.gp > /tmp/mathos08/current.gp
             set +e
             timeout 125s gp -q < /tmp/mathos08/current.gp > "/tmp/mathos08/u$u.gp.log" 2>&1
