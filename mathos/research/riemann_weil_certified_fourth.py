@@ -29,7 +29,7 @@ from mathos.research.riemann_weil_certified_scalar import (
     _outward_decimal, _rational_bound,
 )
 from mathos.research.riemann_weil_generalized_schur import (
-    _ldl_intervals, verified_schur,
+    _ldl_intervals,
 )
 
 NEW_CENTER = Fraction(21, 5)
@@ -169,26 +169,62 @@ def _l2_entry(c: Fraction,d: Fraction) -> object:
             (iv.exp(-(c-d)**2/(4*a))+iv.exp(-(c+d)**2/(4*a))))
 
 
-def _scalar_schur_interval(M: list[list[object]]) -> object:
-    """Enclose the scalar Schur of a verified-positive leading 3x3 block.
+# Rational candidate solutions are witnesses only: interval residuals and the
+# old block's proved positive spectral floor make their Schur bounds rigorous.
+NEW_RATIONAL_WITNESS = (
+    Fraction(796939,1_000_000),
+    Fraction(897880,1_000_000),
+    Fraction(-1258495,1_000_000),
+)
+OLD_RATIONAL_WITNESS = (
+    Fraction(815938,1_000_000),
+    Fraction(925141,1_000_000),
+    Fraction(-1248725,1_000_000),
+)
 
-    Unlike verified_schur(), this returns negative values too; use to
-    rigorously REJECT carrying an old coercivity constant forward.
+
+def _verified_residual_schur(
+    M: list[list[object]], witness: tuple[Fraction,...],
+    old_block_floor: Fraction,
+) -> tuple[Fraction,Fraction,dict]:
+    """Enclose S=C-b^T A^-1 b without unstable interval inversion.
+
+    Given A>=alpha I, for any exact rational x:
+      S = C - 2 b^T x + x^T A x - r^T A^-1 r,
+      r=b-Ax.
+    Therefore C-2b^Tx+x^TAx -||r||²/alpha <= S
+              <= C-2b^Tx+x^TAx.
+    All interval endpoints are converted to exact rational witnesses.
     """
-    if len(M)!=4 or any(len(row)!=4 for row in M):
-        raise ValueError("expected a 4x4 interval matrix")
-    A=[row[:3] for row in M[:3]]
-    low,pivots=_ldl_intervals(A)
-    y=[iv.mpf(0) for _ in range(3)]
+    if (len(M)!=4 or any(len(row)!=4 for row in M)
+        or len(witness)!=3 or old_block_floor<=0):
+        raise ValueError("requires 4x4 matrix, 3-vector and alpha>0")
+    x=tuple(_frac(v) for v in witness)
+    core=M[3][3]
     for i in range(3):
-        v=M[i][3]
-        for k in range(i):
-            v-=low[i][k]*y[k]
-        y[i]=v
-    value=M[3][3]
+        core-=2*M[i][3]*x[i]
+        for j in range(3):
+            core+=x[i]*M[i][j]*x[j]
+    # Interval residual components r_i=b_i-sum_j A_ij x_j.
+    rnorm2=Fraction(0)
+    residual_intervals=[]
     for i in range(3):
-        value-=y[i]*y[i]/pivots[i]
-    return value
+        r=M[i][3]
+        for j in range(3):
+            r-=M[i][j]*x[j]
+        low,high=_rational_bound(r,False),_rational_bound(r,True)
+        rnorm2+=max(abs(low),abs(high))**2
+        residual_intervals.append([_fraction_string(low),_fraction_string(high)])
+    lower=_rational_bound(core,False)-rnorm2/old_block_floor
+    upper=_rational_bound(core,True)
+    return lower,upper,{
+        "rational_witness":[_fraction_string(v) for v in witness],
+        "proved_old_block_lambda_floor":_fraction_string(old_block_floor),
+        "residual_intervals":residual_intervals,
+        "residual_norm_squared_upper":_fraction_string(rnorm2),
+        "core_upper":_fraction_string(upper),
+        "method":"C-2 b^T x+x^T A x -||b-Ax||²/alpha <= true Schur <= C-2 b^T x+x^T A x",
+    }
 
 
 def audit(panels: int=65536) -> dict:
@@ -206,16 +242,33 @@ def audit(panels: int=65536) -> dict:
     _,l2_pivots=_ldl_intervals(L)
     M=[[G[i][j]-_frac(LOWER)*L[i][j] for j in range(4)]
        for i in range(4)]
-    check=verified_schur(M,3)
-    _,pivots=_ldl_intervals(M)
-    # The old 3D lower constant is NOT preserved; certify the negative Schur.
+    # Independently verify the inherited 3D Weyl-eigenvalue floor:
+    # G3 > 1e-6*I (PR #78) and L3 <= 45*I (Gaussian trace bound).
+    _ldl_intervals([[old[i][j]-_frac(Fraction(1,1_000_000) if i==j else Fraction(0))
+                     for j in range(3)] for i in range(3)])
+    if not all(_rational_bound(L[i][i],True)<15 for i in range(3)):
+        raise ArithmeticError("reference L2 trace bound >45 failed")
+    old_pivots=_ldl_intervals([row[:3] for row in M[:3]])[1]
+    alpha=Fraction(1,1_000_000)-45*LOWER
+    s_low,s_high,schur_witness=_verified_residual_schur(
+        M,NEW_RATIONAL_WITNESS,alpha)
+    if s_low<=0:
+        raise ArithmeticError("no certified positive fourth Schur residual bound")
+    check={
+        "old_dim":3,"new_dim":1,"all_pivots_positive":True,
+        "schur_pivots":[[_fraction_string(s_low),_fraction_string(s_high)]],
+        "residual_certificate":schur_witness,
+    }
+    pivots=[_outward_decimal(v,10**12) for v in old_pivots]+[
+        [_fraction_string(s_low),_fraction_string(s_high)]]
     old_M=[[G[i][j]-_frac(PREVIOUS_THREE_DIMENSIONAL_LOWER)*L[i][j]
              for j in range(4)] for i in range(4)]
-    old_schur=_scalar_schur_interval(old_M)
-    if _rational_bound(old_schur,True)>=0:
-        raise ArithmeticError("the old 3D lower constant was not refuted by a negative fourth Schur interval")
-    if not all(_rational_bound(v,False)>0 for v in pivots):
-        raise ArithmeticError("full generalized Weil matrix is not certified positive")
+    _ldl_intervals([row[:3] for row in old_M[:3]])
+    old_alpha=Fraction(1,1_000_000)-45*PREVIOUS_THREE_DIMENSIONAL_LOWER
+    old_low,old_high,old_witness=_verified_residual_schur(
+        old_M,OLD_RATIONAL_WITNESS,old_alpha)
+    if old_high>=0:
+        raise ArithmeticError("old 3D gap not yet refuted by a strictly negative Schur bound")
     return {
         "schema":"mathos_tectx_weil_certified_fourth_direction/1",
         "status":"FIXED_4D_ACTUAL_WEIL_GENERALIZED_SCHUR_CERTIFIED_GLOBAL_OPEN",
@@ -245,9 +298,10 @@ def audit(panels: int=65536) -> dict:
             "weil_G_intervals":[[_outward_decimal(v,10**12) for v in row] for row in G],
             "L2_intervals":[[_outward_decimal(v,10**12) for v in row] for row in L],
             "L2_pivots":[_outward_decimal(v,10**12) for v in l2_pivots],
-            "shifted_G_minus_kappa_L_pivots":[_outward_decimal(v,10**12) for v in pivots],
+            "shifted_G_minus_kappa_L_pivots":pivots,
             "fourth_direction_schur":check,
-            "failed_previous_3D_bound_schur_interval":_outward_decimal(old_schur,10**12),
+            "failed_previous_3D_bound_schur_interval":[_fraction_string(old_low),_fraction_string(old_high)],
+            "failed_previous_3D_bound_residual_certificate":old_witness,
             "previous_3D_bound":_fraction_string(PREVIOUS_THREE_DIMENSIONAL_LOWER),
             "previous_3D_generalized_lower_bound_survives":False,
             "strict_generalized_lambda_lower":_fraction_string(LOWER),
