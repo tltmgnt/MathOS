@@ -2,6 +2,12 @@
 
 **Scope:** The family in the user's supplied mathematical expression, not the separate quadratic-twist construction.
 
+## Prior-art and journal-submission status (19 November 2026)
+
+Patel, Chakraborty and Chattopadhyay, *Two infinite families of elliptic curves with Mordell-Weil rank at least 3*, Czechoslovak Mathematical Journal (online 26 October 2026), DOI [10.21136/CMJ.2026.0080-26](https://doi.org/10.21136/CMJ.2026.0080-26), already give the equation `y²=x³-a²x+b²` with Pell relation `a²−3b²=1`, the three points `(0,b)`, `(a,b)`, `(-1,2b)`, and an infinite rank≥3 construction. Our progression gives an independent congruence certificate for the rational parameterization but does not establish novelty of the underlying family or points. Exact rank-three curves in general are already infinite by Zywina (2026); proving **this progression's full Selmer-3 infinitude** remains the distinctive open goal.
+
+See the [proof-obligation and priority ledger](papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md) and the [blocked submission status](papers/TECT_X_SUBMISSION_STATUS.v1.json). No journal submission as a proved new Selmer-infinitude theorem is authorized.
+
 ## Exact desired assertion (OPEN)
 
 For integers `n = 5 + 759m` (`m >= 0`), define
