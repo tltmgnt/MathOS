@@ -76,6 +76,11 @@ jobs:
             --check-lean --lean "$HOME/.elan/bin/lean" \
             --report artifacts/tect-x/formal/kernel-replay.json \
             --artifact-dir artifacts/tect-x/formal
+      - name: Bind exact finite certificate back into TGA without mathematical promotion
+        run: |
+          python -m mathos.research.tect_x_intelligent_proof_verifier \
+            --verify-lean-certificate --lean "$HOME/.elan/bin/lean" \
+            --report artifacts/tect-x/formal/tga-with-lean.json
       - name: Retain kernel replay and finite-scope proof module only
         uses: actions/upload-artifact@v4
         if: always()
