@@ -181,19 +181,17 @@ class TestTECTXTypedArgumentGate(unittest.TestCase):
                 "  intro h\n  exact ⟨h.right, h.left⟩\n" +
                 "end MathOS.TECTX.Arguments\n", encoding="utf-8")
             b.write_text(
-                "import ConjunctionSwap\nset_option warningAsError true\n" +
+                "import Init\nset_option warningAsError true\n" +
                 "namespace MathOS.TECTX.Contracts\n" +
                 "def swapped : Prop := ∀ P Q : Prop, P ∧ Q → Q ∧ P\n" +
-                "theorem matches : swapped := MathOS.TECTX.Arguments.swap\n" +
-                "end MathOS.TECTX.Contracts\n" +
-                "#print axioms MathOS.TECTX.Arguments.swap\n" +
-                "#print axioms MathOS.TECTX.Contracts.matches\n", encoding="utf-8")
+                "end MathOS.TECTX.Contracts\n", encoding="utf-8")
             data["bundles"] = [{
                 "id": "conjunction-swap",
                 "source": "formal/tectx_arguments/ConjunctionSwap.lean",
                 "contract": "formal/tectx_contracts/ConjunctionSwapContract.lean",
                 "candidate_theorem": "MathOS.TECTX.Arguments.swap",
                 "contract_theorem": "MathOS.TECTX.Contracts.matches",
+                "reference_proposition": "MathOS.TECTX.Contracts.swapped",
                 "informal_claim": "A conjunction can be reordered.",
                 "explicit_hypotheses": ["P,Q are Lean propositions."],
                 "formal_scope": "All Lean propositions",
@@ -204,6 +202,30 @@ class TestTECTXTypedArgumentGate(unittest.TestCase):
             report = validate_manifest(data, root)
             self.assertEqual(report["bundles"][0]["id"], "conjunction-swap")
             self.assertFalse(report["kernel_checked"])
+
+    def test_reference_contract_must_not_import_candidate(self):
+        data = self.modified()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / data["bundles"][0]["source"]
+            contract = root / data["bundles"][0]["contract"]
+            source.parent.mkdir(parents=True)
+            contract.parent.mkdir(parents=True)
+            original = MANIFEST.parent.parent.parent / data["bundles"][0]["source"]
+            source.write_bytes(original.read_bytes())
+            contract.write_text(
+                "import PropositionChain\nset_option warningAsError true\n" +
+                "namespace MathOS.TECTX.Contracts\n" +
+                "def implicationChainReference : Prop := True\n" +
+                "end MathOS.TECTX.Contracts\n", encoding="utf-8")
+            data["bundles"] = data["bundles"][:1]
+            with self.assertRaisesRegex(ValueError, "import Init independently"):
+                validate_manifest(data, root)
+
+    def test_reference_proposition_name_must_be_valid(self):
+        data = self.modified()
+        data["bundles"][0]["reference_proposition"] = "MathOS.TECTX.Contracts.True; axiom false"
+        self.rejects(data, "reference proposition")
 
     def test_tga_integration_keeps_research_claims_blocked(self):
         from mathos.research.tect_x_intelligent_proof_verifier import main as tga_main
