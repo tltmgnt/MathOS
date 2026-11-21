@@ -8,7 +8,7 @@
     "require_zero_transitive_axioms": true
   },
   "validation_scope": "REPOSITORY_REVIEWED_LEAN_FORMALIZATIONS_ONLY",
-  "meaning_of_pass": "The Lean kernel accepted the candidate as an inhabitant of an independently authored reference proposition with no transitive axioms. English-to-formal statement faithfulness and broader research correctness remain unreviewed.",
+  "meaning_of_pass": "A checker-generated Lean theorem must use the candidate proof term directly at the exact, separately authored reference proposition, with zero transitive axioms. Human-language faithfulness and research sufficiency remain open.",
   "scientific_claim_certification": false,
   "language_to_formal_statement_review": "NOT_PERFORMED",
   "independent_expert_review": "NOT_PERFORMED",
@@ -28,7 +28,8 @@
       "formal_scope": "Universal quantification over Lean propositions, as encoded in the independent Lean contract.",
       "semantic_gap": "Equivalence of the English sentence to the chosen Lean contract has not been independently reviewed.",
       "review_status": "NOT_REVIEWED",
-      "conjecture_implication": "NONE"
+      "conjecture_implication": "NONE",
+      "reference_proposition": "MathOS.TECTX.Contracts.implicationChainReference"
     },
     {
       "id": "natural-right-unit",
@@ -44,7 +45,8 @@
       "formal_scope": "All Lean Nat, using Lean Init.",
       "semantic_gap": "The use of Lean Nat and the exact English-to-formal semantic mapping have not been independently reviewed.",
       "review_status": "NOT_REVIEWED",
-      "conjecture_implication": "NONE"
+      "conjecture_implication": "NONE",
+      "reference_proposition": "MathOS.TECTX.Contracts.natRightZeroReference"
     }
   ]
 }
