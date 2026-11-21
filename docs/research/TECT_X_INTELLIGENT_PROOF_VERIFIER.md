@@ -130,20 +130,38 @@ The Lean proof remains scoped to each **bounded input graph**, not a
 general all-graphs correctness theorem for TGA, nor a connection between
 TGA's authored dependency graph and the topology of zeta zero sets.
 
+## Typed mathematical argument proof checking
+
+The [typed argument verifier](TECT_X_TYPED_ARGUMENT_VERIFICATION.md) now accepts
+additional **repository-reviewed Lean formalizations**, each paired with a
+separately authored exact formal reference proposition. An immutable
+checker-generated Lean module directly checks that the candidate proof
+inhabits the reference type, and `#print axioms` reports must show no
+transitive axioms. Run
+`python -m mathos.research.tect_x_intelligent_proof_verifier --verify-typed-arguments --lean lean`
+with the pinned Lean toolchain.
+
+The checker verifies only that precise formal deduction. It explicitly
+reports open semantic edges from informal human intention to formal reference,
+from local lemma to an authored TGA theorem route, and from CI to independent
+external mathematical reproduction. It never certifies arbitrary English
+arguments or closes RH, BSD, or Selmer research obligations.
+
 ## Security and mathematical integrity
 
 This is a **fail-closed metadata analyzer** with a bounded finite input model.
 By default it does not execute untrusted proofs, call an LLM, or
 perform general mathematical semantic entailment. Optional pinned-Lean
-flags invoke a kernel checker only for the repository's validated,
-generated finite-topology propositions. All input evidence remains
+flags invoke a kernel checker on the repository's validated finite-topology
+propositions and reviewed typed argument proofs against separate formal goals. All input evidence remains
 source-authored; adding an evidence link never establishes its proposition.
 Reviewers must independently check every implication, the accuracy of mathematical
 definitions and quantifiers, and the legitimacy of imported theorems.
 
 The finite Lean proof-certificate adapters now perform actual kernel replay,
 with pinned versions, explicit model assumptions and axiom reports. The still-open
-next milestone is a **general typed mathematical assertion-to-proof-edge adapter**
-with a formal correspondence theorem to the Python analysis, explicit formal
-axiom/import trust policy, and independent expert assessment. Merely declaring
+next milestone is a **formally justified correspondence between intended
+mathematical meaning, the independent typed reference, and each TGA proof edge**,
+with a refinement theorem for the Python analysis, independently reviewed
+axiom/import trust, and external expert assessment. Merely declaring
 a certificate path or `verified=true` can never replace verification.
