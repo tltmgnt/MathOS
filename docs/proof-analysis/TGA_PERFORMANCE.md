@@ -42,6 +42,10 @@ The benchmark can reveal growth in software work and memory and establish
 correct outputs on its synthetic fixtures. The original analyzer enumerates
 Cartesian products and only then removes supersets; therefore execution and
 output may grow exponentially with distinct alternative completion sets.
+Deep recursive chains can also exceed Python's recursion depth; the benchmark
+records an explicit RECURSION_LIMIT case and keeps processing other fixtures.
+A benchmark workflow can complete while reporting failed cases, so review
+both the job result and the JSON failed_cases array.
 No implementation can enumerate 2^k required results in sub-exponential
 total output time. If performance is inadequate, compare an incrementally
 pruned antichain algorithm with the unchanged baseline on both cases where
