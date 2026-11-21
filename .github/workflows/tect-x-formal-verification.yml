@@ -54,6 +54,7 @@ jobs:
           python -m mathos.research.tect_x_general_graph_certificates \
             --report artifacts/tect-x/formal/graphs-source-audit.json
           python -m unittest discover -s tests -p 'test_tect_x_general_graph_certificates.py' -v
+          python -m unittest discover -s tests -p 'test_tect_x_intelligent_proof_verifier.py' -v
       - name: Python syntax checks
         run: |
           python -m py_compile mathos/research/tect_x_formal_certificates.py tests/test_tect_x_formal_certificates.py mathos/research/tect_x_general_graph_certificates.py tests/test_tect_x_general_graph_certificates.py
@@ -100,6 +101,11 @@ jobs:
             --check-lean --lean "$HOME/.elan/bin/lean" \
             --artifact-dir artifacts/tect-x/formal/general-f2 \
             --report artifacts/tect-x/formal/general-f2/report.json
+      - name: Bind all ten general graph certificate checks into TGA with no theorem promotion
+        run: |
+          python -m mathos.research.tect_x_intelligent_proof_verifier \
+            --verify-general-graph-cycles --lean "$HOME/.elan/bin/lean" \
+            --report artifacts/tect-x/formal/tga-with-general-graphs.json
       - name: Retain kernel replay and finite-scope proof module only
         uses: actions/upload-artifact@v4
         if: always()
