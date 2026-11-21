@@ -1,0 +1,306 @@
+{
+  "schema_version": "1.0",
+  "project": "MathOS TECT-X TGA intelligent proof-verification prototype",
+  "as_of": "2026-11-21",
+  "purpose": "Rule-based source-scoped proof-obligation diagnostics, not automated mathematical proof certification.",
+  "scientific_status": "NOT_PROOF_CERTIFIED",
+  "model_semantics": "Author-proposed OR-of-AND routes; a closed dependency graph would not establish that its mathematical implications are true.",
+  "thematic_register": "docs/research/TECT_X_THEMATIC_REGISTER.v1.json",
+  "obligation_register": "docs/proof-analysis/OBLIGATIONS.v1.json",
+  "cases": [
+    {
+      "id": "RH-TGA",
+      "title": "Riemann hypothesis: spectral and zeta/TDA candidate bridges",
+      "target": "RH.target",
+      "target_scope": "UNIVERSAL",
+      "theme_ids": [
+        "T1",
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "route_warning": "Both candidate proof routes are authored research hypotheses; neither is known to be a sufficient RH proof.",
+      "nodes": [
+        {
+          "id": "RH.target",
+          "kind": "DERIVED",
+          "scope": "UNIVERSAL",
+          "routes": [
+            [
+              "RH.spectral_route"
+            ],
+            [
+              "RH.tda_route"
+            ]
+          ]
+        },
+        {
+          "id": "RH.spectral_route",
+          "kind": "DERIVED",
+          "scope": "UNIVERSAL",
+          "routes": [
+            [
+              "RH.operator",
+              "RH.zero_identity",
+              "RH.global_bridge"
+            ]
+          ]
+        },
+        {
+          "id": "RH.tda_route",
+          "kind": "DERIVED",
+          "scope": "UNIVERSAL",
+          "routes": [
+            [
+              "RH.feature_scan",
+              "RH.invariant",
+              "RH.tda_zero_bridge",
+              "RH.uniform_argument",
+              "RH.global_bridge"
+            ]
+          ]
+        },
+        {
+          "id": "RH.operator",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E04"
+          ],
+          "mapped_claim": "RH.operator",
+          "next_action": "Specify a fixed arithmetic self-adjoint operator with a proof of domain, spectrum and independence from zero data."
+        },
+        {
+          "id": "RH.zero_identity",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E05"
+          ],
+          "mapped_claim": "RH.zero_identity",
+          "next_action": "Prove an independently justified identity for every genuine nontrivial zero, multiplicity and potential off-line zero."
+        },
+        {
+          "id": "RH.global_bridge",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E04",
+            "E05"
+          ],
+          "next_action": "Demonstrate without assuming RH that the candidate's properties force every real part to equal one half."
+        },
+        {
+          "id": "RH.feature_scan",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "FINITE",
+          "evidence_ids": [
+            "E01"
+          ],
+          "next_action": "Independently reproduce the selected finite zeta/TDA experiment and quantify numerical and sampling error."
+        },
+        {
+          "id": "RH.invariant",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E02",
+            "E03"
+          ],
+          "next_action": "Find a well-defined invariant zeta descriptor and prove stability against reparameterization and adversarial feature choices."
+        },
+        {
+          "id": "RH.tda_zero_bridge",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E02",
+            "E05"
+          ],
+          "next_action": "Prove a noncircular transfer theorem between measured topological invariants and every actual zeta zero."
+        },
+        {
+          "id": "RH.uniform_argument",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "UNIVERSAL",
+          "evidence_ids": [
+            "E01",
+            "E03"
+          ],
+          "next_action": "Supply an all-scales, all-zeros argument; finite Betti numbers and tested thresholds are insufficient."
+        }
+      ]
+    },
+    {
+      "id": "SELMER-TGA",
+      "title": "Exact 2-Selmer-dimension-three infinitude in the nonisotrivial progression",
+      "target": "SEL.target",
+      "target_scope": "INFINITE_FAMILY",
+      "theme_ids": [
+        "T1",
+        "T2",
+        "T5"
+      ],
+      "route_warning": "Route A and route B are conditional strategies; existing point classes and the first-fiber rank-four exception do not establish Selmer-3 infinitude.",
+      "nodes": [
+        {
+          "id": "SEL.target",
+          "kind": "DERIVED",
+          "scope": "INFINITE_FAMILY",
+          "routes": [
+            [
+              "SEL.descent_route"
+            ],
+            [
+              "SEL.moment_route"
+            ]
+          ]
+        },
+        {
+          "id": "SEL.descent_route",
+          "kind": "DERIVED",
+          "scope": "INFINITE_FAMILY",
+          "routes": [
+            [
+              "SEL.points",
+              "SEL.squareclasses",
+              "SEL.local_images",
+              "SEL.uniform_elimination",
+              "SEL.infinitude"
+            ]
+          ]
+        },
+        {
+          "id": "SEL.moment_route",
+          "kind": "DERIVED",
+          "scope": "INFINITE_FAMILY",
+          "routes": [
+            [
+              "SEL.points",
+              "SEL.mean16",
+              "SEL.conditional_counting"
+            ]
+          ]
+        },
+        {
+          "id": "SEL.points",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E06"
+          ],
+          "next_action": "Independently verify the existing three-point lower-bound argument; do not infer a Selmer upper bound from rational points."
+        },
+        {
+          "id": "SEL.squareclasses",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Establish cubic-field global squareclass parametrization including class-group 2-torsion and ramification."
+        },
+        {
+          "id": "SEL.local_images",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Prove exact local Kummer images and valid local matrices at all relevant primes and infinity."
+        },
+        {
+          "id": "SEL.uniform_elimination",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Uniformly eliminate all extra global Selmer classes in an explicit infinite set."
+        },
+        {
+          "id": "SEL.infinitude",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Prove the proposed qualifying parameter set is infinite without unsupported arithmetic distribution assumptions."
+        },
+        {
+          "id": "SEL.mean16",
+          "kind": "OPEN_OBLIGATION",
+          "scope": "INFINITE_FAMILY",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Prove the one-parameter average 2-Selmer cardinality is strictly below 16 with rigorous exceptional-fiber control."
+        },
+        {
+          "id": "SEL.conditional_counting",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "CONDITIONAL",
+          "evidence_ids": [
+            "E07"
+          ],
+          "next_action": "Independently review the conditional first-moment counting lemma; never treat its hypothesis as established."
+        }
+      ]
+    },
+    {
+      "id": "ZETA-FINITE",
+      "title": "Scope of the one-million zeta/TDA bounded report",
+      "target": "ZETA.target",
+      "target_scope": "FINITE",
+      "theme_ids": [
+        "T1",
+        "T2",
+        "T3"
+      ],
+      "route_warning": "This case represents a bounded experimental assertion, not the Riemann hypothesis or a theorem about the zero locus.",
+      "nodes": [
+        {
+          "id": "ZETA.target",
+          "kind": "DERIVED",
+          "scope": "FINITE",
+          "routes": [
+            [
+              "ZETA.features",
+              "ZETA.rips_sample",
+              "ZETA.controls"
+            ]
+          ]
+        },
+        {
+          "id": "ZETA.features",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "FINITE",
+          "evidence_ids": [
+            "E01"
+          ],
+          "next_action": "Independently rerun the registered function count, feature values and digests with pinned versions."
+        },
+        {
+          "id": "ZETA.rips_sample",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "FINITE",
+          "evidence_ids": [
+            "E01",
+            "E03"
+          ],
+          "next_action": "Independently reproduce the 128-point-per-family H0/H1 analysis and declared thresholds."
+        },
+        {
+          "id": "ZETA.controls",
+          "kind": "BOUNDED_EVIDENCE",
+          "scope": "FINITE",
+          "evidence_ids": [
+            "E02",
+            "E03"
+          ],
+          "next_action": "Validate line/circle controls, alias experiments and permutation sensitivity independently."
+        }
+      ]
+    }
+  ]
+}
