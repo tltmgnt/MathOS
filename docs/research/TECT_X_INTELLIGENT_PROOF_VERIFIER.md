@@ -105,6 +105,23 @@ Run `python -m mathos.research.tect_x_formal_certificates --check-lean`
 only when the pinned Lean toolchain is available in a disposable environment.
 Static runs do not report kernel verification.
 
+## Typed mathematical argument proof checking
+
+The [typed argument verifier](TECT_X_TYPED_ARGUMENT_VERIFICATION.md) now accepts
+additional **repository-reviewed Lean formalizations**, each paired with a
+separately authored exact formal reference proposition. An immutable
+checker-generated Lean module directly checks that the candidate proof
+inhabits the reference type, and `#print axioms` reports must show no
+transitive axioms. Run
+`python -m mathos.research.tect_x_intelligent_proof_verifier --verify-typed-arguments --lean lean`
+with the pinned Lean toolchain.
+
+The checker verifies only that precise formal deduction. It explicitly
+reports open semantic edges from informal human intention to formal reference,
+from local lemma to an authored TGA theorem route, and from CI to independent
+external mathematical reproduction. It never certifies arbitrary English
+arguments or closes RH, BSD, or Selmer research obligations.
+
 ## Security and mathematical integrity
 
 This is a **fail-closed metadata analyzer** with a bounded finite input model.
