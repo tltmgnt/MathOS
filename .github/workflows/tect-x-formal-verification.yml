@@ -110,7 +110,7 @@ jobs:
         shell: bash
         run: |
           cp artifacts/tect-x/formal/general-f2/TECTXGeneralFiniteGraph.lean /tmp/TECTXFalseClaim.lean
-          printf '\\ntheorem tectx_false_cycle_claim : Bool.xor true true = true := by decide\\n' >> /tmp/TECTXFalseClaim.lean
+          printf '\ntheorem tectx_false_cycle_claim : Bool.xor true true = true := by decide\n' >> /tmp/TECTXFalseClaim.lean
           if "$HOME/.elan/bin/lean" /tmp/TECTXFalseClaim.lean >/tmp/tectx-negative-proof.log 2>&1; then
             echo "::error::Lean accepted a deliberately false Boolean cycle proposition"
             exit 1
