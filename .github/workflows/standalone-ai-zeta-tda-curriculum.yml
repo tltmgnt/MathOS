@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Unit tests for exact arithmetic and TDA controls
-        run: python -m unittest discover -s curriculum/tect_x_zeta_tda_standalone -p 'test_lab.py' -v
+        run: python -m unittest discover -s curriculum/tect_x_zeta_tda_standalone -p 'test_*.py' -v
       - name: Run reproducible offline demo
         run: |
           python curriculum/tect_x_zeta_tda_standalone/lab.py --radius 1 > /tmp/course_lab.json
