@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "project": "ResearchOS TECT-X typed formal certificates",
+  "trust_boundary": "Independent Lean kernel checks exactly the proposition types in a separate contract file. This neither validates author-selected mathematical model semantics nor proves any open conjecture.",
+  "backend": {
+    "system": "Lean",
+    "version": "4.14.0",
+    "toolchain": "leanprover/lean4:v4.14.0",
+    "standard_library": "Init",
+    "network_required_for_check": false
+  },
+  "certificate": {
+    "id": "TECTX-F2-CHAIN-001",
+    "source": "formal/TECTXFiniteTopology.lean",
+    "independent_contract": "formal/TECTXFiniteTopologyContract.lean",
+    "proof_language": "Lean 4",
+    "scope": "Finite F2 chain complexes for C4, a three-edge path, and one filled triangle",
+    "interpretation": "Kernel-checked parity and chain-boundary deductions for stated finite models only",
+    "theorem_names": [
+      "MathOS.TECTX.square_cycle_iff",
+      "MathOS.TECTX.path_cycle_iff",
+      "MathOS.TECTX.triangle_boundary_squared_zero",
+      "MathOS.TECTX.triangle_kernel_is_face_image"
+    ],
+    "explicit_model_assumptions": [
+      "Edges and faces have Boolean coefficients, interpreted as F2",
+      "Square vertices and edges are exactly those encoded by the four incidence equations",
+      "Path has four vertices and three edges with the specified incidence equations",
+      "Filled triangle has precisely one 2-simplex and its boundary is all three edges",
+      "No geometric or analytic identification with zeta zeros is assumed or established"
+    ],
+    "permitted_transitive_axioms": [],
+    "external_review": "NOT_PERFORMED",
+    "trusted_environment_review": "PINNED_VERSION_DECLARED_NOT_INDEPENDENTLY_ATTESTED",
+    "formal_claim_status": "PENDING_ACTUAL_KERNEL_REPLAY",
+    "linked_tga_capability": "Finite dependency-graph topology sanity checks; no conjecture proof route closed",
+    "closes_mathematical_obligation_ids": [],
+    "proof_of_rh": false,
+    "proof_of_bsd": false,
+    "proof_of_selmer_infinitude": false
+  }
+}
