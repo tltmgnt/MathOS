@@ -89,6 +89,22 @@ short-lived CI artifact. It **does not** use CI passage as mathematical certific
   human-authored next verification actions. The scores are not scientific confidence.
 - `source_sha256` fingerprints the local inputs, but hashes are not external signatures.
 
+## Independently checked finite mathematical deductions
+
+The [typed Lean certificate workflow](TECT_X_FORMAL_VERIFICATION.md) extends
+this structural auditor with actual kernel-replayed finite graph-chain
+deductions. Lean 4.14.0 must type-check a separately authored proposition
+contract and report **no transitive axioms** for four lemmas about C4,
+a three-edge path and a filled triangle. A successful run establishes
+only these exact F2 topological facts, not the correctness of every TGA
+graph algorithm, the validity of any human-authored dependency arrow, or
+a theorem about zeta zeros. Formal certificate status is **never imported
+as closure of RH or Selmer obligations**.
+
+Run `python -m mathos.research.tect_x_formal_certificates --check-lean`
+only when the pinned Lean toolchain is available in a disposable environment.
+Static runs do not report kernel verification.
+
 ## Security and mathematical integrity
 
 This is a **fail-closed metadata analyzer** with a bounded finite input model.

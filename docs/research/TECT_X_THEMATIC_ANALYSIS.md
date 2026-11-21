@@ -91,6 +91,17 @@ or an RH/BSD/Selmer theorem certificate. A graph cycle is not a topological
 invariant of any zeta zero set, and a structurally complete model would
 not prove that its authored implications are sound.
 
+## Formal proof certificate extension
+
+The [Lean kernel replay layer](TECT_X_FORMAL_VERIFICATION.md) adds
+independently type-checked, explicitly scoped finite mathematical deductions
+over F2 graph chains. It checks the full declared theorem types against an
+independent Lean contract and audits transitive axioms using Lean 4.14.0.
+This strengthens correctness assurance **only for those finite lemmas**;
+it does not certify conjectures, informal theorem translations, or authored
+proof-route sufficiency. An external expert must still review semantics
+and imported assumptions.
+
 ## Actionable research priorities
 
 1. **P1 — Govern claim-to-evidence traceability.** Keep T1–T6 and the evidence sources linked, guard the

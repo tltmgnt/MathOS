@@ -11,6 +11,9 @@ import sys
 import tempfile
 from pathlib import Path
 import unittest
+from io import StringIO
+from contextlib import redirect_stdout
+from unittest.mock import patch
 
 from mathos.research.tect_x_intelligent_proof_verifier import (
     CASES_PATH, ROOT, verify_cases, _topology,
@@ -179,6 +182,40 @@ class TestTECTXIntelligentProofVerifier(unittest.TestCase):
             })
         case["nodes"][0]["routes"] = [[f"BR{i}" for i in range(7)]]
         self.blocked(data, "too many modeled proof-route combinations")
+
+    def test_tga_formal_replay_does_not_promote_conjectures(self):
+        from mathos.research.tect_x_intelligent_proof_verifier import main
+        mock_kernel = {
+            "ok": True,
+            "formal_status": "LEAN_KERNEL_CHECKED_FINITE_F2_DEDUCTIONS_ONLY",
+            "kernel_checked": True,
+            "verified_theorems": ["MathOS.TECTX.square_cycle_iff"],
+            "transitive_axioms": {"MathOS.TECTX.square_cycle_iff": []},
+            "closed_conjecture_obligations": [],
+        }
+        output = StringIO()
+        with patch("mathos.research.tect_x_formal_certificates.audit",
+                   return_value=mock_kernel), redirect_stdout(output):
+            result = main(["--verify-lean-certificate", "--json"])
+        self.assertEqual(result, 0)
+        report = json.loads(output.getvalue())
+        self.assertTrue(report["finite_f2_formal_certificate"]["kernel_checked"])
+        self.assertFalse(report["scientific_certification"])
+        self.assertEqual(report["summary"]["mathematical_theorems_certified"], 0)
+        self.assertTrue(all(case["conclusion"] == "BLOCKED_NOT_MATHEMATICALLY_VERIFIED"
+                            for case in report["cases"]))
+
+    def test_tga_rejects_unavailable_formal_checker_when_requested(self):
+        from mathos.research.tect_x_intelligent_proof_verifier import main
+        output = StringIO()
+        with patch("mathos.research.tect_x_formal_certificates.audit",
+                   return_value={"ok": False, "formal_status": "KERNEL_CHECK_FAILED",
+                                 "kernel_checked": False}), redirect_stdout(output):
+            result = main(["--verify-lean-certificate", "--json"])
+        self.assertEqual(result, 1)
+        report = json.loads(output.getvalue())
+        self.assertFalse(report["ok"])
+        self.assertFalse(report["finite_f2_formal_certificate"]["kernel_checked"])
 
     def test_cli_json_and_fail_closed_require_proof(self):
         args = [sys.executable, "-m", "mathos.research.tect_x_intelligent_proof_verifier"]
