@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "project": "ResearchOS / TECT-X in MathOS",
+  "reviewed_on": "2026-11-21",
+  "scope": "Qualitative, source-based thematic analysis of tracked TECT-X documentation, code, tests and governance. No independent mathematical proof review or computational rerun.",
+  "assurance_level": "REPOSITORY_SOURCE_AUDIT_ONLY",
+  "certification_flags": {
+    "riemann_hypothesis_proved": false,
+    "bsd_proved": false,
+    "selmer_infinitude_proved": false,
+    "full_million_point_h1_computed": false,
+    "independent_specialist_review_complete": false,
+    "external_reproduction_complete": false,
+    "journal_submission_authorized": false
+  },
+  "metrics_snapshot": {
+    "experiment": "docs/research/TECT_X_ZETA_TDA_AUDIT.v1.json",
+    "variant_count": 1000000,
+    "family_count": 4,
+    "variants_per_family": 250000,
+    "rips_h01_sample_size_per_family": 128,
+    "zero_sets_computed": 0,
+    "million_point_h1_persistence_computed": false
+  },
+  "themes": [
+    {
+      "id": "T1",
+      "name": "Epistemic control and proof-scope governance",
+      "finding": "Claim status depends on exact scope, evidence and unclosed proof obligations rather than passing software checks.",
+      "evidence_ids": [
+        "E01",
+        "E07",
+        "E10"
+      ],
+      "priority": "HIGH",
+      "open_obligation": "External authentication, independent verification and a formal promotion policy remain outside this source audit."
+    },
+    {
+      "id": "T2",
+      "name": "Finite computation versus universal proof",
+      "finding": "A large finite registry and numerical feature scan cannot resolve an all-zero or all-parameter mathematical statement.",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E07"
+      ],
+      "priority": "HIGH",
+      "open_obligation": "Produce a complete analytic finite-to-global argument before any universal promotion."
+    },
+    {
+      "id": "T3",
+      "name": "Topological identifiability and experimental controls",
+      "finding": "Feature mappings can collapse distinct zeta functions and coordinate manipulations can introduce topological artifacts.",
+      "evidence_ids": [
+        "E02",
+        "E03"
+      ],
+      "priority": "CRITICAL",
+      "open_obligation": "Prove invariant descriptors, stability and any analytically meaningful transfer from TDA features to genuine zeta zeros."
+    },
+    {
+      "id": "T4",
+      "name": "Adversarial spectral mathematics",
+      "finding": "Explicit spectral candidates and determinant identities can have provable or documented failures despite matching partial signatures.",
+      "evidence_ids": [
+        "E04",
+        "E05"
+      ],
+      "priority": "HIGH",
+      "open_obligation": "Construct and independently verify a fixed self-adjoint arithmetic operator with noncircular all-zero correspondence, if pursuing Hilbert–Pólya."
+    },
+    {
+      "id": "T5",
+      "name": "Novelty, provenance and Selmer-infinitude boundary",
+      "finding": "Existing rank lower bounds, known prior work and a conditional Selmer argument do not prove new unconditional Selmer-3 infinitude.",
+      "evidence_ids": [
+        "E06",
+        "E07"
+      ],
+      "priority": "CRITICAL",
+      "open_obligation": "Complete uniform global descent or an independently proved arithmetic-statistics estimate, with a specialist priority audit."
+    },
+    {
+      "id": "T6",
+      "name": "Human review and research-literacy workflows",
+      "finding": "The curriculum and faculty-review MVP operationalize critique and evidence boundaries without certifying new mathematical results.",
+      "evidence_ids": [
+        "E08",
+        "E09",
+        "E10"
+      ],
+      "priority": "MEDIUM",
+      "open_obligation": "Independent participant identity assurance, privacy review and external validation of workflow effectiveness remain open."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "kind": "BOUNDED_COMPUTATION_REPORT",
+      "statement": "Four zeta families total one million evaluated function variants; only 128 feature points per family receive sampled H0/H1 analysis.",
+      "source_paths": [
+        "docs/research/TECT_X_ZETA_TDA_AUDIT.v1.json",
+        "docs/research/TECT_X_ONE_MILLION_ZETA_TDA_GAP_ANALYSIS.md",
+        "mathos/research/tect_x_zeta_tda_1m.py"
+      ],
+      "limitation": "Repository-reported results; no independent rerun, zero search, or million-point H1 computation performed by this thematic audit."
+    },
+    {
+      "id": "E02",
+      "kind": "DOCUMENTED_EXACT_ARGUMENT",
+      "statement": "Adaptive cycle-Ihara probes can map distinct functions to identical descriptors.",
+      "source_paths": [
+        "docs/research/TECT_X_ONE_MILLION_ZETA_TDA_GAP_ANALYSIS.md",
+        "curriculum/tect_x_zeta_tda_standalone/INSTRUCTOR_KEY.md"
+      ],
+      "limitation": "An identifiability counterexample, not a theorem about actual Riemann zeta zeros."
+    },
+    {
+      "id": "E03",
+      "kind": "BOUNDED_COMPUTATION_REPORT",
+      "statement": "Coordinate-permutation controls produce artificial H1 features on a declared finite sample.",
+      "source_paths": [
+        "docs/research/TECT_X_ZETA_TDA_AUDIT.v1.json",
+        "tests/test_tect_x_zeta_tda_1m.py"
+      ],
+      "limitation": "Selected radii, feature normalization and perturbations are not a population-wide statistical result."
+    },
+    {
+      "id": "E04",
+      "kind": "DOCUMENTED_NEGATIVE_RESULT",
+      "statement": "A fixed arithmetic Jacobi candidate has the desired leading counting law but fails the first-zero spectral match.",
+      "source_paths": [
+        "docs/research/TECTX_RH_FIXED_JACOBI_HILBERT_POLYA_GATE.md"
+      ],
+      "limitation": "Refutes a particular candidate, not all spectral approaches; this audit does not independently check the proof."
+    },
+    {
+      "id": "E05",
+      "kind": "DOCUMENTED_SCOPE_BOUNDARY",
+      "statement": "A parameter-dependent theta-Fredholm determinant matches the classical xi divisor without constraining zero locations.",
+      "source_paths": [
+        "docs/research/TECTX_RH_GLOBAL_THETA_FREDHOLM.md"
+      ],
+      "limitation": "Not a fixed self-adjoint Hilbert–Pólya operator or RH proof; no novelty assessment."
+    },
+    {
+      "id": "E06",
+      "kind": "DOCUMENTED_EXACT_ARGUMENT",
+      "statement": "The selected elliptic-curve progression has documented independent rational-point classes and an n=5 rank-at-least-four obstruction.",
+      "source_paths": [
+        "docs/research/TECT_X_NONISOTRIVIAL_SELMER_AUDIT.md",
+        "mathos/research/tect_x_rank4_fiber_certificate.py"
+      ],
+      "limitation": "This audit reviews the claim record, not an independent formal or specialist proof; no uniform Selmer dimension is determined."
+    },
+    {
+      "id": "E07",
+      "kind": "OPEN_PROOF_OBLIGATION",
+      "statement": "The unconditional infinite Selmer-3 subfamily theorem is open and manuscript submission is blocked.",
+      "source_paths": [
+        "docs/research/papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md",
+        "docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json"
+      ],
+      "limitation": "A publication workflow declaration is not a mathematical decision procedure."
+    },
+    {
+      "id": "E08",
+      "kind": "IMPLEMENTED_WORKFLOW",
+      "statement": "Faculty-review prototype provides invitation-linked reviewers, distinct teaching approvals, and admin adjudication.",
+      "source_paths": [
+        "apps/tect_x_faculty_review/README.md",
+        "apps/tect_x_faculty_review/tests/test_workflow.py"
+      ],
+      "limitation": "Local MVP; teaching approval is not mathematical peer review, and reviewer identity is not institutionally verified."
+    },
+    {
+      "id": "E09",
+      "kind": "IMPLEMENTED_EDUCATIONAL_MATERIAL",
+      "statement": "Standalone six-week curriculum trains finite-versus-universal reasoning and controlled zeta/TDA experiments.",
+      "source_paths": [
+        "curriculum/tect_x_zeta_tda_standalone/README.md",
+        "curriculum/tect_x_zeta_tda_standalone/INSTRUCTOR_KEY.md"
+      ],
+      "limitation": "A curricular design and tests do not demonstrate learning efficacy without independent educational evaluation."
+    },
+    {
+      "id": "E10",
+      "kind": "IMPLEMENTED_WORKFLOW",
+      "statement": "Repository provides claim-evidence checks and a fail-closed manuscript readiness gate.",
+      "source_paths": [
+        "evidence_tect/README.md",
+        "mathos/research/tect_x_submission_gate.py",
+        "docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json"
+      ],
+      "limitation": "Internal consistency checks and state declarations cannot certify external reproduction or mathematical truth."
+    }
+  ],
+  "priorities": [
+    {
+      "id": "P1",
+      "action": "Maintain a versioned claim-to-evidence thematic register and fail-closed consistency checks.",
+      "theme_ids": [
+        "T1",
+        "T6"
+      ],
+      "acceptance": "Referenced files exist; status mirrors retain documented blockers; CI validates the register."
+    },
+    {
+      "id": "P2",
+      "action": "Seek invariant, stable feature maps and an explicit analytic TDA-to-zero transfer theorem before stronger RH claims.",
+      "theme_ids": [
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "acceptance": "Formal assumptions and proof obligations are written down, independently assessed and not inferred from finite plots."
+    },
+    {
+      "id": "P3",
+      "action": "Resolve full Selmer descent or the thin-family average estimate, with independent novelty review.",
+      "theme_ids": [
+        "T5"
+      ],
+      "acceptance": "A complete, externally scrutinized unconditional theorem rather than a finite-rank certificate."
+    },
+    {
+      "id": "P4",
+      "action": "Package independent rerun scripts, bounded numerical error controls and human review provenance.",
+      "theme_ids": [
+        "T1",
+        "T6"
+      ],
+      "acceptance": "Reproduction/identity assertions are backed by distinct independently verified artifacts, not merely self-declared flags."
+    }
+  ]
+}
