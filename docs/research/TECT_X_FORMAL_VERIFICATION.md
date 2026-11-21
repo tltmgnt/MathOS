@@ -126,6 +126,12 @@ python -m mathos.research.tect_x_intelligent_proof_verifier \
 python -m unittest discover -s tests -p 'test_tect_x_general_graph_certificates.py' -v
 ```
 
+The workflow also performs a **real negative-control replay**: it appends
+a deliberately false finite F2 parity theorem to the previously accepted
+generated Lean source and requires the pinned checker to reject that file.
+This detects an accidentally permissive invocation or status parser; it
+still does not constitute independent assessment of the modeled mathematics.
+
 **Trust boundaries remain:** The manifest chooses what graph and proof
 target to study; its endpoints and correspondence to the intended
 research math require human review. Lean proves the finite propositions
