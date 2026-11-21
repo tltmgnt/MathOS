@@ -92,3 +92,35 @@ The lab computes small cycle spectral sums, closed-form checks, fixed/adaptive I
 Run `python curriculum/tect_x_zeta_tda_standalone/terrain.py` from the repository root. The JSON includes the integer-metre grid, endpoints, connectivity, and result. Follow the middle row to exhibit a path whose maximum is 140 m. Every four-neighbour path must cross column 2, whose minimum is 140 m. These two bounds prove the merge elevation for this grid. Exactly two local minima are born, at 100 and 110 m, so the younger component persists for 30 m.
 
 The solver computes a connection level between marked cells. Interpreting the difference as a persistence lifetime requires knowing which component dies at the merge. Missing heights exclude paths through those cells. A disconnected result describes the observed grid only. The tests independently flood each sublevel set, remove the saddle, and vary diagonal connectivity. These checks establish a finite synthetic baseline. Ground elevations, mapped saddle locations, and survey accuracy require georeferenced data and independent validation.
+
+## Choose the next measurement
+
+Run the lab as above and inspect the omission study in the JSON report. It masks each observed cell except the two endpoints, restores it, and recalculates the threshold with the original adjacency. Coordinates are zero-based row and column. Loss of every observed path ranks first, followed by the largest increase in the original units. The report lists all tied leaders in row order. When all changes are zero it suggests investigating a plausible joint omission. If the baseline is already disconnected it asks which missing observations could bridge the gap.
+
+Before viewing the ranking, predict the most influential cell. Compare your prediction with the complete ranking, choose a flagged assumption, and record what independent measurement or adjacency check would resolve it. This exhaustive single-omission exercise is intended for small synthetic grids. A high rank measures sensitivity within the fixture; field accuracy and market outcomes require independent observations.
+
+## Reviewer questions and example answers
+
+Ask the learner to predict the answer before opening the omission ranking. Coordinates are zero-based (row, column). Start with edge neighbours only.
+
+**Why is 140 m the lowest crossing?** The middle row gives a route of 100 → 120 → 140 → 125 → 110 m. Every route crosses the middle column. Its lowest cell is 140 m, so no route opens earlier.
+
+**Which location deserves a survey first?** The 120 m western approach at (1, 1) and the 125 m eastern approach at (1, 3) tie. Masking either raises the crossing to 160 m. Masking the 140 m saddle raises it to 150 m. Ask which approach has poorer survey coverage and record the evidence used to break the tie.
+
+**How should we report a disconnection?** Say “No path through the remaining observed cells under the stated adjacency rule.” Ask which missing observations could bridge the gap and whether corner contact is meaningful in this setting.
+
+**What evidence would change the conclusion?** Independently measure the western approach, replace the assumed 120 m elevation, and rerun the ranking. Record whether the two approaches still tie.
+
+## Sensitivity investigation agent
+
+From this lab folder, run `python sensitivity_agent.py terrain`. The default rule-based planner runs offline. To use an AI planner, set `OPENAI_API_KEY` outside the repository and add `--model MODEL_ID` using a Responses API model with structured outputs. This sends the synthetic study to the provider and can incur one model call per investigation.
+
+1. The agent masks each eligible cell and computes the full ranking.
+2. A separate threshold flood checks the baseline, every omission, all ties and any disconnections. A disagreement stops the run before planning.
+3. The planner selects one bounded experiment. The offline rule tests corner connectivity for tied leaders; for a unique leader it removes the top two observations together. The AI planner chooses between those same experiments based on the verified packet.
+4. The agent executes the chosen experiment locally and checks its result by flooding again. Read the baseline and single-cell ranking under `study`, then the actual masked cells and resulting thresholds under `follow_up`. A null threshold means disconnected. Coordinates use zero-based row and column.
+5. The packet ends with a question for a human reviewer. Record a source for the requested measurements or challenge the adjacency assumption before drawing conclusions about the world.
+
+## Optional final-week capstone
+
+[Reason across an octillion omission masks](OMISSION_CAPSTONE.md) using a 64-case counterexample search, a proof for nested path sets, and a missing-as-zero control. Run `python omission_capstone.py` from this folder.
