@@ -75,6 +75,22 @@ The versioned JSON assigns exactly one descriptive evidence kind and explicit li
 record. It deliberately does **not** assign universal confidence percentages or represent self-reported
 validation as independent confirmation.
 
+## Intelligent proof-gap verifier extension
+
+The [TECT-X topological proof-gap prototype](TECT_X_INTELLIGENT_PROOF_VERIFIER.md)
+connects this thematic register to the existing MathOS AND/OR dependency analyzer.
+Its [three versioned cases](TECT_X_PROOF_VERIFIER_CASES.v1.json) cover the RH spectral
+and zeta/TDA proposals, the open Selmer infinitude theorem, and the bounded
+one-million-function experimental report. It calculates minimal *modeled*
+completion sets, common unresolved obligations, structural dependency-graph
+H0/H1, scope-transfer warnings and ranked next review actions.
+
+Run `python -m mathos.research.tect_x_intelligent_proof_verifier` from the
+repository root. The output is **not a semantic mathematical proof verifier**
+or an RH/BSD/Selmer theorem certificate. A graph cycle is not a topological
+invariant of any zeta zero set, and a structurally complete model would
+not prove that its authored implications are sound.
+
 ## Actionable research priorities
 
 1. **P1 — Govern claim-to-evidence traceability.** Keep T1–T6 and the evidence sources linked, guard the
