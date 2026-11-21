@@ -74,6 +74,71 @@ digests, exact Lean version, explicit axiom inventory, and immutable
 after success; do not trust a binary artifact instead of repeating kernel
 replay against the tracked source.
 
+## General bounded graph-cycle certificates (extension)
+
+The [graph-certificate manifest](TECT_X_FINITE_GRAPH_CERTIFICATES.v1.json)
+contains five finite graph 1-skeleta: a path, a square, a diamond, a
+disconnected graph and K4. The
+[general graph certificate generator](../../mathos/research/tect_x_general_graph_certificates.py)
+computes H0 with **two independent Python algorithms** (BFS and union-find),
+generates a mod-2 incidence matrix, computes its nullspace with Gaussian
+elimination, and independently enumerates **every** bounded edge subset.
+It rejects mismatched claimed Betti numbers and malformed or excessive input.
+
+More importantly, for **each** accepted graph it emits two new Lean theorems:
+
+1. `cycles_exact`: universally quantifies all edge choices and proves that
+   the complete incidence kernel consists exactly of the enumerated F2
+   linear combinations of the candidate cycle basis.
+2. `basis_independent`: universally quantifies the basis coefficients
+   and proves that only the all-zero coefficient vector maps to zero.
+   Acyclic cases are proved vacuously.
+
+This yields **ten additional formally checkable theorems** across the five
+registered graphs. The generated Lean source uses only `Init`, explicit
+Boolean equations, case splitting and `decide`; `#print axioms` must
+confirm **zero transitive axioms for each theorem**. A source or mock test
+is never treated as a kernel verification. The GitHub workflow actually
+installs Lean 4.14.0 and checks all ten theorems with a zero-axiom policy.
+
+**Exact scope:** Simple undirected graphs with up to seven vertices,
+eight edges, and four independent cycles. These are one-dimensional
+graphs with **no filled 2-cells**. A result about their cycle space is
+not a persistent homology theorem, does not characterize zeta zeros,
+and is not a proof that TGA works on arbitrary sized graphs. H0 is
+cross-checked in Python; the exact finite F2 cycle space and basis
+independence are kernel-checked.
+
+```sh
+# Source-audited Python preflight, NOT a kernel certificate.
+python -m mathos.research.tect_x_general_graph_certificates
+
+# Actual pinned Lean kernel replay (saves generated theorem source).
+python -m mathos.research.tect_x_general_graph_certificates \
+  --check-lean --lean lean \
+  --report artifacts/tect-x/general-f2/report.json
+
+# Use within the TGA command while preserving all conjecture blockers.
+python -m mathos.research.tect_x_intelligent_proof_verifier \
+  --verify-general-graph-cycles --lean lean \
+  --report artifacts/tect-x/tga-general.json
+
+python -m unittest discover -s tests -p 'test_tect_x_general_graph_certificates.py' -v
+```
+
+The workflow also performs a **real negative-control replay**: it appends
+a deliberately false finite F2 parity theorem to the previously accepted
+generated Lean source and requires the pinned checker to reject that file.
+This detects an accidentally permissive invocation or status parser; it
+still does not constitute independent assessment of the modeled mathematics.
+
+**Trust boundaries remain:** The manifest chooses what graph and proof
+target to study; its endpoints and correspondence to the intended
+research math require human review. Lean proves the finite propositions
+the generator actually submits, not the validity of the author's
+broader conjecture. Recompiling saved Lean text independently improves
+reproducibility, but source digests are not cryptographic author attestations.
+
 ## Relationship to intelligent Topological Gap Analysis
 
 The [TGA proof-gap analyzer](TECT_X_INTELLIGENT_PROOF_VERIFIER.md) constructs an
