@@ -55,6 +55,11 @@ python -m mathos.research.tect_x_formal_certificates \
 
 # Adversarial regression tests for fail-closed controls.
 python -m unittest discover -s tests -p 'test_tect_x_formal_certificates.py' -v
+
+# Integrate a real kernel replay with TGA without closing any conjecture.
+python -m mathos.research.tect_x_intelligent_proof_verifier \
+  --verify-lean-certificate --lean lean \
+  --report artifacts/tect-x/formal/tga-with-lean.json
 ```
 
 Only successful, warning-free Lean compilation plus the independent
