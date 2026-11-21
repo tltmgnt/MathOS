@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "system": "TECT-X independent typed argument gate",
+  "backend": {
+    "name": "Lean",
+    "version": "4.14.0",
+    "stdlib": "Init",
+    "require_zero_transitive_axioms": true
+  },
+  "validation_scope": "REPOSITORY_REVIEWED_LEAN_FORMALIZATIONS_ONLY",
+  "meaning_of_pass": "The Lean kernel accepted the candidate as an inhabitant of an independently authored reference proposition with no transitive axioms. English-to-formal statement faithfulness and broader research correctness remain unreviewed.",
+  "scientific_claim_certification": false,
+  "language_to_formal_statement_review": "NOT_PERFORMED",
+  "independent_expert_review": "NOT_PERFORMED",
+  "closed_research_obligations": [],
+  "bundles": [
+    {
+      "id": "proposition-chain",
+      "source": "formal/tectx_arguments/PropositionChain.lean",
+      "contract": "formal/tectx_contracts/PropositionChainContract.lean",
+      "candidate_theorem": "MathOS.TECTX.Arguments.implication_chain",
+      "contract_theorem": "MathOS.TECTX.Contracts.implication_chain_matches_reference",
+      "informal_claim": "For arbitrary propositions P, Q, R, if P implies Q and Q implies R, then P implies R.",
+      "explicit_hypotheses": [
+        "P, Q, R range over Lean Prop.",
+        "The two implication premises are explicitly quantified as arguments."
+      ],
+      "formal_scope": "Universal quantification over Lean propositions, as encoded in the independent Lean contract.",
+      "semantic_gap": "Equivalence of the English sentence to the chosen Lean contract has not been independently reviewed.",
+      "review_status": "NOT_REVIEWED",
+      "conjecture_implication": "NONE"
+    },
+    {
+      "id": "natural-right-unit",
+      "source": "formal/tectx_arguments/NaturalRightUnit.lean",
+      "contract": "formal/tectx_contracts/NaturalRightUnitContract.lean",
+      "candidate_theorem": "MathOS.TECTX.Arguments.nat_add_right_zero",
+      "contract_theorem": "MathOS.TECTX.Contracts.nat_right_zero_matches_reference",
+      "informal_claim": "For every natural number n, adding zero to n on the right leaves n unchanged.",
+      "explicit_hypotheses": [
+        "n ranges over Lean Nat.",
+        "+ and = use Lean core natural-number arithmetic and equality."
+      ],
+      "formal_scope": "All Lean Nat, using Lean Init.",
+      "semantic_gap": "The use of Lean Nat and the exact English-to-formal semantic mapping have not been independently reviewed.",
+      "review_status": "NOT_REVIEWED",
+      "conjecture_implication": "NONE"
+    }
+  ]
+}
