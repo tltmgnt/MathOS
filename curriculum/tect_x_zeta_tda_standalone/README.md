@@ -86,3 +86,9 @@ The lab computes small cycle spectral sums, closed-form checks, fixed/adaptive I
 
 **Suggested certificate wording:** “Completed the standalone AI, Zeta Functions & TDA course; can evaluate the limits of numerical evidence and provide reproducible bounded mathematical examples.” Not “proved RH” or “established a new zeta theorem.”
 
+
+## Two-valley terrain control
+
+Run `python curriculum/tect_x_zeta_tda_standalone/terrain.py` from the repository root. The JSON includes the integer-metre grid, endpoints, connectivity, and result. Follow the middle row to exhibit a path whose maximum is 140 m. Every four-neighbour path must cross column 2, whose minimum is 140 m. These two bounds prove the merge elevation for this grid. Exactly two local minima are born, at 100 and 110 m, so the younger component persists for 30 m.
+
+The solver computes a connection level between marked cells. Interpreting the difference as a persistence lifetime requires knowing which component dies at the merge. Missing heights exclude paths through those cells. A disconnected result describes the observed grid only. The tests independently flood each sublevel set, remove the saddle, and vary diagonal connectivity. These checks establish a finite synthetic baseline. Ground elevations, mapped saddle locations, and survey accuracy require georeferenced data and independent validation.
