@@ -1,22 +1,14 @@
-import PropositionChain
+import Init
 
 /-!
-Independently authored reference-goal contract.
-Only the exact Lean expression is checked, not the meaning of English.
+This file specifies the expected mathematical proposition independently of
+the candidate theorem module. The checker generates the proof binding.
 -/
 set_option warningAsError true
 
 namespace MathOS.TECTX.Contracts
 
-/-- The separately written proposition that the candidate must inhabit. -/
 def implicationChainReference : Prop :=
   ∀ (P Q R : Prop), (P → Q) → (Q → R) → P → R
 
-/-- A Lean proof of the reference proposition must be supplied verbatim. -/
-theorem implication_chain_matches_reference : implicationChainReference :=
-  MathOS.TECTX.Arguments.implication_chain
-
 end MathOS.TECTX.Contracts
-
-#print axioms MathOS.TECTX.Arguments.implication_chain
-#print axioms MathOS.TECTX.Contracts.implication_chain_matches_reference
