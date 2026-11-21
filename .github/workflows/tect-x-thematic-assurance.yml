@@ -6,6 +6,7 @@ on:
       - 'docs/research/**'
       - 'mathos/research/tect_x_*.py'
       - 'tests/test_tect_x_thematic_gate.py'
+      - 'tests/test_tect_x_intelligent_proof_verifier.py'
       - 'curriculum/tect_x_zeta_tda_standalone/**'
       - 'apps/tect_x_faculty_review/**'
       - 'evidence_tect/**'
@@ -16,6 +17,7 @@ on:
       - 'docs/research/**'
       - 'mathos/research/tect_x_*.py'
       - 'tests/test_tect_x_thematic_gate.py'
+      - 'tests/test_tect_x_intelligent_proof_verifier.py'
       - '.github/workflows/tect-x-thematic-assurance.yml'
   workflow_dispatch:
 
@@ -36,5 +38,17 @@ jobs:
         run: python -m mathos.research.tect_x_thematic_gate --json
       - name: Test fail-closed scope assertions
         run: python -m unittest discover -s tests -p 'test_tect_x_thematic_gate.py' -v
+      - name: Verify authored proof graph structure, topological cycles and unclosed obligations
+        run: |
+          python -m mathos.research.tect_x_intelligent_proof_verifier --json \
+            --report artifacts/tect-x/proof-gap-report.json
+      - name: Test adversarial proof-verifier inputs
+        run: python -m unittest discover -s tests -p 'test_tect_x_intelligent_proof_verifier.py' -v
+      - name: Upload scoped proof-gap report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tect-x-proof-gap-not-a-theorem-certificate
+          path: artifacts/tect-x/proof-gap-report.json
+          retention-days: 14
       - name: Verify Python syntax
-        run: python -m py_compile mathos/research/tect_x_thematic_gate.py tests/test_tect_x_thematic_gate.py
+        run: python -m py_compile mathos/research/tect_x_thematic_gate.py mathos/research/tect_x_intelligent_proof_verifier.py tests/test_tect_x_thematic_gate.py tests/test_tect_x_intelligent_proof_verifier.py
