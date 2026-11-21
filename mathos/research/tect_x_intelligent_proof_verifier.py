@@ -367,6 +367,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--report", type=Path, help="write a full machine-readable JSON report")
     parser.add_argument("--json", action="store_true", help="print JSON rather than summary")
     parser.add_argument("--require-proof", action="store_true", help="fail until independent mathematical certification exists (not supplied here)")
+    parser.add_argument("--verify-lean-certificate", action="store_true",
+                        help="run pinned Lean on exact finite F2 lemmas; never promote a conjecture")
+    parser.add_argument("--lean", default="lean", help="Lean 4.14.0 executable for finite certificate replay")
     args = parser.parse_args(argv)
 
     try:
@@ -374,6 +377,24 @@ def main(argv: list[str] | None = None) -> int:
         result = verify_cases(input_data)
     except (OSError, ValueError) as exc:
         result = {"ok": False, "issues": [str(exc)], "cases": [], "scientific_certification": False}
+    # The kernel certifies specific finite graph-chain lemmas, NOT authored
+    # TGA edges or any open mathematical statement. Import lazily so the
+    # independent certificate module can reference this graph checker safely.
+    if args.verify_lean_certificate:
+        from mathos.research.tect_x_formal_certificates import audit as formal_audit
+        certificate = formal_audit(check_kernel=True, executable=args.lean)
+        result["finite_f2_formal_certificate"] = {
+            "status": certificate["formal_status"],
+            "kernel_checked": certificate["kernel_checked"],
+            "verified_theorems": certificate.get("verified_theorems", []),
+            "transitive_axioms": certificate.get("transitive_axioms"),
+            "closed_conjecture_obligations": [],
+        }
+        if not certificate.get("ok") or not certificate["kernel_checked"]:
+            result["ok"] = False
+            result["issues"].append("pinned Lean finite-F2 certificate replay failed")
+        # Do not change mathematical_theorems_certified, the case verdicts,
+        # or scientific_certification under any circumstance.
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8")
