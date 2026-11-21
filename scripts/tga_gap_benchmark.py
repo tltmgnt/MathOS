@@ -85,33 +85,40 @@ def benchmark(sizes=(10, 30, 100, 500), layers=(4, 6, 8), repeats=3):
     for kind, size in cases:
         graph, expected = fixture(kind, size)
         times, peaks = [], []
-        checked = None
+        failure = None
         for _ in range(repeats):
             gc.collect()
             tracemalloc.start()
             begin = perf_counter()
             try:
                 result = analyze(graph, "target")
+            except RecursionError:
+                # Deep linear dependency chains can exceed Python's call stack.
+                # Keep this a visible benchmark failure rather than hiding it.
+                failure = "RECURSION_LIMIT"
+            finally:
                 elapsed_ms = (perf_counter() - begin) * 1000
                 _, peak = tracemalloc.get_traced_memory()
-            finally:
                 tracemalloc.stop()
+            times.append(elapsed_ms)
+            peaks.append(peak)
+            if failure:
+                break
             if result["minimal_completion_sets"] != expected:
                 raise AssertionError(f"incorrect completion sets: {kind}/{size}")
             if result["status"] != "BLOCKED":
                 raise AssertionError("synthetic fixture unexpectedly closed")
-            times.append(elapsed_ms)
-            peaks.append(peak)
         open_count = sum(item.state == "open" for item in graph.values())
-        checked = "not_run_open_leaf_limit"
-        if open_count <= 10:
+        checked = "not_run_analysis_failed" if failure else "not_run_open_leaf_limit"
+        if not failure and open_count <= 10:
             audit = exhaustive_check(graph, "target", expected)
             checked = f"pass_{audit['assignments_checked']}_assignments"
         rows.append({
             "fixture": kind, "parameter": size,
+            "status": failure or "ANALYZED",
             "nodes": len(graph), "open_leaves": open_count,
-            "minimal_completion_set_count": len(expected),
-            "fixture_expected_sets_match": True,
+            "minimal_completion_set_count": None if failure else len(expected),
+            "fixture_expected_sets_match": not bool(failure),
             "exhaustive_boolean_crosscheck": checked,
             "instrumented_wall_ms": {
                 "min": round(min(times), 4),
@@ -130,6 +137,8 @@ def benchmark(sizes=(10, 30, 100, 500), layers=(4, 6, 8), repeats=3):
         "platform": platform.platform(),
         "repeats_per_case": repeats,
         "cases": rows,
+        "failed_cases": [f"{row['fixture']}:{row['parameter']}:{row['status']}"
+                         for row in rows if row["status"] != "ANALYZED"],
         "mathematical_theorem_certified": False,
         "lean_kernel_checked": False,
         "interpretation": (
