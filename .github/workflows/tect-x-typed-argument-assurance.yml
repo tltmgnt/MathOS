@@ -1,0 +1,108 @@
+name: TECT-X typed mathematical deductions and semantic-fidelity gap gate
+
+on:
+  pull_request:
+    paths:
+      - 'formal/tectx_arguments/**'
+      - 'formal/tectx_contracts/**'
+      - 'docs/research/TECT_X_TYPED_ARGUMENTS.v1.json'
+      - 'docs/research/TECT_X_TYPED_ARGUMENT_VERIFICATION.md'
+      - 'mathos/research/tect_x_typed_argument_gate.py'
+      - 'mathos/research/tect_x_intelligent_proof_verifier.py'
+      - 'tests/test_tect_x_typed_argument_gate.py'
+      - '.github/workflows/tect-x-typed-argument-assurance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'formal/tectx_arguments/**'
+      - 'formal/tectx_contracts/**'
+      - 'docs/research/TECT_X_TYPED_ARGUMENTS.v1.json'
+      - 'docs/research/TECT_X_TYPED_ARGUMENT_VERIFICATION.md'
+      - 'mathos/research/tect_x_typed_argument_gate.py'
+      - 'mathos/research/tect_x_intelligent_proof_verifier.py'
+      - 'tests/test_tect_x_typed_argument_gate.py'
+      - '.github/workflows/tect-x-typed-argument-assurance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof-metadata-and-negative-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Check formal source/reference provenance, without kernel certification
+        run: |
+          python -m mathos.research.tect_x_typed_argument_gate \
+            --report artifacts/tect-x/typed-arguments/static-audit.json
+          python -m unittest discover -s tests -p 'test_tect_x_typed_argument_gate.py' -v
+          python -m py_compile mathos/research/tect_x_typed_argument_gate.py tests/test_tect_x_typed_argument_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tect-x-typed-source-audit-not-kernel-checked
+          path: artifacts/tect-x/typed-arguments/static-audit.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  lean-kernel-and-independent-reference-types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install pinned Lean 4.14.0
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check exact candidate theorem types against independent formal reference goals
+        run: |
+          python -m mathos.research.tect_x_typed_argument_gate \
+            --check-lean --lean "$HOME/.elan/bin/lean" \
+            --report artifacts/tect-x/typed-arguments/kernel-check.json
+      - name: Preserve unresolved semantic gaps when integrating into TGA
+        run: |
+          python -m mathos.research.tect_x_intelligent_proof_verifier \
+            --verify-typed-arguments --lean "$HOME/.elan/bin/lean" \
+            --json --report artifacts/tect-x/typed-arguments/tga-typed-report.json
+      - name: Negative-control check must reject an incorrectly specified Lean goal
+        shell: bash
+        run: |
+          mkdir -p /tmp/tectx-negative-contract
+          "$HOME/.elan/bin/lean" -o /tmp/tectx-negative-contract/PropositionChain.olean \
+            formal/tectx_arguments/PropositionChain.lean
+          cat > /tmp/tectx-negative-contract/WrongReference.lean <<'EOF'
+          import PropositionChain
+          set_option warningAsError true
+          namespace MathOS.TECTX.Contracts
+          def wrongReference : Prop := ∀ P Q : Prop, P → Q
+          theorem impossibleGoal : wrongReference :=
+            MathOS.TECTX.Arguments.implication_chain
+          end MathOS.TECTX.Contracts
+          EOF
+          if LEAN_PATH=/tmp/tectx-negative-contract "$HOME/.elan/bin/lean" \
+            /tmp/tectx-negative-contract/WrongReference.lean >/tmp/tectx-negative.log 2>&1; then
+            echo "::error::Lean incorrectly accepted a proof of an unrelated reference proposition"
+            exit 1
+          fi
+          echo "Lean rejected an intentionally mismatched independent goal (expected)."
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tect-x-typed-exact-goal-check-not-english-certification
+          path: artifacts/tect-x/typed-arguments/
+          if-no-files-found: ignore
+          retention-days: 14
