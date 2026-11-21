@@ -1,5 +1,7 @@
 # TECT-X independent Lean kernel certificates for finite topological deductions
 
+**Public-facing product identity:** **Remetheon Kernel**, part of [REMETHEON — Mathematical Memory Intelligence](../brand/REMETHEON.md). This name refers to the existing scoped TECT-X formal verification tooling; it does not claim general theorem proving.
+
 **Implemented artifact:** [finite F₂ graph-chain proof](../../formal/TECTXFiniteTopology.lean) +
 [independent theorem-type contract](../../formal/TECTXFiniteTopologyContract.lean) +
 [pinned Lean replay auditor](../../mathos/research/tect_x_formal_certificates.py).
