@@ -1,0 +1,75 @@
+name: RH 2026 external Lean headline and provenance audit
+
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/rh_external_claim_audit.py'
+      - 'tests/test_rh_external_claim_audit.py'
+      - 'mathos/research/rh_external_bridge_audit.py'
+      - 'tests/test_rh_external_bridge_audit.py'
+      - 'docs/research/RH_EXTERNAL_CLAIM_2026*'
+      - '.github/workflows/rh-external-claim-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/rh_external_claim_audit.py'
+      - 'tests/test_rh_external_claim_audit.py'
+      - 'docs/research/RH_EXTERNAL_CLAIM_2026*'
+      - '.github/workflows/rh-external-claim-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-headline-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline adversarial tests (no upstream execution)
+        run: python -m unittest discover -s tests -p 'test_rh_external_claim_audit.py' -v
+      - name: Challenge RH source bridge trace without network
+        run: python -m unittest discover -s tests -p 'test_rh_external_bridge_audit.py' -v
+      - name: Validate frozen MIT report and CMI status snapshot
+        run: python -m mathos.research.rh_external_claim_audit --output artifacts/rh-external/snapshot.json
+      - name: Fetch six small immutable upstream files and verify exact Git blobs
+        run: python -m mathos.research.rh_external_claim_audit --fetch-pinned --output artifacts/rh-external/headline-audit.json
+      - name: Fetch eight additional immutable source bridge files
+        run: |
+          python -m mathos.research.rh_external_bridge_audit --fetch-pinned --output artifacts/rh-external/bridge-trace.json
+          python - <<'PY'
+          import json
+          with open("artifacts/rh-external/bridge-trace.json", encoding="utf-8") as stream:
+              r = json.load(stream)
+          assert r["source_fetch_performed"]
+          assert r["source_inspection"]["files_matched"] == 8
+          assert r["source_inspection"]["transitive_kernel_proof_verified_by_this_audit"] is False
+          assert r["global_rh_status"] == "OPEN"
+          assert r["mathos_certification"] == "NOT_CERTIFIED"
+          assert r["acceptance"] == "SOURCE_TRACE_ONLY"
+          PY
+      - name: Assert MathOS does not claim to have replayed the theorem
+        run: |
+          python - <<'PY'
+          import json
+          with open("artifacts/rh-external/headline-audit.json", encoding="utf-8") as handle:
+              report = json.load(handle)
+          assert report["pinned_source_fetch_completed"]
+          assert report["source_inspection"]["riemann_target_is_mathlib_definition"]
+          assert report["source_inspection"]["transitive_proof_checked_by_this_tool"] is False
+          assert report["clay_classification_at_snapshot"] == "UNSOLVED"
+          assert report["mathos_certification"] == "NOT_CERTIFIED"
+          assert report["independent_full_proof_replayed_by_mathos"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-2026-external-headline-provenance
+          path: artifacts/rh-external/
+          if-no-files-found: ignore

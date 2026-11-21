@@ -90,3 +90,13 @@ Model-authored proposals cannot change the canonical register.
 See [Phase I Li obligations](RH_OMEGA_LI_PHASE1.md) and
 [benchmarks](RH_OMEGA_BENCHMARKS.md). The unresolved mathematical
 obligations G1-G6 and G5P are not discharged by this implementation.
+
+## New external theorem-claim verification track
+
+The November 20, 2026 Alpöge/Claude Lean proof announcement and independent
+MIT kernel-check evidence are audited separately from RH-Ω's numerical
+experiments. See [the pinned external source review](RH_EXTERNAL_CLAIM_2026.md)
+and [its machine-readable snapshot](RH_EXTERNAL_CLAIM_2026.v1.json).
+This external-source audit does not replay the full proof or update canonical
+proof obligations. Consult the live MIT status page for changes after the
+19:45 UTC snapshot.
