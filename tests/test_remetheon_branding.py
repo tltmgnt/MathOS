@@ -83,7 +83,7 @@ class RemetheonBrandConsistencyTests(unittest.TestCase):
     def test_proof_scope_and_brand_legal_claims_remain_unverified(self):
         caveats = self.manifest["scope_notes"]
         self.assertIn("not introduce persistent memory", caveats["current"])
-        self.assertIn("not", caveats["temporal_memory"])
+        self.assertIn("no running memory agent", caveats["temporal_memory"])
         self.assertIn("not", caveats["certification"])
         self.assertIn("No trademark registration", caveats["trademark"])
         self.assertIn("no", self.guide.lower())
