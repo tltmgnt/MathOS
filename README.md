@@ -104,7 +104,9 @@ python -m mathos.research.discovery --limit 8
 python -m unittest discover -s tests -p 'test_discovery.py' -v
 ```
 
-This is a bounded, human-in-the-loop learning scheduler—not an autonomous theorem prover, proof of mathematical novelty, or automatic code-updating agent.
+**Human review** guides which questions to investigate next. A reviewer can record `useful` or `not_useful` for a question, with an evidence reference, using the [feedback instructions](docs/research/DISCOVERY_ENGINE.md).
+
+**Autonomous exploration** can proceed while a question awaits review. Run `python -m mathosx.autonomy --output-dir artifacts/mathosx-autonomous` to search the registered finite XOR systems for consequences and replay the resulting certificates. The [finite-prover workflow](.github/workflows/mathosx-prover-ci.yml) also publishes the report. Each result applies to the specified finite system; reviewers can use it to choose a follow-up experiment.
 
 ## The MathOS reasoning loop
 
