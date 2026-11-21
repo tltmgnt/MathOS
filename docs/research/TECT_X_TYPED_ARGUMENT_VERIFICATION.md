@@ -47,15 +47,19 @@ Two different forms of deduction are included:
 - **Universal natural-number arithmetic:** For every `n : Nat`,
   `n + 0 = n`.
 
-For each example, the contract defines its **own expected proposition**
-and must construct a term of exactly that type from the candidate theorem.
-The proof source cannot choose or derive the expected type at verification
-time. A candidate with an extra premise, missing quantifier or different
-result is rejected unless the reference goal itself has been compromised.
+For each example, the reference file defines its **own expected
+proposition** and imports only Lean `Init`—it does not import the candidate.
+The verifier itself generates a *third* Lean checking module that imports
+both and directly assigns the submitted candidate theorem as a proof of
+that exact independent reference proposition. Neither candidate author
+nor reference author can silently replace this checking assignment.
+A candidate with an extra premise, missing quantifier or different result
+is rejected unless the reference specification itself is wrong.
 
 The manifest is extensible: add a reviewed Lean source, a genuinely
-separate reference contract, explicit assumptions and a new bundle
-entry. Validated proof theorem names are not hard-coded to these two cases.
+separate reference proposition declaration, explicit assumptions and a new
+bundle entry. The verifier generates the proof-to-goal type check from
+the registered theorem and reference-proposition names. Validated proof theorem names are not hard-coded to these two cases.
 The initial trust boundary accepts only the repo's Lean `Init`
 environment and bounded, repository-controlled source; arbitrary
 mathlib imports or uploaded untrusted executable Lean scripts are **not**
