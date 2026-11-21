@@ -99,4 +99,14 @@ Run the lab as above and inspect the omission study in the JSON report. It masks
 
 Before viewing the ranking, predict the most influential cell. Compare your prediction with the complete ranking, choose a flagged assumption, and record what independent measurement or adjacency check would resolve it. This exhaustive single-omission exercise is intended for small synthetic grids. A high rank measures sensitivity within the fixture; field accuracy and market outcomes require independent observations.
 
-Instructor key: on the terrain fixture, either (1, 1) or (1, 3) raises the pass from 140 m to 160 m. Both outrank the central saddle omission (150 m).
+## Reviewer questions and example answers
+
+Ask the learner to predict the answer before opening the omission ranking. Coordinates are zero-based (row, column). Start with edge neighbours only.
+
+**Why is 140 m the lowest crossing?** The middle row gives a route of 100 → 120 → 140 → 125 → 110 m. Every route crosses the middle column. Its lowest cell is 140 m, so no route opens earlier.
+
+**Which location deserves a survey first?** The 120 m western approach at (1, 1) and the 125 m eastern approach at (1, 3) tie. Masking either raises the crossing to 160 m. Masking the 140 m saddle raises it to 150 m. Ask which approach has poorer survey coverage and record the evidence used to break the tie.
+
+**How should we report a disconnection?** Say “No path through the remaining observed cells under the stated adjacency rule.” Ask which missing observations could bridge the gap and whether corner contact is meaningful in this setting.
+
+**What evidence would change the conclusion?** Independently measure the western approach, replace the assumed 120 m elevation, and rerun the ranking. Record whether the two approaches still tie.
