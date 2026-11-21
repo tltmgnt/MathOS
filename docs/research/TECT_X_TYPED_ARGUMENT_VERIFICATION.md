@@ -1,5 +1,7 @@
 # TECT-X typed mathematical argument verifier and formalization-fidelity gaps
 
+**Public-facing product identity:** **Remetheon Kernel**, part of [REMETHEON — Mathematical Memory Intelligence](../brand/REMETHEON.md). Technical package names, Lean proof interfaces and unsupported-fidelity warnings remain unchanged.
+
 ## Verified boundaries
 
 **What this feature can verify:** For any **repository-reviewed mathematical

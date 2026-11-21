@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "brand_id": "remetheon",
+  "display_name": "REMETHEON",
+  "descriptor": "Mathematical Memory Intelligence",
+  "tagline": "Every insight remembered. Every proof advanced.",
+  "purpose": "A long-term identity for a mathematical research and learning platform combining provenance-aware reasoning, topological proof-gap analysis, and scoped formal checking.",
+  "former_project_name": "MathOS",
+  "repository": "tltmgnt/MathOS",
+  "research_technology": "TECT-X",
+  "audiences": [
+    "research mathematicians",
+    "mathematics students",
+    "mathematics educators"
+  ],
+  "product_family": [
+    {
+      "name": "Remetheon TGA",
+      "role": "Topological Gap Analysis and dependency-gap reporting",
+      "status": "implemented_research_prototype",
+      "source": "docs/research/TECT_X_INTELLIGENT_PROOF_VERIFIER.md"
+    },
+    {
+      "name": "Remetheon Kernel",
+      "role": "Scoped Lean proof certificate and typed-argument checking",
+      "status": "implemented_scoped_research_prototype",
+      "source": "docs/research/TECT_X_FORMAL_VERIFICATION.md"
+    },
+    {
+      "name": "Remetheon Chronicle",
+      "role": "Time-indexed mathematical reasoning memory and provenance history",
+      "status": "planned",
+      "source": null
+    },
+    {
+      "name": "Remetheon Research",
+      "role": "Integrated researcher-facing conjecture histories and evidence workflows",
+      "status": "planned_product_experience",
+      "source": null
+    },
+    {
+      "name": "Remetheon Scholar",
+      "role": "Guided learning with learner-specific mathematical history",
+      "status": "planned",
+      "source": null
+    }
+  ],
+  "data_principles": [
+    "Separate user-authored hypotheses, finite experiments, formally checked lemmas, and independently reviewed theorem claims.",
+    "Preserve sources, timestamps, derivation lineage, revision history and explicit unresolved proof obligations when temporal memory is implemented.",
+    "Provide research- and student-facing explanations without changing the underlying truth or certification status."
+  ],
+  "scope_notes": {
+    "current": "Branding overlays existing MathOS and TECT-X code; this change does not introduce persistent memory, autonomous tutoring or new mathematical proofs.",
+    "temporal_memory": "A proposed future capability; no running memory agent, persistence service, cross-session recollection or automatic versioned mathematical history is implied.",
+    "certification": "Kernel checks establish only exact supported formal propositions, not faithful translation of arbitrary prose or an open conjecture.",
+    "trademark": "No trademark registration, domain ownership, exclusivity or independent legal clearance is claimed."
+  },
+  "migration_policy": {
+    "github_repo_rename": false,
+    "rename_imports_or_files": false,
+    "preserve_legacy_identifiers": true,
+    "public_facing_name": "REMETHEON",
+    "attribution": "Built on MathOS research infrastructure and the TECT-X verification toolkit."
+  }
+}

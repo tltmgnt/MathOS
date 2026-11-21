@@ -1,4 +1,14 @@
-# MathOS
+# REMETHEON
+
+**Mathematical Memory Intelligence** · *Every insight remembered. Every proof advanced.*
+
+REMETHEON is the public-facing mathematical research and learning brand built on the **MathOS** codebase and its **TECT-X** proof-assurance toolkit. The existing GitHub repository, Python imports, research filenames, workflows and legacy project identifiers remain **MathOS / TECT-X** for compatibility.
+
+The current implementation includes TECT-X proof-gap analysis, evidence audits and **scoped** Lean verification. Temporal mathematical memory (`Remetheon Chronicle`), a unified researcher experience (`Remetheon Research`) and a student learning assistant (`Remetheon Scholar`) are **planned product experiences**, not shipped persistent memory or AI tutoring services. The brand does not imply proof of open conjectures or formalization fidelity for arbitrary informal mathematical arguments.
+
+[REMETHEON brand and product guide](docs/brand/REMETHEON.md) · [Versioned brand identity](docs/brand/remetheon.brand.json)
+
+---
 
 <!-- research-workbench:start -->
 ## Research workbench

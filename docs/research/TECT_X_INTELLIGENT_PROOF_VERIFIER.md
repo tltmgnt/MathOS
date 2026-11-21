@@ -1,5 +1,7 @@
 # TECT-X — Topological Gap Analysis intelligent proof-verifier prototype
 
+**Public-facing product identity:** **Remetheon TGA**, part of [REMETHEON — Mathematical Memory Intelligence](../brand/REMETHEON.md). TECT-X and MathOS remain the technical identifiers. This branding does not change the verifier's proof scope or scientific status.
+
 **Research status:** `BLOCKED_NOT_MATHEMATICALLY_VERIFIED` for all modeled cases.  
 **Scope:** Deterministic structural, evidence, and scope diagnostics. **Not** a proof assistant, automatic discovery model, independent theorem reviewer, or mathematical certification system.
 
