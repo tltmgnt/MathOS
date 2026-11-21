@@ -215,7 +215,7 @@ def analyze_manifest(raw: Any) -> dict[str, Any]:
         topology = _topology(n, edges)
         if topology["h0_components"] != item["expected_h0"] or topology["h1_cycle_dimension"] != item["expected_h1"]:
             raise ValueError(f"{name}: claimed H0/H1 contradict the finite incidence complex")
-        results.append({"id": name, "edges": edges, **topology})
+        results.append({"id": name, **topology, "edge_pairs": edges})
     return {
         "schema_version": "1.0",
         "validated_scope": SCOPE,
@@ -229,7 +229,7 @@ def analyze_manifest(raw: Any) -> dict[str, Any]:
 
 def _emit_graph(case: dict[str, Any]) -> tuple[str, list[str]]:
     name = case["id"]
-    m, n = case["edges"], case["vertices"]
+    m, n = case["edge_pairs"], case["vertices"]
     evars = [f"e{i}" for i in range(len(m))]
     basis = case["cycle_basis_masks"]
     bvars = [f"b{i}" for i in range(len(basis))]
