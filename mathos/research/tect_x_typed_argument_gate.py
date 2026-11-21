@@ -38,6 +38,7 @@ THEOREM_RE = re.compile(r"MathOS\.TECTX\.(?:Arguments|Contracts)\.[a-z][A-Za-z0-
 VERSION = re.compile(r"^Lean \(version ([^, )]+)", re.MULTILINE)
 SOURCE_KEYS = {
     "id", "source", "contract", "candidate_theorem", "contract_theorem",
+    "reference_proposition",
     "informal_claim", "explicit_hypotheses", "formal_scope", "semantic_gap",
     "review_status", "conjecture_implication"
 }
@@ -114,6 +115,12 @@ def validate_manifest(raw: Any, root: Path = ROOT) -> dict[str, Any]:
         paths.update((src, contract))
         theorem = bundle["candidate_theorem"]
         contract_theorem = bundle["contract_theorem"]
+        reference_proposition = bundle["reference_proposition"]
+        if (not isinstance(reference_proposition, str) or
+                not THEOREM_RE.fullmatch(reference_proposition) or
+                not reference_proposition.startswith("MathOS.TECTX.Contracts.") or
+                reference_proposition in theorems):
+            raise ValueError("invalid or duplicate independent Lean reference proposition")
         if (not isinstance(theorem, str) or not THEOREM_RE.fullmatch(theorem) or
                 not theorem.startswith("MathOS.TECTX.Arguments.") or
                 not isinstance(contract_theorem, str) or
@@ -121,7 +128,7 @@ def validate_manifest(raw: Any, root: Path = ROOT) -> dict[str, Any]:
                 not contract_theorem.startswith("MathOS.TECTX.Contracts.") or
                 theorem in theorems or contract_theorem in theorems):
             raise ValueError("invalid or duplicate Lean theorem name")
-        theorems.update((theorem, contract_theorem))
+        theorems.update((theorem, contract_theorem, reference_proposition))
         for field in ("informal_claim", "formal_scope", "semantic_gap"):
             _required_text(bundle[field], field)
         hypotheses = bundle["explicit_hypotheses"]
@@ -144,28 +151,29 @@ def validate_manifest(raw: Any, root: Path = ROOT) -> dict[str, Any]:
             source_text, contract_text = sbytes.decode("utf-8"), cbytes.decode("utf-8")
         except UnicodeDecodeError as exc:
             raise ValueError("formal files must use UTF-8") from exc
-        if (source_text.splitlines()[0].strip() != "import Init" or
-                contract_text.splitlines()[0].strip() != "import " + PurePosixPath(src).stem):
-            raise ValueError("proof and contract must have pinned, distinct imports")
-        # Prevent unlisted extra imports: the trusted environment is core Init
-        # plus exactly the candidate module. This is defense-in-depth, NOT a
-        # security sandbox or a general Lean parser.
-        if len(re.findall(r"(?m)^\s*import\s+", source_text)) != 1:
-            raise ValueError("proof source must import Init only")
-        if len(re.findall(r"(?m)^\s*import\s+", contract_text)) != 1:
-            raise ValueError("proof contract must import candidate module only")
+        if (not source_text.splitlines() or not contract_text.splitlines() or
+                source_text.splitlines()[0].strip() != "import Init" or
+                contract_text.splitlines()[0].strip() != "import Init"):
+            raise ValueError("proof and reference type sources must import Init independently")
+        # Only the checker-generated verification module imports both files.
+        # This prevents the reference specification from depending on the
+        # submitted candidate theorem or faking a 'reference' theorem.
+        if (len(re.findall(r"(?m)^\s*import\s+", source_text)) != 1 or
+                len(re.findall(r"(?m)^\s*import\s+", contract_text)) != 1):
+            raise ValueError("proof and reference sources must import Init only")
         if FORBIDDEN.search(source_text) or FORBIDDEN.search(contract_text):
             raise ValueError("disallowed proof bypass or metaprogram token in reviewed source")
         if "set_option warningAsError true" not in source_text or "set_option warningAsError true" not in contract_text:
-            raise ValueError("warningAsError required for the proof and contract")
-        for name in (theorem, contract_theorem):
-            if contract_text.count("#print axioms " + name) != 1:
-                raise ValueError(f"exactly one transitive axiom report is required for {name}")
-        if contract_text.count("#print axioms ") != 2:
-            raise ValueError("proof contract must audit exactly the declared pair of theorem names")
+            raise ValueError("warningAsError required for the proof and reference")
+        if "#print axioms " in contract_text or theorem in contract_text:
+            raise ValueError("independent reference must not import, audit or mention candidate theorem")
+        reference_short = reference_proposition.rsplit(".", 1)[1]
+        if not re.search(r"(?m)^\s*def\s+" + re.escape(reference_short) + r"\s*:\s*Prop\b", contract_text):
+            raise ValueError("independent Lean reference proposition definition is missing")
         results.append({
             "id": bundle_id, "source": src, "contract": contract,
             "candidate_theorem": theorem, "contract_theorem": contract_theorem,
+            "reference_proposition": reference_proposition,
             "informal_claim": bundle["informal_claim"],
             "explicit_hypotheses": hypotheses,
             "formal_scope": bundle["formal_scope"],
@@ -219,7 +227,8 @@ def _axiom_report(output: str, theorem: str) -> list[str]:
 
 def _replay_one(source: bytes, contract: bytes, *, source_module: str,
                 candidate_theorem: str, contract_theorem: str,
-                lean: str) -> dict[str, Any]:
+                reference_proposition: str, lean: str) -> dict[str, Any]:
+    """The runner, not the reference author, binds the proof to the goal."""
     with tempfile.TemporaryDirectory(prefix="mathos-tectx-typed-proof-") as temp:
         root = Path(temp)
         source_path = root / (source_module + ".lean")
@@ -228,29 +237,57 @@ def _replay_one(source: bytes, contract: bytes, *, source_module: str,
         contract_path.write_bytes(contract)
         env = os.environ.copy()
         env["LEAN_PATH"] = str(root)
-        compiler = subprocess.run(
-            [lean, "-o", str(root / (source_module + ".olean")), str(source_path)],
-            cwd=root, env=env, capture_output=True, text=True,
-            timeout=120, check=False,
+
+        # Both modules import only Lean Init. The reference does not import
+        # the candidate and cannot borrow its definitions for its statement.
+        for path in (source_path, contract_path):
+            compiled = subprocess.run(
+                [lean, "-o", str(path.with_suffix(".olean")), str(path)],
+                cwd=root, env=env, capture_output=True, text=True,
+                timeout=120, check=False,
+            )
+            if compiled.returncode or "warning:" in compiled.stdout + compiled.stderr:
+                raise ValueError("Lean rejected formal module: " +
+                                 (compiled.stdout + compiled.stderr)[-2000:])
+            if not path.with_suffix(".olean").is_file():
+                raise ValueError("Lean produced no compiled formal module")
+
+        # Every theorem binder here is generated from a validated, bounded
+        # identifier. User-controlled Lean source cannot replace the binding
+        # or silently change the expected goal in this checking module.
+        check_source = (
+            "import " + source_module + "\n"
+            "import " + source_module + "Contract\n"
+            "set_option warningAsError true\n"
+            "namespace MathOS.TECTX.Contracts\n"
+            "theorem " + contract_theorem.rsplit(".", 1)[1] + " : "
+            + reference_proposition + " :=\n"
+            "  " + candidate_theorem + "\n"
+            "end MathOS.TECTX.Contracts\n\n"
+            "#print axioms " + candidate_theorem + "\n"
+            "#print axioms " + contract_theorem + "\n"
         )
-        if compiler.returncode or "warning:" in compiler.stdout + compiler.stderr:
-            raise ValueError("Lean rejected proof source: " + (compiler.stdout + compiler.stderr)[-2000:])
-        contract_check = subprocess.run(
-            [lean, str(contract_path)], cwd=root, env=env,
+        check_path = root / "TECTXGeneratedCheck.lean"
+        check_path.write_text(check_source, encoding="utf-8")
+        checked = subprocess.run(
+            [lean, str(check_path)], cwd=root, env=env,
             capture_output=True, text=True, timeout=120, check=False,
         )
-        if contract_check.returncode or "warning:" in contract_check.stdout + contract_check.stderr:
-            raise ValueError("independent formal goal contract failed: " +
-                             (contract_check.stdout + contract_check.stderr)[-2000:])
+        if checked.returncode or "warning:" in checked.stdout + checked.stderr:
+            raise ValueError("independent formal goal type mismatch or proof failure: " +
+                             (checked.stdout + checked.stderr)[-2000:])
         axioms = {
-            candidate_theorem: _axiom_report(contract_check.stdout, candidate_theorem),
-            contract_theorem: _axiom_report(contract_check.stdout, contract_theorem),
+            candidate_theorem: _axiom_report(checked.stdout, candidate_theorem),
+            contract_theorem: _axiom_report(checked.stdout, contract_theorem),
         }
-        if source_path.read_bytes() != source or contract_path.read_bytes() != contract:
-            raise ValueError("formal files changed during kernel replay")
-        if not (root / (source_module + ".olean")).is_file():
-            raise ValueError("proof module kernel compilation produced no .olean")
-        return {"transitive_axioms": axioms, "contract_kernel_checked": True}
+        if (source_path.read_bytes() != source or contract_path.read_bytes() != contract or
+                check_path.read_text(encoding="utf-8") != check_source):
+            raise ValueError("formal input or generated goal binding changed during replay")
+        return {
+            "transitive_axioms": axioms,
+            "contract_kernel_checked": True,
+            "generated_goal_binding_sha256": _sha(check_source.encode("utf-8")),
+        }
 
 
 def replay(raw: Any, *, root: Path = ROOT, check_lean: bool = False,
@@ -275,7 +312,8 @@ def replay(raw: Any, *, root: Path = ROOT, check_lean: bool = False,
             checked = _replay_one(
                 sb, cb, source_module=Path(bundle["source"]).stem,
                 candidate_theorem=bundle["candidate_theorem"],
-                contract_theorem=bundle["contract_theorem"], lean=lean,
+                contract_theorem=bundle["contract_theorem"],
+                reference_proposition=bundle["reference_proposition"], lean=lean,
             )
             if (_sha((root / bundle["source"]).read_bytes()) != bundle["source_sha256"] or
                     _sha((root / bundle["contract"]).read_bytes()) != bundle["contract_sha256"]):
