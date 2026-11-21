@@ -1,4 +1,5 @@
 import itertools
+from terrain import investigate_omissions
 import unittest
 
 from terrain import EXAMPLE, lowest_pass
@@ -50,3 +51,39 @@ class TerrainTests(unittest.TestCase):
         for grid in ((), ((1,), (1, 2)), ((True,),), ((None,),)):
             with self.assertRaises(ValueError):
                 lowest_pass(grid, (0, 0), (0, 0))
+
+
+class OmissionStudyTests(unittest.TestCase):
+    def test_all_ranked_omissions_against_flood_oracle(self):
+        for values in itertools.product((None, -1, 2), repeat=4):
+            grid = [[0, values[0], values[1]], [values[2], values[3], 1]]
+            start, end = (0, 0), (1, 2)
+            baseline = flood_oracle(grid, start, end)
+            expected = {}
+            if baseline is not None:
+                for r, c in ((0, 1), (0, 2), (1, 0), (1, 1)):
+                    if grid[r][c] is not None:
+                        masked = [row.copy() for row in grid]
+                        masked[r][c] = None
+                        expected[(r, c)] = flood_oracle(masked, start, end)
+            before = [row.copy() for row in grid]
+            result = investigate_omissions(grid, start, end)
+            self.assertEqual(grid, before)
+            self.assertEqual(result["baseline"], baseline)
+            ordered = sorted(expected, key=lambda cell: (
+                expected[cell] is None, expected[cell] or 0), reverse=True)
+            self.assertEqual([tuple(item["cell"]) for item in result["ranking"]], ordered)
+            for item in result["ranking"]:
+                level = expected[tuple(item["cell"])]
+                self.assertEqual(item["threshold_after"], level)
+                self.assertEqual(item["increase"], None if level is None else level - baseline)
+            top = [list(cell) for cell in ordered if expected[cell] == expected[ordered[0]]
+                   and expected[cell] != baseline]
+            self.assertEqual(result["review_cells"], top)
+
+    def test_diagonal_control(self):
+        grid = [[1, None], [None, 2]]
+        self.assertIsNone(investigate_omissions(grid, (0, 0), (1, 1))["baseline"])
+        result = investigate_omissions(grid, (0, 0), (1, 1), diagonals=True)
+        self.assertEqual(result["baseline"], 2)
+        self.assertEqual(result["ranking"], [])

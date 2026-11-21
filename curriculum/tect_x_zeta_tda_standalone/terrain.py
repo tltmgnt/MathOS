@@ -45,8 +45,48 @@ def lowest_pass(grid, start, end, *, diagonals=False):
     return None
 
 
+
+def investigate_omissions(grid, start, end, *, diagonals=False):
+    """Rank all single observed-cell omissions, holding endpoints and adjacency fixed."""
+    baseline = lowest_pass(grid, start, end, diagonals=diagonals)
+    report = {"baseline": baseline, "ranking": [], "review_cells": []}
+    if baseline is None:
+        report["review_question"] = "Which missing observations could connect the endpoints?"
+        return report
+
+    trial = [list(row) for row in grid]
+    for r, row in enumerate(grid):
+        for c, value in enumerate(row):
+            if value is None or (r, c) in (start, end):
+                continue
+            trial[r][c] = None
+            level = lowest_pass(trial, start, end, diagonals=diagonals)
+            trial[r][c] = value
+            report["ranking"].append({
+                "cell": [r, c], "value": value, "threshold_after": level,
+                "increase": None if level is None else level - baseline,
+            })
+
+    def severity(result):
+        return (result["threshold_after"] is None, result["increase"] or 0)
+
+    ranked = report["ranking"]
+    ranked.sort(key=severity, reverse=True)
+    if ranked and severity(ranked[0]) > (False, 0):
+        report["review_cells"] = [item["cell"] for item in ranked
+                                  if severity(item) == severity(ranked[0])]
+        report["review_question"] = (
+            "What independent measurement supports the listed cells, and are their "
+            "assumed neighbour connections justified?"
+        )
+    else:
+        report["review_question"] = "No single omission changed the threshold. Which joint omission is plausible?"
+    return report
+
+
 if __name__ == "__main__":
     level = lowest_pass(EXAMPLE, (1, 0), (1, 4))
     print(json.dumps({"scope": "synthetic two-minimum grid", "heights_m": EXAMPLE,
                       "endpoints_row_col": [[1, 0], [1, 4]], "connectivity": 4,
+                      "omission_study_m": investigate_omissions(EXAMPLE, (1, 0), (1, 4)),
                       "merge_level_m": level, "younger_persistence_m": level - EXAMPLE[1][4]}))
