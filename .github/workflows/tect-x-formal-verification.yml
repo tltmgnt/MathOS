@@ -10,6 +10,9 @@ on:
       - 'docs/research/TECT_X_PROOF_VERIFIER_CASES.v1.json'
       - 'docs/research/TECT_X_THEMATIC_REGISTER.v1.json'
       - 'tests/test_tect_x_formal_certificates.py'
+      - 'mathos/research/tect_x_general_graph_certificates.py'
+      - 'docs/research/TECT_X_FINITE_GRAPH_CERTIFICATES.v1.json'
+      - 'tests/test_tect_x_general_graph_certificates.py'
       - '.github/workflows/tect-x-formal-verification.yml'
   push:
     branches: [main]
@@ -21,6 +24,9 @@ on:
       - 'docs/research/TECT_X_PROOF_VERIFIER_CASES.v1.json'
       - 'docs/research/TECT_X_THEMATIC_REGISTER.v1.json'
       - 'tests/test_tect_x_formal_certificates.py'
+      - 'mathos/research/tect_x_general_graph_certificates.py'
+      - 'docs/research/TECT_X_FINITE_GRAPH_CERTIFICATES.v1.json'
+      - 'tests/test_tect_x_general_graph_certificates.py'
       - '.github/workflows/tect-x-formal-verification.yml'
   workflow_dispatch:
 
@@ -43,14 +49,21 @@ jobs:
           python -m mathos.research.tect_x_formal_certificates \
             --report artifacts/tect-x/formal/static-audit.json
           python -m unittest discover -s tests -p 'test_tect_x_formal_certificates.py' -v
+      - name: Independently enumerate finite graph F2 cycles (not kernel check)
+        run: |
+          python -m mathos.research.tect_x_general_graph_certificates \
+            --report artifacts/tect-x/formal/graphs-source-audit.json
+          python -m unittest discover -s tests -p 'test_tect_x_general_graph_certificates.py' -v
       - name: Python syntax checks
         run: |
-          python -m py_compile mathos/research/tect_x_formal_certificates.py tests/test_tect_x_formal_certificates.py
+          python -m py_compile mathos/research/tect_x_formal_certificates.py tests/test_tect_x_formal_certificates.py mathos/research/tect_x_general_graph_certificates.py tests/test_tect_x_general_graph_certificates.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tect-x-formal-static-audit-not-kernel-check
-          path: artifacts/tect-x/formal/static-audit.json
+          path: |
+            artifacts/tect-x/formal/static-audit.json
+            artifacts/tect-x/formal/graphs-source-audit.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -81,6 +94,12 @@ jobs:
           python -m mathos.research.tect_x_intelligent_proof_verifier \
             --verify-lean-certificate --lean "$HOME/.elan/bin/lean" \
             --report artifacts/tect-x/formal/tga-with-lean.json
+      - name: Independently kernel-check all bounded graph cycle spaces and basis injectivity
+        run: |
+          python -m mathos.research.tect_x_general_graph_certificates \
+            --check-lean --lean "$HOME/.elan/bin/lean" \
+            --artifact-dir artifacts/tect-x/formal/general-f2 \
+            --report artifacts/tect-x/formal/general-f2/report.json
       - name: Retain kernel replay and finite-scope proof module only
         uses: actions/upload-artifact@v4
         if: always()

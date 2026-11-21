@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "scope": "BOUNDED_FINITE_GRAPH_1_SKELETON_OVER_F2",
+  "proof_status": "KERNEL_CHECK_REQUIRED",
+  "mathematical_theorem_certification": false,
+  "graph_assumptions": [
+    "Finite undirected simple graphs with vertices 0..n-1 and explicit unordered edges",
+    "C1 and C0 use F2 edge/vertex indicator chains; boundary is XOR of incident selected edges",
+    "Graphs are 1-dimensional CW complexes with no 2-cells; H1 is ker(boundary1)",
+    "Edges, vertex labels, and claimed Betti numbers are inputs whose interpretation must be independently reviewed"
+  ],
+  "formal_check": "For each graph, kernel is exactly the F2 span of a Gaussian-elimination basis, and that basis has unique coefficients. Explicit Lean theorems quantify every edge and coefficient Boolean.",
+  "cases": [
+    {
+      "id": "path4",
+      "vertices": 4,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "expected_h0": 1,
+      "expected_h1": 0
+    },
+    {
+      "id": "square4",
+      "vertices": 4,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "expected_h0": 1,
+      "expected_h1": 1
+    },
+    {
+      "id": "diamond4",
+      "vertices": 4,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "expected_h0": 1,
+      "expected_h1": 2
+    },
+    {
+      "id": "disconnected6",
+      "vertices": 6,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "expected_h0": 3,
+      "expected_h1": 1
+    },
+    {
+      "id": "k4",
+      "vertices": 4,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "expected_h0": 1,
+      "expected_h1": 3
+    }
+  ],
+  "supported_scope": "1..7 vertices, 0..8 edges, at most 4 independent F2 cycles, no loops or parallel edges. Computational limits prevent claim of a general graph theorem.",
+  "assumption_policy": "No axioms, sorry, arbitrary user Lean code or native_decide. Lean kernel runs on generated closed finite facts only.",
+  "no_clay_proof": true,
+  "closed_conjecture_obligations": []
+}
