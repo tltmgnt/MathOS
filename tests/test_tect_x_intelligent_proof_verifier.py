@@ -144,6 +144,42 @@ class TestTECTXIntelligentProofVerifier(unittest.TestCase):
         data["cases"] = data["cases"][:2]
         self.blocked(data, "expected exactly the three anchored research cases")
 
+    def test_canonical_quantifier_cannot_be_downgraded(self):
+        data = self.mutation()
+        data["cases"][0]["target_scope"] = "FINITE"
+        self.blocked(data, "canonical target or quantified scope has changed")
+
+    def test_core_proof_obligation_cannot_be_silently_removed(self):
+        data = self.mutation()
+        data["cases"][0]["nodes"] = [
+            n for n in data["cases"][0]["nodes"] if n["id"] != "RH.zero_identity"
+        ]
+        self.blocked(data, "a required scientific blocker was removed")
+
+    def test_combinatorial_explosion_is_bounded(self):
+        data = self.mutation()
+        case = data["cases"][0]
+        shared = []
+        for i in range(4):
+            nid = f"shared_evidence_{i}"
+            shared.append(nid)
+            case["nodes"].append({
+                "id": nid,
+                "kind": "BOUNDED_EVIDENCE",
+                "scope": "FINITE",
+                "evidence_ids": ["E01"],
+                "next_action": "Do not infer an unbounded proof",
+            })
+        for i in range(7):
+            case["nodes"].append({
+                "id": f"BR{i}",
+                "kind": "DERIVED",
+                "scope": "UNIVERSAL",
+                "routes": [[leaf] for leaf in shared],
+            })
+        case["nodes"][0]["routes"] = [[f"BR{i}" for i in range(7)]]
+        self.blocked(data, "too many modeled proof-route combinations")
+
     def test_cli_json_and_fail_closed_require_proof(self):
         args = [sys.executable, "-m", "mathos.research.tect_x_intelligent_proof_verifier"]
         checked = subprocess.run(args + ["--json"], cwd=ROOT, capture_output=True, text=True, check=False)
