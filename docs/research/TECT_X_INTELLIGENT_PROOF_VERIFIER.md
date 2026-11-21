@@ -105,17 +105,45 @@ Run `python -m mathos.research.tect_x_formal_certificates --check-lean`
 only when the pinned Lean toolchain is available in a disposable environment.
 Static runs do not report kernel verification.
 
+## Bounded general graph certificates
+
+Beyond the four manually scoped finite Lean lemmas, the
+[general finite graph module](../../mathos/research/tect_x_general_graph_certificates.py)
+now checks author-declared simple graph incidence data. Two Python
+connectivity methods and exhaustive F2 cycle enumeration cross-check
+Gaussian-elimination results. **Lean then independently checks** that
+every possible F2 edge chain has boundary zero exactly when it lies in
+the proposed cycle-basis span, and that the basis is linearly independent.
+
+The [five anchored cases](TECT_X_FINITE_GRAPH_CERTIFICATES.v1.json) span
+cycle dimensions 0, 1, 2 and 3, including disconnected graphs. They
+generate ten exact finite Lean theorems rather than simply trusting a
+Python-computed Betti number.
+
+```sh
+python -m mathos.research.tect_x_intelligent_proof_verifier \
+  --verify-general-graph-cycles --lean lean \
+  --report artifacts/tect-x/validated-finite-graphs.json
+```
+
+The Lean proof remains scoped to each **bounded input graph**, not a
+general all-graphs correctness theorem for TGA, nor a connection between
+TGA's authored dependency graph and the topology of zeta zero sets.
+
 ## Security and mathematical integrity
 
 This is a **fail-closed metadata analyzer** with a bounded finite input model.
-It does not ingest or execute untrusted proofs, call an LLM, invoke Lean/Coq, or
-perform general mathematical semantic entailment. All input evidence remains
+By default it does not execute untrusted proofs, call an LLM, or
+perform general mathematical semantic entailment. Optional pinned-Lean
+flags invoke a kernel checker only for the repository's validated,
+generated finite-topology propositions. All input evidence remains
 source-authored; adding an evidence link never establishes its proposition.
 Reviewers must independently check every implication, the accuracy of mathematical
 definitions and quantifiers, and the legitimacy of imported theorems.
 
-The next credible upgrade is a **separate formally checked certificate adapter**
-(Lean/Coq proof terms or similarly trusted checked artifacts) with pinned environments,
-explicit axioms, scope/assumption matching and independent review. That would need an
-actual checker invocation and artifacts. Merely declaring a certificate path or a
-`verified=true` flag is prohibited by this prototype's schema.
+The finite Lean proof-certificate adapters now perform actual kernel replay,
+with pinned versions, explicit model assumptions and axiom reports. The still-open
+next milestone is a **general typed mathematical assertion-to-proof-edge adapter**
+with a formal correspondence theorem to the Python analysis, explicit formal
+axiom/import trust policy, and independent expert assessment. Merely declaring
+a certificate path or `verified=true` can never replace verification.
