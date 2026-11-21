@@ -106,6 +106,16 @@ jobs:
           python -m mathos.research.tect_x_intelligent_proof_verifier \
             --verify-general-graph-cycles --lean "$HOME/.elan/bin/lean" \
             --report artifacts/tect-x/formal/tga-with-general-graphs.json
+      - name: Negative kernel control rejects a false F2 cycle assertion
+        shell: bash
+        run: |
+          cp artifacts/tect-x/formal/general-f2/TECTXGeneralFiniteGraph.lean /tmp/TECTXFalseClaim.lean
+          printf '\\ntheorem tectx_false_cycle_claim : Bool.xor true true = true := by decide\\n' >> /tmp/TECTXFalseClaim.lean
+          if "$HOME/.elan/bin/lean" /tmp/TECTXFalseClaim.lean >/tmp/tectx-negative-proof.log 2>&1; then
+            echo "::error::Lean accepted a deliberately false Boolean cycle proposition"
+            exit 1
+          fi
+          echo "Lean rejected a deliberately false F2 parity assertion (expected)."
       - name: Retain kernel replay and finite-scope proof module only
         uses: actions/upload-artifact@v4
         if: always()
