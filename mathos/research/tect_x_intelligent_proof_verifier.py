@@ -25,6 +25,14 @@ CASES_PATH = "docs/research/TECT_X_PROOF_VERIFIER_CASES.v1.json"
 THEMES_PATH = "docs/research/TECT_X_THEMATIC_REGISTER.v1.json"
 OBLIGATIONS_PATH = "docs/proof-analysis/OBLIGATIONS.v1.json"
 REQUIRED_CASES = {"RH-TGA", "SELMER-TGA", "ZETA-FINITE"}
+# Prevent a valid-looking case ID being silently replaced with a trivial
+# or differently quantified target. These are modeling invariants, not proofs.
+CASE_INVARIANTS = {
+    "RH-TGA": ("RH.target", "UNIVERSAL", {"RH.operator", "RH.zero_identity", "RH.global_bridge"}),
+    "SELMER-TGA": ("SEL.target", "INFINITE_FAMILY", {"SEL.squareclasses", "SEL.local_images", "SEL.mean16", "SEL.infinitude"}),
+    "ZETA-FINITE": ("ZETA.target", "FINITE", {"ZETA.features", "ZETA.rips_sample", "ZETA.controls"}),
+}
+MAX_MODELED_COMBINATIONS = 8192
 KINDS = {"DERIVED", "OPEN_OBLIGATION", "BOUNDED_EVIDENCE"}
 SCOPES = {"FINITE", "CONDITIONAL", "INFINITE_FAMILY", "UNIVERSAL"}
 NODE_KEYS = {"id", "kind", "scope", "routes", "evidence_ids", "mapped_claim", "next_action"}
@@ -97,8 +105,45 @@ def _is_scope_gap(leaf_scope: str, target_scope: str) -> bool:
     return rank[leaf_scope] < rank[target_scope]
 
 
+def _route_combination_budget(nodes: dict[str, dict], target: str) -> None:
+    """Upper-bound authored OR/AND Cartesian products to avoid explosive audits.
+
+    The estimate deliberately overcounts overlap; it protects the generic
+    analyzer from adversarial models with combinatorially many proof routes.
+    """
+    cache: dict[str, int] = {}
+    active: set[str] = set()
+
+    def count(key: str) -> int:
+        if key in cache:
+            return cache[key]
+        if key in active:
+            raise ValueError("Dependency cycle: " + key)
+        active.add(key)
+        node = nodes[key]
+        if node["kind"] != "DERIVED":
+            total = 1
+        else:
+            total = 0
+            for route in node["routes"]:
+                choices = 1
+                for dep in route:
+                    choices *= count(dep)
+                    if choices > MAX_MODELED_COMBINATIONS:
+                        raise ValueError("too many modeled proof-route combinations")
+                total += choices
+                if total > MAX_MODELED_COMBINATIONS:
+                    raise ValueError("too many modeled proof-route combinations")
+        active.remove(key)
+        cache[key] = total
+        return total
+
+    count(target)
+
+
 def _analyze_case(case: dict[str, Any]) -> dict[str, Any]:
     nodes = {node["id"]: node for node in case["nodes"]}
+    _route_combination_budget(nodes, case["target"])
     graph = {
         key: Claim(
             label=key,
@@ -249,6 +294,14 @@ def verify_cases(payload: Any, root: Path = ROOT) -> dict[str, Any]:
             issues.append(f"{cid}: duplicate or invalid node IDs")
             continue
         node_map = {n["id"]: n for n in nodes}
+        requirements = CASE_INVARIANTS.get(cid)
+        if requirements:
+            required_target, required_scope, required_nodes = requirements
+            if (case.get("target") != required_target or
+                    case.get("target_scope") != required_scope):
+                issues.append(f"{cid}: canonical target or quantified scope has changed")
+            if not required_nodes.issubset(node_map):
+                issues.append(f"{cid}: a required scientific blocker was removed")
         if case.get("target") not in node_map or node_map[case["target"]].get("kind") != "DERIVED":
             issues.append(f"{cid}: target must be a known DERIVED node")
         elif node_map[case["target"]].get("scope") != case["target_scope"]:
