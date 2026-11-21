@@ -217,6 +217,48 @@ class TestTECTXIntelligentProofVerifier(unittest.TestCase):
         self.assertFalse(report["ok"])
         self.assertFalse(report["finite_f2_formal_certificate"]["kernel_checked"])
 
+    def test_tga_independent_general_graph_certificate_not_promoted(self):
+        from mathos.research.tect_x_intelligent_proof_verifier import main
+        mocked = {
+            "ok": True,
+            "kernel_checked": True,
+            "formal_status": "LEAN_KERNEL_CHECKED_EXACT_FINITE_GRAPH_CYCLE_SPACES",
+            "formal_theorem_count": 10,
+            "total_graphs": 5,
+            "validated_scope": "BOUNDED_FINITE_GRAPH_1_SKELETON_OVER_F2",
+        }
+        out = StringIO()
+        with patch("mathos.research.tect_x_general_graph_certificates.replay",
+                   return_value=mocked), redirect_stdout(out):
+            code = main(["--verify-general-graph-cycles", "--json"])
+        self.assertEqual(code, 0)
+        payload = json.loads(out.getvalue())
+        self.assertTrue(payload["general_graph_cycle_certificates"]["kernel_checked"])
+        self.assertEqual(payload["general_graph_cycle_certificates"]["formal_theorem_count"], 10)
+        self.assertFalse(payload["scientific_certification"])
+        self.assertEqual(payload["summary"]["mathematical_theorems_certified"], 0)
+        self.assertTrue(all(c["conclusion"] == "BLOCKED_NOT_MATHEMATICALLY_VERIFIED"
+                            for c in payload["cases"]))
+
+    def test_tga_general_graph_certificate_fails_closed(self):
+        from mathos.research.tect_x_intelligent_proof_verifier import main
+        mocked = {
+            "ok": False,
+            "kernel_checked": False,
+            "formal_status": "KERNEL_CHECK_FAILED",
+            "formal_theorem_count": 0,
+            "total_graphs": 5,
+            "validated_scope": "BOUNDED_FINITE_GRAPH_1_SKELETON_OVER_F2",
+        }
+        out = StringIO()
+        with patch("mathos.research.tect_x_general_graph_certificates.replay",
+                   return_value=mocked), redirect_stdout(out):
+            code = main(["--verify-general-graph-cycles", "--json"])
+        self.assertEqual(code, 1)
+        payload = json.loads(out.getvalue())
+        self.assertFalse(payload["ok"])
+        self.assertFalse(payload["general_graph_cycle_certificates"]["kernel_checked"])
+
     def test_cli_json_and_fail_closed_require_proof(self):
         args = [sys.executable, "-m", "mathos.research.tect_x_intelligent_proof_verifier"]
         checked = subprocess.run(args + ["--json"], cwd=ROOT, capture_output=True, text=True, check=False)
