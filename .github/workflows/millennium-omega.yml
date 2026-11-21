@@ -1,0 +1,85 @@
+name: Millennium Omega research assurance
+
+on:
+  push:
+    paths:
+      - 'mathos/millennium_omega/**'
+      - 'formal/MillenniumOmega.lean'
+      - 'formal/coq/MillenniumOmega.v'
+      - 'scripts/millennium_omega_*.py'
+      - 'tests/test_millennium_omega.py'
+      - 'docs/millennium-omega/**'
+      - 'docs/research/HYPOTHESES.v1.json'
+      - 'docs/research/CLAY_FULL_TARGETS.v1.json'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - '.github/workflows/millennium-omega.yml'
+  pull_request:
+    paths:
+      - 'mathos/millennium_omega/**'
+      - 'formal/MillenniumOmega.lean'
+      - 'formal/coq/MillenniumOmega.v'
+      - 'scripts/millennium_omega_*.py'
+      - 'tests/test_millennium_omega.py'
+      - 'docs/millennium-omega/**'
+      - 'docs/research/HYPOTHESES.v1.json'
+      - 'docs/research/CLAY_FULL_TARGETS.v1.json'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - '.github/workflows/millennium-omega.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-and-tect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run seven-engine adversarial tests
+        run: python -m unittest discover -s tests -p 'test_millennium_omega.py' -v
+      - name: Verify source policy and generate evidence
+        run: |
+          python scripts/millennium_omega_audit.py --output artifacts/millennium-omega/formal_source_audit.json
+          python -m mathos.millennium_omega --output artifacts/millennium-omega/framework.json
+          python scripts/millennium_omega_benchmark.py --runs 2 --output artifacts/millennium-omega/benchmark.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: millennium-omega-bounded-research
+          path: artifacts/millennium-omega/
+          if-no-files-found: ignore
+
+  lean-policy-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install repository's Lean 4.14.0 toolchain
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel check bounded TECT policy lemmas
+        run: lean formal/MillenniumOmega.lean
+
+  coq-policy-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Kernel check bounded TECT policy lemmas
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/formal/coq/MillenniumOmega.v,dst=/tmp/MillenniumOmega.v,readonly" \
+            --workdir /tmp \
+            coqorg/coq:8.20.1 opam exec -- coqc -q MillenniumOmega.v
