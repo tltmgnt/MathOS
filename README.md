@@ -364,6 +364,21 @@ detects scope mismatches, ranks unresolved proof steps and computes H0/H1 of the
 It is a **rule-based structural audit**, not a semantic theorem prover or proof
 of RH, BSD, or the open Selmer-infinitude assertion.
 
+## TECT-X: Lean kernel proof certificates for finite graph topology
+
+The [TECT-X formal verification layer](docs/research/TECT_X_FORMAL_VERIFICATION.md)
+provides actual Lean 4.14.0 checking of four fixed finite chain deductions
+and five additional input-driven finite graph cycle-space cases. The latter
+produce ten universally quantified Lean propositions about exact mod-2
+incidence kernels and linearly independent cycle bases, with zero-axiom
+checks and auditable generated source artifacts.
+
+Run `python -m mathos.research.tect_x_general_graph_certificates --check-lean`
+with pinned Lean installed, or integrate with
+`python -m mathos.research.tect_x_intelligent_proof_verifier --verify-general-graph-cycles`.
+The checks **do not** prove arbitrary mathematical statements, RH, BSD or
+Selmer infinitude; evidence-scope and open-obligation blockers remain.
+
 ## TECT-X: typed mathematical argument verification and faithfulness gaps
 
 The [typed Lean proof-contract gate](docs/research/TECT_X_TYPED_ARGUMENT_VERIFICATION.md)

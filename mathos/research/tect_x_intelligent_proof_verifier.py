@@ -372,6 +372,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--verify-typed-arguments", action="store_true",
                         help="check typed proof terms against separately authored Lean reference goals")
     parser.add_argument("--lean", default="lean", help="Lean 4.14.0 executable for finite certificate replay")
+    parser.add_argument("--verify-general-graph-cycles", action="store_true",
+                        help="kernel-check finite F2 graph cycle spaces; does not certify conjectures")
     args = parser.parse_args(argv)
 
     try:
@@ -397,6 +399,37 @@ def main(argv: list[str] | None = None) -> int:
             result["issues"].append("pinned Lean finite-F2 certificate replay failed")
         # Do not change mathematical_theorems_certified, the case verdicts,
         # or scientific_certification under any circumstance.
+    if args.verify_general_graph_cycles:
+        from mathos.research.tect_x_general_graph_certificates import (
+            MANIFEST as GRAPH_MANIFEST, replay as general_replay
+        )
+        try:
+            graph_manifest = json.loads(GRAPH_MANIFEST.read_text(encoding="utf-8"))
+            graph_output_dir = ((args.report.parent if args.report is not None
+                                else Path("artifacts/tect-x")) / "general-f2")
+            graph_cert = general_replay(graph_manifest, lean=args.lean,
+                                        output_dir=graph_output_dir, run_lean=True)
+            result["general_graph_cycle_certificates"] = {
+                "formal_status": graph_cert["formal_status"],
+                "kernel_checked": graph_cert["kernel_checked"],
+                "formal_theorem_count": graph_cert["formal_theorem_count"],
+                "finite_graph_cases": graph_cert["total_graphs"],
+                "verified_scope": graph_cert["validated_scope"],
+                "closed_conjecture_obligations": [],
+            }
+            if not graph_cert["ok"] or not graph_cert["kernel_checked"]:
+                result["ok"] = False
+                result["issues"].append("pinned Lean general graph cycle-space certificate check failed")
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            result["ok"] = False
+            result["issues"].append(f"general finite graph proof checker failed: {exc}")
+            result["general_graph_cycle_certificates"] = {
+                "formal_status": "INVALID_OR_UNAVAILABLE",
+                "kernel_checked": False,
+                "closed_conjecture_obligations": [],
+            }
+        # Never mutate TGA case conclusions or convert graph facts into a
+        # verified research theorem. Formal status applies to finite F2 graphs only.
     if args.verify_typed_arguments:
         from mathos.research.tect_x_typed_argument_gate import (
             MANIFEST as TYPED_MANIFEST, replay as typed_replay
