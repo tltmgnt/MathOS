@@ -1,0 +1,40 @@
+name: TGA proof-gap scaling benchmark (not theorem certification)
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/tga_gap_benchmark.py'
+      - 'tests/test_proof_gap_benchmark.py'
+      - 'mathos/proof_analysis/gap_analysis.py'
+      - 'docs/proof-analysis/TGA_PERFORMANCE.md'
+      - '.github/workflows/tga-gap-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run deterministic fixture and noncertification tests
+        run: python -m unittest discover -s tests -p 'test_proof_gap_benchmark.py' -v
+      - name: Profile instrumented TGA baseline
+        run: |
+          python scripts/tga_gap_benchmark.py \
+            --sizes 10 30 100 500 --layers 4 6 8 --repeats 3 \
+            --output artifacts/proof-analysis/tga-performance.json
+          python -m json.tool artifacts/proof-analysis/tga-performance.json > /dev/null
+      - name: Upload scoped benchmark (not a proof)
+        uses: actions/upload-artifact@v4
+        with:
+          name: tga-proof-gap-scaling-baseline
+          path: artifacts/proof-analysis/tga-performance.json
+          retention-days: 14
