@@ -364,6 +364,21 @@ detects scope mismatches, ranks unresolved proof steps and computes H0/H1 of the
 It is a **rule-based structural audit**, not a semantic theorem prover or proof
 of RH, BSD, or the open Selmer-infinitude assertion.
 
+## TECT-X: Lean kernel proof certificates for finite graph topology
+
+The [TECT-X formal verification layer](docs/research/TECT_X_FORMAL_VERIFICATION.md)
+provides actual Lean 4.14.0 checking of four fixed finite chain deductions
+and five additional input-driven finite graph cycle-space cases. The latter
+produce ten universally quantified Lean propositions about exact mod-2
+incidence kernels and linearly independent cycle bases, with zero-axiom
+checks and auditable generated source artifacts.
+
+Run `python -m mathos.research.tect_x_general_graph_certificates --check-lean`
+with pinned Lean installed, or integrate with
+`python -m mathos.research.tect_x_intelligent_proof_verifier --verify-general-graph-cycles`.
+The checks **do not** prove arbitrary mathematical statements, RH, BSD or
+Selmer infinitude; evidence-scope and open-obligation blockers remain.
+
 ## TECT-X: preliminary Selmer-infinitude manuscript (submission blocked)
 
 The [preliminary LaTeX note](docs/research/papers/TECT_X_NONISOTRIVIAL_SELMER_PRELIMINARY.tex) audits exact rank-lower-bound certificates in a nonisotrivial elliptic family and an **elementary conditional** average-size implication. It does **not** prove infinitely many 2-Selmer-dimension-three fibers. The three underlying points and Pell-type family are already in Patel--Chakraborty--Chattopadhyay (2026, [published DOI](https://doi.org/10.21136/CMJ.2026.0080-26)); they are not claimed as new. See the [explicit missing proof obligations](docs/research/papers/TECT_X_SELMER_INFINITUDE_PROOF_OBLIGATIONS.md), [publication readiness audit](docs/research/papers/TECT_X_PUBLICATION_READINESS.md), and [machine-readable blocked gate](docs/research/papers/TECT_X_SUBMISSION_STATUS.v1.json). Neither software tests nor a successful LaTeX build constitute independent mathematical proof review.
