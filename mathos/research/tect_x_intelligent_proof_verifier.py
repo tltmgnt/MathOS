@@ -369,6 +369,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--require-proof", action="store_true", help="fail until independent mathematical certification exists (not supplied here)")
     parser.add_argument("--verify-lean-certificate", action="store_true",
                         help="run pinned Lean on exact finite F2 lemmas; never promote a conjecture")
+    parser.add_argument("--verify-typed-arguments", action="store_true",
+                        help="check typed proof terms against separately authored Lean reference goals")
     parser.add_argument("--lean", default="lean", help="Lean 4.14.0 executable for finite certificate replay")
     args = parser.parse_args(argv)
 
@@ -395,6 +397,33 @@ def main(argv: list[str] | None = None) -> int:
             result["issues"].append("pinned Lean finite-F2 certificate replay failed")
         # Do not change mathematical_theorems_certified, the case verdicts,
         # or scientific_certification under any circumstance.
+    if args.verify_typed_arguments:
+        from mathos.research.tect_x_typed_argument_gate import (
+            MANIFEST as TYPED_MANIFEST, replay as typed_replay
+        )
+        try:
+            manifest = json.loads(TYPED_MANIFEST.read_text(encoding="utf-8"))
+            typed = typed_replay(manifest, check_lean=True, lean=args.lean)
+            result["typed_argument_certificates"] = {
+                "formal_status": typed["formal_status"],
+                "kernel_checked": typed["kernel_checked"],
+                "exact_formal_goals_checked": sum(bool(b["kernel_checked"]) for b in typed["bundles"]),
+                "semantic_faithfulness_certified": False,
+                "remaining_semantic_gaps": typed["gaps"],
+                "closed_research_obligations": [],
+            }
+            if not typed["ok"] or not typed["kernel_checked"]:
+                result["ok"] = False
+                result["issues"].append("pinned Lean typed argument contract replay failed")
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            result["ok"] = False
+            result["issues"].append("typed argument checker unavailable: " + str(exc))
+            result["typed_argument_certificates"] = {
+                "kernel_checked": False,
+                "semantic_faithfulness_certified": False,
+                "closed_research_obligations": [],
+            }
+        # No pass may promote semantic faithfulness or RH/Selmer research status.
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8")
