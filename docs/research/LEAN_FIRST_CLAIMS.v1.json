@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "lean_version": "4.14.0",
+  "policy": {
+    "allowed_axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "automatic_claim_promotion": false,
+    "informal_statement_fidelity": "REQUIRES_INDEPENDENT_REVIEW"
+  },
+  "claims": [
+    {
+      "claim_id": "SAT1_SUPPORT",
+      "source": "formal/SATSupport.lean",
+      "theorem": "MathOS.satSupport_certificate",
+      "expected_type": "∀ m : Nat, (MathOS.satTerms m).length = 3 ^ m ∧ (MathOS.satTerms m).Nodup ∧ (∀ w ∈ MathOS.satTerms m, MathOS.satCoefficient w ≠ 0)",
+      "research_claim": "For every natural number m, the indexed three-choice SAT-factor word list has length 3^m, contains no duplicates, and has nonzero integer signs.",
+      "scope": "The inductive, syntactic list of independent factor-choice words defined by MathOS.satTerms and MathOS.satCoefficient; not a generic multivariate polynomial ring.",
+      "limitations": "Does not establish polynomial-ring support correspondence, lower bounds for arbitrary SAT algorithms, P versus NP, novelty, or any Millennium Prize solution.",
+      "statement_review": "PENDING",
+      "external_review": "PENDING",
+      "proves_open_problem": false
+    },
+    {
+      "claim_id": "SAT1_LENGTH",
+      "source": "formal/SATSupport.lean",
+      "theorem": "MathOS.satTerms_length",
+      "expected_type": "∀ m : Nat, (MathOS.satTerms m).length = 3 ^ m",
+      "research_claim": "For every finite number m of independently indexed factors, the explicitly generated MathOS three-choice words have exactly 3^m list entries.",
+      "scope": "The list length of the recursively constructed syntactic term words only; this is a finite combinatorial fact and not an algorithmic complexity lower bound.",
+      "limitations": "Does not prove terms are noncanceling in arbitrary polynomial representations, nor does it imply anything about the worst-case runtime of all SAT solvers.",
+      "statement_review": "PENDING",
+      "external_review": "PENDING",
+      "proves_open_problem": false
+    }
+  ]
+}

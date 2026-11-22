@@ -49,6 +49,17 @@ MathOS combines implemented research components with a broader proposed mathemat
 
 See [machine-readable implementation status](docs/portfolio/STATUS.json), [integration boundaries](docs/portfolio/INTEGRATION.md), and [proof review evaluation limits](docs/PROOF_REVIEW_EVALUATION.md). Software checks, empirical benefit, and deployment acceptance are separate milestones.
 
+## Lean-first proof checks (bounded implementation)
+
+The [Lean-first registered claim gate](docs/implementation/LEAN_FIRST.md) keeps
+Python for mathematical exploration while requiring **pinned Lean 4.14.0
+kernel replay, a named-theorem/expected-proposition witness, and a transitive
+axiom audit** before a registered subresult can be called formally checked.
+Only explicitly enrolled SAT1 subresults are currently covered; informal
+statement fidelity, novelty, external review, and open-problem implications
+remain unverified. Use `python -m mathos.research.lean_first inspect` to view
+the registry without compiler claims, or `verify` with pinned Lean installed.
+
 ## Quick start (bounded offline example)
 
 From a checkout of this repository, use Python 3.11 to run the deterministic linear-equation CLI:
