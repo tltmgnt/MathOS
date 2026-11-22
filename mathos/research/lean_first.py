@@ -152,8 +152,13 @@ def _replay(lean: str, root: Path, claim: dict, original: bytes) -> dict:
     )
     with TemporaryDirectory(prefix="mathos-lean-claim-") as directory:
         source = Path(directory) / "MathOSClaimAudit.lean"
-        source.write_bytes(b"set_option warningAsError true\n" +
-                           original + witness.encode("utf-8"))
+        # Lean imports must precede ordinary commands such as set_option.
+        body = original.decode("utf-8")
+        if body.startswith("import Init\n"):
+            body = "import Init\nset_option warningAsError true\n" + body[len("import Init\n"):]
+        else:
+            body = "set_option warningAsError true\n" + body
+        source.write_text(body + witness, encoding="utf-8")
         try:
             replay = subprocess.run(
                 [lean, str(source)], cwd=root, capture_output=True,
