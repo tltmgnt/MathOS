@@ -1,0 +1,177 @@
+{
+  "source_commit": "4464a8b18a25f2e4d1efc3ad72f69b8a7b2218da",
+  "workflow_run": 45369503725,
+  "job_id": 138359797737,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "open_obligations": 14,
+    "cycle": 2,
+    "results": {
+      "NS-B002": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "NS.critical_bound",
+          "outcome": "FALSIFIED_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "balance_cases": 15,
+          "rows": [
+            {
+              "scale": 1,
+              "t_over_T": "0",
+              "energy_over_K": "1",
+              "enstrophy_over_E": "1"
+            },
+            {
+              "scale": 2,
+              "t_over_T": "3/4",
+              "energy_over_K": "1/2",
+              "enstrophy_over_E": "2"
+            },
+            {
+              "scale": 4,
+              "t_over_T": "15/16",
+              "energy_over_K": "1/4",
+              "enstrophy_over_E": "4"
+            },
+            {
+              "scale": 8,
+              "t_over_T": "63/64",
+              "energy_over_K": "1/8",
+              "enstrophy_over_E": "8"
+            },
+            {
+              "scale": 16,
+              "t_over_T": "255/256",
+              "energy_over_K": "1/16",
+              "enstrophy_over_E": "16"
+            },
+            {
+              "scale": 1,
+              "t_over_T": "0",
+              "energy_over_K": "1",
+              "enstrophy_over_E": "1"
+            },
+            {
+              "scale": 2,
+              "t_over_T": "3/4",
+              "energy_over_K": "1/2",
+              "enstrophy_over_E": "2"
+            },
+            {
+              "scale": 4,
+              "t_over_T": "15/16",
+              "energy_over_K": "1/4",
+              "enstrophy_over_E": "4"
+            },
+            {
+              "scale": 8,
+              "t_over_T": "63/64",
+              "energy_over_K": "1/8",
+              "enstrophy_over_E": "8"
+            },
+            {
+              "scale": 16,
+              "t_over_T": "255/256",
+              "energy_over_K": "1/16",
+              "enstrophy_over_E": "16"
+            },
+            {
+              "scale": 1,
+              "t_over_T": "0",
+              "energy_over_K": "1",
+              "enstrophy_over_E": "1"
+            },
+            {
+              "scale": 2,
+              "t_over_T": "3/4",
+              "energy_over_K": "1/2",
+              "enstrophy_over_E": "2"
+            },
+            {
+              "scale": 4,
+              "t_over_T": "15/16",
+              "energy_over_K": "1/4",
+              "enstrophy_over_E": "4"
+            },
+            {
+              "scale": 8,
+              "t_over_T": "63/64",
+              "energy_over_K": "1/8",
+              "enstrophy_over_E": "8"
+            },
+            {
+              "scale": 16,
+              "t_over_T": "255/256",
+              "energy_over_K": "1/16",
+              "enstrophy_over_E": "16"
+            }
+          ],
+          "critical_integral": "constant * log(lambda/lambda0), diverges",
+          "exact_scalar_balance_path": true,
+          "navier_stokes_solution_established": false
+        }
+      },
+      "RH-B002": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "RH.zero_identity",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "digamma_partial_terms": 64,
+          "partial_gt_7": true,
+          "local_length": "1/1024",
+          "coercivity_lower": "317/768",
+          "reported_floor": "2/5",
+          "cross_upper": "-125/512",
+          "schur_controls": [
+            {
+              "a": 1,
+              "b": 1,
+              "c": 0,
+              "determinant": 1,
+              "psd": true
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "c": 1,
+              "determinant": 0,
+              "psd": true
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "c": 2,
+              "determinant": -3,
+              "psd": false
+            },
+            {
+              "a": 2,
+              "b": 8,
+              "c": 4,
+              "determinant": 0,
+              "psd": true
+            },
+            {
+              "a": 2,
+              "b": 8,
+              "c": 5,
+              "determinant": -9,
+              "psd": false
+            }
+          ],
+          "global_weil_positivity_proved": false
+        }
+      }
+    }
+  }
+}

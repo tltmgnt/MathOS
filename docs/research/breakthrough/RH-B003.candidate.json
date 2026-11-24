@@ -1,0 +1,17 @@
+{
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "RH.zero_identity",
+  "statement": "For four translates of a short smooth test at spacings log 2, the genuine Weil off-diagonal form magnitude on the constant coefficient vector exceeds the previously guaranteed single-window coercivity floor. Thus a gluing proof replacing each diagonal by that fixed floor and estimating cross terms cannot work.",
+  "hypotheses": "Same unconditional explicit formula and normalization as RH-B002; support length L=1/1024; four translates at j log 2.",
+  "definitions": "Prime-power shift, archimedean separated kernel, pole kernel, four-dimensional compressed form matrix.",
+  "source_locators": "RH-B002; Connes-Consani arXiv:2006.13771; DLMF 5.7.",
+  "proof_or_gap": "Only n=2^j contributes at each separation j log2, j=1,2,3. Bound smooth mixed term by 8L||f||², prime weights below by 2/5,1/3,2/9. Constant-vector cross magnitude exceeds 317/768. True diagonal may be larger; actual form negativity is not implied.",
+  "implication_to_claim": "Identifies a precise failure of fixed-floor gluing and the need for a frequency-dependent diagonal estimate; not global Weil positivity.",
+  "unproved_dependencies": "Sharp relative form control using actual diagonal symbol and prime couplings on arbitrary supports, global positivity or independent spectral realization.",
+  "adversarial_findings": "The lower bound on off-diagonal magnitude is not a negative direction for the actual Weil form; the replacement diagonal is a lower bound only."
+}

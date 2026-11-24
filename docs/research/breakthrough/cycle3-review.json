@@ -1,0 +1,16 @@
+{
+  "status": "PROPOSED_NEXT_CYCLE",
+  "promotion": "NONE",
+  "completed_attempts": {
+    "NS.critical_bound": 3,
+    "RH.zero_identity": 3
+  },
+  "review_decision": "PIVOT",
+  "proposed_primary": "PNP.sat_runtime",
+  "proposed_challenger": "BSD.analytic_selmer",
+  "return_conditions": {
+    "NS.critical_bound": "quantitative approximate-profile rigidity or other PDE-dependent critical estimate",
+    "RH.zero_identity": "genuine relative-form coupling estimate or independently justified new arithmetic spectral mechanism"
+  },
+  "canonical_open_obligations": 14
+}

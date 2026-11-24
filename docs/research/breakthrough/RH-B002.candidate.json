@@ -1,0 +1,17 @@
+{
+  "claim_id": "RH.zero_identity",
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "statement": "The true Weil quadratic form on smooth functions supported in an interval of length 1/1024 has lower bound (2/5)||f||². Every fixed bounded window has a closed semibounded realization, but a translated pair separated by log 2 has a strictly negative cross term; local direct-sum positivity cannot be presumed.",
+  "hypotheses": "Classical unconditional Weil explicit formula on compactly supported smooth functions, standard Fourier convention and digamma series.",
+  "definitions": "Q=sum over completed xi zero divisor of q(z) conjugate(q(conjugate(z))); arithmetic formula with poles, digamma multiplier, prime-power shifts.",
+  "source_locators": "Suzuki, Aspects of the screw function, doi:10.1112/jlms.12785 eq. 5.15; NIST DLMF 5.4, 5.7, 5.11; Connes-Consani arXiv:2006.13771; Suzuki arXiv:2606.09096.",
+  "proof_or_gap": "Plancherel and explicit digamma bounds give uniform tiny-window coercivity without zeros as inputs; a bounded pole/prime perturbation of the weighted Fourier form yields fixed-window self-adjoint realizations. The prime shift at log 2 produces a cross term bounded above by (-1/4+6L)||f||². A Schur complement condition identifies the missing gluing inequality.",
+  "implication_to_claim": "A rigorous scoped step on the genuine arithmetic form, not a synthetic spectrum; global positivity and spectral correspondence are not proved.",
+  "unproved_dependencies": "Control of cross-window interactions for arbitrary supports, no uniform positive floor asserted globally; a noncircular spectral correspondence with multiplicities and complex zero mapping.",
+  "adversarial_findings": "Prior small-support positivity is substantially stronger than this elementary bound. Cross-term negativity does not imply a negative full form or disprove RH.",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED"
+}

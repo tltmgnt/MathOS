@@ -178,3 +178,7 @@ artifacts are necessary before any theorem-level claim can advance.
 **Scope of improvement:** stronger targeting, reproducible provenance, and
 failure detection for candidate research packets. **No mathematical theorem
 was proved by this software change.**
+
+## Breakthrough-focused mode
+
+Use the [standalone breakthrough protocol](BREAKTHROUGH_PROTOCOL.md) and [editable Word version](BREAKTHROUGH_PROTOCOL.docx) to prioritize direct attempts on the canonical 14 open obligations. The queue and metadata intake do not establish mathematical truth or promote claims.

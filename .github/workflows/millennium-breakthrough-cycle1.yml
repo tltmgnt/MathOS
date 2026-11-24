@@ -1,0 +1,35 @@
+name: Millennium breakthrough cycle 1 (scoped obstructions)
+on:
+  push:
+    paths:
+      - 'mathos/research/breakthrough_cycle1.py'
+      - 'tests/test_breakthrough_cycle1.py'
+      - 'docs/research/breakthrough/**'
+      - '.github/workflows/millennium-breakthrough-cycle1.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/breakthrough_cycle1.py'
+      - 'tests/test_breakthrough_cycle1.py'
+      - 'docs/research/breakthrough/**'
+      - '.github/workflows/millennium-breakthrough-cycle1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_cycle1.py' -v
+      - run: |
+          mkdir -p artifacts/breakthrough-cycle1
+          python -m mathos.research.breakthrough_cycle1 > artifacts/breakthrough-cycle1/report.json
+          cat artifacts/breakthrough-cycle1/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-cycle1-evidence
+          path: artifacts/breakthrough-cycle1/report.json
+          if-no-files-found: error

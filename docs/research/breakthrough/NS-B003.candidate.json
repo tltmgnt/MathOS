@@ -1,0 +1,17 @@
+{
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "NS.critical_bound",
+  "statement": "A nonzero smooth compactly supported profile cannot give an exact unforced periodic solution of the single-scale form u=lambda F(lambda(x-x0)), lambda'=a lambda^3 with a>0, support contained in one cell.",
+  "hypotheses": "Smooth compact solenoidal F, fixed nu>0, exact momentum equation and smooth pressure, lambda scale as specified.",
+  "definitions": "Leray projected momentum, stationary profile equation, curl profile equation, compact vorticity support.",
+  "source_locators": "NS-B001 and NS-B002; classical analytic elliptic regularity for analytic semilinear elliptic systems (Morrey 1958, doi:10.2307/1970251); verify applicability to velocity-pressure elliptic system.",
+  "proof_or_gap": "At a fixed time the rescaled profile satisfies stationary viscous elliptic equation with polynomial coefficients. Pressure solves Poisson equation with polynomial first-derivative source. Local analyticity via semilinear elliptic regularity implies velocity analytic, hence compact support forces zero. Harmonic pressure test additionally forces isotropic integrated velocity tensor.",
+  "implication_to_claim": "Excludes the exact compact concentrating path of NS-B002 under full momentum dynamics, not arbitrary concentration with noncompact or evolving profile.",
+  "unproved_dependencies": "A quantitative version of this exclusion controlling general evolving, noncompact concentration; full critical norm bound.",
+  "adversarial_findings": "Analyticity is qualitative, no uniform quantitative rate. Pressure is not presumed compact until its gradient is seen to vanish on exterior. No claim that moment isotropy alone is sufficient."
+}
