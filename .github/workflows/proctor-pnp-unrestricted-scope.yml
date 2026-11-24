@@ -1,0 +1,46 @@
+name: Proctor PNP unrestricted scope audit
+on:
+  push:
+    paths:
+      - 'formal/ProctorUnrestrictedScope.lean'
+      - 'formal/ProctorGF2.lean'
+      - 'mathos/research/tga_proctor_unrestricted_scope*.py'
+      - 'mathos/research/tga_proctor_tape_solver.py'
+      - 'tests/test_tga_proctor_unrestricted_scope.py'
+      - 'docs/research/tga-universal/PNP-F024.md'
+      - '.github/workflows/proctor-pnp-unrestricted-scope.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorUnrestrictedScope.lean'
+      - 'formal/ProctorGF2.lean'
+      - 'mathos/research/tga_proctor_unrestricted_scope*.py'
+      - 'mathos/research/tga_proctor_tape_solver.py'
+      - 'tests/test_tga_proctor_unrestricted_scope.py'
+      - 'docs/research/tga-universal/PNP-F024.md'
+      - '.github/workflows/proctor-pnp-unrestricted-scope.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_unrestricted_scope.py' -v
+      - run: python -m mathos.research.tga_proctor_unrestricted_scope_audit --output-dir artifacts/pnp-unrestricted-scope
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f024-scope-evidence
+          path: artifacts/pnp-unrestricted-scope/
+          if-no-files-found: error
