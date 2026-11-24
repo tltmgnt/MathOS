@@ -10,6 +10,7 @@ on:
       - 'formal/ProctorPairedReplay.lean'
       - 'formal/ProctorExecutableReplay.lean'
       - 'formal/ProctorCapacityReplay.lean'
+      - 'formal/ProctorXorReplay.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -26,6 +27,7 @@ on:
       - 'formal/ProctorPairedReplay.lean'
       - 'formal/ProctorExecutableReplay.lean'
       - 'formal/ProctorCapacityReplay.lean'
+      - 'formal/ProctorXorReplay.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -99,6 +101,8 @@ jobs:
           python -m mathos.research.tga_proctor_replay_bridge > artifacts/pnp-f030/f034-executable-fixtures.lean
           python -m unittest discover -s tests -p 'test_tga_proctor_capacity_bridge.py' -v
           python -m mathos.research.tga_proctor_capacity_bridge > artifacts/pnp-f030/f034-capacity-fixtures.lean
+          python -m unittest discover -s tests -p 'test_tga_proctor_xor_bridge.py' -v
+          python -m mathos.research.tga_proctor_xor_bridge > artifacts/pnp-f030/f034-xor-fixtures.lean
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
@@ -125,6 +129,9 @@ jobs:
           cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean artifacts/pnp-f030/f034-capacity-fixtures.lean > artifacts/pnp-f030/f034-capacity-replay-combined.lean
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-capacity-replay-combined.lean 2>&1 | tee artifacts/pnp-f030/f034-capacity-replay-kernel.txt
           grep -Fx 'F034_CAPACITY_REPLAY_OK cases=17' artifacts/pnp-f030/f034-capacity-replay-kernel.txt
+          cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean artifacts/pnp-f030/f034-xor-fixtures.lean > artifacts/pnp-f030/f034-xor-replay-combined.lean
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-xor-replay-combined.lean 2>&1 | tee artifacts/pnp-f030/f034-xor-replay-kernel.txt
+          grep -Fx 'F034_XOR_REPLAY_OK cases=18' artifacts/pnp-f030/f034-xor-replay-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -144,6 +151,7 @@ jobs:
           groups.append(("ProctorPairedReplay", "f034-replay-kernel.txt", ("parent_tail", "paired_set_sound", "batch_set_entails", "chain_entails", "chain_unsat_lifts")))
           groups.append(("ProctorExecutableReplay", "f034-executable-kernel.txt", ("lookup_mem", "contains_sound", "shape_sound", "step_sound", "batch_sound", "chain_sound", "empty_member", "checked_empty_refutes", "and_true_local")))
           groups.append(("ProctorCapacityReplay", "f034-capacity-replay-kernel.txt", ("test_sound", "every_sound", "some_sound", "getAt_mem", "getAt_exists", "ref_sound", "contains_complete", "distinct_sound", "distinct_complete", "words_sound", "group_sound", "index_mem", "demand_at_mem", "different_sound", "capacity_check_sound", "checked_chain_capacity_refutes")))
+          groups.append(("ProctorXorReplay", "f034-xor-replay-kernel.txt", ("pattern_sound", "false_member", "pattern_parity", "block_sound", "bx_zero", "bx_swap", "bx_mix", "toggle_sound", "combine_sound", "sum_sound", "xor_check_sound", "checked_chain_xor_refutes")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -180,6 +188,11 @@ jobs:
           report["f034_capacity_fixture_sha256"] = hashlib.sha256((out / "f034-capacity-fixtures.lean").read_bytes()).hexdigest()
           report["f034_capacity_fixture_count"] = 17
           report["f034_capacity_python_refinement_verified"] = False
+          report["f034_xor_replay_scope"] = "TYPED_CHAIN_AND_SPARSE_XOR_TERMINAL_ONLY"
+          report["f034_xor_replay_source_sha256"] = hashlib.sha256(Path("formal/ProctorXorReplay.lean").read_bytes()).hexdigest()
+          report["f034_xor_fixture_sha256"] = hashlib.sha256((out / "f034-xor-fixtures.lean").read_bytes()).hexdigest()
+          report["f034_xor_fixture_count"] = 18
+          report["f034_xor_python_refinement_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - uses: actions/upload-artifact@v4
