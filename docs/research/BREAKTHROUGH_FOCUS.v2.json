@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "status": "RESEARCH_ONLY",
+  "promotion": "NONE",
+  "focus_policy": {
+    "primary": "PNP.sat_runtime",
+    "challenger": "BSD.analytic_selmer",
+    "max_active_tracks": 2,
+    "review_after_attempts": 3,
+    "selection_reason": "Cycle-three pivot review: explicit SAT representation cost and independent higher-rank arithmetic comparison. Not a ranking of solution probability.",
+    "reserve": "NS and RH narrow routes paused per cycle3-review.json; all canonical obligations remain open."
+  },
+  "tracks": [
+    {
+      "track": "RH",
+      "route": "RH.spectral",
+      "claims": [
+        "RH.operator",
+        "RH.zero_identity"
+      ],
+      "attack": "Define an operator from arithmetic data without using zeta zero locations; prove a domain/self-adjointness lemma and derive a complete determinant identity for the completed xi function.",
+      "falsify": "Check deficiency indices, compactness/trace class or regularized determinant hypotheses, zero multiplicities and possible extra zeros. Use Lagarias/Li/Weil as a comparator; reject an assumed RH or a finite spectrum extrapolation.",
+      "exit": "An unconditional operator construction plus identity and a logically checked implication for every nontrivial zero."
+    },
+    {
+      "track": "PNP",
+      "route": "PNP.equality",
+      "claims": [
+        "PNP.sat_correctness",
+        "PNP.sat_runtime"
+      ],
+      "attack": "Specify a deterministic SAT state representation and update rules, with an explicit invariant guaranteeing exact satisfiability preservation; derive a polynomial total encoding-size and bit-operation bound for arbitrary CNF.",
+      "falsify": "Attack adversarial width-three Tseitin, pigeonhole and compression instances; track expansion, bit growth, branching and uniformity. Audit relativization, natural proofs (where applicable), and algebrization. Restricted lower bounds do not settle separation.",
+      "exit": "Correctness and polynomial worst-case bit complexity on all encoded SAT inputs, or a separate registered unconditional separation argument."
+    },
+    {
+      "track": "NS",
+      "route": "NS.B",
+      "claims": [
+        "NS.critical_bound"
+      ],
+      "attack": "On the periodic unforced route, derive a scale-critical estimate for the actual nonlinear vorticity/velocity interaction that controls the L4_t L6_x norm up to every finite potential breakdown time for arbitrary admissible data.",
+      "falsify": "Test scaling, concentration, high-low interactions and vortex stretching; reject energy-only control, constants depending on the unknown critical norm, or bounds stopping before the possible breakdown. Independently audit any announced forced-breakdown route under its own official hypotheses.",
+      "exit": "An a priori estimate under the full periodic hypotheses and a justified continuation implication, or a distinct complete official breakdown alternative."
+    },
+    {
+      "track": "YM",
+      "route": "YM.continuum_mass",
+      "claims": [
+        "YM.continuum",
+        "YM.axioms",
+        "YM.uniform_gap"
+      ],
+      "attack": "Choose a specified four-dimensional non-Abelian lattice gauge action, initially SU(2), and seek a physical-unit correlation bound with constants uniform in volume and spacing along a justified renormalization trajectory; separately develop a nontrivial continuum limit and reconstruction.",
+      "falsify": "Check gauge invariance, reflection positivity, regulator removal, observable overlap, tightness and nontriviality. Reject a lattice-unit gap or two-state model as physical mass-gap evidence.",
+      "exit": "A nontrivial continuum theory satisfying required axioms and positive physical spectral gap for every required compact simple gauge group; SU(2) alone is a scoped milestone."
+    },
+    {
+      "track": "HODGE",
+      "route": "HODGE.cycles",
+      "claims": [
+        "HODGE.primitive_cycles",
+        "HODGE.reduction"
+      ],
+      "attack": "Pick a precise smooth projective family beyond divisor-generated cohomology; compute the rational Hodge subspace and isolate a primitive class not accounted for by known cycle generators; attempt an actual algebraic correspondence or cycle construction.",
+      "falsify": "Audit rationality, Hodge type, smooth projectivity, cycle-class map and primitive reduction. Distinguish a gap in a chosen generator span from a nonalgebraic class.",
+      "exit": "Proved algebraic representatives for the remaining rational Hodge classes and a valid reduction covering all varieties/codimensions, or a valid counterexample."
+    },
+    {
+      "track": "BSD",
+      "route": "BSD.rank_refined",
+      "claims": [
+        "BSD.analytic_selmer",
+        "BSD.sha_finiteness",
+        "BSD.leading_term"
+      ],
+      "attack": "Choose a rank-at-least-two family over Q with rigorously sourced analytic order and descent/Selmer data; isolate the exact missing comparison map or bound and attempt a theorem beyond known rank-zero/one cases.",
+      "falsify": "Audit analytic-order certificates, Mordell-Weil rank versus Selmer rank, local conditions, Sha finiteness, regulator, periods and Tamagawa factors. Do not use BSD to compute the evidence intended to prove BSD.",
+      "exit": "Universal analytic/algebraic rank equality; for the refined route also Sha finiteness and normalized leading-term identity."
+    },
+    {
+      "track": "POINCARE",
+      "route": "POINCARE.replay",
+      "claims": [
+        "POINCARE.reconstruction"
+      ],
+      "attack": "Reconstruct the externally established proof one theorem at a time, starting with coherent transport of the nontrivial sweepout class and the precise surgery comparison-map hypotheses.",
+      "falsify": "Check original Perelman and Kleiner-Lott/Colding-Minicozzi statements, local finiteness of surgeries, class transport, extinction and topological classification. A scalar inequality is not geometric reconstruction.",
+      "exit": "Complete independently reviewed proof-dependency chain. Already solved externally; not a new prize target."
+    }
+  ]
+}

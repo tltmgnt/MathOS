@@ -86,8 +86,9 @@ def intake(packet, queue):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--candidate", type=Path)
+    p.add_argument("--plan", choices=("v1","v2"), default="v2")
     args = p.parse_args()
-    paths = ["docs/research/BREAKTHROUGH_FOCUS.v1.json",
+    paths = [f"docs/research/BREAKTHROUGH_FOCUS.{args.plan}.json",
              "docs/proof-analysis/OBLIGATIONS.v1.json", "docs/research/CLAY_PROOF_ROUTES.v1.json"]
     queue = build_queue(*(load(path) for path in paths))
     queue["source_sha256"] = {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest() for path in paths}
