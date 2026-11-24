@@ -19,19 +19,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Build missing Word copies and validate canonical text
+      - name: Validate committed Word copies and canonical text
         run: |
           python - <<'PY'
           from pathlib import Path
-          from scripts.millennium_docx import make_docx, verify
-          import base64
+          from scripts.millennium_docx import verify
           for src in sorted(Path("docs/research/breakthrough").glob("*-B[0-9][0-9][0-9].md")):
               dst=src.with_suffix(".docx")
-              if not dst.exists():
-                  make_docx(src,dst)
-                  b64=base64.b64encode(dst.read_bytes()).decode("ascii")
-                  for i in range(0,len(b64),3000):
-                      print(f"PAPER64 {src.stem} {b64[i:i+3000]}")
               verify(src,dst)
               print(f"PASS {dst}")
           PY
