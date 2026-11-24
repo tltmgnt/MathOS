@@ -38,12 +38,8 @@ theorem pattern_sound (vs : List Nat) (p : Clause → Bool)
     have hh := and_true_local _ _ h
     change p ((v,!x v)::falseLits x vs) = true
     cases e : x v with
-    | false =>
-      rw [e]
-      exact ih _ hh.right
-    | true =>
-      rw [e]
-      exact ih _ hh.left
+    | false => exact ih _ hh.right
+    | true => exact ih _ hh.left
 
 theorem false_member (x : Assignment) (vs : List Nat) (l : Literal)
     (h : l ∈ falseLits x vs) : x l.1 ≠ l.2 := by
