@@ -31,14 +31,9 @@ jobs:
       - run: |
           python - <<'PY'
           from pathlib import Path
-          from scripts.millennium_docx import make_docx, verify
-          import base64
+          from scripts.millennium_docx import verify
           p=Path('docs/research/tga-universal/TGA-U001.md')
           d=p.with_suffix('.docx')
-          if not d.exists():
-              make_docx(p,d)
-              s=base64.b64encode(d.read_bytes()).decode('ascii')
-              for i in range(0,len(s),3000): print('PAPER64 '+s[i:i+3000])
           verify(p,d)
           PY
       - uses: actions/upload-artifact@v4
