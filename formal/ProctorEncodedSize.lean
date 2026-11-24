@@ -192,7 +192,8 @@ private theorem formula_append (a b : Formula) :
   | nil => exact (Nat.zero_add _).symm
   | cons c cs ih =>
     change (c.length+1)+formulaMass (cs++b)=(c.length+1+formulaMass cs)+formulaMass b
-    rw [ih,Nat.add_assoc]
+    rw [ih]
+    exact (Nat.add_assoc (c.length+1) (formulaMass cs) (formulaMass b)).symm
 
 def cap (n : Nat) (f : Formula) (e : Envelope) : Nat :=
   size n f e+size n f e+1
@@ -296,7 +297,9 @@ theorem formula_binding_size (f : Formula) :
 
 theorem clause_range_size (c : Clause) :
     clauseBudget c+1≤(encClause c).length*4 :=
-  list_charge (fun _ : Literal => 2) encLiteral c (fun _ => by decide)
+  list_charge (fun _ : Literal => 2) encLiteral c (fun l => by
+    change 3 ≤ 8
+    decide)
 
 theorem formula_range_size (f : Formula) :
     formulaRangeBudget f+1≤(encFormula f).length*4 :=
@@ -309,7 +312,7 @@ private theorem ref_range (r : RefRow) :
 
 theorem refs_range_size (rs : List RefRow) :
     refsRangeBudget rs+1≤(encList encRef rs).length*4 :=
-  list_charge (fun r => clauseBudget r.row) encRef rs ref_range
+  list_charge (fun r : RefRow => clauseBudget r.row) encRef rs ref_range
 
 private theorem group_range (g : Group) :
     clauseBudget g.literals+1≤(encGroup g).length*4 := by
@@ -320,7 +323,9 @@ private theorem group_range (g : Group) :
 
 private theorem support_range (vs : List Nat) :
     visitsBudget (fun _ : Nat => 2) vs+1≤(encList encNat vs).length*4 :=
-  list_charge (fun _ : Nat => 2) encNat vs (fun _ => by decide)
+  list_charge (fun _ : Nat => 2) encNat vs (fun v => by
+    change 3 ≤ 4
+    decide)
 
 private theorem block_range (b : Block) :
     visitsBudget (fun _ : Nat => 2) b.support+refsRangeBudget b.refs+1≤(encBlock b).length*4 := by
