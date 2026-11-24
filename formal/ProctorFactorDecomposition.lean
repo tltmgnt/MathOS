@@ -29,15 +29,21 @@ theorem assemble_shared (shared : Nat → Bool) (sigma : Assignment)
     (owner : Nat → Nat) (locals : Family) (v : Nat)
     (h : shared v = true) :
     assemble shared sigma owner locals v = sigma v := by
-  simp [assemble, h]
+  unfold assemble
+  rw [h]
+  rfl
 
 theorem assemble_local (shared : Nat → Bool) (sigma : Assignment)
     (owner : Nat → Nat) (locals : Family) (j v : Nat)
     (h : shared v = true ∨ owner v = j) :
     assemble shared sigma owner locals v = localView shared sigma locals j v := by
   cases h with
-  | inl hs => simp [assemble, localView, hs]
-  | inr ho => simp [assemble, localView, ho]
+  | inl hs =>
+    unfold assemble localView
+    rw [hs]
+  | inr ho =>
+    unfold assemble localView
+    rw [ho]
 
 theorem clause_agrees (c : Clause) (x y : Assignment)
     (h : ∀ l ∈ c, x l.variable = y l.variable) :
@@ -45,9 +51,11 @@ theorem clause_agrees (c : Clause) (x y : Assignment)
   constructor
   · intro hx
     obtain ⟨l, hl, ht⟩ := hx
+    change x l.variable = l.positive at ht
     exact ⟨l, hl, (h l hl).symm.trans ht⟩
   · intro hy
     obtain ⟨l, hl, ht⟩ := hy
+    change y l.variable = l.positive at ht
     exact ⟨l, hl, (h l hl).trans ht⟩
 
 -- The labels are a certificate of separation. Each original clause is
@@ -80,8 +88,8 @@ theorem separator_forward (clauses : Nat → Clause) (m : Nat)
   intro l _
   unfold localView
   cases e : shared l.variable with
-  | false => simp [e]
-  | true => simpa [e] using hs l.variable e
+  | false => rfl
+  | true => exact hs l.variable e
 
 theorem separator_backward (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment)
