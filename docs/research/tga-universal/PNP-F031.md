@@ -128,8 +128,11 @@ New controls: 600 deterministic random sparse formulas compared with brute
 force, 600 zero-budget checks, direct tamper tests, and F030's existing
 disjoint UNSAT and connected SAT families at t=1,2,4,6,8. The connected
 SAT control checks that root splitting gives no gain when there is one
-component; it is not Claude's missing connected adversary. No finite result
-is claimed until the new CI logs report it.
+component; it is not Claude's missing connected adversary. PR #146 CI run 45438210589, job 138601729422, completed successfully:
+all five component-search tests passed, including the seeded 600-formula
+and budget controls; evidence artifact 14942193124.
+https://github.com/tltmgnt/MathOS/actions/runs/45438210589/job/138601729422
+The native follow-up was merged into F030 at 5249246d80cb8c9baebb369cfc9f28b19a77c905.
 
 Cost accounting: nodes are explicitly abstract search nodes, not bit steps.
 For a supplied root partition with component variable counts r_j, complete
@@ -139,3 +142,36 @@ their sum. This is a schedule bound only. Sparse normalization, partition,
 sort, propagation, recognition, Horn closure, stack and certificate storage,
 replay and serialization are additional costs. No total machine-model
 complexity theorem or general connected search bound is claimed.
+
+## Next native gate: connected root obstruction and explicit machine model
+
+The follow-up supplies a connected obstruction for **this root-only policy**.
+Start with F030's disjoint mixed-sign gadgets and fixed UNSAT core, with
+4t+3 variables and 24t+8 clauses. Introduce fresh g=4t+4 and its unit clause
+(g,g,g). Let a_i=4i+1 for i=0,...,t (the last representative belongs to
+the UNSAT core). Append (g,a_i,a_{i+1}) for i=0,...,t-1.
+All clauses are non-tautological. The primal graph is connected: every
+original gadget and the core is internally connected, and the added
+clauses connect their representatives to g. Root F025 partition therefore
+returns just one component. Its F030 solver forces g=true before any
+branch, removing precisely the added clauses. The residual is the
+original F030 obstruction, with unchanged compact IDs and original clause
+indices. F030's later decisions are unchanged: g is fixed and excluded
+from recognition, counts and branch choices; all original rows, ties
+and assignments are preserved. Hence the visited-node count is exactly
+the count of the original F030 search, at least 2^t by the F030 argument.
+The guarded family has 4t+4 variables, 25t+9 clauses and O(t log(t+1))
+encoded bits. This is superpolynomial for the current root-only search
+policy, not a lower bound for all SAT algorithms or for dynamic splitting
+after propagation. The latter would immediately expose the original
+components. The new controls check equality of node counts at five
+sizes and budget exhaustion at three sizes; actual CI is required.
+
+A conservative deterministic multitape Turing-machine time bound for a
+specified list-based realization of the native algorithm is given in
+[PNP-F031-BIT-COST.md](PNP-F031-BIT-COST.md). It charges preprocessing,
+per-node work, proof replay, output and sparse-ID bit lengths. It is a
+paper analysis, not a kernel-checked or measured CPython transition
+bound. The literal-touch/node counters remain abstract. The scratch
+code is still unavailable; the old connected negative result has not
+been reproduced and this new family does not settle it.

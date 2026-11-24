@@ -39,6 +39,7 @@ jobs:
           python -m mathos.research.tga_proctor_adaptive_propagation > artifacts/pnp-f030/controls.json
           python -m unittest discover -s tests -p 'test_tga_proctor_component_search.py' -v
           python -m mathos.research.tga_proctor_component_search > artifacts/pnp-f030/f031-native-controls.json
+          cat artifacts/pnp-f030/f031-native-controls.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
