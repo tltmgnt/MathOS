@@ -23,11 +23,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m unittest discover -s tests -p 'test_tga_rh_hodge.py' -v
       - run: |
           mkdir -p artifacts/tga-rh-hodge
           python -m mathos.research.tga_rh_hodge > artifacts/tga-rh-hodge/report.json
           cat artifacts/tga-rh-hodge/report.json
+      - run: python -m unittest discover -s tests -p 'test_tga_rh_hodge.py' -v
       - uses: actions/upload-artifact@v4
         with:
           name: tga-rh-hodge-evidence

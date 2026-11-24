@@ -38,7 +38,7 @@ def exp_negative(x):
     return r
 
 
-def xi_moments(steps=65536):
+def xi_moments(steps=8192):
     # Integrate t in [0,2], with steps intervals and n=1,...,5.
     # The common factor 2 in the xi cosine kernel cancels on normalization.
     pi=atan(5).scaled(16)-atan(239).scaled(4)
@@ -50,19 +50,29 @@ def xi_moments(steps=65536):
             u=(pi*e2).scaled(n*n)
             a=(u*u).scaled(4)-u.scaled(6)
             a=a*half
-            v.append((a,exp_negative(u)))
+            v.append((a,exp_negative(u),u,half))
         return v
     prev=endpoint(half)
     for j in range(1,steps+1):
         half=half*inc;cur=endpoint(half)
-        # A(t) increasing and exp(-u(t)) decreasing; all nonnegative.
-        lo=sum((I(a.l)*I(e.l)).l for (a,_),(_,e) in zip(prev,cur))
-        hi=sum((I(a.h)*I(e.h)).h for (a,_),(_,e) in zip(cur,prev))
-        assert 0<=lo<=hi
+        # Composite trapezoid with certified interval-local second derivative.
+        f0=I.rat(0);f1=I.rat(0)
+        B=[I.rat(0) for _ in range(3)]
+        for (a,e,_,_),(a1,e1,u,hf) in zip(prev,cur):
+            f0=f0+a*e;f1=f1+a1*e1
+            z=I(u.h);z2=z*z;z3=z2*z;z4=z2*z2
+            common=I(e.h)*I(hf.h)
+            B[0]=B[0]+common*(z2.scaled(4)+z.scaled(6))
+            B[1]=B[1]+common*(z3.scaled(8)+z2.scaled(30)+z.scaled(15))
+            B[2]=B[2]+common*(z4.scaled(16)+z3.scaled(112)+z2.scaled(165)+z.scaled(F(75,2)))
         for k in range(5):
-            l=I(lo).scaled(h*((j-1)*h)**(2*k)/factorial(2*k)).l
-            r=I(hi).scaled(h*(j*h)**(2*k)/factorial(2*k)).h
-            acc[k]=acc[k]+I(l,r)
+            d=2*k;left=(j-1)*h;right=j*h
+            q=(f0.scaled(left**d/factorial(d))+f1.scaled(right**d/factorial(d))).scaled(h/2)
+            bd=B[2].scaled(right**d/factorial(d))
+            if d>=1:bd=bd+B[1].scaled(2*right**(d-1)/factorial(d-1))
+            if d>=2:bd=bd+B[0].scaled(right**(d-2)/factorial(d-2))
+            err=bd.scaled(h**3/12).h
+            acc[k]=acc[k]+I(q.l-err,q.h+err)
         prev=cur
     # For omitted t>=2: Phi t^(2k)/(2k)! <= 64 exp(3t/2) exp(-u/2)
     # u>=150 n^2 (1+2(t-2)); e^3<27. For omitted n>=6:
