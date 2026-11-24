@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "mode": "USE_CASE_COMPLETION",
+  "independent_review": "OPTIONAL_NONBLOCKING",
+  "completion_rule": "A use case may complete only with an exact scoped statement, a proof or certificate under explicitly stated established theorems, reproducible evidence and no unresolved dependency inside that scope. Independent review is not required to continue or publish internal results; not reviewed must remain explicit.",
+  "global_status_rule": "No automatic promotion of Millennium claims, external certification or prize eligibility. Never claim review was performed if it was not.",
+  "active_cases": [
+    {
+      "id": "PNP-AND-XOR",
+      "claim": "PNP.sat_runtime",
+      "exit": "Correct polynomial-time witness-producing solver for disjoint local gate blocks with arbitrary affine coupling on one output per block; check positive and negative instances."
+    },
+    {
+      "id": "BSD-E41-P5",
+      "claim": "BSD.analytic_selmer",
+      "exit": "Independent arithmetic proof of trivial 5-primary Sha for E_41, not assuming BSD or generalized Kato nonvanishing, or record precise failed certificate."
+    }
+  ]
+}
