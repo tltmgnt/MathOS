@@ -1,0 +1,207 @@
+{
+  "source_commit": "313d565d9f3ef33f65f35f7fb6a567c5c96ba345",
+  "workflow_run": 45376062305,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "canonical_open_obligations": 14,
+    "promotion": "NONE",
+    "universal_solutions_claimed": false,
+    "derived_routes": {
+      "RH": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "RH.all_hankel"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "RH.all_hankel"
+          ]
+        ]
+      },
+      "PNP": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "PNP.poly_sat"
+          ],
+          [
+            "PNP.separation"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "PNP.poly_sat",
+            "PNP.separation"
+          ]
+        ]
+      },
+      "NS": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "NS.A.critical"
+          ],
+          [
+            "NS.B.critical"
+          ],
+          [
+            "NS.C.breakdown"
+          ],
+          [
+            "NS.D.breakdown"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "NS.A.critical",
+            "NS.B.critical",
+            "NS.C.breakdown",
+            "NS.D.breakdown"
+          ]
+        ]
+      },
+      "HODGE": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "HODGE.primitive"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "HODGE.primitive"
+          ]
+        ]
+      },
+      "YM": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "YM.continuum",
+            "YM.os",
+            "YM.uniform_dense_decay"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "YM.continuum"
+          ],
+          [
+            "YM.os"
+          ],
+          [
+            "YM.uniform_dense_decay"
+          ]
+        ]
+      },
+      "BSD.core": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "BSD.p5_comparison",
+            "BSD.p5_finite"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "BSD.p5_comparison"
+          ],
+          [
+            "BSD.p5_finite"
+          ]
+        ]
+      },
+      "BSD.refined": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "BSD.full_annihilator",
+            "BSD.leading_formula",
+            "BSD.p5_comparison",
+            "BSD.p5_finite"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "BSD.full_annihilator"
+          ],
+          [
+            "BSD.leading_formula"
+          ],
+          [
+            "BSD.p5_comparison"
+          ],
+          [
+            "BSD.p5_finite"
+          ]
+        ]
+      },
+      "POINCARE.external": {
+        "status": "EXTERNAL_RESULT_OR_ROUTE_CLOSED",
+        "minimal_completion_sets": [
+          []
+        ],
+        "minimal_blocking_sets": []
+      },
+      "POINCARE.project": {
+        "status": "BLOCKED",
+        "minimal_completion_sets": [
+          [
+            "POINCARE.reconstruction"
+          ]
+        ],
+        "minimal_blocking_sets": [
+          [
+            "POINCARE.reconstruction"
+          ]
+        ]
+      }
+    },
+    "finite_hankel_counterexamples": [
+      {
+        "largest_tested_order": 0,
+        "epsilon": "1/2",
+        "negative_root": "-2",
+        "witness_degree": 1,
+        "negative_quadratic_form": "-9/8"
+      },
+      {
+        "largest_tested_order": 1,
+        "epsilon": "1/16",
+        "negative_root": "-16",
+        "witness_degree": 2,
+        "negative_quadratic_form": "-23409/1048576"
+      },
+      {
+        "largest_tested_order": 2,
+        "epsilon": "1/128",
+        "negative_root": "-128",
+        "witness_degree": 3,
+        "negative_quadratic_form": "-134062161025/562949953421312"
+      },
+      {
+        "largest_tested_order": 3,
+        "epsilon": "1/2048",
+        "negative_root": "-2048",
+        "witness_degree": 4,
+        "negative_quadratic_form": "-542569265658698999450625/633825300114114700748351602688"
+      },
+      {
+        "largest_tested_order": 4,
+        "epsilon": "1/16384",
+        "negative_root": "-16384",
+        "witness_degree": 5,
+        "negative_quadratic_form": "-96968801706135349102610710828341321729/22835963083295358096932575511191922182123945984"
+      },
+      {
+        "largest_tested_order": 5,
+        "epsilon": "1/262144",
+        "negative_root": "-262144",
+        "witness_degree": 6,
+        "negative_quadratic_form": "-203181261053775930058525218573474560119517597086872596250625/27606985387162255149739023449108101809804435888681546220650096895197184"
+      }
+    ]
+  }
+}
