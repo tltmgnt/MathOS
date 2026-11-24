@@ -1,0 +1,57 @@
+name: Millennium breakthrough focus (research only)
+on:
+  push:
+    paths:
+      - 'docs/research/BREAKTHROUGH*'
+      - 'mathos/research/breakthrough_focus.py'
+      - 'tests/test_breakthrough_focus.py'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
+      - '.github/workflows/millennium-breakthrough-focus.yml'
+  pull_request:
+    paths:
+      - 'docs/research/BREAKTHROUGH*'
+      - 'mathos/research/breakthrough_focus.py'
+      - 'tests/test_breakthrough_focus.py'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - 'docs/research/CLAY_PROOF_ROUTES.v1.json'
+      - '.github/workflows/millennium-breakthrough-focus.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_focus.py' -v
+      - run: |
+          mkdir -p artifacts/breakthrough
+          python -m mathos.research.breakthrough_focus > artifacts/breakthrough/queue.json
+          python -m json.tool artifacts/breakthrough/queue.json > /dev/null
+      - name: Generate or verify standalone Word protocol
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx, verify
+          import base64
+          src=Path("docs/research/BREAKTHROUGH_PROTOCOL.md")
+          dst=src.with_suffix(".docx")
+          if not dst.exists():
+              make_docx(src,dst)
+              b64=base64.b64encode(dst.read_bytes()).decode("ascii")
+              for i in range(0,len(b64),3000):
+                  print("PROTOCOL64 "+b64[i:i+3000])
+          verify(src,dst)
+          print("Standalone protocol text and ZIP verified")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-protocol-and-queue
+          path: |
+            docs/research/BREAKTHROUGH_PROTOCOL.docx
+            artifacts/breakthrough/queue.json
+          if-no-files-found: error
