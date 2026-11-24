@@ -117,8 +117,9 @@ def feedCount (n : Nat) (orig : List MRow) : (rs pre : List MRow) →
     have ht : tag.weight < 2^orig.length := by
       change 2^pre.length < 2^orig.length
       rw [e]
-      apply Nat.pow_lt_pow_of_lt_right (by decide : 1 < 2)
-      simp
+      have hl : pre.length+1 ≤ (pre++r::rs).length := by simp; omega
+      have hh : 2^pre.length < 2^(pre.length+1) := by rw [Nat.pow_succ]; have := Nat.two_pow_pos pre.length; omega
+      exact Nat.lt_of_lt_of_le hh (Nat.pow_le_pow_of_le_right Nat.zero_lt_two hl)
     obtain ⟨res,v,c,hv,hc,wt⟩ := insertCount b tag hw.left hb ht
     cases res with
     | bad w cert =>
@@ -208,7 +209,9 @@ theorem occupied_bound {n orig cap} (b : HB n orig cap) : occupiedCount b ≤ ca
   induction b with
   | empty => exact Nat.le_refl 0
   | vacant t ih => exact Nat.le_trans ih (Nat.le_succ _)
-  | occupied r hp t ih => exact Nat.add_le_add_left ih 1
+  | occupied r hp t ih =>
+    change 1+occupiedCount t ≤ _
+    omega
 
 -- Fixed-width payload accounting: n coefficient bits, one rhs, m provenance bits.
 -- Includes one occupancy bit per slot, not allocator/stack/object overhead.
