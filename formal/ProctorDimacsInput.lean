@@ -131,9 +131,10 @@ theorem row_sound (n : Nat) (ts : List Literal) (c : Clause)
             | mk d tail =>
               rw [hp] at h
               have eq : ((v,sign)::d,tail) = (c,rest) := Option.some.inj h
-              cases eq
-              exact Row.lit (Nat.lt_of_le_of_ne (Nat.zero_le v)
+              have row := Row.lit (l := (v,sign)) (Nat.lt_of_le_of_ne (Nat.zero_le v)
                 (fun e => z e.symm)) le (ih d tail hp)
+              cases eq
+              exact row
         · rw [if_neg le] at h
           cases h
 
@@ -234,8 +235,9 @@ theorem decode_sound (bytes : List Nat) (n : Nat) (f : Formula)
       | some g =>
         rw [hf] at h
         have eq : (v,g) = (n,f) := Option.some.inj h
+        have meaning : Meaning bytes v g := ⟨m,ts,he,size,rows_sound v m ts g hf⟩
         cases eq
-        exact ⟨m,ts,he,size,rows_sound v m ts g hf⟩
+        exact meaning
     · rw [if_neg size] at h
       cases h
 
