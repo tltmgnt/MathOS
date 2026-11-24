@@ -5,6 +5,7 @@ on:
       - 'formal/ProctorAdaptivePropagation.lean'
       - 'formal/ProctorParityElimination.lean'
       - 'formal/ProctorHallDeficiency.lean'
+      - 'formal/ProctorCapacityDeficiency.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -16,6 +17,7 @@ on:
       - 'formal/ProctorAdaptivePropagation.lean'
       - 'formal/ProctorParityElimination.lean'
       - 'formal/ProctorHallDeficiency.lean'
+      - 'formal/ProctorCapacityDeficiency.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -90,6 +92,8 @@ jobs:
           cat formal/ProctorGF2.lean formal/ProctorParityElimination.lean > artifacts/pnp-f030/f032-combined.lean
           lean -DwarningAsError=true artifacts/pnp-f030/f032-combined.lean 2>&1 | tee artifacts/pnp-f030/f032-kernel.txt
           lean -DwarningAsError=true formal/ProctorHallDeficiency.lean 2>&1 | tee artifacts/pnp-f030/f033-kernel.txt
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean > artifacts/pnp-f030/f033-capacity-combined.lean
+          lean -DwarningAsError=true artifacts/pnp-f030/f033-capacity-combined.lean 2>&1 | tee artifacts/pnp-f030/f033-capacity-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -104,6 +108,7 @@ jobs:
               ("ProctorParityElimination", "f032-kernel.txt", ("resolution_sound", "projection_iff", "clause_split_iff", "block_self", "block_false_eq", "parity_block_iff", "parity_select", "row_block_sound", "parity_blocks_unsat", "all_true_or_false_member")),
           ]
           groups.append(("ProctorHallDeficiency", "f033-kernel.txt", ("bounded_injection", "finite_demand_choices", "capacity_injection", "hall_deficiency", "positive_clause_demand", "negative_pair_capacity", "hall_cnf_unsat")))
+          groups.append(("ProctorCapacityDeficiency", "f033-capacity-kernel.txt", ("truths_mem", "truths_distinct", "distinct_prefix", "opposite_conflict", "group_bound", "length_append_local", "mem_append_left_local", "mem_append_right_local", "total_bound", "covered_truth", "finite_choices", "locate_bound", "locate_injective", "capacity_cnf_unsat")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -121,6 +126,9 @@ jobs:
           report["f033_scope"] = "LOCAL_HALL_CNF_SEMANTICS_ONLY"
           report["f033_source_sha256"] = hashlib.sha256(Path("formal/ProctorHallDeficiency.lean").read_bytes()).hexdigest()
           report["f033_python_refinement_verified"] = False
+          report["f033_capacity_scope"] = "LOCAL_SIGNED_CAPACITY_SEMANTICS_ONLY"
+          report["f033_capacity_source_sha256"] = hashlib.sha256(Path("formal/ProctorCapacityDeficiency.lean").read_bytes()).hexdigest()
+          report["f033_capacity_python_refinement_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - uses: actions/upload-artifact@v4
