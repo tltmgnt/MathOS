@@ -28,8 +28,7 @@ theorem xorCells_spec (a b : List Bool) (h : a.length = b.length) :
       have e := ih bs (Nat.succ.inj h)
       exact ⟨congrArg (List.cons (bx a b)) e.left,by
         change (xorCells as bs).steps+4 = 4*(as.length+1)
-        rw [e.right,Nat.mul_add]
-        rfl⟩
+        rw [e.right,Nat.mul_add]⟩
 
 -- Two reads, one AND, one XOR per coordinate; a Boolean accumulator.
 def dotCells : List Bool → List Bool → CellRun Bool
@@ -52,8 +51,7 @@ theorem dotCells_spec (a b : List Bool) (h : a.length = b.length) :
       have e := ih bs (Nat.succ.inj h)
       exact ⟨congrArg (bx (a && b)) e.left,by
         change (dotCells as bs).steps+4 = 4*(as.length+1)
-        rw [e.right,Nat.mul_add]
-        rfl⟩
+        rw [e.right,Nat.mul_add]⟩
 
 theorem mask_xor_cells (n a b : Nat) :
     (xorCells (decode n a) (decode n b)).value = decode n (a ^^^ b) ∧
@@ -120,7 +118,8 @@ theorem taggedCells_spec (n m a b u v : Nat) (p r : Bool) :
   have w := mask_xor_cells m u v
   unfold taggedCells
   constructor
-  · rw [c.left,w.left]
+  · change ((xorCells (decode n a) (decode n b)).value,bx p r,(xorCells (decode m u) (decode m v)).value) = _
+    rw [c.left,w.left]
   · change (xorCells (decode n a) (decode n b)).steps+
       (xorCells (decode m u) (decode m v)).steps+4 = _
     rw [c.right,w.right]
@@ -152,8 +151,7 @@ theorem copyCells_spec (bs : List Bool) :
   | cons b bs ih =>
     exact ⟨congrArg (List.cons b) ih.left,by
       change (copyCells bs).steps+2 = 2*(bs.length+1)
-      rw [ih.right,Nat.mul_add]
-      rfl⟩
+      rw [ih.right,Nat.mul_add]⟩
 
 end ProctorGF2
 
