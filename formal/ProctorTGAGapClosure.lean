@@ -10,16 +10,16 @@ theorem edge_has_left_support (odd a : Bool) :
   cases odd <;> cases a
   · exact ⟨false, rfl⟩
   · exact ⟨true, rfl⟩
-  · exact ⟨true, by decide⟩
-  · exact ⟨false, by decide⟩
+  · exact ⟨true, by intro h; cases h⟩
+  · exact ⟨false, by intro h; cases h⟩
 
 theorem edge_has_right_support (odd b : Bool) :
     ∃ a : Bool, edge odd a b := by
   cases odd <;> cases b
   · exact ⟨false, rfl⟩
   · exact ⟨true, rfl⟩
-  · exact ⟨true, by decide⟩
-  · exact ⟨false, by decide⟩
+  · exact ⟨true, by intro h; cases h⟩
+  · exact ⟨false, by intro h; cases h⟩
 
 theorem even_triangle_sat :
     ∃ a b c : Bool, edge false a b ∧ edge false b c ∧ edge false c a := by
