@@ -1,0 +1,49 @@
+name: Breakthrough full-target attack (not solved)
+on:
+  push:
+    paths:
+      - 'mathos/research/breakthrough_full_target.py'
+      - 'tests/test_breakthrough_full_target.py'
+      - 'docs/research/full-target/**'
+      - '.github/workflows/breakthrough-full-target.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/breakthrough_full_target.py'
+      - 'tests/test_breakthrough_full_target.py'
+      - 'docs/research/full-target/**'
+      - '.github/workflows/breakthrough-full-target.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_full_target.py' -v
+      - run: |
+          mkdir -p artifacts/full-target
+          python -m mathos.research.breakthrough_full_target > artifacts/full-target/report.json
+          cat artifacts/full-target/report.json
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx, verify
+          import base64
+          p=Path("docs/research/full-target/FULL-TARGET-001.md")
+          d=p.with_suffix(".docx")
+          if not d.exists():
+              make_docx(p,d)
+              s=base64.b64encode(d.read_bytes()).decode("ascii")
+              for i in range(0,len(s),3000): print("PAPER64 "+s[i:i+3000])
+          verify(p,d)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-target-attack
+          path: |
+            docs/research/full-target/*.docx
+            artifacts/full-target/report.json
