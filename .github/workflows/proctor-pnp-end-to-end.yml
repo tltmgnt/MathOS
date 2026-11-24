@@ -1,0 +1,42 @@
+name: Proctor PNP end to end restricted solver
+on:
+  push:
+    paths:
+      - 'formal/ProctorPNPEndToEnd.lean'
+      - 'mathos/research/tga_proctor_pnp_end_to_end.py'
+      - 'tests/test_tga_proctor_pnp_end_to_end.py'
+      - 'docs/research/tga-universal/PNP-F011.md'
+      - '.github/workflows/proctor-pnp-end-to-end.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorPNPEndToEnd.lean'
+      - 'mathos/research/tga_proctor_pnp_end_to_end.py'
+      - 'tests/test_tga_proctor_pnp_end_to_end.py'
+      - 'docs/research/tga-universal/PNP-F011.md'
+      - '.github/workflows/proctor-pnp-end-to-end.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_pnp_end_to_end.py' -v
+      - run: python -m mathos.research.tga_proctor_pnp_end_to_end --output-dir artifacts/pnp-end-to-end
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f011-evidence
+          path: artifacts/pnp-end-to-end/
+          if-no-files-found: error
