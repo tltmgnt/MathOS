@@ -17,22 +17,42 @@ inductive Projected : Domains → List Bool → Prop where
   | cons {d : List Pair} {ds : Domains} {y : Bool} {ys : List Bool} :
       y ∈ d.map gate → Projected ds ys → Projected (d :: ds) (y :: ys)
 
+-- Direct inductive list membership proofs avoid library axiom dependencies.
+theorem map_forward (d : List Pair) (p : Pair) (h : p ∈ d) :
+    gate p ∈ d.map gate := by
+  induction h with
+  | head => exact List.Mem.head _
+  | tail _ _ ih => exact List.Mem.tail _ ih
+
+theorem map_lift (d : List Pair) (y : Bool) (h : y ∈ d.map gate) :
+    ∃ p : Pair, p ∈ d ∧ gate p = y := by
+  induction d with
+  | nil => cases h
+  | cons p ps ih =>
+    change y ∈ gate p :: ps.map gate at h
+    cases h with
+    | head => exact ⟨p, List.Mem.head _, rfl⟩
+    | tail _ ht =>
+      obtain ⟨q,hq,heq⟩ := ih ht
+      exact ⟨q,List.Mem.tail _ hq,heq⟩
+
 theorem project (ds : Domains) (ps : List Pair) (h : Allowed ds ps) :
     Projected ds (ps.map gate) := by
   induction h with
   | nil => exact Projected.nil
   | cons hp _ ih =>
-    exact Projected.cons (List.mem_map_of_mem gate hp) ih
+    exact Projected.cons (map_forward _ _ hp) ih
 
 theorem lift (ds : Domains) (ys : List Bool) (h : Projected ds ys) :
     ∃ ps : List Pair, Allowed ds ps ∧ ps.map gate = ys := by
   induction h with
   | nil => exact ⟨[], Allowed.nil, rfl⟩
   | @cons d ds y ys hy _ ih =>
-    obtain ⟨p, hp, heq⟩ := List.mem_map.mp hy
+    obtain ⟨p, hp, heq⟩ := map_lift d y hy
     obtain ⟨ps, hs, hout⟩ := ih
     exact ⟨p :: ps, Allowed.cons hp hs,
-      congrArg₂ List.cons heq hout⟩
+      (congrArg (fun z : Bool => z :: ps.map gate) heq).trans
+        (congrArg (fun zs : List Bool => y :: zs) hout)⟩
 
 /-- Arbitrary output coupling, including the affine GF(2) system in B006. -/
 theorem projection_iff (ds : Domains) (C : List Bool → Prop) :

@@ -66,7 +66,7 @@ def run(out,lean="lean"):
         audit={name:next((x for x in log.splitlines() if x.startswith("'ProctorPNP."+name+"' ")),None) for name in NAMES}
         accepted=r.returncode==0 and all(audit[n]=="'ProctorPNP."+n+"' does not depend on any axioms" for n in NAMES)
         report["attempts"].append({"method":method,"exit_code":r.returncode,"accepted":accepted,
-             "source_sha256":digest(p.read_bytes()),"log_sha256":digest(log.encode()),"axioms":audit})
+             "source_sha256":digest(p.read_bytes()),"log_sha256":digest(log.encode()),"axioms":audit,"diagnostic":log[-4000:]})
         (out/"report.json").write_text(json.dumps(report,indent=2)+"\n")
         if accepted:break
     accepted=report["attempts"][-1]["accepted"]
