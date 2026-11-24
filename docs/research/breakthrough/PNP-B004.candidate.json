@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "PNP.sat_runtime",
+  "outcome": "FALSIFIED_CANDIDATE",
+  "statement": "Explicit CNF Davis-Putnam elimination with the first parity-chain auxiliaries eliminated before input variables has exponential output on a linear-clause unsatisfiable width-three family.",
+  "hypotheses": "n>=3; two XOR chains encoding opposite parity on common inputs; distinct auxiliary variables; explicit non-tautological resolvents and duplicate elimination, optional syntactic subsumption only.",
+  "definitions": "One XOR gate is encoded by one clause for each forbidden assignment. Eliminate a variable by resolving opposite occurrences and retaining unaffected clauses.",
+  "source_locators": "Davis and Putnam, J ACM 7 (1960), 201-215; MathOS PNP-002; standard XOR encoding.",
+  "proof_or_gap": "The first chain projected onto n input variables is even parity. Every non-tautological parity implicate contains all n variables, and exactly one forbidden assignment is excluded per such clause. The second chain remains untouched and cannot syntactically subsume input-only clauses. Thus at least 2^(n-1) clauses of width n appear; summing the original XOR equations proves UNSAT in linear row operations.",
+  "implication_to_claim": "Eliminates polynomial total bit complexity for this specified explicit representation/order, not for arbitrary SAT algorithms.",
+  "unproved_dependencies": "A uniformly polynomial alternative representation or unrestricted lower bound.",
+  "adversarial_findings": "An XOR-aware solver avoids this blowup. General semantic simplification and different variable orders are not covered."
+}

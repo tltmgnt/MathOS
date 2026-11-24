@@ -1,0 +1,35 @@
+name: Millennium breakthrough cycle 5 (hybrid projection and CM localization)
+on:
+  push:
+    paths:
+      - 'mathos/research/breakthrough_cycle5.py'
+      - 'tests/test_breakthrough_cycle5.py'
+      - 'docs/research/breakthrough/*B005*'
+      - '.github/workflows/millennium-breakthrough-cycle5.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/breakthrough_cycle5.py'
+      - 'tests/test_breakthrough_cycle5.py'
+      - 'docs/research/breakthrough/*B005*'
+      - '.github/workflows/millennium-breakthrough-cycle5.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_cycle5.py' -v
+      - run: |
+          mkdir -p artifacts/breakthrough-cycle5
+          python -m mathos.research.breakthrough_cycle5 > artifacts/breakthrough-cycle5/report.json
+          cat artifacts/breakthrough-cycle5/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-cycle5-evidence
+          path: artifacts/breakthrough-cycle5/report.json
+          if-no-files-found: error

@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "PNP.sat_runtime",
+  "outcome": "FALSIFIED_CANDIDATE",
+  "statement": "Projecting n AND gates linked by one even parity equation onto their 2n inputs requires (3^n−1)/2 clauses even in a conjunction of CNF and affine GF(2) equations over the visible inputs only.",
+  "hypotheses": "n>=2; exact projection, conjunction of explicit clauses and affine equations, no auxiliary variables or other representation.",
+  "definitions": "y_i=a_i AND b_i, sum y_i=0 in GF(2); projected relation has even number of pairs 11.",
+  "source_locators": "PNP-B004; Davis-Putnam J ACM 7 (1960) doi:10.1145/321033.321034. Proof is self-contained.",
+  "proof_or_gap": "The zero vector and all unit vectors belong to the relation, so its affine hull is full. A falsifying clause cube must force every pair AND output; maximal such cubes select an odd active subset and one zero in each inactive pair. Each has a unique private witness with exactly one zero per inactive pair. Count (3^n−1)/2.",
+  "implication_to_claim": "Eliminates polynomial materialization for exact auxiliary-free CNF+XOR projection, not SAT decision complexity.",
+  "unproved_dependencies": "Efficient representation and decision procedure that retains auxiliaries or uses nonlinear constraints; arbitrary-instance runtime.",
+  "adversarial_findings": "A direct circuit is linear size. No lower bound for hybrid solvers that avoid materializing this projection."
+}

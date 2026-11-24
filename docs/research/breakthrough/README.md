@@ -31,3 +31,23 @@ NS-B003 excludes the exact compact concentrating path under full momentum dynami
 [RH-B003 paper](RH-B003.md) · [Word](RH-B003.docx)
 
 [Cycle 3 machine evidence](cycle3-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45370481721)
+
+## Cycle 4 — first attempts after the pivot
+
+The v2 focus plan is now active for new intake: PNP.sat_runtime and BSD.analytic_selmer. Historical cycles explicitly retain v1 and can be replayed. PNP-B004 proves a representation lower bound for fixed-order explicit CNF elimination. BSD-B004 gives a single rank-two comparison certificate using exact arithmetic, classical 2-descent and an outward-rounded analytic interval; the known example is not a new general rank theorem. All 14 canonical obligations remain open. Next attack: mixed XOR/CNF representation growth and higher-rank Euler-system/Kato-class comparison hypotheses.
+
+[PNP-B004 paper](PNP-B004.md) · [Word](PNP-B004.docx)
+
+[BSD-B004 paper](BSD-B004.md) · [Word](BSD-B004.docx)
+
+[Cycle 4 machine evidence](cycle4-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45371621490)
+
+## Cycle 5 — mixed representation and higher-rank comparison
+
+PNP-B005 establishes an exact exponential auxiliary-free CNF+XOR projection bound for parity of AND gates. BSD-B005 audits Castella's actual CM theorem and isolates generalized Kato nonvanishing as equivalent to odd-primary Sha finiteness on E_41 under its hypotheses; five explicit local certificates check the localization condition. Neither result closes a canonical work package. Next: retain nonlinear gate structure for SAT and compute an independent nonvanishing or primary-finiteness certificate for one ordinary prime. At the end of cycle 6 conduct the three-attempt review for these two targets.
+
+[PNP-B005 paper](PNP-B005.md) · [Word](PNP-B005.docx)
+
+[BSD-B005 paper](BSD-B005.md) · [Word](BSD-B005.docx)
+
+[Cycle 5 machine evidence](cycle5-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45372843485)

@@ -1,0 +1,156 @@
+{
+  "source_commit": "b4623c70d99ca05363681e709e9dc9191e93fd9d",
+  "workflow_run": 45371621490,
+  "job_id": 138367040357,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "cycle": 4,
+    "open_obligations": 14,
+    "results": {
+      "PNP-B004": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "PNP.sat_runtime",
+          "outcome": "FALSIFIED_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "cases": [
+            {
+              "n": 3,
+              "input_clauses": 12,
+              "projected_clauses": 4,
+              "projected_literal_occurrences": 12
+            },
+            {
+              "n": 4,
+              "input_clauses": 20,
+              "projected_clauses": 8,
+              "projected_literal_occurrences": 32
+            },
+            {
+              "n": 5,
+              "input_clauses": 28,
+              "projected_clauses": 16,
+              "projected_literal_occurrences": 80
+            },
+            {
+              "n": 6,
+              "input_clauses": 36,
+              "projected_clauses": 32,
+              "projected_literal_occurrences": 192
+            },
+            {
+              "n": 7,
+              "input_clauses": 44,
+              "projected_clauses": 64,
+              "projected_literal_occurrences": 448
+            },
+            {
+              "n": 8,
+              "input_clauses": 52,
+              "projected_clauses": 128,
+              "projected_literal_occurrences": 1024
+            },
+            {
+              "n": 9,
+              "input_clauses": 60,
+              "projected_clauses": 256,
+              "projected_literal_occurrences": 2304
+            },
+            {
+              "n": 10,
+              "input_clauses": 68,
+              "projected_clauses": 512,
+              "projected_literal_occurrences": 5120
+            },
+            {
+              "n": 11,
+              "input_clauses": 76,
+              "projected_clauses": 1024,
+              "projected_literal_occurrences": 11264
+            },
+            {
+              "n": 12,
+              "input_clauses": 84,
+              "projected_clauses": 2048,
+              "projected_literal_occurrences": 24576
+            }
+          ],
+          "representation": "explicit CNF, first chain auxiliaries first",
+          "xor_certificate": "sum both chains over GF(2): 0=1",
+          "general_sat_lower_bound_proved": false
+        }
+      },
+      "BSD-B004": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "BSD.analytic_selmer",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "curve": "y^2=x^3-1681*x",
+          "points": [
+            [
+              "-9",
+              "120"
+            ],
+            [
+              "-64/25",
+              "8184/125"
+            ]
+          ],
+          "kummer_classes": [
+            [
+              -1,
+              -2,
+              2
+            ],
+            [
+              -1,
+              -1,
+              1
+            ]
+          ],
+          "product_class": [
+            1,
+            2,
+            2
+          ],
+          "good_reduction_counts": {
+            "3": 4,
+            "7": 8
+          },
+          "monsky_nullity": 2,
+          "tunnell_counts": [
+            16,
+            32
+          ],
+          "analytic_rank": 2,
+          "mordell_weil_rank": 2,
+          "selmer_2_infty_corank": 2,
+          "sha_2_primary_trivial": true,
+          "all_prime_sha_finiteness_proved": false,
+          "analytic_certificate": {
+            "truncation": 512,
+            "mesh_intervals": 1022,
+            "completed_second_derivative_lower": 300,
+            "completed_second_derivative_upper": 850,
+            "quadrature_lower_floor": 315,
+            "quadrature_upper_ceiling": 819,
+            "coefficient_tail_lt": 1,
+            "time_tail_lt": 2,
+            "arithmetic": "integer outward rounding and rational tail bounds"
+          },
+          "scope": "one curve; uses classical descent, modularity, Tunnell and functional equation"
+        }
+      }
+    }
+  }
+}
