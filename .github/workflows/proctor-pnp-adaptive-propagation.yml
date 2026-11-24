@@ -6,6 +6,7 @@ on:
       - 'formal/ProctorParityElimination.lean'
       - 'formal/ProctorHallDeficiency.lean'
       - 'formal/ProctorCapacityDeficiency.lean'
+      - 'formal/ProctorMixedInference.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -18,6 +19,7 @@ on:
       - 'formal/ProctorParityElimination.lean'
       - 'formal/ProctorHallDeficiency.lean'
       - 'formal/ProctorCapacityDeficiency.lean'
+      - 'formal/ProctorMixedInference.lean'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -81,6 +83,9 @@ jobs:
           python -m unittest discover -s tests -p 'test_tga_proctor_combined_boundary.py' -v
           python -m mathos.research.tga_proctor_combined_boundary > artifacts/pnp-f030/f033-combined-controls.json
           cat artifacts/pnp-f030/f033-combined-controls.json
+          python -m unittest discover -s tests -p 'test_tga_proctor_mixed_routing.py' -v
+          python -m mathos.research.tga_proctor_mixed_routing > artifacts/pnp-f030/f034-mixed-controls.json
+          cat artifacts/pnp-f030/f034-mixed-controls.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
@@ -97,6 +102,8 @@ jobs:
           lean -DwarningAsError=true formal/ProctorHallDeficiency.lean 2>&1 | tee artifacts/pnp-f030/f033-kernel.txt
           cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean > artifacts/pnp-f030/f033-capacity-combined.lean
           lean -DwarningAsError=true artifacts/pnp-f030/f033-capacity-combined.lean 2>&1 | tee artifacts/pnp-f030/f033-capacity-kernel.txt
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean > artifacts/pnp-f030/f034-combined.lean
+          lean -DwarningAsError=true artifacts/pnp-f030/f034-combined.lean 2>&1 | tee artifacts/pnp-f030/f034-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -112,6 +119,7 @@ jobs:
           ]
           groups.append(("ProctorHallDeficiency", "f033-kernel.txt", ("bounded_injection", "finite_demand_choices", "capacity_injection", "hall_deficiency", "positive_clause_demand", "negative_pair_capacity", "hall_cnf_unsat")))
           groups.append(("ProctorCapacityDeficiency", "f033-capacity-kernel.txt", ("truths_mem", "truths_distinct", "distinct_prefix", "opposite_conflict", "group_bound", "length_append_local", "mem_append_left_local", "mem_append_right_local", "total_bound", "covered_truth", "finite_choices", "locate_bound", "locate_injective", "capacity_cnf_unsat")))
+          groups.append(("ProctorMixedInference", "f034-kernel.txt", ("paired_sound", "paired_batch_entails", "derived_unsat_lifts", "append_sat", "augmented_unsat_lifts")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -132,6 +140,9 @@ jobs:
           report["f033_capacity_scope"] = "LOCAL_SIGNED_CAPACITY_SEMANTICS_ONLY"
           report["f033_capacity_source_sha256"] = hashlib.sha256(Path("formal/ProctorCapacityDeficiency.lean").read_bytes()).hexdigest()
           report["f033_capacity_python_refinement_verified"] = False
+          report["f034_scope"] = "LOCAL_MIXED_ENTAILMENT_SEMANTICS_ONLY"
+          report["f034_source_sha256"] = hashlib.sha256(Path("formal/ProctorMixedInference.lean").read_bytes()).hexdigest()
+          report["f034_python_refinement_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - uses: actions/upload-artifact@v4
