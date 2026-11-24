@@ -42,7 +42,7 @@ theorem split_sound (bytes word : List Nat) (acc : List (List Nat)) :
       splitWords bs [] (if word.isEmpty then acc else word.reverse::acc)
       else splitWords bs (b::word) acc)
     unfold white
-    by_cases h : Space b
+    by_cases h : b=32 ∨ b=9 ∨ b=10 ∨ b=13
     · have e : (if b=32 ∨ b=9 ∨ b=10 ∨ b=13 then true else false) = true :=
         if_pos h
       rw [e]
@@ -64,7 +64,9 @@ theorem split_complete (bytes word : List Nat) (acc out : List (List Nat))
     change (if white b then splitWords bs []
       (if w.isEmpty then a else w.reverse::a) else splitWords bs (b::w) a) = out
     unfold white
-    rw [if_pos sp]
+    have e : (if b=32 ∨ b=9 ∨ b=10 ∨ b=13 then true else false) = true :=
+      if_pos sp
+    rw [e]
     change splitWords bs [] (if w.isEmpty then a else w.reverse::a) = out
     rw [flush_eq]
     exact ih
@@ -72,7 +74,9 @@ theorem split_complete (bytes word : List Nat) (acc out : List (List Nat))
     change (if white b then splitWords bs []
       (if w.isEmpty then a else w.reverse::a) else splitWords bs (b::w) a) = out
     unfold white
-    rw [if_neg sp]
+    have e : (if b=32 ∨ b=9 ∨ b=10 ∨ b=13 then true else false) = false :=
+      if_neg sp
+    rw [e]
     exact ih
 
 -- First LF terminates the header, including for CRLF.
