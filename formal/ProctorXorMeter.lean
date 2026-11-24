@@ -159,7 +159,7 @@ theorem block_value (f : Formula) (b : Block) :
       (every (ProctorCapacityReplay.refCheck f) b.refs &&
         patterns b.support (patternCheck b))
     rw [refs_value,patterns_value _ _ _ (pattern_value b)]
-  · rw [if_neg h,if_neg h]
+  · rw [if_neg h,if_neg h] <;> rfl
 
 theorem block_bound (f : Formula) (b : Block) :
     (blockMeter f b).2 ≤ blockBudget f b := by
