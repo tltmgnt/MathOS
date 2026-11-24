@@ -1,0 +1,36 @@
+name: Millennium DOCX library validation
+on:
+  push:
+    paths:
+      - 'docs/research/papers/millennium/**'
+      - 'scripts/millennium_docx.py'
+      - '.github/workflows/millennium-docx-library.yml'
+  pull_request:
+    paths:
+      - 'docs/research/papers/millennium/**'
+      - 'scripts/millennium_docx.py'
+      - '.github/workflows/millennium-docx-library.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build and verify editable library
+        run: |
+          if test -f docs/research/papers/millennium/docx/RH/RH-001.docx; then
+            python scripts/millennium_docx.py --verify
+          else
+            python scripts/millennium_docx.py --emit-base64
+          fi
+      - name: Upload complete editable paper library
+        uses: actions/upload-artifact@v4
+        with:
+          name: millennium-docx-library
+          path: docs/research/papers/millennium/docx/
+          if-no-files-found: error

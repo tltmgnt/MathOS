@@ -27,3 +27,7 @@ Future papers increment the per-track identifier, cite the previous note, and di
 | [HODGE-002](HODGE-002.md) | Catalan basis for primitive middle cohomology on even products of projective lines | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45363907650) |
 | [BSD-002](BSD-002.md) | Odd/even extension-field observability of a quadratic twist at a good prime | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45363907650) |
 | [POINCARE-002](POINCARE-002.md) | Sharp comparison obstruction when cumulative surgery distortion suppresses extinction forcing | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45363907650) |
+
+## Editable DOCX library
+
+[Open the seven-track Word document library](docx/README.md). Every future numbered milestone must include its editable copy, checked against the canonical Markdown.
