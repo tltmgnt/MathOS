@@ -59,6 +59,9 @@ jobs:
           python -m unittest discover -s tests -p 'test_tga_proctor_blind_parity.py' -v
           python -m mathos.research.tga_proctor_blind_parity > artifacts/pnp-f030/f032-blind-controls.json
           cat artifacts/pnp-f030/f032-blind-controls.json
+          python -m unittest discover -s tests -p 'test_tga_proctor_hybrid_sat.py' -v
+          python -m mathos.research.tga_proctor_hybrid_sat > artifacts/pnp-f030/f032-hybrid-controls.json
+          cat artifacts/pnp-f030/f032-hybrid-controls.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
