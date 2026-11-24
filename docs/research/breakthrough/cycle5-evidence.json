@@ -1,0 +1,231 @@
+{
+  "source_commit": "fb4c9faa5cf8a32c286996e80ce443d6ad0b48fe",
+  "workflow_run": 45372843485,
+  "job_id": 138371235038,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "cycle": 5,
+    "open_obligations": 14,
+    "results": {
+      "PNP-B005": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "PNP.sat_runtime",
+          "outcome": "FALSIFIED_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "cases": [
+            {
+              "n": 2,
+              "visible_bits": 4,
+              "input_and_clauses": 6,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 4,
+              "unique_witnesses": 4,
+              "forbidden_assignments": 6
+            },
+            {
+              "n": 3,
+              "visible_bits": 6,
+              "input_and_clauses": 9,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 13,
+              "unique_witnesses": 13,
+              "forbidden_assignments": 28
+            },
+            {
+              "n": 4,
+              "visible_bits": 8,
+              "input_and_clauses": 12,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 40,
+              "unique_witnesses": 40,
+              "forbidden_assignments": 120
+            },
+            {
+              "n": 5,
+              "visible_bits": 10,
+              "input_and_clauses": 15,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 121,
+              "unique_witnesses": 121,
+              "forbidden_assignments": 496
+            },
+            {
+              "n": 6,
+              "visible_bits": 12,
+              "input_and_clauses": 18,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 364,
+              "unique_witnesses": 364,
+              "forbidden_assignments": 2016
+            },
+            {
+              "n": 7,
+              "visible_bits": 14,
+              "input_and_clauses": 21,
+              "input_xor_rows": 1,
+              "minimum_projected_clauses": 1093,
+              "unique_witnesses": 1093,
+              "forbidden_assignments": 8128
+            }
+          ],
+          "affine_hull": "full",
+          "general_sat_lower_bound_proved": false
+        }
+      },
+      "BSD-B005": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "BSD.analytic_selmer",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "curve": "E_41",
+          "ordinary_local_certificates": [
+            {
+              "p": 5,
+              "point_count": 8,
+              "trace": -2,
+              "P": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 1
+              },
+              "Q": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 3
+              },
+              "kernel_vector_mod_p": [
+                3,
+                4
+              ]
+            },
+            {
+              "p": 13,
+              "point_count": 20,
+              "trace": -6,
+              "P": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 8
+              },
+              "Q": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 4
+              },
+              "kernel_vector_mod_p": [
+                4,
+                5
+              ]
+            },
+            {
+              "p": 17,
+              "point_count": 20,
+              "trace": -2,
+              "P": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 12
+              },
+              "Q": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 14
+              },
+              "kernel_vector_mod_p": [
+                14,
+                5
+              ]
+            },
+            {
+              "p": 29,
+              "point_count": 20,
+              "trace": 10,
+              "P": {
+                "valuation": 2,
+                "parameter_over_p_mod_p": 0
+              },
+              "Q": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 20
+              },
+              "kernel_vector_mod_p": [
+                20,
+                0
+              ]
+            },
+            {
+              "p": 37,
+              "point_count": 40,
+              "trace": -2,
+              "P": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 35
+              },
+              "Q": {
+                "valuation": 1,
+                "parameter_over_p_mod_p": 35
+              },
+              "kernel_vector_mod_p": [
+                35,
+                2
+              ]
+            }
+          ],
+          "excluded_primes": [
+            {
+              "p": 3,
+              "point_count": 4,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 7,
+              "point_count": 8,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 11,
+              "point_count": 12,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 19,
+              "point_count": 20,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 23,
+              "point_count": 24,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 31,
+              "point_count": 32,
+              "trace": 0,
+              "reason": "p<5 or supersingular"
+            },
+            {
+              "p": 41,
+              "reason": "bad reduction"
+            }
+          ],
+          "analytic_rank_from_cycle4": 2,
+          "rational_rank_from_cycle4": 2,
+          "theorem": "Castella CM Theorem B (2026-02-13), conditional on admissible auxiliary characters",
+          "implication": "Kato nonvanishing iff p-primary Sha finite on E_41; neither side computed",
+          "kato_nonvanishing_established": false,
+          "odd_primary_sha_finiteness_established": false
+        }
+      }
+    }
+  }
+}
