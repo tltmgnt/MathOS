@@ -1,0 +1,17 @@
+{
+  "claim_id": "NS.critical_bound",
+  "outcome": "FALSIFIED_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "statement": "The exact kinetic-energy and enstrophy scalar balances, imposed on smooth solenoidal periodic paths, do not by themselves imply finite L4_t L6_x norm or time-integrable critical high-strain threshold.",
+  "hypotheses": "Fixed viscosity nu>0; periodic smooth fields for t<T; scalar balances only, not assumed momentum PDE.",
+  "definitions": "K=integral |u|²; E=integral |curl u|²; D=integral |grad curl u|²; S=integral omega dot (omega dot grad)u.",
+  "source_locators": "NS-B001 localized seed; Tao arXiv:1402.0290 (related energy-only obstruction); Prodi-Serrin survey doi:10.1007/s00028-020-00645-3.",
+  "proof_or_gap": "Choose positive stretching compact seed W, rescale amplitude to satisfy S-nu D=nu E²/K, then let lambda'=2nu E/K lambda³. The concentrated path satisfies both scalar identities exactly; critical spacetime norm and required high-strain threshold integral diverge. No momentum PDE is established.",
+  "implication_to_claim": "Rules out deriving the registered critical bound using just these scalar balances and spatial solenoidality, even with finite integrated enstrophy.",
+  "unproved_dependencies": "Actual PDE-dependent constraint excluding this concentrating behavior, or direct proof of integrable critical threshold for actual solutions.",
+  "adversarial_findings": "Path is not established as a Navier-Stokes solution. No singularity of the actual equation claimed. Exact rational checks use arbitrary constants, not measured seed values.",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED"
+}
