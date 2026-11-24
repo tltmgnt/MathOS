@@ -71,10 +71,11 @@ def check(r, root, now=None):
     summary=[]
     for c in claims:
         k=c['id']; s=c['state']; ev=bound[k]; blockers=[]
-        v=[e for e in ev if e['kind']=='validation' and e['result']=='PASS']
+        v=[e for e in ev if e['kind']=='validation' and e['result']=='PASS' and e['scope']==c['scope']]
         attacks={e['attack_class'] for e in ev if e['kind']=='attack' and e['result']=='PASS'}
         if s not in ('GENERATED','UNVERIFIED','CONTESTED'):
-            if not v: blockers.append('NO_VALIDATION')
+            if not v: blockers.append('NO_SCOPED_VALIDATION')
+            if any(e['kind'] in ('validation','reproduction','attack') and e['result']=='FAIL' and e['scope']==c['scope'] for e in ev): blockers.append('UNRESOLVED_FAILED_EVIDENCE')
             if any(e['kind']=='contradiction' and e['result']=='PASS' for e in ev): blockers.append('UNRESOLVED_CONTRADICTION')
             if any(byid[d]['state'] not in ('SUPPORTED','ADVERSARIAL_TEST','REPRODUCED','VALIDATED','STABLE','ASSURED') for d in c['dependencies']): blockers.append('UNVERIFIED_DEPENDENCY')
         if s in ('ADVERSARIAL_TEST','REPRODUCED','VALIDATED','STABLE','ASSURED') and attacks!=ATTACKS: blockers.append('ATTACK_COVERAGE_MISSING')
@@ -99,6 +100,17 @@ def selftest():
         assert check(r,root)['result']=='REGISTER_CONSISTENT_NOT_ASSURED'
         bad=copy.deepcopy(r); bad['claims'][0]['state']='SUPPORTED'
         try: check(bad,root); raise AssertionError('unsupported promotion accepted')
+        except ValueError: pass
+        # A hash-valid PASS from another scope must not promote a claim.
+        bad=copy.deepcopy(r); bad['claims'][0]['state']='SUPPORTED'
+        e={'id':'validation','claim_id':'test','claim_version':1,'kind':'validation','result':'PASS','actor':'synthetic','source_id':'source','method':'synthetic','group':'synthetic','scope':'other scope','assumptions':'synthetic','observed_at':'2020-01-01T00:00:00Z','expires_at':'2100-01-01T00:00:00Z','artifact_path':'source','sha256':hashlib.sha256((root/'source').read_bytes()).hexdigest()}
+        bad['evidence']=[e]
+        try: check(bad,root); raise AssertionError('out-of-scope validation accepted')
+        except ValueError: pass
+        e['scope']='test'
+        assert check(bad,root)['claims'][0]['declared_state']=='SUPPORTED'
+        bad['evidence'].append(dict(e,id='failed-validation',result='FAIL'))
+        try: check(bad,root); raise AssertionError('conflicting failure ignored')
         except ValueError: pass
         bad=copy.deepcopy(r); bad['canonical_tect']['version']='9.0'
         try: check(bad,root); raise AssertionError('authority drift accepted')
