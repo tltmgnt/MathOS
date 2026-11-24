@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Execute adversarial controls against a copy of actual claim evidence."""
+import argparse
 import copy
 import json
 from pathlib import Path
@@ -116,4 +117,10 @@ def run():
 
 
 if __name__ == '__main__':
-    print(json.dumps(run(), indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true')
+    args = parser.parse_args()
+    report = run()
+    if args.check and report != json.loads((ROOT / 'evidence_tect/adversarial-validation.json').read_text()):
+        raise SystemExit('adversarial evidence report mismatch')
+    print(json.dumps(report, indent=2))

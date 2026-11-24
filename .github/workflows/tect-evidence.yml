@@ -18,7 +18,7 @@ jobs:
           CXX: clang++
         run: python3 evidence_tect/validate_polynomials.py --check
       - name: Replay adversarial controls on actual claim and C++ mutant
-        run: python3 evidence_tect/adversarial.py
+        run: python3 evidence_tect/adversarial.py --check
       - name: Verify scoped claim register (not scientific assurance)
         run: python3 evidence_tect/check.py
       - name: Compile and run bounded C++17 reference model

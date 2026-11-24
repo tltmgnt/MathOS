@@ -9,3 +9,4 @@ Each paper must include the question, specific contribution, mathematical statem
 | ID | Title | Evidence |
 |---|---|---|
 | M001 | [Exact finite-domain validation of a C++ polynomial multiplication kernel](M001-exact-polynomial-validation.md) | [Successful CI](https://github.com/tltmgnt/MathOS/actions/runs/45361551662) |
+| M002 | [Fail-closed adversarial testing and cross-compiler replay](M002-adversarial-cross-compiler.md) | [Successful CI](https://github.com/tltmgnt/MathOS/actions/runs/45362051952) |

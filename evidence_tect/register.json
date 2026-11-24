@@ -36,7 +36,7 @@
         "Integer evaluation at five distinct points determines a polynomial of degree at most four.",
         "Empty vectors represent the zero polynomial with the implementation's empty-result convention."
       ],
-      "state": "SUPPORTED",
+      "state": "ADVERSARIAL_TEST",
       "dependencies": [],
       "deployment_authorized": false
     }
@@ -75,6 +75,60 @@
       "expires_at": "2027-11-24T00:00:00Z",
       "artifact_path": "evidence_tect/polynomial-validation.json",
       "sha256": "e5fe13b2c6bb9fd3f4ce7bde4d7613ad8d0f2d6a9b5871f81c4468da40b92200"
+    },
+    {
+      "id": "bounded-polynomial-source_poisoning-20261124",
+      "claim_id": "bounded-polynomial-multiply",
+      "claim_version": 1,
+      "kind": "attack",
+      "attack_class": "source_poisoning",
+      "result": "PASS",
+      "actor": "GitHub Actions repository-local adversarial replay (not externally authenticated)",
+      "source_id": "https://github.com/tltmgnt/MathOS/actions/runs/45362051952/job/138334290303",
+      "method": "Tampered artifact and path traversal rejected.",
+      "group": "repository-local-validation",
+      "scope": "C++17 polynomial multiplication: all ordered pairs of coefficient vectors of lengths 0 through 3, integer coefficients -2 through 2",
+      "assumptions": "Synthetic perturbations target this claim and its evidence gate; no independent reproduction or comprehensive security guarantee.",
+      "observed_at": "2026-11-24T09:06:48Z",
+      "expires_at": "2027-11-24T00:00:00Z",
+      "artifact_path": "evidence_tect/adversarial-validation.json",
+      "sha256": "11c48ea9d536ad7fa9760abaab2f50fedeebcf23d52175db66ff049e1650b5da"
+    },
+    {
+      "id": "bounded-polynomial-contradiction_injection-20261124",
+      "claim_id": "bounded-polynomial-multiply",
+      "claim_version": 1,
+      "kind": "attack",
+      "attack_class": "contradiction_injection",
+      "result": "PASS",
+      "actor": "GitHub Actions repository-local adversarial replay (not externally authenticated)",
+      "source_id": "https://github.com/tltmgnt/MathOS/actions/runs/45362051952/job/138334290303",
+      "method": "Unresolved contradiction and failed attack evidence rejected.",
+      "group": "repository-local-validation",
+      "scope": "C++17 polynomial multiplication: all ordered pairs of coefficient vectors of lengths 0 through 3, integer coefficients -2 through 2",
+      "assumptions": "Synthetic perturbations target this claim and its evidence gate; no independent reproduction or comprehensive security guarantee.",
+      "observed_at": "2026-11-24T09:06:48Z",
+      "expires_at": "2027-11-24T00:00:00Z",
+      "artifact_path": "evidence_tect/adversarial-validation.json",
+      "sha256": "11c48ea9d536ad7fa9760abaab2f50fedeebcf23d52175db66ff049e1650b5da"
+    },
+    {
+      "id": "bounded-polynomial-assumption_violation-20261124",
+      "claim_id": "bounded-polynomial-multiply",
+      "claim_version": 1,
+      "kind": "attack",
+      "attack_class": "assumption_violation",
+      "result": "PASS",
+      "actor": "GitHub Actions repository-local adversarial replay (not externally authenticated)",
+      "source_id": "https://github.com/tltmgnt/MathOS/actions/runs/45362051952/job/138334290303",
+      "method": "Out-of-scope, stale and expired evidence rejected; compiled incorrect arithmetic mutation detected.",
+      "group": "repository-local-validation",
+      "scope": "C++17 polynomial multiplication: all ordered pairs of coefficient vectors of lengths 0 through 3, integer coefficients -2 through 2",
+      "assumptions": "Synthetic perturbations target this claim and its evidence gate; no independent reproduction or comprehensive security guarantee.",
+      "observed_at": "2026-11-24T09:06:48Z",
+      "expires_at": "2027-11-24T00:00:00Z",
+      "artifact_path": "evidence_tect/adversarial-validation.json",
+      "sha256": "11c48ea9d536ad7fa9760abaab2f50fedeebcf23d52175db66ff049e1650b5da"
     }
   ],
   "reviews": []
