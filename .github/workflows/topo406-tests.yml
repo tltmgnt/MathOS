@@ -201,7 +201,7 @@ jobs:
     permissions:
       contents: read
     env:
-      HF_HOME: ${{ runner.temp }}/mathos-hf
+      HF_HOME: ${{ github.workspace }}/.hf-cache
       HF_HUB_DISABLE_TELEMETRY: '1'
     steps:
       - uses: actions/checkout@v4
