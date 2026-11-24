@@ -1,0 +1,35 @@
+name: Millennium breakthrough cycle 3 (momentum and Weil coupling)
+on:
+  push:
+    paths:
+      - 'mathos/research/breakthrough_cycle3.py'
+      - 'tests/test_breakthrough_cycle3.py'
+      - 'docs/research/breakthrough/*B003*'
+      - '.github/workflows/millennium-breakthrough-cycle3.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/breakthrough_cycle3.py'
+      - 'tests/test_breakthrough_cycle3.py'
+      - 'docs/research/breakthrough/*B003*'
+      - '.github/workflows/millennium-breakthrough-cycle3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_cycle3.py' -v
+      - run: |
+          mkdir -p artifacts/breakthrough-cycle3
+          python -m mathos.research.breakthrough_cycle3 > artifacts/breakthrough-cycle3/report.json
+          cat artifacts/breakthrough-cycle3/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-cycle3-evidence
+          path: artifacts/breakthrough-cycle3/report.json
+          if-no-files-found: error
