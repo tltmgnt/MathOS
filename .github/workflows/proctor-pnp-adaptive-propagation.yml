@@ -23,6 +23,7 @@ on:
       - 'formal/ProctorEnvelopeRoundtrip.lean'
       - 'formal/ProctorEnvelopeRoundtripMain.lean'
       - 'formal/ProctorDimacsInput.lean'
+      - 'formal/ProctorDimacsLexical.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -51,6 +52,7 @@ on:
       - 'formal/ProctorEnvelopeRoundtrip.lean'
       - 'formal/ProctorEnvelopeRoundtripMain.lean'
       - 'formal/ProctorDimacsInput.lean'
+      - 'formal/ProctorDimacsLexical.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -189,6 +191,9 @@ jobs:
           bash scripts/build_proctor_dimacs_checker.sh artifacts/pnp-f030/f034-dimacs-combined.lean
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-dimacs-combined.lean -- --fixtures artifacts/pnp-f030/f034-dimacs-fixtures 2>&1 | tee artifacts/pnp-f030/f034-dimacs-kernel.txt
           grep -Fx 'F034_DIMACS_REPLAY_OK cases=73 parsed=56 accepted=22 rejected=51' artifacts/pnp-f030/f034-dimacs-kernel.txt
+          cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsMain.lean > artifacts/pnp-f030/f034-dimacs-lexical-combined.lean
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-dimacs-lexical-combined.lean -- --fixtures artifacts/pnp-f030/f034-dimacs-fixtures 2>&1 | tee artifacts/pnp-f030/f034-dimacs-lexical-kernel.txt
+          grep -Fx 'F034_DIMACS_REPLAY_OK cases=73 parsed=56 accepted=22 rejected=51' artifacts/pnp-f030/f034-dimacs-lexical-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -214,6 +219,7 @@ jobs:
           groups.append(("ProctorWireRoundtrip", "f034-wire-kernel.txt", ("nat_roundtrip", "bool_roundtrip", "items_roundtrip", "list_roundtrip", "literal_roundtrip", "clause_roundtrip", "formula_roundtrip", "expected_roundtrip", "expected_exact", "scan_word", "scan_words", "tokenize_words", "expected_bytes_roundtrip")))
           groups.append(("ProctorEnvelopeRoundtrip", "f034-envelope-kernel.txt", ("seq_roundtrip", "ref_roundtrip", "group_roundtrip", "capacity_roundtrip", "block_roundtrip", "step_roundtrip", "terminal_roundtrip", "proof_roundtrip", "envelope_roundtrip", "envelope_bytes_roundtrip", "scan_converse", "tokenize_converse", "wire_iff")))
           groups.append(("ProctorDimacsInput", "f034-dimacs-kernel.txt", ("row_sound", "row_complete", "rows_sound", "rows_complete", "decode_sound", "decode_complete", "accepted_decoded", "accepted_unsat", "accepted_binding")))
+          groups.append(("ProctorDimacsLexical", "f034-dimacs-lexical-kernel.txt", ("split_sound", "split_complete", "header_sound", "header_complete", "prefix_sound", "prefix_complete", "natural_iff", "signed_sound", "signed_complete", "signed_words_sound", "signed_words_complete", "numbers_sound", "numbers_complete", "lex_sound", "lex_complete", "raw_decode_iff", "raw_accepted_unsat")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -288,6 +294,10 @@ jobs:
           report["f034_dimacs_fixture_count"] = 73
           report["f034_dimacs_token_grammar_gate"] = True
           report["f034_dimacs_raw_lexer_refinement_verified"] = False
+          report["f034_dimacs_raw_scope"] = "STRICT_COMMENT_FREE_RAW_BYTE_GRAMMAR_ONLY"
+          report["f034_dimacs_raw_source_sha256"] = hashlib.sha256(Path("formal/ProctorDimacsLexical.lean").read_bytes()).hexdigest()
+          report["f034_dimacs_raw_lexer_refinement_verified"] = True
+          report["f034_dimacs_full_standard_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - uses: actions/upload-artifact@v4
