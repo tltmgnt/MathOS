@@ -20,11 +20,12 @@ theorem extend_forced (rules : List Rule) (known body : List Nat) (head : Nat)
     (hs : Forced rules known) (hr : (body, some head) ∈ rules)
     (hb : ∀ v, v ∈ body → v ∈ known) : Forced rules (head :: known) := by
   intro v hv x hx
-  cases List.mem_cons.mp hv with
-  | inl he =>
-    subst v
+  -- Eliminate inductive membership directly; avoid the propext
+  -- dependency of the library's mem_cons equivalence.
+  cases hv with
+  | head =>
     exact hx (body, some head) hr (fun w hw => hs w (hb w hw) x hx)
-  | inr ht =>
+  | tail _ ht =>
     exact hs v ht x hx
 
 theorem conflict_refutes (rules : List Rule) (known body : List Nat)
