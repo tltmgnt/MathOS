@@ -84,7 +84,9 @@ def solve(n, clauses, node_limit=1024):
     ids, cs, rows, bags = scope_bags(n, clauses)
     g = topology(bags)
     if not g["gap"]:
-        result = tree.solve(len(ids), cs, bags, g["edges"])
+        result = tree.solve(len(ids), tuple(cs[i] for i, _ in rows), bags, g["edges"])
+        if result["sat"] and not evaluate(cs, result["witness"]):
+            raise AssertionError("original witness failed")
         return dict(status="SAT" if result["sat"] else "UNSAT",
                     method="JOIN_TREE", ids=ids, topology=g, evidence=result)
     result = adaptive.solve(n, tuple(tuple(ids[abs(l)-1] if l > 0 else -ids[abs(l)-1]
@@ -94,7 +96,7 @@ def solve(n, clauses, node_limit=1024):
 
 
 def verify(n, clauses, result):
-    ids, cs, _, bags = scope_bags(n, clauses)
+    ids, cs, rows, bags = scope_bags(n, clauses)
     try:
         if tuple(result["ids"]) != ids:
             return False
@@ -107,7 +109,8 @@ def verify(n, clauses, result):
         if result["method"] == "JOIN_TREE" and g["gap"] == 0:
             if e["sat"] is not (result["status"] == "SAT"):
                 return False
-            return tree.verify(len(ids), cs, bags, g["edges"], e)
+            return (tree.verify(len(ids), tuple(cs[i] for i, _ in rows), bags, g["edges"], e)
+                    and (not e["sat"] or evaluate(cs, e["witness"])))
         if result["method"] == "ADAPTIVE" and g["gap"] > 0:
             original = tuple(tuple(ids[abs(l)-1] if l > 0 else -ids[abs(l)-1]
                                    for l in c) for c in cs)
