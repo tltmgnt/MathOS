@@ -22,7 +22,10 @@ theorem pure_negative_preserves (x rest : Bool) :
 theorem false_residual_refutes (a b c : Bool)
     (ha : a = false) (hb : b = false) (hc : c = false) :
     (a || b || c) = false := by
-  rw [ha, hb, hc]
+  cases ha
+  cases hb
+  cases hc
+  rfl
 
 theorem split_refutes (p : Bool → Prop)
     (hf : ¬ p false) (ht : ¬ p true) : ¬ ∃ b : Bool, p b := by
