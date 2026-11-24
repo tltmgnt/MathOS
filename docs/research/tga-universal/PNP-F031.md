@@ -51,11 +51,12 @@ handoff reports the following, without source or raw artifacts:
 
 ## Formally verified
 
-The new declarations are candidates until the actual pinned Lean replay
-and strict axiom gate succeed. The local execution environment had no Lean
+The four new declarations passed the pinned Lean replay and strict axiom
+ gate in PR #145: run 45436519279, job 138595697242, artifact 14939909674.
+Lean 4.14.0 returned exit code 0 with all eleven declarations axiom-free.
+The 74 inherited F025 controls also passed. The local execution environment had no Lean
 or elan and could not resolve github.com for a git checkout. No local
-kernel output is claimed. Check the PR's actual CI run and artifacts
-before promoting this section. No executable partition, certificate
+kernel output is claimed. Evidence: https://github.com/tltmgnt/MathOS/actions/runs/45436519279/job/138595697242 . No executable partition, certificate
 checker, search algorithm or machine-cost refinement is formally proved
 by these semantic declarations.
 
@@ -103,3 +104,38 @@ the stated component-aware policy has not been constructed. F032 remains
 a separate incomplete experimental track. Require pinned zero-axiom Lean
 and actual CI run IDs, then explicit bit-cost analysis and independent
 review before accepting F031. No global promotion.
+
+## Native follow-up (not the scratch port)
+
+PR #145 was merged into the F030 branch at e7e593fc53a3045a5ea43de700e52f221f161ebd.
+This follow-up deliberately implements a separate adapter using repository
+sources, since the six scratch modules remain unavailable. It does root-only
+decomposition using F025 partition and F030 sparse normalization and solve.
+It accepts signed CNF of width 0–3, pads nonempty short clauses by repeating
+their final literal, and treats empty clauses as direct refutations.
+Wider clauses are rejected. Smallest components are tried first; the global
+F030 search-node budget is decremented across calls. An empty formula may
+return SAT without a search node; a zero budget always yields UNKNOWN.
+
+SAT witnesses are checked against the original clauses. UNSAT evidence is
+either an original empty-clause index or a sorted set of original clause
+indices and the F030 refutation of that subset. The outer verifier does not
+reconstruct the partition: a refuted subset suffices by monotonicity.
+It reuses F030's verifier and the input normalizer, so independent code
+review and kernel refinement of the executable remain open.
+
+New controls: 600 deterministic random sparse formulas compared with brute
+force, 600 zero-budget checks, direct tamper tests, and F030's existing
+disjoint UNSAT and connected SAT families at t=1,2,4,6,8. The connected
+SAT control checks that root splitting gives no gain when there is one
+component; it is not Claude's missing connected adversary. No finite result
+is claimed until the new CI logs report it.
+
+Cost accounting: nodes are explicitly abstract search nodes, not bit steps.
+For a supplied root partition with component variable counts r_j, complete
+search needs at most sum_j (2^(r_j+1)-1) nodes, since each F030 search
+splits on a previously unassigned variable. A global node limit also bounds
+their sum. This is a schedule bound only. Sparse normalization, partition,
+sort, propagation, recognition, Horn closure, stack and certificate storage,
+replay and serialization are additional costs. No total machine-model
+complexity theorem or general connected search bound is claimed.
