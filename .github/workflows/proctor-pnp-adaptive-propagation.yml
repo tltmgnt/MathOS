@@ -150,7 +150,7 @@ jobs:
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-unified-combined.lean 2>&1 | tee artifacts/pnp-f030/f034-unified-kernel.txt
           grep -Fx 'F034_UNIFIED_REPLAY_OK cases=53' artifacts/pnp-f030/f034-unified-kernel.txt
           cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorDataParserMain.lean > artifacts/pnp-f030/f034-data-combined.lean
-          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-data-combined.lean --fixtures artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-data-kernel.txt
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-data-combined.lean -- --fixtures artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-data-kernel.txt
           grep -Fx 'F034_DATA_REPLAY_OK cases=67 accepted=19 rejected=48' artifacts/pnp-f030/f034-data-kernel.txt
           python - <<'PY'
           import hashlib
