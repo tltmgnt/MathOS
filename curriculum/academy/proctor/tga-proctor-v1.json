@@ -1,0 +1,239 @@
+{
+  "course_id": "TGA-PROCTOR-501",
+  "version": 1,
+  "status": "CURRICULUM_PLAN_ONLY",
+  "duration_weeks": 12,
+  "hours_per_week": [
+    8,
+    10
+  ],
+  "prerequisites": [
+    "MathOS proof analysis and verification or documented equivalent",
+    "Python 3.11 and basic mathematical proof literacy",
+    "One advanced mathematical specialization or supervised equivalent"
+  ],
+  "source_commit": "0f58d3b468ff5a13986e14bd916de496dea5c223",
+  "automatic_completion": false,
+  "external_validation_established": false,
+  "independent_review_policy": "NONBLOCKING_FOR_RESEARCH_NOT_A_SUBSTITUTE_FOR_ASSESSMENT",
+  "weeks": [
+    {
+      "week": 1,
+      "title": "Target literacy",
+      "outcome": "Distinguish official problem, modeled route, open leaf and scoped result.",
+      "lab": "Extract RH and BSD core statements from CLAY_FULL_TARGETS and U003; identify quantifiers and the refined BSD distinction.",
+      "deliverable": "Two target cards with exact assumptions, source locator, missing theorem and one non-implication.",
+      "boundary": "Reject any claim that all seven problems are currently unsolved; Poincaré is externally established."
+    },
+    {
+      "week": 2,
+      "title": "AND/OR graph semantics",
+      "outcome": "Compute minimal completion and blocking sets by hand and by code.",
+      "lab": "Use A AND B OR C as a toy route, then run joint_gap and compare hand-derived counts.",
+      "deliverable": "Route graph, eight modeled joint sets, seven common leaves, minimal transversal explanation.",
+      "boundary": "Do not interpret modeled counts as mathematical necessity or percent solved."
+    },
+    {
+      "week": 3,
+      "title": "Proof anatomy and quantifiers",
+      "outcome": "Locate an unsupported inference and state its exact missing hypothesis.",
+      "lab": "Trace the U002 tail-Hankel implication and identify the unbounded d quantifier; contrast a fixed finite test.",
+      "deliverable": "Numbered proof outline, dependency labels and one repaired statement.",
+      "boundary": "Finite positive matrices cannot certify every dimension."
+    },
+    {
+      "week": 4,
+      "title": "Adversarial mathematics",
+      "outcome": "Produce a mathematically decisive negative control for a supplied claim.",
+      "lab": "Reproduce U003 synthetic negative Hankel form and the Kummer identical-pairing control; explain scope.",
+      "deliverable": "Exact calculation, expected output, observed output and falsification boundary.",
+      "boundary": "Synthetic spectra are not actual xi zero data; square of a Hodge class does not imply its algebraicity."
+    },
+    {
+      "week": 5,
+      "title": "Agent role supervision",
+      "outcome": "Evaluate planner, deriver, adversary and synthesizer outputs independently of agreement.",
+      "lab": "Run offline TGA agent once; annotate four role handoffs and draft an adversarial critique of a proposed lemma.",
+      "deliverable": "Role trace, critique, remaining gap and suggested next attack.",
+      "boundary": "Offline fixture is not live AI research; no model agreement establishes proof."
+    },
+    {
+      "week": 6,
+      "title": "Tool requests and exact evidence",
+      "outcome": "Validate finite mathematical requests and reproduce results independently.",
+      "lab": "Use check_request for a rational determinant, Hankel form and CNF; include malformed request and oversize rejection.",
+      "deliverable": "Inputs, exact answers, rejection controls and explicit evidence scope.",
+      "boundary": "Do not execute model-authored commands; a bounded UNSAT result is not a general lower bound."
+    },
+    {
+      "week": 7,
+      "title": "Checkpoint and provenance",
+      "outcome": "Detect inconsistent source hashes, state transitions, calls and candidate classifications.",
+      "lab": "Resume an offline batch; inspect state.json; use proctor audit on a copied checkpoint and mutate one evidence field.",
+      "deliverable": "Pinned commit, file digests, call accounting, accepted structural audit and rejected mutation.",
+      "boundary": "Do not modify original research records or public proof register; a hash is not authorship authentication."
+    },
+    {
+      "week": 8,
+      "title": "Deployment and incident control",
+      "outcome": "Configure budgeted research and recover safely from failure.",
+      "lab": "Explain main-only live workflow and secret handling; simulate interrupted and malformed-response attempts using offline tests.",
+      "deliverable": "Runbook, budget calculation, interruption report and safe resume decision.",
+      "boundary": "No live API required; no secret in submissions; no automatic paid schedule."
+    },
+    {
+      "week": 9,
+      "title": "Specialist track practicum",
+      "outcome": "Audit a research argument in one of six unresolved tracks or reconstruct Poincaré as an external benchmark.",
+      "lab": "Use a track-specific exercise below; compare a source theorem with the precise hypothesis and find a limitation.",
+      "deliverable": "Two verified source locators, theorem statement, dependency matrix and substantive skeptical challenge.",
+      "boundary": "A known special case is not a universal result or literature novelty."
+    },
+    {
+      "week": 10,
+      "title": "Formal proof and acceptance",
+      "outcome": "Separate checked formal terms, unproved axioms, source hypotheses and natural-language plans.",
+      "lab": "Prove a small supporting lemma by hand; if using Lean, record exact statement, toolchain, assumptions and actual checker output. Inspect a deliberately missing assumption.",
+      "deliverable": "Small lemma proof, assumption audit and verification boundary; explicit NOT_PERFORMED if no formal checker ran.",
+      "boundary": "Never treat sorry/admit, an invented axiom, or an AI verdict as a kernel proof."
+    },
+    {
+      "week": 11,
+      "title": "Research dossier and moderation",
+      "outcome": "Assemble evidence and defend a pass/revise decision for research process quality.",
+      "lab": "Audit one fresh agent packet, reproduce permitted checks, document failed attempts and classify remaining gaps.",
+      "deliverable": "Markdown/DOCX research dossier, evidence manifest, feedback and revision plan.",
+      "boundary": "Do not award proof status or expose private learner records."
+    },
+    {
+      "week": 12,
+      "title": "Proctored capstone",
+      "outcome": "Independently operate and critique one full bounded research batch.",
+      "lab": "Closed-AI oral scope questions, open-resource practical audit, then explain the first unresolved theorem and next falsifiable attack.",
+      "deliverable": "Observed session record, final dossier, independent calculations and oral defense.",
+      "boundary": "A course pass is not Clay certification, proof validity or independent educational validation."
+    }
+  ],
+  "tracks": [
+    {
+      "track": "Riemann",
+      "source": "U002-RH / U003",
+      "exercise": "State the sparse-shift Hankel criterion; demonstrate a negative form on synthetic moments and distinguish it from actual xi evidence."
+    },
+    {
+      "track": "P versus NP",
+      "source": "PNP-B005 / B006",
+      "exercise": "Prove the disjoint-block solver reduction; explain why overlapping gates and unrestricted runtime remain unresolved."
+    },
+    {
+      "track": "Navier–Stokes",
+      "source": "TGA-U001 / NS-B002",
+      "exercise": "Derive the conditional Gronwall continuation inequality and distinguish it from a universal critical bound."
+    },
+    {
+      "track": "Yang–Mills",
+      "source": "TGA-U001 / YM transfer probe",
+      "exercise": "Prove the dense-sector spectral estimate implication; exhibit why one-channel decay is insufficient."
+    },
+    {
+      "track": "Hodge",
+      "source": "U002-HODGE / U003",
+      "exercise": "Explain the determinant-square cycle and Kummer detecting cycle, including why the family does not cover general K3 surfaces."
+    },
+    {
+      "track": "BSD",
+      "source": "BSD-B006 / TGA-U001",
+      "exercise": "Explain finite primary Sha and the Selmer corank sequence; identify the missing universal rank theorem and all-prime support distinction."
+    },
+    {
+      "track": "Poincaré",
+      "source": "External result ledger / simplicial sphere probe",
+      "exercise": "Reconstruct one documented proof dependency and explain why mod-2 homology does not characterize S³. No new unsolved conjecture."
+    }
+  ],
+  "modules": [
+    {
+      "id": "M1",
+      "weeks": [
+        1,
+        2
+      ],
+      "title": "Target and topology audit",
+      "points": 10,
+      "rubric": "Exact statement and scope (4); AND/OR derivation (4); source traceability (2)."
+    },
+    {
+      "id": "M2",
+      "weeks": [
+        3,
+        4
+      ],
+      "title": "Proof and falsification audit",
+      "points": 10,
+      "rubric": "Proof dependency analysis (4); exact negative control (4); scope (2)."
+    },
+    {
+      "id": "M3",
+      "weeks": [
+        5,
+        6
+      ],
+      "title": "AI and computational evidence audit",
+      "points": 10,
+      "rubric": "Role critique (4); exact tool replay (4); tool boundary (2)."
+    },
+    {
+      "id": "M4",
+      "weeks": [
+        7,
+        8
+      ],
+      "title": "Provenance and operations audit",
+      "points": 10,
+      "rubric": "Checkpoint audit (4); mutation/recovery (4); secret and budget controls (2)."
+    },
+    {
+      "id": "M5",
+      "weeks": [
+        9,
+        10
+      ],
+      "title": "Specialist and formal-proof audit",
+      "points": 10,
+      "rubric": "Mathematical reasoning (4); source/assumption audit (4); verification boundary (2)."
+    },
+    {
+      "id": "M6",
+      "weeks": [
+        11,
+        12
+      ],
+      "title": "Dossier and proctor conduct audit",
+      "points": 10,
+      "rubric": "Reproducible dossier (4); revision quality (4); ethical scope (2)."
+    }
+  ],
+  "capstone": {
+    "points": 40,
+    "dimensions": {
+      "oral_scope": 10,
+      "practical_replay": 10,
+      "adversarial_mathematics": 10,
+      "dossier_and_defense": 10
+    }
+  },
+  "decision": {
+    "minimum_total": 80,
+    "minimum_module": 7,
+    "minimum_capstone": 30,
+    "critical_gates": [
+      "No false mathematical or educational certification",
+      "No fabricated source, checker run, review or evidence",
+      "No secret or identifiable learner data exposure",
+      "No execution of arbitrary model-authored commands",
+      "No unauthorized change to protected proof register"
+    ],
+    "assessment": "ACCOUNTABLE_HUMAN_PROCTOR",
+    "software_awards_completion": false
+  }
+}
