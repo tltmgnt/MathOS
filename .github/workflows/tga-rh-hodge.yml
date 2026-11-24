@@ -1,0 +1,35 @@
+name: TGA xi arithmetic and K3 determinant research
+on:
+  push:
+    paths:
+      - 'docs/research/tga-universal/**'
+      - 'mathos/research/tga_rh_hodge.py'
+      - 'tests/test_tga_rh_hodge.py'
+      - '.github/workflows/tga-rh-hodge.yml'
+  pull_request:
+    paths:
+      - 'docs/research/tga-universal/**'
+      - 'mathos/research/tga_rh_hodge.py'
+      - 'tests/test_tga_rh_hodge.py'
+      - '.github/workflows/tga-rh-hodge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          mkdir -p artifacts/tga-rh-hodge
+          python -m mathos.research.tga_rh_hodge > artifacts/tga-rh-hodge/report.json
+          cat artifacts/tga-rh-hodge/report.json
+      - run: python -m unittest discover -s tests -p 'test_tga_rh_hodge.py' -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-rh-hodge-evidence
+          path: artifacts/tga-rh-hodge/report.json
+          if-no-files-found: error

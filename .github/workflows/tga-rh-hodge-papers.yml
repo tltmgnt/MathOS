@@ -1,0 +1,35 @@
+name: TGA research note document validation
+on:
+  push:
+    paths:
+      - 'docs/research/tga-universal/**'
+      - '.github/workflows/tga-rh-hodge-papers.yml'
+  pull_request:
+    paths:
+      - 'docs/research/tga-universal/**'
+      - '.github/workflows/tga-rh-hodge-papers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  papers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import verify
+          for p in sorted(Path('docs/research/tga-universal').glob('TGA-U*.md')):
+              d=p.with_suffix('.docx')
+              verify(p,d)
+              print('PASS',d)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-research-notes
+          path: docs/research/tga-universal/*.docx
+          if-no-files-found: error

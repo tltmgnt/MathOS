@@ -1,0 +1,71 @@
+# An explicit algebraic determinant-square correspondence on powers of K3 surfaces
+
+**MathOS TGA-U002-HODGE | 24 November 2026 | Research note, Hodge conjecture not solved**
+
+## 1. Target
+
+TGA-U001 proved that the full rational Hodge conjecture follows from algebraic representatives for every rational primitive Hodge class. Here we specialize to a smooth complex projective K3 surface S and construct an actual algebraic cycle for the square of a particular primitive determinant class. The class itself remains the missing geometric input. This is a reconstruction of classical projector and invariant-theoretic identities, not a claim of literature novelty.
+
+Let N=NS(S)_Q be the rational Néron–Severi space and T=N-perp⊂H²(S,Q) its transcendental part, with nondegenerate cup-product pairing q. Let r=dim_Q T. For any rational basis e_1,...,e_r define δ∈T^(⊗r)⊂H^(2r)(S^r,Q) by
+
+δ=Σ_(σ∈S_r) sgn(σ)e_(σ(1))⊗...⊗e_(σ(r)).
+
+The determinant line is rational and of Hodge type (r,r), since T has Hodge numbers (1,r−2,1). Thus δ is a nonzero rational Hodge class. It is primitive for the product ample class h=Σ_i pr_i* h_S: every vector in T pairs trivially with h_S, so cupping with h annihilates the tensor. This is a genuine middle-degree primitive class on a smooth projective variety, not a synthetic vector-space example.
+
+## 2. Actual algebraic transcendental projector
+
+Choose divisor classes D_1,...,D_ρ forming a basis of N, and fix a closed point o∈S. The intersection matrix B=(D_i·D_j) is rational and invertible by the Hodge index theorem. In CH²(S×S)_Q form the algebraic correspondence
+
+P_T=Δ_S−[o×S]−[S×o]−Σ_(i,j)(B^(-1))_(ij)[D_i×D_j].
+
+The K3 has no odd cohomology; Poincaré duality and the Künneth formula identify the cohomology class of its diagonal with the inverse pairings in degrees 0/4, 2/2 and 4/0. The first two point terms remove degrees 0/4 and 4/0, and the divisor sum is the inverse pairing on N. By the orthogonal direct sum H²=N⊕T, the cohomology class of P_T is exactly the inverse pairing tensor Q^(-1) in T⊗T, where Q=(q(e_i,e_j)). Equivalently it acts as the identity on T and zero on its complement. No Chow-level idempotence is required, only the cohomological identity.
+
+## 3. Algebraic determinant square
+
+For each permutation σ∈S_r let p_(i,r+σ(i)):S^(2r)→S×S project to those two indexed factors. Define the rational algebraic cycle of codimension 2r
+
+Z=Σ_(σ∈S_r) sgn(σ) ∏_(i=1)^r p_(i,r+σ(i))* P_T.
+
+Products and pullbacks are defined in the Chow ring of the smooth projective product. Its class lies in T^(⊗r)⊗T^(⊗r). In the chosen tensor basis indexed by tuples a=(a_1,...,a_r), b=(b_1,...,b_r), the coefficient of cl(Z) is
+
+det((Q^(-1))_(a_i,b_j))_(1≤i,j≤r).
+
+It vanishes if either tuple repeats an index (equal rows or columns). Otherwise each tuple is a permutation, and the determinant equals det(Q^(-1)) times the product of the two permutation signs. Therefore
+
+cl(Z)=det(Q^(-1)) δ⊗δ.
+
+Since det Q is a nonzero rational number, the cycle (det Q) Z represents δ⊗δ exactly. This is an explicit algebraic cycle in every transcendental rank. It is a square, not a representative of δ itself.
+
+## 4. Exact obstruction to taking the square root
+
+Let W be any algebraic cycle of codimension r on S^r. Write its cohomology class w. If the pairing ∫_(S^r) δ∪w is nonzero, compose the determinant-square cycle with W: intersect with the pullback of W on the second group of factors, then push forward to the first. The projection formula gives
+
+cl((pr_1)_*(((det Q)Z)·pr_2*W)) = (∫ δ∪w) δ.
+
+Dividing by the nonzero rational scalar proves algebraicity of δ. Conversely, if δ is algebraic then one can take W representing δ, since ∫δ²=r! det Q≠0. Thus detecting δ by one algebraic middle cycle is equivalent to its algebraicity. Having δ⊗δ algebraic does not itself furnish that detecting cycle.
+
+There is an exact symmetry barrier to producing δ using only the already constructed pairing cycles. The orthogonal group O(T,q) fixes the pairing tensor Q^(-1), acts trivially on N and the degree-zero and degree-four factors, and preserves the cohomology ring of S. The divisor, point and diagonal constructions and the tensor products, permutations, contractions and sums built from them are equivariant for this action. But any orthogonal reflection (there exists a nonisotropic rational vector by nondegeneracy) has determinant −1 and sends δ to −δ. Hence this particular collection of generators cannot produce a nonzero δ component. The square δ⊗δ is invariant. This is a generator obstruction, not a proof that δ is nonalgebraic. Other cycles could have the required orientation-sensitive component.
+
+## 5. Relation to the known all-powers reduction
+
+If End_Hdg(T)=Q, Zarhin's theorem identifies the Hodge group of T (after Tate twist) with SO(T,q). The first fundamental theorem of orthogonal invariant theory says that invariants in tensor powers of the standard SO representation are generated by pairings and the determinant tensor, using permutations and contractions. For r≥3 this gives the known equivalence: the rational Hodge conjecture for every power S^m holds if and only if δ is algebraic on S^r. Indeed all other Künneth factors of K3 cohomology are algebraic Tate factors, the pairings are represented by P_T, and if δ has a representative then products and correspondences realize all these invariants. Conversely δ is one of the Hodge classes on S^r. This is the established determinant reduction studied by Varesco; the present note makes the square cycle and detection condition explicit.
+
+For m<r the invariant theorem needs only pairings, so the rational Hodge conjecture holds on these powers for this endomorphism-field case, without assuming algebraicity of δ. A very general polarized K3 of Picard rank one has r=21 and rational endomorphism field; the missing class is then on S^21, a variety of dimension 42. The square cycle on S^42 is already explicit by the formula above, but it does not address algebraicity of δ on S^21.
+
+## 6. Executable controls and limitations
+
+The companion code tests the exact determinant identity on abstract rational diagonal quadratic forms of ranks 2,3,4,5, with nontrivial signs and denominators. It checks all pairs of permutations (4,36,576,14400 respectively) plus repeated-index zero controls. These are algebraic identity regressions, not computations of K3 periods, Chow classes, or new algebraic cycle detection. The actual cycle construction in section 3 is justified by the universal cohomological determinant argument.
+
+Next: construct an algebraic cycle with nonzero pairing against δ, perhaps through an independently justified correspondence to another variety whose determinant-line cycle is known. Such a correspondence must be genuinely algebraic, not merely a Hodge map or a square-root argument. The full Hodge conjecture would further require every variety and primitive class, not just these powers.
+
+## References and reproduction
+
+Yu. G. Zarhin, Hodge groups of K3 surfaces, J. reine angew. Math. 341 (1983), 193–220, https://doi.org/10.1515/crll.1983.341.193.
+
+M. Varesco, The Hodge conjecture for powers of K3 surfaces of Picard number 16, https://arxiv.org/abs/2203.09778 ; Hodge similarities, algebraic classes, and Kuga–Satake varieties, https://arxiv.org/abs/2304.02519. Classical first fundamental theorem for the special orthogonal group, Hodge index theorem, Künneth formula and cycle-class compatibility.
+
+MathOS TGA-U001, primitive reduction. Pinned calculation source: e2da79ba836c37b5177fe205dc462ef7cbd8e54c. Replay: https://github.com/tltmgnt/MathOS/actions/runs/45377339649.
+
+Run: python -m unittest discover -s tests -p 'test_tga_rh_hodge.py' -v
+
+No independent review performed. HODGE.primitive_cycles remains open; no universal conjecture or canonical obligation is promoted.

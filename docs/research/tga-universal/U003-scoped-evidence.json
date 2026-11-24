@@ -1,0 +1,180 @@
+{
+  "source_commit": "08c5478f919d63a55c1109f96a76b46cb8d174b9",
+  "workflow_run": 45378742710,
+  "job_id": 138391878977,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "canonical_open_obligations": 14,
+    "rh": {
+      "synthetic_shift_controls": [
+        {
+          "shift": 4,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 6,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 8,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 10,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 12,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 14,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 16,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 18,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 20,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 22,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 24,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 26,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 28,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 30,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 32,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 34,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 36,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 38,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 40,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 42,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 44,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 46,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 48,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 50,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 52,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 54,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 56,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 58,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 60,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 62,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        },
+        {
+          "shift": 64,
+          "degree": 3,
+          "negative_form_lt": "-1"
+        }
+      ],
+      "positive_controls": 10,
+      "actual_zeta_zero_locations_used": false,
+      "RH_proved": false
+    },
+    "hodge": {
+      "alternating_coefficient": "-1/2",
+      "permutation_checks": 576,
+      "nonzero_terms": 12,
+      "same_pairing_negative_control": true,
+      "scope": "Kummer of product of two nonisogenous non-CM elliptic curves; proof in paper",
+      "universal_hodge_proved": false
+    }
+  }
+}
