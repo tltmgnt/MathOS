@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "scope": "CYCLE_6_DEFINED_USE_CASES_ONLY",
+  "independent_review": "NOT_PERFORMED_NONBLOCKING",
+  "global_promotion": "NONE",
+  "canonical_open_obligations": 14,
+  "source_commit": "dac9239e4bd2787e373a11322e4d8dbb3dd986d2",
+  "workflow_run": 45374313360,
+  "cases": [
+    {
+      "id": "PNP-AND-XOR",
+      "status": "COMPLETED_SCOPED",
+      "paper": "PNP-B006",
+      "claim": "PNP.sat_runtime"
+    },
+    {
+      "id": "BSD-E41-P5",
+      "status": "COMPLETED_SCOPED_UNDER_CITED_THEOREMS",
+      "paper": "BSD-B006",
+      "claim": "BSD.analytic_selmer"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "source_commit": "dac9239e4bd2787e373a11322e4d8dbb3dd986d2",
+  "workflow_run": 45374313360,
+  "job_id": 138376299519,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "cycle": 6,
+    "open_obligations": 14,
+    "results": {
+      "PNP-B006": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "PNP.sat_runtime",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "exhaustive_cases": 3375,
+          "sat": 2121,
+          "unsat": 1254,
+          "large": [
+            {
+              "blocks": 16,
+              "sat_row_xors": 0,
+              "unsat_row_xors": 1
+            },
+            {
+              "blocks": 64,
+              "sat_row_xors": 0,
+              "unsat_row_xors": 1
+            },
+            {
+              "blocks": 256,
+              "sat_row_xors": 0,
+              "unsat_row_xors": 1
+            },
+            {
+              "blocks": 1024,
+              "sat_row_xors": 0,
+              "unsat_row_xors": 1
+            }
+          ],
+          "empty_block_control": true,
+          "tampered_certificates_rejected": 2,
+          "use_case_completed": true,
+          "general_sat_runtime_proved": false
+        }
+      },
+      "BSD-B006": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "BSD.analytic_selmer",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "curve": "E_41",
+          "analytic_rank": 2,
+          "mordell_weil_rank": 2,
+          "ordinary_prime": 5,
+          "good_reduction_order": 8,
+          "certificate": {
+            "terms": 5000,
+            "root_number_of_weight6_form": -1,
+            "center_derivative_test_integer_interval": [
+              "-5132450162614958813659008444241805303762070918209441442606808212040066",
+              "-5132450162614958813659008444241798781066613870341214026239884408156759"
+            ],
+            "fixed_point_scale": "100000000000000000000000000000000000000000000000000000000000000000",
+            "scaled_integer": "7123579054258805066956800",
+            "scale_denominator": "84448070452814184185856",
+            "scaled_interval_integer_endpoints": [
+              "712357905425880506695679999999999999999928884549072542144453815086288999672446304196231168",
+              "712357905425880506695680000000000000000071115450927457855550194388709034413712136309047296"
+            ],
+            "normalized_hecke_value": "141800/1681",
+            "scaled_integer_mod_125": 50,
+            "valuation_at_5": 2,
+            "tail_bound_lt": "1e-35",
+            "integer_reconstruction": "unique integer in rigorous interval, conditional on stated trace identity"
+          },
+          "sha_5_primary_trivial_under_CLS_theorem": true,
+          "selmer_5_infty_corank": 2,
+          "all_prime_sha_finiteness_proved": false
+        }
+      }
+    }
+  }
+}

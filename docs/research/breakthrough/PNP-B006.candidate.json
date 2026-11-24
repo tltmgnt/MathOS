@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "claim_id": "PNP.sat_runtime",
+  "statement": "The disjoint two-input AND block and arbitrary affine output coupling use case is decidable in polynomial total bit complexity with SAT witnesses or XOR inconsistency certificates.",
+  "hypotheses": "Disjoint local blocks with explicitly allowed input pairs and no cross-block constraints except affine equations on their AND outputs.",
+  "definitions": "Project each local block onto a one-bit allowed set, add singleton equations, solve GF(2) system, lift witness.",
+  "source_locators": "PNP-B005; self-contained proof and standard Gaussian elimination.",
+  "proof_or_gap": "Independence of block inputs gives exact lift of any output solution; row provenance gives 0=1 refutation if inconsistent. Polynomial bit complexity, no projected CNF materialization.",
+  "implication_to_claim": "Completes the specified use case, not arbitrary SAT.",
+  "unproved_dependencies": "Arbitrary overlapping gate networks and nonaffine cross-block constraints.",
+  "adversarial_findings": "Empty local domain and contradictory XOR rows rejected; exhaustive small cases compared to brute force."
+}

@@ -1,0 +1,35 @@
+name: Millennium breakthrough cycle 6 (completed use cases)
+on:
+  push:
+    paths:
+      - 'mathos/research/breakthrough_cycle6.py'
+      - 'tests/test_breakthrough_cycle6.py'
+      - 'docs/research/breakthrough/*B006*'
+      - '.github/workflows/millennium-breakthrough-cycle6.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/breakthrough_cycle6.py'
+      - 'tests/test_breakthrough_cycle6.py'
+      - 'docs/research/breakthrough/*B006*'
+      - '.github/workflows/millennium-breakthrough-cycle6.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_breakthrough_cycle6.py' -v
+      - run: |
+          mkdir -p artifacts/breakthrough-cycle6
+          python -m mathos.research.breakthrough_cycle6 > artifacts/breakthrough-cycle6/report.json
+          cat artifacts/breakthrough-cycle6/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-cycle6-evidence
+          path: artifacts/breakthrough-cycle6/report.json
+          if-no-files-found: error

@@ -1,0 +1,46 @@
+name: Breakthrough end-to-end completion gate
+on:
+  push:
+    paths:
+      - 'docs/research/breakthrough/**'
+      - 'docs/research/BREAKTHROUGH*'
+      - 'mathos/research/breakthrough*.py'
+      - 'tests/test_breakthrough*.py'
+      - '.github/workflows/breakthrough-completion.yml'
+      - 'scripts/millennium_docx.py'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+  pull_request:
+    paths:
+      - 'docs/research/breakthrough/**'
+      - 'docs/research/BREAKTHROUGH*'
+      - 'mathos/research/breakthrough*.py'
+      - 'tests/test_breakthrough*.py'
+      - '.github/workflows/breakthrough-completion.yml'
+      - 'scripts/millennium_docx.py'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  completion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Regression suite
+        run: python -m unittest discover -s tests -p 'test_breakthrough*.py' -v
+      - name: Replay exact evidence and check all committed papers
+        run: |
+          mkdir -p artifacts/completion
+          python -m mathos.research.breakthrough_completion > artifacts/completion/report.json
+          cat artifacts/completion/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: breakthrough-end-to-end
+          path: |
+            artifacts/completion/report.json
+            docs/research/breakthrough/*.docx
+            docs/research/breakthrough/cycle6-*.json
+          if-no-files-found: error

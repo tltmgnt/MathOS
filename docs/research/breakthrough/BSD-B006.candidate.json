@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "claim_id": "BSD.analytic_selmer",
+  "statement": "E_41 has trivial 5-primary Sha by the Coates–Liang–Sujatha criterion; normalized fifth Hecke L-value has 5-adic valuation two.",
+  "hypotheses": "Classical CM Hecke modularity, corrected trace identity and CLS Theorem 2.2, prior rank-two certificate; explicitly justified denominator and interval enclosure.; corrected denominator is 24*8*82^5*164^5.",
+  "definitions": "c5=(least real period)^(-5)L(bar psi^5,5); weight-six form, rational scaled integer certificate.",
+  "source_locators": "Coates–Liang–Sujatha arXiv:0901.3832 Thm 2.2; arXiv:1005.4206 correction after eq.79 and trace formula; BSD-B004.",
+  "proof_or_gap": "The fifth power keeps CM finite character, conductor unchanged. Determine sign by nonzero center derivative combination. Exponential Mellin series with outward rounded fixed point and rigorous tails. Trace integrality bounds denominator, unique integer residue 50 modulo 125 using corrected Gaussian-integer denominator. Theorem applies at nonanomalous good ordinary 5.",
+  "implication_to_claim": "Closes p=5 use case subject to established cited theorems, no general rank theorem.",
+  "unproved_dependencies": "Other odd primes and horizontal all-prime finiteness; admissible generalized Kato auxiliary choices not constructed.",
+  "adversarial_findings": "Not an analytic Sha estimate or assumption of BSD; unique integer step uses trace denominator theorem, not arbitrary rational recognition."
+}
