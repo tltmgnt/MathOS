@@ -70,6 +70,9 @@ jobs:
           python -m unittest discover -s tests -p 'test_tga_proctor_hall.py' -v
           python -m mathos.research.tga_proctor_hall > artifacts/pnp-f030/f033-hall-controls.json
           cat artifacts/pnp-f030/f033-hall-controls.json
+          python -m unittest discover -s tests -p 'test_tga_proctor_signed_hall.py' -v
+          python -m mathos.research.tga_proctor_signed_hall > artifacts/pnp-f030/f033-signed-controls.json
+          cat artifacts/pnp-f030/f033-signed-controls.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
