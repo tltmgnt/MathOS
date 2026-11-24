@@ -24,6 +24,7 @@ on:
       - 'formal/ProctorEnvelopeRoundtripMain.lean'
       - 'formal/ProctorDimacsInput.lean'
       - 'formal/ProctorDimacsLexical.lean'
+      - 'formal/ProctorCheckerCost.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -53,6 +54,7 @@ on:
       - 'formal/ProctorEnvelopeRoundtripMain.lean'
       - 'formal/ProctorDimacsInput.lean'
       - 'formal/ProctorDimacsLexical.lean'
+      - 'formal/ProctorCheckerCost.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -137,6 +139,8 @@ jobs:
           python -m mathos.research.tga_proctor_data_fixtures artifacts/pnp-f030/f034-data-fixtures
           python -m unittest discover -s tests -p 'test_tga_proctor_dimacs_fixtures.py' -v
           python -m mathos.research.tga_proctor_dimacs_fixtures artifacts/pnp-f030/f034-dimacs-fixtures
+          python -m unittest discover -s tests -p 'test_tga_proctor_checker_cost.py' -v
+          python -m mathos.research.tga_proctor_checker_cost > artifacts/pnp-f030/f034-checker-cost.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
@@ -194,6 +198,8 @@ jobs:
           cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsMain.lean > artifacts/pnp-f030/f034-dimacs-lexical-combined.lean
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-dimacs-lexical-combined.lean -- --fixtures artifacts/pnp-f030/f034-dimacs-fixtures 2>&1 | tee artifacts/pnp-f030/f034-dimacs-lexical-kernel.txt
           grep -Fx 'F034_DIMACS_REPLAY_OK cases=73 parsed=56 accepted=22 rejected=51' artifacts/pnp-f030/f034-dimacs-lexical-kernel.txt
+          cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCheckerCost.lean > artifacts/pnp-f030/f034-cost-combined.lean
+          lean -DwarningAsError=true artifacts/pnp-f030/f034-cost-combined.lean 2>&1 | tee artifacts/pnp-f030/f034-cost-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -220,6 +226,7 @@ jobs:
           groups.append(("ProctorEnvelopeRoundtrip", "f034-envelope-kernel.txt", ("seq_roundtrip", "ref_roundtrip", "group_roundtrip", "capacity_roundtrip", "block_roundtrip", "step_roundtrip", "terminal_roundtrip", "proof_roundtrip", "envelope_roundtrip", "envelope_bytes_roundtrip", "scan_converse", "tokenize_converse", "wire_iff")))
           groups.append(("ProctorDimacsInput", "f034-dimacs-kernel.txt", ("row_sound", "row_complete", "rows_sound", "rows_complete", "decode_sound", "decode_complete", "accepted_decoded", "accepted_unsat", "accepted_binding")))
           groups.append(("ProctorDimacsLexical", "f034-dimacs-lexical-kernel.txt", ("split_sound", "split_complete", "header_sound", "header_complete", "prefix_sound", "prefix_complete", "natural_iff", "signed_sound", "signed_complete", "signed_words_sound", "signed_words_complete", "numbers_sound", "numbers_complete", "lex_sound", "lex_complete", "raw_decode_iff", "raw_accepted_unsat")))
+          groups.append(("ProctorCheckerCost", "f034-cost-kernel.txt", ("lookup_value", "lookup_bound", "contains_value", "contains_bound", "shape_value", "shape_bound")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -298,6 +305,11 @@ jobs:
           report["f034_dimacs_raw_source_sha256"] = hashlib.sha256(Path("formal/ProctorDimacsLexical.lean").read_bytes()).hexdigest()
           report["f034_dimacs_raw_lexer_refinement_verified"] = True
           report["f034_dimacs_full_standard_verified"] = False
+          report["f034_cost_scope"] = "LOCAL_PRIMITIVE_METERS_AND_SELECTED_STRUCTURAL_LEDGER"
+          report["f034_cost_source_sha256"] = hashlib.sha256(Path("formal/ProctorCheckerCost.lean").read_bytes()).hexdigest()
+          report["f034_cost_ledger_sha256"] = hashlib.sha256((out / "f034-checker-cost.json").read_bytes()).hexdigest()
+          report["f034_total_cost_semantics_verified"] = False
+          report["f034_bit_machine_refinement_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
       - uses: actions/upload-artifact@v4
