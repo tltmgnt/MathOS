@@ -1,0 +1,42 @@
+name: Proctor GF2 polynomial cost model
+on:
+  push:
+    paths:
+      - 'formal/ProctorGF2Cost.lean'
+      - 'mathos/research/tga_proctor_gf2_cost.py'
+      - 'tests/test_tga_proctor_gf2_cost.py'
+      - 'docs/research/tga-universal/PNP-F010.md'
+      - '.github/workflows/proctor-gf2-cost.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorGF2Cost.lean'
+      - 'mathos/research/tga_proctor_gf2_cost.py'
+      - 'tests/test_tga_proctor_gf2_cost.py'
+      - 'docs/research/tga-universal/PNP-F010.md'
+      - '.github/workflows/proctor-gf2-cost.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_gf2_cost.py' -v
+      - run: python -m mathos.research.tga_proctor_gf2_cost --output-dir artifacts/gf2-cost
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f010-evidence
+          path: artifacts/gf2-cost/
+          if-no-files-found: error
