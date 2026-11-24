@@ -172,7 +172,7 @@ def poincare():
     # Exact rational toy replay in r=(t+C)^(1/4), normalized width V/(16π).
     # Each step has dr=1, smooth slope <= -1, jump multiplier (1+xi)^2.
     v=F(5);P=F(1);weighted=F(5);rows=[]
-    for j in range(1,20):
+    for j in range(1,42):
         v-=1
         weighted-=1/P
         require(v/P==weighted,'integrating-factor identity')
@@ -183,7 +183,7 @@ def poincare():
         P*=factor;v*=factor
         rows.append({'step':j,'rescaled_width':str(v),'product':str(P)})
     require(v<0,'toy extinction contradiction not reached')
-    return {'conditional_only':True,'toy_first_negative_step':j,'rows':rows}
+    return {'conditional_only':True,'toy_first_negative_step':j,'final_rescaled_width_sign':'negative','steps_checked':len(rows)}
 
 
 def run():
