@@ -38,7 +38,7 @@ def exp_negative(x):
     return r
 
 
-def xi_moments(steps=4096):
+def xi_moments(steps=65536):
     # Integrate t in [0,2], with steps intervals and n=1,...,5.
     # The common factor 2 in the xi cosine kernel cancels on normalization.
     pi=atan(5).scaled(16)-atan(239).scaled(4)
