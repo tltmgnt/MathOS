@@ -18,7 +18,8 @@ theorem dot_add_right_scope (a b c : List Bool) :
     dot a (addVec b c) = bx (dot a b) (dot a c) :=
   (dot_comm_scope a (addVec b c)).trans
     ((dot_add b c a).trans
-      (congrArg₂ bx (dot_comm_scope b a) (dot_comm_scope c a)))
+      ((congrArg (fun v => bx v (dot c a)) (dot_comm_scope b a)).trans
+        (congrArg (bx (dot a b)) (dot_comm_scope c a))))
 
 def combine (a b c : List Bool) : List Bool := addVec (addVec a b) c
 
