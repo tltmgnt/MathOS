@@ -1,0 +1,42 @@
+name: Proctor PNP bitmask and domain encoding
+on:
+  push:
+    paths:
+      - 'formal/ProctorPNPEncoding.lean'
+      - 'mathos/research/tga_proctor_pnp_encoding.py'
+      - 'tests/test_tga_proctor_pnp_encoding.py'
+      - 'docs/research/tga-universal/PNP-F006.md'
+      - '.github/workflows/proctor-pnp-encoding.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorPNPEncoding.lean'
+      - 'mathos/research/tga_proctor_pnp_encoding.py'
+      - 'tests/test_tga_proctor_pnp_encoding.py'
+      - 'docs/research/tga-universal/PNP-F006.md'
+      - '.github/workflows/proctor-pnp-encoding.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_pnp_encoding.py' -v
+      - run: python -m mathos.research.tga_proctor_pnp_encoding --output-dir artifacts/pnp-encoding
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f006-evidence
+          path: artifacts/pnp-encoding/
+          if-no-files-found: error
