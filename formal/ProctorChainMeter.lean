@@ -31,6 +31,7 @@ def parentBudget (f : Formula) (i : Nat) (t : Clause) : Nat :=
 theorem parent_value (f : Formula) (i : Nat) (p : Literal) (t : Clause) :
     (parentMeter f i p t).1 = parentCheck f i p t := by
   unfold parentMeter parentCheck
+  dsimp only
   rw [lookup_value]
   cases lookup f i with
   | none => rfl
@@ -39,6 +40,7 @@ theorem parent_value (f : Formula) (i : Nat) (p : Literal) (t : Clause) :
 theorem parent_bound (f : Formula) (i : Nat) (p : Literal) (t : Clause) :
     (parentMeter f i p t).2 ≤ parentBudget f i t := by
   unfold parentMeter parentBudget
+  dsimp only
   rw [lookup_value]
   cases lookup f i with
   | none => exact lookup_bound f i
@@ -60,7 +62,9 @@ theorem step_value (f : Formula) (s : Step) :
   | none => rfl
   | some a =>
     cases lookup f s.right with
-    | none => cases shapeCheck (s.pivot,true) s.tail a <;> rfl
+    | none =>
+      change (shapeCheck (s.pivot,true) s.tail a && false) = false
+      exact Bool.and_false _
     | some _ => rfl
 
 theorem step_bound (f : Formula) (s : Step) :
@@ -184,6 +188,7 @@ def refBudget (f : Formula) (r : RefRow) : Nat :=
 theorem ref_value (f : Formula) (r : RefRow) :
     (refMeter f r).1 = refCheck f r := by
   unfold refMeter refCheck
+  dsimp only
   rw [lookup_value]
   cases lookup f r.index with
   | none => rfl
@@ -192,6 +197,7 @@ theorem ref_value (f : Formula) (r : RefRow) :
 theorem ref_bound (f : Formula) (r : RefRow) :
     (refMeter f r).2 ≤ refBudget f r := by
   unfold refMeter refBudget
+  dsimp only
   rw [lookup_value]
   cases lookup f r.index with
   | none => exact lookup_bound f r.index
