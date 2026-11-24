@@ -1,0 +1,17 @@
+{
+  "claim_id": "RH.zero_identity",
+  "outcome": "FALSIFIED_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "statement": "No finite integer-order regularized Fredholm determinant of the prime-diagonal heat family det_k(I-exp(-sH)), H e_p=(log p)e_p, has zeros in its open Schatten half-plane Re s>1/k.",
+  "hypotheses": "Hilbert space ell^2 of primes; k a positive integer; standard regularized Fredholm determinant.",
+  "definitions": "H maximal real multiplication by log p; A_s=exp(-sH); det_k subtracts the first k-1 logarithmic power terms.",
+  "source_locators": "TECTX_RH_PRIME_FREDHOLM_BOUNDARY.md; NIST DLMF 25.2; https://doi.org/10.1098/rspa.2014.0597.",
+  "proof_or_gap": "H self-adjoint on weighted domain; A_s in S_k iff k Re s>1. Its norm <1. Log det_k equals a locally normally convergent negative prime-power tail. Hence det_k and its reciprocal are holomorphic nonvanishing. Adjacent orders differ by the exponential of the kth trace over their common domain.",
+  "implication_to_claim": "Rules out direct Schatten regularization of this noncircular prime family as the all-zero identity (including k>=3 across the critical line). Does not exclude other operator constructions.",
+  "unproved_dependencies": "A different arithmetic operator with a noncircular complete zero-divisor identity or independently justified global Weil positivity; multiplicities and domains.",
+  "adversarial_findings": "A prime-based self-adjoint H and a regularized determinant in the strip are insufficient: the determinant cannot carry the zero divisor. Missing scalar counterterms cannot be assumed zero-free on continuation.",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED"
+}

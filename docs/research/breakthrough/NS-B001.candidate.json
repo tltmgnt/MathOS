@@ -1,0 +1,17 @@
+{
+  "claim_id": "NS.critical_bound",
+  "outcome": "FALSIFIED_CANDIDATE",
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "statement": "At fixed viscosity and energy upper bound, a uniform pointwise enstrophy-production bound C(1+E^alpha) with alpha<3 is impossible on smooth mean-zero periodic initial data.",
+  "hypotheses": "Unforced 3D periodic Navier-Stokes; smooth solenoidal initial fields; fixed nu>0 and energy upper bound M>0.",
+  "definitions": "E=integral |curl u|^2, D=integral |grad curl u|^2, S=integral omega dot (omega dot grad)u.",
+  "source_locators": "NS-001/002/003 and Lu & Doering (2008), https://iumj.org/article/4718/; Clay announcement https://www.claymath.org/news/navier-stokes-announcement/.",
+  "proof_or_gap": "Localize a periodic positive-stretching seed by curl of a cut-off periodic vector potential; positive bulk dominates the surface layer. Choose fixed amplitude to dominate viscosity and concentrate by critical scaling. Energy decays as lambda^-1, E grows as lambda, initial E' as lambda^3. A subcubic bound fails.",
+  "implication_to_claim": "Eliminates a proposed scalar instantaneous route to NS.critical_bound; does not prove or disprove global continuation. A conditional high-strain L^(3/2) tail estimate provides a next precise target.",
+  "unproved_dependencies": "Uniform time-integrable amplitude threshold with small high-strain tail for every smooth evolution; continuation estimate under full official hypotheses.",
+  "adversarial_findings": "Concentration breaks any subcubic bound even with a uniform kinetic-energy upper bound. No dynamic blowup inferred. Prior art on cubic sharpness exists.",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED"
+}
