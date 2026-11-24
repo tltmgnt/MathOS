@@ -1,0 +1,165 @@
+{
+  "source_commit": "77aeea6ce2d0b5d17c2e2c64c2c7cb05117e70b9",
+  "workflow_run": 45368544615,
+  "job_id": 138356504100,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "open_obligations": 14,
+    "cycle": 1,
+    "results": {
+      "NS-B001": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "NS.critical_bound",
+          "outcome": "FALSIFIED_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "seed_mean_stretching": "-1/4",
+          "scaling_powers": {
+            "energy": -1,
+            "enstrophy": 1,
+            "stretching": 3,
+            "palinstrophy": 3
+          },
+          "algebraic_controls": 15,
+          "cases": [
+            {
+              "scale": 2,
+              "alpha": 0,
+              "normalized_ratio": "8"
+            },
+            {
+              "scale": 2,
+              "alpha": 1,
+              "normalized_ratio": "4"
+            },
+            {
+              "scale": 2,
+              "alpha": 2,
+              "normalized_ratio": "2"
+            },
+            {
+              "scale": 4,
+              "alpha": 0,
+              "normalized_ratio": "64"
+            },
+            {
+              "scale": 4,
+              "alpha": 1,
+              "normalized_ratio": "16"
+            },
+            {
+              "scale": 4,
+              "alpha": 2,
+              "normalized_ratio": "4"
+            },
+            {
+              "scale": 8,
+              "alpha": 0,
+              "normalized_ratio": "512"
+            },
+            {
+              "scale": 8,
+              "alpha": 1,
+              "normalized_ratio": "64"
+            },
+            {
+              "scale": 8,
+              "alpha": 2,
+              "normalized_ratio": "8"
+            },
+            {
+              "scale": 16,
+              "alpha": 0,
+              "normalized_ratio": "4096"
+            },
+            {
+              "scale": 16,
+              "alpha": 1,
+              "normalized_ratio": "256"
+            },
+            {
+              "scale": 16,
+              "alpha": 2,
+              "normalized_ratio": "16"
+            },
+            {
+              "scale": 32,
+              "alpha": 0,
+              "normalized_ratio": "32768"
+            },
+            {
+              "scale": 32,
+              "alpha": 1,
+              "normalized_ratio": "1024"
+            },
+            {
+              "scale": 32,
+              "alpha": 2,
+              "normalized_ratio": "32"
+            }
+          ],
+          "cutoff_integrals_numerically_measured": false,
+          "global_continuation_proved": false
+        }
+      },
+      "RH-B001": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "RH.zero_identity",
+          "outcome": "FALSIFIED_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "cases": [
+            {
+              "sigma": 1.25,
+              "height": 0.5,
+              "order": 1,
+              "finite_primes": 46,
+              "finite_determinant_abs": 0.44673363699975843,
+              "finite_tail_abs": 0.08957733885981374,
+              "analytic_tail_upper": 2.5955251230869387
+            },
+            {
+              "sigma": 0.5,
+              "height": 0.75,
+              "order": 3,
+              "finite_primes": 46,
+              "finite_determinant_abs": 1.1935752230865313,
+              "finite_tail_abs": 0.0060503946822704855,
+              "analytic_tail_upper": 0.32189514164974603
+            },
+            {
+              "sigma": 0.4,
+              "height": 1,
+              "order": 4,
+              "finite_primes": 46,
+              "finite_determinant_abs": 1.1016649586392648,
+              "finite_tail_abs": 0.0009755396898377446,
+              "analytic_tail_upper": 0.1645648728367679
+            },
+            {
+              "sigma": 0.25,
+              "height": 0.5,
+              "order": 5,
+              "finite_primes": 46,
+              "finite_determinant_abs": 1.2341666903298034,
+              "finite_tail_abs": 0.009349708355016122,
+              "analytic_tail_upper": 1.8908954686763286
+            }
+          ],
+          "finite_checks": 12,
+          "numerical_scope": "finite float controls, not certified interval arithmetic",
+          "global_zero_identity_proved": false
+        }
+      }
+    }
+  }
+}
