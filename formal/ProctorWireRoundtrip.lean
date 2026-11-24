@@ -29,21 +29,47 @@ def encList {α : Type} (enc : α → List Nat) (xs : List α) : List Nat :=
 def FitsList {α : Type} (fits : α → Prop) (xs : List α) : Prop :=
   xs.length ≤ listLimit ∧ ∀ a ∈ xs, fits a
 
+-- The library list identities use propext in Lean 4.14.0.
+private theorem append_nil_exact {α : Type} (xs : List α) :
+    xs ++ [] = xs := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih => exact congrArg (List.cons x) ih
+
+private theorem append_assoc_exact {α : Type} (xs ys zs : List α) :
+    (xs ++ ys) ++ zs = xs ++ (ys ++ zs) := by
+  induction xs with
+  | nil => rfl
+  | cons x xs ih => exact congrArg (List.cons x) ih
+
+-- Keep the reverse step constructive for the strict axiom audit.
+private theorem reverseAux_append {α : Type} (xs ys zs : List α) :
+    xs.reverseAux (ys ++ zs) = xs.reverseAux ys ++ zs := by
+  induction xs generalizing ys with
+  | nil => rfl
+  | cons x xs ih => exact ih (x::ys)
+
+private theorem reverse_cons_exact {α : Type} (x : α) (xs : List α) :
+    (x::xs).reverse = xs.reverse ++ [x] :=
+  reverseAux_append xs [] [x]
+
 theorem items_roundtrip {α : Type} (p : Parser α) (enc : α → List Nat)
     (xs : List α) (h : ∀ a ∈ xs, RoundTrip p a (enc a))
     (rest : List Nat) (acc : List α) :
     manyAux p xs.length (encItems enc xs ++ rest) acc =
       some (acc.reverse ++ xs,rest) := by
   induction xs generalizing acc with
-  | nil => simp only [encItems, List.nil_append, List.length_nil, manyAux, List.append_nil]
+  | nil =>
+    change some (acc.reverse,rest) = some (acc.reverse ++ [],rest)
+    exact congrArg (fun xs => some (xs,rest)) (append_nil_exact acc.reverse).symm
   | cons a as ih =>
     change (do
       let (b,ts) ← p ((enc a ++ encItems enc as) ++ rest)
       manyAux p as.length ts (b::acc)) = some (acc.reverse ++ (a::as),rest)
-    rw [List.append_assoc, h a (List.Mem.head _) (encItems enc as ++ rest)]
+    rw [append_assoc_exact, h a (List.Mem.head _) (encItems enc as ++ rest)]
     change manyAux p as.length (encItems enc as ++ rest) (a::acc) = _
     rw [ih (fun b hb => h b (List.Mem.tail _ hb)) (a::acc)]
-    rw [List.reverse_cons, List.append_assoc] <;> rfl
+    rw [reverse_cons_exact, append_assoc_exact] <;> rfl
 
 theorem list_roundtrip {α : Type} (p : Parser α) (enc : α → List Nat)
     (xs : List α) (bound : xs.length ≤ listLimit)
@@ -100,7 +126,7 @@ theorem expected_exact (n : Nat) (f : Formula) (h : FitsFormula f)
     | [] => some a
     | _::_ => none) = some (n,f)
   have ht := expected_roundtrip n f h []
-  rw [List.append_nil] at ht
+  rw [append_nil_exact] at ht
   rw [ht] <;> rfl
 
 /-- Independent inductive decimal-word grammar with an accumulated
@@ -152,10 +178,10 @@ theorem scan_words (bytes tokens : List Nat) (h : Wire bytes tokens)
     (acc : List Nat) :
     scan bytes 0 0 acc = some (acc.reverse ++ tokens) := by
   induction h generalizing acc with
-  | nil => change some acc.reverse = some (acc.reverse ++ []); rw [List.append_nil]
+  | nil => change some acc.reverse = some (acc.reverse ++ []); rw [append_nil_exact]
   | @cons digits bytes v vs word tail ih =>
     rw [scan_word 0 0 v digits word bytes acc, ih (v::acc)]
-    rw [List.reverse_cons, List.append_assoc] <;> rfl
+    rw [reverse_cons_exact, append_assoc_exact] <;> rfl
 
 theorem tokenize_words (bytes tokens : List Nat) (h : Wire bytes tokens)
     (bound : bytes.length ≤ byteLimit) : tokenize bytes = some tokens := by
