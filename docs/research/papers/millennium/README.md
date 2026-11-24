@@ -31,3 +31,15 @@ Future papers increment the per-track identifier, cite the previous note, and di
 ## Editable DOCX library
 
 [Open the seven-track Word document library](docx/README.md). Every future numbered milestone must include its editable copy, checked against the canonical Markdown.
+
+## Third-round papers
+
+| Paper | Contribution | Evidence |
+|---|---|---|
+| [RH-003](RH-003.md) | A uniform imaginary-offset bound for delayed polynomial detection in symmetric finite spectra | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [PNP-003](PNP-003.md) | Exact quadratic literal-read complexity for a fixed delayed traversal of odd parity cycles | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [NS-003](NS-003.md) | Conditional short-time enstrophy control after positive initial stretching | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [YM-003](YM-003.md) | A sharp visibility bound for separated positive spectral measures | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [HODGE-003](HODGE-003.md) | Explicit invariant and primitive divisor-product ranks on the fourth power of a non-CM elliptic curve | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [BSD-003](BSD-003.md) | Recovery of a local Euler factor from a quadratic and any odd extension trace | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |
+| [POINCARE-003](POINCARE-003.md) | Vanishing distortion at surgery times: a source-traced conditional width comparison | [Executed](https://github.com/tltmgnt/MathOS/actions/runs/45366064464) |

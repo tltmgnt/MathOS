@@ -1,0 +1,151 @@
+{
+  "source_commit": "2b5f3a9ffc3177681695afd9d471d1ca1448188a",
+  "workflow_run": 45366064464,
+  "job_id": 138347967028,
+  "report": {
+    "status": "BOUNDED_RESEARCH_NOT_CERTIFIED",
+    "globally_proved": 0,
+    "rh": {
+      "epsilon": "1/4",
+      "uniform_ceiling": "32/49",
+      "cases": 32,
+      "max_minimum_degree": 65
+    },
+    "p_vs_np": {
+      "cases": 49,
+      "largest": {
+        "n": 101,
+        "reads": 20798,
+        "full_scans_per_branch": 25,
+        "conflict_edge": 50,
+        "queue_edge_visits_upper_bound": 404
+      },
+      "formula_4k_plus_1": "8*n*k+24*k-2",
+      "formula_4k_plus_3": "8*n*(k+1)+8*k+6"
+    },
+    "navier_stokes": {
+      "initial_enstrophy_A47": "19881/2",
+      "K": "27*C^8/(128*nu^3)",
+      "conditional_bound": "E(t)<=E0/sqrt(1-2*K*E0^2*t)",
+      "illustrative_horizon_C1_nu1": "256/10671862347",
+      "young_controls": 7
+    },
+    "yang_mills": {
+      "cases": 9,
+      "inequality_checks": 36,
+      "sharp_endpoints": 9,
+      "examples": [
+        {
+          "w": "1/10",
+          "s": 0.1,
+          "f": 0.8,
+          "crossover_upper": 3.138892253
+        },
+        {
+          "w": "1/10",
+          "s": 0.25,
+          "f": 1,
+          "crossover_upper": 2.92963277
+        },
+        {
+          "w": "1/10",
+          "s": 0.5,
+          "f": 2,
+          "crossover_upper": 1.464816385
+        },
+        {
+          "w": "1/4",
+          "s": 0.1,
+          "f": 0.8,
+          "crossover_upper": 1.569446127
+        },
+        {
+          "w": "1/4",
+          "s": 0.25,
+          "f": 1,
+          "crossover_upper": 1.464816385
+        },
+        {
+          "w": "1/4",
+          "s": 0.5,
+          "f": 2,
+          "crossover_upper": 0.732408192
+        },
+        {
+          "w": "2/5",
+          "s": 0.1,
+          "f": 0.8,
+          "crossover_upper": 0.579235869
+        },
+        {
+          "w": "2/5",
+          "s": 0.25,
+          "f": 1,
+          "crossover_upper": 0.540620144
+        },
+        {
+          "w": "2/5",
+          "s": 0.5,
+          "f": 2,
+          "crossover_upper": 0.270310072
+        }
+      ]
+    },
+    "hodge": {
+      "divisor_classes": 10,
+      "products_tested": 55,
+      "degree4_invariant_dimension": 20,
+      "product_span_rank": 20,
+      "primitive_dimension": 10
+    },
+    "bsd": {
+      "prime_count": 9,
+      "odd_degrees": [
+        1,
+        3,
+        5,
+        7,
+        9
+      ],
+      "trace_degree_cases": 725,
+      "collisions": 0
+    },
+    "poincare": {
+      "source": "Kleiner-Lott Remark 73.6; Colding-Minicozzi published Theorem 1.4 and Corollary 1.7",
+      "conditional_jump_factor": 1,
+      "limit_controls": 6,
+      "examples": [
+        {
+          "j": 2,
+          "comparison_upper": "63/8",
+          "error_bound": "13/2"
+        },
+        {
+          "j": 4,
+          "comparison_upper": "325/64",
+          "error_bound": "13/4"
+        },
+        {
+          "j": 8,
+          "comparison_upper": "2025/512",
+          "error_bound": "13/8"
+        },
+        {
+          "j": 16,
+          "comparison_upper": "14161/4096",
+          "error_bound": "13/16"
+        },
+        {
+          "j": 32,
+          "comparison_upper": "105633/32768",
+          "error_bound": "13/32"
+        },
+        {
+          "j": 64,
+          "comparison_upper": "815425/262144",
+          "error_bound": "13/64"
+        }
+      ]
+    }
+  }
+}
