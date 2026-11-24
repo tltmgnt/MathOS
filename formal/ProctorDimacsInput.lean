@@ -7,7 +7,7 @@ open ProctorDataParser (byteLimit listLimit tokenize decodeEnvelope)
 open ProctorUnifiedReplay (Envelope boundCheck)
 
 def white (b : Nat) : Bool :=
-  b == 32 || b == 9 || b == 10 || b == 13
+  if b=32 ∨ b=9 ∨ b=10 ∨ b=13 then true else false
 
 def splitWords : List Nat → List Nat → List (List Nat) → List (List Nat)
   | [], word, acc =>
@@ -28,12 +28,14 @@ def naturalWord (word : List Nat) : Option Nat :=
   | _ => none
 
 def signedWord : List Nat → Option Literal
-  | 45::ds => do
-    let v ← naturalWord ds
-    if v=0 then none else some (v,false)
-  | ds => do
-    let v ← naturalWord ds
-    some (v,true)
+  | [] => none
+  | b::ds =>
+    if b=45 then do
+      let v ← naturalWord ds
+      if v=0 then none else some (v,false)
+    else do
+      let v ← naturalWord (b::ds)
+      some (v,true)
 
 def signedWords : List (List Nat) → List Literal → Option (List Literal)
   | [], acc => some acc.reverse
@@ -41,21 +43,27 @@ def signedWords : List (List Nat) → List Literal → Option (List Literal)
     let l ← signedWord w
     signedWords ws (l::acc)
 
+def stripPrefix : List Nat → List Nat → Option (List Nat)
+  | [], bytes => some bytes
+  | _::_, [] => none
+  | p::ps, b::bs => if p=b then stripPrefix ps bs else none
+
+def headerNumbers : List (List Nat) → Option (Nat × Nat)
+  | [a,b] => do
+    let n ← naturalWord a
+    let m ← naturalWord b
+    some (n,m)
+  | _ => none
+
 /-- Require an initial p cnf header ending in LF. Only numeric body
 tokens and ASCII whitespace are supported; no comments or extensions. -/
 def lexDimacs (bytes : List Nat) : Option (Nat × Nat × List Literal) := do
   if bytes.length > byteLimit then none else
   let (header,body) ← takeHeader bytes []
-  match header with
-  | 112::32::99::110::102::32::rest =>
-    match splitWords rest [] [] with
-    | [a,b] =>
-      let n ← naturalWord a
-      let m ← naturalWord b
-      let ts ← signedWords (splitWords body [] []) []
-      some (n,m,ts)
-    | _ => none
-  | _ => none
+  let rest ← stripPrefix [112,32,99,110,102,32] header
+  let (n,m) ← headerNumbers (splitWords rest [] [])
+  let ts ← signedWords (splitWords body [] []) []
+  some (n,m,ts)
 
 def parseRow (n : Nat) : List Literal → Option (Clause × List Literal)
   | [] => none
