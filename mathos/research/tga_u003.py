@@ -77,8 +77,25 @@ def orientation():
             "scope":"Kummer of product of two nonisogenous non-CM elliptic curves; proof in paper",
             "universal_hodge_proved":False}
 
+def joint_gap():
+    """All seven official targets, not the optional stronger BSD/reconstruction."""
+    from mathos.research.tga_universal_bridges import graph, brute, transversals
+    from mathos.proof_analysis.gap_analysis import Claim, analyze
+    g=graph()
+    g["RH.sparse_shift"]=Claim("For each fixed d, unbounded even shifts with PSD Hankel matrix","open")
+    g["RH"]=Claim("RH by U003 persistent obstruction theorem","derived",(("RH.sparse_shift",),))
+    g["ALL_CORE"]=Claim("All seven official targets","derived",
+        (("RH","PNP","NS","HODGE","YM","BSD.core","POINCARE.external"),))
+    r=analyze(g,"ALL_CORE")
+    sets=[set(s) for s in r["minimal_completion_sets"]]
+    assert {tuple(s) for s in r["minimal_completion_sets"]}==brute(g,"ALL_CORE")
+    return {"status":r["status"],"completion_sets":r["minimal_completion_sets"],
+            "minimal_blocking_sets":transversals(sets),
+            "common_gaps":r["common_to_all_modeled_routes"],
+            "model_only":True}
+
 def run():
     return {"status":"RESEARCH_ONLY","promotion":"NONE","canonical_open_obligations":14,
-            "rh":shifted_witness(),"hodge":orientation()}
+            "rh":shifted_witness(),"hodge":orientation(),"all_core":joint_gap()}
 
 if __name__=="__main__":print(json.dumps(run(),indent=2))
