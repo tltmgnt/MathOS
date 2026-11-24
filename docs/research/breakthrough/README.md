@@ -9,3 +9,13 @@ The next attempt remains on the two active tracks: NS time-dependent critical st
 [RH-B001 technical paper](RH-B001.md) · [Word version](RH-B001.docx)
 
 [Machine evidence](cycle1-evidence.json) · [CI execution](https://github.com/tltmgnt/MathOS/actions/runs/45368544615) · [Protocol](../BREAKTHROUGH_PROTOCOL.md)
+
+## Cycle 2 — decision record
+
+NS-B002 rules out an inference from the exact kinetic-energy and enstrophy scalar identities alone. RH-B002 derives a positive local realization of the genuine Weil form, and a strictly negative inter-window prime-coupling term; the positivity range is weaker than existing literature. No canonical obligation closed. Two attempts per active gap have now been completed. Cycle 3 should target actual momentum-dynamics restrictions and normalized cross-window control, then carry out the protocol's three-attempt review (revise, pivot or pause).
+
+[NS-B002 paper](NS-B002.md) · [Word](NS-B002.docx)
+
+[RH-B002 paper](RH-B002.md) · [Word](RH-B002.docx)
+
+[Cycle 2 machine evidence](cycle2-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45369503725)
