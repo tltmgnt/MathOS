@@ -42,9 +42,18 @@ class TestTGAAgent(unittest.TestCase):
             self.assertEqual(s["global_promotion"],"NONE")
             self.assertFalse(list(out.glob("*.docx")))
         with self.assertRaises(ValueError):a.validate("adversary",{
-            "verdict":"PROVED","first_gap":"x","counterexample_attempt":"x","next_check":"x"})
+            "verdict":"PROVED","first_gap":"x","counterexample_attempt":"x","next_check":"x","check_request":"{}"})
         with tempfile.TemporaryDirectory() as td:
             with self.assertRaises(ValueError):a.run(a.Offline(),Path(td),attempts=2,max_calls=7)
+    def test_directed_checks(self):
+        q=a.check_request('{"kind":"hankel_quadratic","moments":["1","0","-1"],"q":["0","1"]}')
+        self.assertEqual(q["result"]["value"],"-1")
+        self.assertTrue(q["result"]["negative"])
+        self.assertEqual(a.check_request('{"kind":"determinant","matrix":[["2","1"],["1","2"]]}')["result"]["value"],"3")
+        self.assertFalse(a.check_request('{"kind":"cnf","variables":1,"clauses":[[1],[-1]]}')["result"]["satisfiable"])
+        for s in ('{"kind":"shell","command":"echo BAD"}','{"kind":"cnf","variables":13,"clauses":[]}',
+                  '{"kind":"determinant","matrix":[["1/0"]]}','{"kind":"determinant","matrix":[["1000000000000"]]}'):
+            self.assertEqual(a.check_request(s)["status"],"REJECTED_INVALID_REQUEST")
     def test_interruption_accounting(self):
         with tempfile.TemporaryDirectory() as td:
             path=Path(td)/"state.json";h=a.snapshot()

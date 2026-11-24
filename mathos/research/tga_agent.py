@@ -2,6 +2,9 @@
 from __future__ import annotations
 import argparse
 from collections import Counter
+from fractions import Fraction
+from itertools import product
+import re
 import hashlib
 import json
 import os
@@ -35,7 +38,7 @@ PRIORITY=("RH.sparse_shift","HODGE.primitive","YM.uniform_dense_decay","YM.conti
 ROLES={
     "planner":("exact_statement","quantifiers","attack","required_check"),
     "deriver":("statement","derivation","dependencies","unproved_steps","source_leads"),
-    "adversary":("verdict","first_gap","counterexample_attempt","next_check"),
+    "adversary":("verdict","first_gap","counterexample_attempt","next_check","check_request"),
     "synthesizer":("disposition","revised_argument","remaining_gap","next_attack","formalization_plan"),
 }
 ENUMS={("adversary","verdict"):("REVISE","REJECT","NO_OBVIOUS_FLAW"),
@@ -43,7 +46,7 @@ ENUMS={("adversary","verdict"):("REVISE","REJECT","NO_OBVIOUS_FLAW"),
 INSTRUCTIONS={
     "planner":"Choose a direct mathematical attack on the exact open hypothesis, not another restatement. Identify all quantifiers and a decisive falsifier. Use the previous failure and propose a distinct mechanism if repeated.",
     "deriver":"Attempt the actual mathematical derivation, including a full proof if you can derive one. Give numbered logical steps, precise hypotheses, and separate established results from unsupported lemmas. Do not assume a statement equivalent to the target. If stuck, name the first missing inference.",
-    "adversary":"Audit each inference in the proposed argument. Try to construct a mathematical counterexample, especially quantifier escape, circularity, restricted-model extrapolation and wrong source hypotheses. Give REVISE, REJECT or NO_OBVIOUS_FLAW; the last is not a proof check. Do not claim execution of new tests.",
+    "adversary":"Audit each inference in the proposed argument. Try to construct a mathematical counterexample, especially quantifier escape, circularity, restricted-model extrapolation and wrong source hypotheses. Give REVISE, REJECT or NO_OBVIOUS_FLAW; the last is not a proof check. Do not claim execution of new tests. check_request must be a JSON string containing one bounded request: {\"kind\":\"none\"}; {\"kind\":\"hankel_quadratic\",\"moments\":[\"rational\",...],\"q\":[\"rational\",...]} (exactly 2*len(q)-1 moments); {\"kind\":\"determinant\",\"matrix\":[[\"rational\",...],...]}; or {\"kind\":\"cnf\",\"variables\":integer,\"clauses\":[[integer,...],...]}. All dimensions <=8 except CNF variables <=12, clauses <=64. Rational entries use integer or fraction strings with <=12 digits per part. Supply concrete bounded data, not code.",
     "synthesizer":"Revise the argument in response to the critic and the actual bounded replay. Preserve all unresolved dependencies; distinguish a full proof candidate, counterexample candidate, scoped candidate or unresolved attempt. Give the next specific attack and a formalization plan. A candidate is not an established theorem.",
 }
 MAX_BYTES=1_000_000
@@ -70,7 +73,8 @@ class Offline:
                        "source_leads":"Pinned repository sources only."},
             "adversary":{"verdict":"REVISE","first_gap":"No proof supplied by the offline fixture.",
                          "counterexample_attempt":"No model-generated counterexample attempted.",
-                         "next_check":"Seek a theorem-level argument, not numerical extrapolation."},
+                         "next_check":"Seek a theorem-level argument, not numerical extrapolation.",
+                         "check_request":'{"kind":"none"}'},
             "synthesizer":{"disposition":"UNRESOLVED","revised_argument":"Offline test of role handoffs only.",
                            "remaining_gap":statement,"next_attack":"Attempt an actual derivation with a live model.",
                            "formalization_plan":"No formal proof generated or checked."}
@@ -171,12 +175,56 @@ def load_state(path,backend,hashes,resume):
     if resume:raise ValueError("no state to resume")
     return new_state(backend,hashes)
 
-def probe(claim,baseline):
+def check_request(raw):
+    """Execute only a finite, typed, resource-bounded mathematical check."""
+    try:
+        if not isinstance(raw,str) or len(raw)>10000:raise ValueError()
+        obj=json.loads(raw)
+        if type(obj) is not dict:raise ValueError()
+        kind=obj.get("kind")
+        def rat(s):
+            if not isinstance(s,str) or not re.fullmatch(r"-?\d{1,12}(/\d{1,12})?",s):
+                raise ValueError()
+            return Fraction(s)
+        if kind=="none" and set(obj)=={"kind"}:
+            return {"status":"NOT_REQUESTED","executed":False}
+        if kind=="hankel_quadratic" and set(obj)=={"kind","moments","q"}:
+            q=obj["q"];m=obj["moments"]
+            if type(q) is not list or not 1<=len(q)<=8 or type(m) is not list or len(m)!=2*len(q)-1:
+                raise ValueError()
+            q=list(map(rat,q));m=list(map(rat,m))
+            v=sum((x*y*m[i+j] for i,x in enumerate(q) for j,y in enumerate(q)),Fraction(0))
+            result={"value":str(v),"negative":v<0}
+        elif kind=="determinant" and set(obj)=={"kind","matrix"}:
+            matrix=obj["matrix"]
+            if type(matrix) is not list or not 1<=len(matrix)<=8 or any(type(row) is not list or len(row)!=len(matrix) for row in matrix):
+                raise ValueError()
+            from mathos.research.tga_universal_bridges import det
+            result={"value":str(det([list(map(rat,row)) for row in matrix]))}
+        elif kind=="cnf" and set(obj)=={"kind","variables","clauses"}:
+            n=obj["variables"];clauses=obj["clauses"]
+            if type(n) is not int or not 1<=n<=12 or type(clauses) is not list or len(clauses)>64:
+                raise ValueError()
+            if any(type(c) is not list or len(c)>24 or any(type(l) is not int or not 1<=abs(l)<=n for l in c) for c in clauses):
+                raise ValueError()
+            witness=None
+            for bits in product((False,True),repeat=n):
+                if all(any(bits[abs(l)-1]==(l>0) for l in c) for c in clauses):
+                    witness=list(bits);break
+            result={"satisfiable":witness is not None,"witness":witness}
+        else:raise ValueError()
+        return {"status":"EXECUTED_BOUNDED_REQUEST","executed":True,"kind":kind,
+                "input":obj,"result":result,
+                "scope":"Exact check of supplied finite data only; its connection to a candidate theorem is not verified."}
+    except (ValueError,TypeError,ZeroDivisionError,RecursionError):
+        return {"status":"REJECTED_INVALID_REQUEST","executed":False}
+
+def probe(claim,baseline,request):
     prefix=claim.split(".")[0]
     item=next(x for x in baseline["experiments"] if x["model_key"]==PREFIX[prefix])
     extra=shifted_witness() if prefix=="RH" else orientation() if prefix=="HODGE" else None
     return {"probe_id":item["probe"],"baseline":item["probe_result"],"additional_control":extra,
-            "executed":True,"candidate_specific_proof_verified":False}
+            "executed":True,"directed_check":check_request(request),"candidate_specific_proof_verified":False}
 
 def plain(s):
     return " ".join(s.replace("\x60","'").replace("[","(").replace("]",")").split())
@@ -191,6 +239,7 @@ def publish(out,a,backend):
         for k,v in a["roles"][role].items():text.extend([k.replace("_"," ").capitalize()+": "+plain(v),""])
     text.extend(["## Actual bounded evidence",
                  "Registered probe: "+a["probe"]["probe_id"]+". Executed; not candidate-proof verification.",
+                 "Directed finite check: "+a["probe"]["directed_check"]["status"]+".",
                  "Full numerical/structural evidence and source hashes are in state.json.",
                  "## Scope and status",
                  "Candidate status: "+a["candidate_status"]+". Independent mathematical review: not performed. "
@@ -233,7 +282,7 @@ def run(backend,out,*,attempts=2,max_calls=8,resume=False):
         try:
             for role in ROLES:
                 if role=="synthesizer":
-                    a["probe"]=probe(claim,baseline)
+                    a["probe"]=probe(claim,baseline,a["roles"]["adversary"]["check_request"])
                     context["executed_bounded_control"]=a["probe"]
                     atomic(path,state)
                 if spent>=max_calls:raise RuntimeError("call budget exhausted")
