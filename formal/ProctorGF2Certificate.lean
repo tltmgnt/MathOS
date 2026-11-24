@@ -24,9 +24,9 @@ def shiftTag (r : Row) (rs : List Row) (t : Tagged rs id) :
     Tagged (r::rs) id :=
   ⟨t.row,false::t.weights,fun x => t.lhs_ok x,t.rhs_ok⟩
 
-def initialize : (rs : List Row) → List (Tagged rs id)
+def initTags : (rs : List Row) → List (Tagged rs id)
   | [] => []
-  | r::rs => firstTag r rs :: (initialize rs).map (shiftTag r rs)
+  | r::rs => firstTag r rs :: (initTags rs).map (shiftTag r rs)
 
 def plain {orig shift} (ts : List (Tagged orig shift)) : List Row :=
   ts.map Tagged.row
@@ -37,17 +37,18 @@ theorem plain_shift (r : Row) (rs : List Row) (ts : List (Tagged rs id)) :
   | nil => rfl
   | cons t ts ih => exact congrArg (List.cons t.row) ih
 
-theorem plain_initialize (rs : List Row) : plain (initialize rs) = rs := by
+theorem plain_initTags (rs : List Row) : plain (initTags rs) = rs := by
   induction rs with
   | nil => rfl
   | cons r rs ih =>
-    exact congrArg (List.cons r) ((plain_shift r rs (initialize rs)).trans ih)
+    exact congrArg (List.cons r) ((plain_shift r rs (initTags rs)).trans ih)
 
 def xorTag {orig shift} (p t : Tagged orig shift) : Tagged orig shift :=
   ⟨addRow p.row t.row,addVec p.weights t.weights,
     fun x => (dot_add p.weights t.weights _).trans
       ((congrArg (fun z => bx z (lhs orig t.weights x)) (p.lhs_ok x)).trans
-        (congrArg (bx (dot p.row.coeff (shift x))) (t.lhs_ok x))),
+        ((congrArg (bx (dot p.row.coeff (shift x))) (t.lhs_ok x)).trans
+          (dot_add p.row.coeff t.row.coeff (shift x)).symm)),
     (dot_add p.weights t.weights _).trans
       ((congrArg (fun z => bx z (rhs orig t.weights)) p.rhs_ok).trans
         (congrArg (bx p.row.rhs) t.rhs_ok))⟩
@@ -182,8 +183,8 @@ inductive Certified (n : Nat) (orig : List Row) : Type where
       (hl : ∀ x, x.length = n → lhs orig w x = false) : Certified n orig
 
 def certify (n : Nat) (orig : List Row) : Certified n orig :=
-  match solveCert orig n id (initialize orig) with
-  | .sat x hx hs => .sat x hx ((plain_initialize orig) ▸ hs)
+  match solveCert orig n id (initTags orig) with
+  | .sat x hx hs => .sat x hx ((plain_initTags orig) ▸ hs)
   | .unsat w hr hl => .unsat w hr hl
 
 -- Independent certificate soundness, requiring only original rows and weights.
