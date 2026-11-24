@@ -62,7 +62,7 @@ structure PackCount (n : Nat) (rs : List Row) where
   exactWork : work = rs.length*(2*n+1)
 
 def packCount (n : Nat) : (rs : List Row) → PackCount n rs
-  | [] => ⟨[],0,rfl,rfl⟩
+  | [] => ⟨[],0,rfl,by simp⟩
   | r::rs =>
     let q := packCount n rs
     ⟨rowMask n r :: q.masks,q.work+(2*n+1),
@@ -158,7 +158,10 @@ def totalSolve (ds : Domains) (rs : List MRow) (hw : InWidth ds.length rs) :
     TotalRun ds rs := by
   let p := prepCount ds rs
   let a := p.rows
-  have wa : InWidth ds.length a := p.agrees.symm ▸ augmented_width ds rs hw
+  have wa : InWidth ds.length a := by
+    change InWidth ds.length p.rows
+    rw [p.agrees]
+    exact augmented_width ds rs hw
   let s := costSolve ds.length a wa
   let c := bitCharge ds.length a.length s.visits s.collisions s.rowsSeen s.backVisits s.evaluations
   have la : a.length ≤ rs.length+ds.length := by
@@ -172,13 +175,21 @@ def totalSolve (ds : Domains) (rs : List MRow) (hw : InWidth ds.length rs) :
   | sat x hx hs =>
     have hlen := decode_length ds.length x 0
     have hsat : AllSat ((augmented ds rs).map (maskRow ds.length)) (decode ds.length x) :=
-      p.agrees ▸ (maskAll_iff ds.length a x).mp hs
+      by
+        rw [← p.agrees]
+        exact (maskAll_iff ds.length a x).mp hs
     have hh := (augmented_sat ds rs (decode ds.length x) hlen).mp hsat
     let q := liftCount ds (decode ds.length x) hh.right
     exact ⟨.sat q.result.pairs ⟨q.result.valid,q.result.output.symm ▸ hh.left⟩,
       p.work,c,q.visits,p.bound,cb,q.bound⟩
   | unsat w cert =>
-    exact ⟨.unsat w (p.agrees ▸ wt) (p.agrees ▸ cert),p.work,c,0,p.bound,cb,Nat.zero_le _⟩
+    have wb : w < 2^(augmented ds rs).length := by
+      rw [← p.agrees]
+      exact wt
+    have wc : MaskProvenance ds.length (augmented ds rs) (0,true) w := by
+      rw [← p.agrees]
+      exact cert
+    exact ⟨.unsat w wb wc,p.work,c,0,p.bound,cb,Nat.zero_le _⟩
 
 theorem totalSolve_bound (ds : Domains) (rs : List MRow) (hw : InWidth ds.length rs) :
     let t := totalSolve ds rs hw
@@ -203,7 +214,9 @@ theorem totalOutput_spec (ds : Domains) (rs : List MRow) (hw : InWidth ds.length
     | .unsat w => w < 2^(augmented ds rs).length ∧
       MaskProvenance ds.length (augmented ds rs) (0,true) w ∧ ¬ ∃ ps, OriginalSat ds rs ps := by
   unfold totalOutput
-  cases (totalSolve ds rs hw).result with
+  generalize h : totalSolve ds rs hw = t
+  obtain ⟨res,p,a,l,hp,ha,hl⟩ := t
+  cases res with
   | sat ps h => exact h
   | unsat w hb hc => exact ⟨hb,hc,augmented_refutes ds rs w hc⟩
 
