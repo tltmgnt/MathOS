@@ -1,6 +1,6 @@
 """Dynamic residual component search, with preorder UNSAT replay.
 
-Native follow-up, not the missing scratch implementation. Width <= 3.
+Native follow-up, not the missing scratch implementation. Width <= 3 by default; optional explicit wide CNF.
 Search-node budget is abstract; no universal polynomial bound.
 """
 from collections import Counter
@@ -22,8 +22,33 @@ def _compact(cs, ids):
                        for l in c) for c in cs)
 
 
+def _input(n, clauses, wide):
+    if type(wide) is not bool:
+        raise ValueError("wide must be Boolean")
+    if not wide:
+        return root._input(n, clauses)
+    if type(n) is not int or n < 0:
+        raise ValueError("invalid variable count")
+    cs = tuple(tuple(c) for c in clauses)
+    if any(type(l) is not int or not 1 <= abs(l) <= n for c in cs for l in c):
+        raise ValueError("invalid literal")
+    return cs, tuple(sorted({abs(l) for c in cs for l in c}))
+
+
+def _wide_rows(cs):
+    seen, rows = set(), []
+    for i,c in enumerate(cs):
+        key = tuple(sorted(set(c)))
+        if key not in seen and not any(-l in key for l in key):
+            seen.add(key)
+            rows.append((i,key))
+    return tuple(rows)
+
+
 def _groups(rows):
-    bad, groups = partition(tuple(root._pad(c) for _, c in rows), {})
+    # F025 partition supports arbitrary nonempty rows; its compact
+    # clause output is not used here, only original index groups.
+    bad, groups = partition(tuple(c for _, c in rows), {})
     if bad is not None:
         raise AssertionError("empty clause after simplification")
     groups = sorted(groups, key=lambda g: (len(g.variables), g.indices))
@@ -39,11 +64,11 @@ def _flatten(proof):
     return tuple(out)
 
 
-def solve(n, clauses, node_limit=1024):
+def solve(n, clauses, node_limit=1024, *, wide=False):
     """Explicit continuation stack; split residuals after every propagation."""
     if type(node_limit) is not int or node_limit < 0:
         raise ValueError("invalid node limit")
-    cs, ids = root._input(n, clauses)
+    cs, ids = _input(n, clauses, wide)
     compact = _compact(cs, ids)
     nodes = partitions = decompositions = splits = 0
 
@@ -57,7 +82,10 @@ def solve(n, clauses, node_limit=1024):
     empty = next((i for i, c in enumerate(compact) if not c), None)
     if empty is not None:
         return report("UNSAT", tree=(((), ("conflict", empty)),))
-    _, rows, _ = compress(len(ids), tuple(root._pad(c) for c in compact))
+    if wide:
+        rows = _wide_rows(compact)
+    else:
+        _, rows, _ = compress(len(ids), tuple(root._pad(c) for c in compact))
     # A visit's input rows are already restricted by its ancestors.
     # Only a binary branch passes a nonempty initial local assignment.
     work = [("visit", rows, {})]
@@ -146,9 +174,9 @@ def _restrict(rows, fixed):
             if not any(abs(l) in fixed and fixed[abs(l)] == (l > 0) for l in c)}
 
 
-def verify(n, clauses, result):
+def verify(n, clauses, result, *, wide=False):
     """Replay subset and binary refutations without partition or recognition."""
-    cs, ids = root._input(n, clauses)
+    cs, ids = _input(n, clauses, wide)
     try:
         if tuple(result["ids"]) != ids:
             return False

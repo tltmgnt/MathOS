@@ -54,7 +54,9 @@ def _lift(cs, pre, result):
     return tuple(x[v] for v in _ids(cs))
 
 
-def solve(n, clauses, pair_limit=100000, node_limit=1024):
+def solve(n, clauses, pair_limit=100000, node_limit=1024, *, allow_wide=False):
+    if type(allow_wide) is not bool:
+        raise ValueError("allow_wide must be Boolean")
     bve._budget(pair_limit)
     bve._budget(node_limit)
     cs = xor._input(n,clauses)
@@ -67,7 +69,7 @@ def solve(n, clauses, pair_limit=100000, node_limit=1024):
                    pair_limit=pair_limit, node_limit=node_limit,
                    cost_model="SEPARATE_ABSTRACT_PAIR_AND_NODE_COUNTS",
                    resolution_status=PNP_RESOLUTION_STATUS, **kw)
-        if status != "UNKNOWN" and not verify(n,cs,out):
+        if status != "UNKNOWN" and not verify(n,cs,out,allow_wide=allow_wide):
             raise AssertionError("hybrid certificate rejected")
         return out
 
@@ -86,19 +88,19 @@ def solve(n, clauses, pair_limit=100000, node_limit=1024):
     residual = bve.replay(n,cs,pre)
     if residual is None:
         raise AssertionError("invalid preprocessing log")
-    if _narrow(residual):
+    if allow_wide or _narrow(residual):
         route, target = "DYNAMIC_PROJECTED", residual
     elif _narrow(cs):
         route, target = "DYNAMIC_ORIGINAL", cs
     else:
         return report("UNKNOWN","NONE", reason="UNSUPPORTED_SEARCH_WIDTH")
-    search = dynamic.solve(n,target,node_limit)
+    search = dynamic.solve(n,target,node_limit,wide=allow_wide)
     nodes = search["nodes"]
     if nodes > node_limit:
         raise AssertionError("node budget exceeded")
     if search["status"] == "UNKNOWN":
         return report("UNKNOWN","NONE", reason="SEARCH_BUDGET")
-    if not dynamic.verify(n,target,search):
+    if not dynamic.verify(n,target,search,wide=allow_wide):
         raise AssertionError("dynamic proof rejected")
     if search["status"] == "SAT":
         w = _lift(cs,pre,search) if route == "DYNAMIC_PROJECTED" else search["witness"]
@@ -108,7 +110,7 @@ def solve(n, clauses, pair_limit=100000, node_limit=1024):
     return report("UNSAT",route,proof=search)
 
 
-def verify(n, clauses, result):
+def verify(n, clauses, result, *, allow_wide=False):
     """Check original SAT witness or dispatch an UNSAT certificate.
 
     Costs, reason, solver scheduling and search order are not evidence.
@@ -135,13 +137,13 @@ def verify(n, clauses, result):
         if route == "BVE_XOR":
             return bve.verify(n,cs,proof)
         if route == "DYNAMIC_ORIGINAL":
-            return (_narrow(cs) and proof["status"] == "UNSAT"
-                    and dynamic.verify(n,cs,proof))
+            return ((allow_wide or _narrow(cs)) and proof["status"] == "UNSAT"
+                    and dynamic.verify(n,cs,proof,wide=allow_wide))
         if route == "DYNAMIC_PROJECTED":
             pre, search = proof
             residual = bve.replay(n,cs,pre)
-            return (residual is not None and _narrow(residual)
-                    and search["status"] == "UNSAT" and dynamic.verify(n,residual,search))
+            return (residual is not None and (allow_wide or _narrow(residual))
+                    and search["status"] == "UNSAT" and dynamic.verify(n,residual,search,wide=allow_wide))
         return False
     except (KeyError,TypeError,ValueError,IndexError,AttributeError):
         return False

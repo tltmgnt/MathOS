@@ -11,9 +11,9 @@ from . import tga_proctor_component_search as root
 PNP_RESOLUTION_STATUS = "OPEN"
 
 
-def extract(n, clauses, result):
-    cs, ids = root._input(n, clauses)
-    if result.get("status") != "UNSAT" or not dynamic.verify(n, cs, result):
+def extract(n, clauses, result, *, wide=False):
+    cs, ids = dynamic._input(n, clauses, wide)
+    if result.get("status") != "UNSAT" or not dynamic.verify(n, cs, result, wide=wide):
         raise ValueError("valid dynamic UNSAT certificate required")
     compact = dynamic._compact(cs, ids)
     steps, derived, rows = [], [], {}
@@ -87,9 +87,9 @@ def extract(n, clauses, result):
     return dict(ids=ids, steps=tuple(steps), conclusion=end)
 
 
-def verify(n, clauses, proof):
+def verify(n, clauses, proof, *, wide=False):
     """Ordinary resolution checker; no solver or dynamic certificate required."""
-    cs, ids = root._input(n, clauses)
+    cs, ids = dynamic._input(n, clauses, wide)
     compact = dynamic._compact(cs, ids)
     try:
         if tuple(proof["ids"]) != ids:
