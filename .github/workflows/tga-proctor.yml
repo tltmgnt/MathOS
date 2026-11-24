@@ -1,0 +1,48 @@
+name: TGA proctor curriculum and checkpoint audit
+on:
+  push:
+    paths:
+      - 'curriculum/academy/proctor/**'
+      - 'mathos/research/tga_proctor.py'
+      - 'tests/test_tga_proctor.py'
+      - '.github/workflows/tga-proctor.yml'
+  pull_request:
+    paths:
+      - 'curriculum/academy/proctor/**'
+      - 'mathos/research/tga_proctor.py'
+      - 'tests/test_tga_proctor.py'
+      - '.github/workflows/tga-proctor.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  practicum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor.py' -v
+      - name: Run offline practice and read-only audit
+        run: |
+          python -m mathos.research.tga_agent --attempts 2 --max-calls 8 --output-dir artifacts/proctor-lab
+          python -m mathos.research.tga_agent --attempts 1 --max-calls 4 --output-dir artifacts/proctor-lab --resume
+          python -m mathos.research.tga_proctor --checkpoint artifacts/proctor-lab/state.json > artifacts/proctor-lab/proctor-report.json
+          cat artifacts/proctor-lab/proctor-report.json
+      - name: Generate curriculum and practice guide
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx, verify
+          for p in sorted(Path("curriculum/academy/proctor").glob("*.md")):
+              dst=Path("artifacts/proctor-lab")/p.with_suffix(".docx").name
+              make_docx(p,dst)
+              verify(p,dst)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-proctor-curriculum
+          path: artifacts/proctor-lab/
+          if-no-files-found: error
