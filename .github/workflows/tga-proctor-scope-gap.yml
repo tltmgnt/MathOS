@@ -1,0 +1,72 @@
+name: Proctor 601 verified-scope gap analysis
+on:
+  push:
+    paths:
+      - 'curriculum/academy/proctor/601-SCOPE-GAPS.md'
+      - 'mathos/research/tga_proctor_scope_gap.py'
+      - 'tests/test_tga_proctor_scope_gap.py'
+      - 'formal/ProctorScopeGap.lean'
+      - '.github/workflows/tga-proctor-scope-gap.yml'
+  pull_request:
+    paths:
+      - 'curriculum/academy/proctor/601-SCOPE-GAPS.md'
+      - 'mathos/research/tga_proctor_scope_gap.py'
+      - 'tests/test_tga_proctor_scope_gap.py'
+      - 'formal/ProctorScopeGap.lean'
+      - '.github/workflows/tga-proctor-scope-gap.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_scope_gap.py' -v
+      - run: |
+          mkdir -p artifacts/scope-gap
+          python -m mathos.research.tga_proctor_scope_gap > artifacts/scope-gap/report.json
+          cat artifacts/scope-gap/report.json
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx,verify
+          p=Path("curriculum/academy/proctor/601-SCOPE-GAPS.md")
+          d=Path("artifacts/scope-gap/601-SCOPE-GAPS.docx")
+          make_docx(p,d)
+          verify(p,d)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proctor601-scope-gap
+          path: artifacts/scope-gap/
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lean 4.14.0
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check general finite-prefix countermodel
+        run: |
+          mkdir -p artifacts/scope-kernel
+          lean --version | tee artifacts/scope-kernel/version.txt
+          lean -DwarningAsError=true formal/ProctorScopeGap.lean | tee artifacts/scope-kernel/axioms.txt
+          grep -F "'ProctorScopeGap.prefix_countermodel' does not depend on any axioms" artifacts/scope-kernel/axioms.txt
+          grep -F "'ProctorScopeGap.no_finite_prefix_rule' does not depend on any axioms" artifacts/scope-kernel/axioms.txt
+          sha256sum formal/ProctorScopeGap.lean > artifacts/scope-kernel/source.sha256
+          cp formal/ProctorScopeGap.lean artifacts/scope-kernel/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proctor601-scope-kernel
+          path: artifacts/scope-kernel/
