@@ -198,6 +198,26 @@ def obstruction(t):
     return 3*t, tuple(cs)
 
 
+def search_obstruction(t):
+    """Disjoint satisfiable mixed-sign gadgets delay the fixed UNSAT core.
+
+    Each untouched four-variable gadget has literal incidence 18 per
+    variable; each core variable has incidence 8. Both uniform gadget
+    assignments satisfy all six mixed-sign clauses on each triple.
+    """
+    if type(t) is not int or t < 1:
+        raise ValueError("t >= 1 required")
+    from itertools import combinations
+    cs = [tuple(s*v for s, v in zip(signs, triple))
+          for i in range(t)
+          for triple in combinations(range(4*i+1, 4*i+5), 3)
+          for signs in product((-1, 1), repeat=3)
+          if len(set(signs)) == 2]
+    cs += [tuple(s*(4*t+j+1) for j, s in enumerate(signs))
+           for signs in product((-1, 1), repeat=3)]
+    return 4*t+3, tuple(cs)
+
+
 def controls():
     triples = tuple(product((-2, -1, 1, 2), repeat=3))
     cases = [(0, ()), (2, ())] + [(2, (c,)) for c in triples]
@@ -233,7 +253,15 @@ def controls():
             raise AssertionError("bounded adaptive family check failed")
         families.append(dict(t=t, minimum_static_deletion=2*t, nodes=r["nodes"],
                              splits=r["splits"], root_propagation=0))
+    search_families = []
+    for t in range(1, 5):
+        n, cs = search_obstruction(t)
+        r = solve(n, cs, 100000)
+        if r["status"] != "UNSAT" or not verify(n, cs, r) or r["nodes"] < 2**t:
+            raise AssertionError("search obstruction failed")
+        search_families.append(dict(t=t, nodes=r["nodes"], lower_bound=2**t))
     return dict(cases=len(cases), sat=sat, unsat=unsat, families=families,
+                search_obstruction=search_families,
                 universal_bound=False, machine_refinement=False, independent_review=False)
 
 
