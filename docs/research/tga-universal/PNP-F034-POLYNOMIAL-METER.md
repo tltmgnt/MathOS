@@ -66,3 +66,18 @@ unchanged. New results pending CI, no local Lean.
 No independent review, original scratch port, unrestricted SAT
 result or main change. Next: formal capacity leaf and aggregate
 bounds and complete XOR-block bound, then unified size bridge.
+
+## First polynomial CI correction
+
+Initial run 45503601628 job 138832955813 failed on seven
+proof obligations. Representative exact errors:
+artifacts/pnp-f030/f034-polynomial-meter-combined.lean:3112:11: error: type mismatch
+artifacts/pnp-f030/f034-polynomial-meter-combined.lean:3223:11: error: tactic 'rfl' failed, the left-hand side
+artifacts/pnp-f030/f034-polynomial-meter-combined.lean:3264:8: error: tactic 'rewrite' failed, did not find instance of the pattern in the target expression
+Process completed with exit code 1.
+https://github.com/tltmgnt/MathOS/actions/runs/45503601628/job/138832955813
+Base cases now use natural zero lower bounds rather than
+definitional zero multiplication; parent case reduces its match
+before rewriting. Local constructive multiplication identities
+and monotonicity replace library lemmas to avoid axiom dependencies.
+The corrected declarations still await strict CI; no gate relaxed.

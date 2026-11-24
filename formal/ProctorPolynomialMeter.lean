@@ -10,14 +10,53 @@ open ProctorXorMeter (sumBudget combineBudget sumMeter sum_bound)
 open ProctorCheckerCost (shapeBudget)
 open ProctorChainMeter (parentBudget stepBudget batchBudget chainBudget chainMeter chain_bound)
 
+-- Local constructive arithmetic identities avoid importing any
+-- axiom-dependent library simplification lemmas into the strict gate.
+private theorem zero_mul_local (k : Nat) : 0*k=0 := by
+  induction k with
+  | zero => rfl
+  | succ k ih => exact ih
+
+private theorem one_mul_local (k : Nat) : 1*k=k := by
+  induction k with
+  | zero => rfl
+  | succ k ih => exact congrArg Nat.succ ih
+
+private theorem add_mul_local (a b k : Nat) : (a+b)*k=a*k+b*k := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+    change (a+b)*k+(a+b)=(a*k+a)+(b*k+b)
+    rw [ih]
+    calc
+      (a*k+b*k)+(a+b) = a*k+(b*k+(a+b)) := Nat.add_assoc _ _ _
+      _ = a*k+((b*k+a)+b) := congrArg (fun z => a*k+z) (Nat.add_assoc _ _ _).symm
+      _ = a*k+((a+b*k)+b) := congrArg (fun z => a*k+(z+b)) (Nat.add_comm _ _)
+      _ = a*k+(a+(b*k+b)) := congrArg (fun z => a*k+z) (Nat.add_assoc _ _ _)
+      _ = (a*k+a)+(b*k+b) := (Nat.add_assoc _ _ _).symm
+
+private theorem mul_left_mono (a b k : Nat) (h : a≤b) : a*k≤b*k := by
+  induction k with
+  | zero => exact Nat.le_refl 0
+  | succ k ih => exact Nat.add_le_add ih h
+
+private theorem mul_right_mono (k a b : Nat) (h : a≤b) : k*a≤k*b := by
+  induction h with
+  | refl => exact Nat.le_refl _
+  | step h ih => exact Nat.le_trans ih (Nat.le_add_right _ _)
+
+private theorem mul_mono {a b c d : Nat} (h : a≤b) (g : c≤d) :
+    a*c≤b*d :=
+  Nat.le_trans (mul_left_mono a b c h) (mul_right_mono b c d g)
+
 theorem visits_uniform {α : Type} (q : α → Nat) (xs : List α)
     (B : Nat) (h : ∀ a, q a ≤ B) :
     visitsBudget q xs ≤ xs.length*(B+1) := by
   induction xs with
-  | nil => exact Nat.le_refl 0
+  | nil => exact Nat.zero_le _
   | cons a as ih =>
     change q a + visitsBudget q as + 1 ≤ (as.length+1)*(B+1)
-    rw [Nat.add_mul,Nat.one_mul]
+    rw [add_mul_local,one_mul_local]
     calc
       q a + visitsBudget q as + 1 ≤ B + as.length*(B+1) + 1 :=
         Nat.add_le_add (Nat.add_le_add (h a) ih) (Nat.le_refl 1)
@@ -72,17 +111,20 @@ theorem combine_length (a b : List Nat) :
         toggle_length v (combine vs b)
       _ ≤ (vs.length+b.length)+1 := Nat.succ_le_succ ih
       _ = (vs.length+1)+b.length := by
-        rw [Nat.add_assoc,Nat.add_assoc,Nat.add_comm b.length 1]
+        calc
+          (vs.length+b.length)+1 = vs.length+(b.length+1) := Nat.add_assoc _ _ _
+          _ = vs.length+(1+b.length) := congrArg (fun x => vs.length+x) (Nat.add_comm _ _)
+          _ = (vs.length+1)+b.length := (Nat.add_assoc _ _ _).symm
 
 theorem combine_uniform (a b : List Nat) (B : Nat)
     (h : a.length+b.length≤B) : combineBudget a b ≤ a.length*B := by
   induction a with
-  | nil => exact Nat.le_refl 0
+  | nil => exact Nat.zero_le _
   | cons v vs ih =>
     have ht : vs.length+b.length≤B :=
       Nat.le_trans (Nat.add_le_add (Nat.le_succ vs.length) (Nat.le_refl b.length)) h
     change combineBudget vs b + (combine vs b).length ≤ (vs.length+1)*B
-    rw [Nat.add_mul,Nat.one_mul]
+    rw [add_mul_local,one_mul_local]
     exact Nat.add_le_add (ih ht) (Nat.le_trans (combine_length vs b) ht)
 
 def supportMass : List Block → Nat
@@ -99,7 +141,7 @@ theorem sum_length (bs : List Block) : (sumSupport bs).length ≤ supportMass bs
 theorem sum_uniform (bs : List Block) (B : Nat)
     (h : supportMass bs≤B) : sumBudget bs ≤ supportMass bs*B := by
   induction bs with
-  | nil => exact Nat.le_refl 0
+  | nil => exact Nat.zero_le _
   | cons b bs ih =>
     have hr : supportMass bs≤B :=
       Nat.le_trans (Nat.le_add_left _ _) h
@@ -107,7 +149,7 @@ theorem sum_uniform (bs : List Block) (B : Nat)
       Nat.le_trans (Nat.add_le_add (Nat.le_refl b.support.length) (sum_length bs)) h
     change sumBudget bs + combineBudget b.support (sumSupport bs) ≤
       (b.support.length+supportMass bs)*B
-    rw [Nat.add_mul,Nat.add_comm (b.support.length*B) (supportMass bs*B)]
+    rw [add_mul_local,Nat.add_comm (b.support.length*B) (supportMass bs*B)]
     exact Nat.add_le_add (ih hr) (combine_uniform _ _ B hc)
 
 theorem sum_quadratic (bs : List Block) :
@@ -125,11 +167,11 @@ def formulaMass : Formula → Nat
 theorem shape_closed (tail row : Clause) :
     shapeBudget tail row = row.length*(tail.length+1) := by
   induction row with
-  | nil => rfl
+  | nil => exact (zero_mul_local _).symm
   | cons _ ls ih =>
     change shapeBudget tail ls+(tail.length+1) =
       (ls.length+1)*(tail.length+1)
-    rw [ih,Nat.add_mul,Nat.one_mul]
+    rw [ih,add_mul_local,one_mul_local]
 
 theorem mass_rows (f : Formula) : f.length≤formulaMass f := by
   induction f with
@@ -166,8 +208,9 @@ theorem parent_poly (f : Formula) (i : Nat) (t : Clause) (B : Nat)
     rw [Nat.add_zero]
     exact Nat.le_trans hrows (Nat.le_add_right _ _)
   | some row =>
+    change f.length+shapeBudget t row≤B+B*(B+1)
     rw [shape_closed]
-    exact Nat.add_le_add hrows (Nat.mul_le_mul
+    exact Nat.add_le_add hrows (mul_mono
       (Nat.le_trans (lookup_mass f i row e) hf) (Nat.succ_le_succ ht))
 
 theorem step_poly (f : Formula) (s : Step) (B : Nat)
@@ -180,7 +223,7 @@ theorem batch_poly (f : Formula) (ss : Batch) (B : Nat)
     (hf : formulaMass f≤B) (hs : formulaMass (tails ss)≤B) :
     batchBudget f ss≤ss.length*stepUnit B := by
   induction ss with
-  | nil => exact Nat.le_refl 0
+  | nil => exact Nat.zero_le _
   | cons s ss ih =>
     change (s.tail.length+1)+formulaMass (tails ss)≤B at hs
     have ht : s.tail.length≤B :=
@@ -188,7 +231,7 @@ theorem batch_poly (f : Formula) (ss : Batch) (B : Nat)
     have hr : formulaMass (tails ss)≤B :=
       Nat.le_trans (Nat.le_add_left _ _) hs
     change stepBudget f s+batchBudget f ss≤(ss.length+1)*stepUnit B
-    rw [Nat.add_mul,Nat.one_mul,Nat.add_comm (ss.length*stepUnit B) (stepUnit B)]
+    rw [add_mul_local,one_mul_local,Nat.add_comm (ss.length*stepUnit B) (stepUnit B)]
     exact Nat.add_le_add (step_poly f s B hf ht) (ih hr)
 
 def chainMass (f : Formula) : List Batch → Nat
@@ -229,7 +272,7 @@ theorem chain_steps_mass (f : Formula) (bs : List Batch) :
 theorem chain_uniform (f : Formula) (bs : List Batch) (B : Nat)
     (h : chainMass f bs≤B) : chainBudget f bs≤chainSteps bs*stepUnit B := by
   induction bs generalizing f with
-  | nil => exact Nat.le_refl 0
+  | nil => exact Nat.zero_le _
   | cons ss rest ih =>
     change formulaMass f+chainMass (tails ss) rest≤B at h
     have hf : formulaMass f≤B := Nat.le_trans (Nat.le_add_right _ _) h
@@ -237,13 +280,13 @@ theorem chain_uniform (f : Formula) (bs : List Batch) (B : Nat)
     have hs := Nat.le_trans (chain_mass_head (tails ss) rest) hr
     change batchBudget f ss+chainBudget (tails ss) rest≤
       (ss.length+chainSteps rest)*stepUnit B
-    rw [Nat.add_mul]
+    rw [add_mul_local]
     exact Nat.add_le_add (batch_poly f ss B hf hs) (ih (tails ss) hr)
 
 theorem chain_polynomial (f : Formula) (bs : List Batch) :
     chainBudget f bs≤chainMass f bs*stepUnit (chainMass f bs) :=
   Nat.le_trans (chain_uniform f bs _ (Nat.le_refl _))
-    (Nat.mul_le_mul (chain_steps_mass f bs) (Nat.le_refl _))
+    (mul_mono (chain_steps_mass f bs) (Nat.le_refl _))
 
 theorem chain_meter_polynomial (f : Formula) (bs : List Batch) :
     (chainMeter f bs).2≤chainMass f bs*stepUnit (chainMass f bs) :=
