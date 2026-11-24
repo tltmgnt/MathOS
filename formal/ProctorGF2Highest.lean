@@ -38,8 +38,9 @@ theorem pivot_strict_decrease (a b p : Nat) (ha : Highest a p) (hb : Highest b p
 
 theorem next_pivot_lower (a b p q : Nat) (ha : Highest a p) (hb : Highest b p)
     (hq : Highest (a ^^^ b) q) : q < p := by
-  by_contra h
-  have le := Nat.pow_le_pow_of_le_right Nat.zero_lt_two (by omega : p ≤ q)
+  apply Nat.lt_of_not_ge
+  intro h
+  have le := Nat.pow_le_pow_of_le_right Nat.zero_lt_two h
   exact Nat.not_lt_of_ge (Nat.le_trans le hq.left) (highest_descent a b p ha hb)
 
 def maskAdd (p r : Nat × Bool) : Nat × Bool := (p.1 ^^^ r.1,bx p.2 r.2)
@@ -75,18 +76,17 @@ theorem provenance_xor (n : Nat) (orig : List (Nat × Bool))
     MaskProvenance n orig (maskAdd p r) (u ^^^ v) := by
   constructor
   · intro x
-    change dot (decode n (p.1 ^^^ r.1)) x = lhs (orig.map (maskRow n)) (decode orig.length (u ^^^ v)) x
-    exact (congrArg (fun a => dot a x) (decode_xor n p.1 r.1 0)).trans
-      ((dot_add (decode n p.1) (decode n r.1) x).trans
-        ((congrArg (fun b => bx b (dot (decode n r.1) x)) (hp.left x)).trans
-          ((congrArg (bx (dot (decode orig.length u) ((orig.map (maskRow n)).map (fun r => dot r.coeff x)))) (hr.left x)).trans
-            ((dot_add (decode orig.length u) (decode orig.length v) _).symm.trans
-              (congrArg (fun a => dot a ((orig.map (maskRow n)).map (fun r => dot r.coeff x))) (decode_xor orig.length u v 0).symm)))))
-  · change bx p.2 r.2 = rhs (orig.map (maskRow n)) (decode orig.length (u ^^^ v))
-    exact (congrArg (fun b => bx b r.2) hp.right).trans
-      ((congrArg (bx (dot (decode orig.length u) ((orig.map (maskRow n)).map Row.rhs))) hr.right).trans
-        ((dot_add (decode orig.length u) (decode orig.length v) _).symm.trans
-          (congrArg (fun a => dot a ((orig.map (maskRow n)).map Row.rhs)) (decode_xor orig.length u v 0).symm)))
+    let vals := (orig.map (maskRow n)).map (fun r : Row => dot r.coeff x)
+    change dot (decode n (p.1 ^^^ r.1)) x = dot (decode orig.length (u ^^^ v)) vals
+    have ep : dot (decode n p.1) x = dot (decode orig.length u) vals := hp.left x
+    have er : dot (decode n r.1) x = dot (decode orig.length v) vals := hr.left x
+    rw [show decode n (p.1 ^^^ r.1) = addVec (decode n p.1) (decode n r.1) from decode_xor n p.1 r.1 0,
+        dot_add,ep,er,show decode orig.length (u ^^^ v) = addVec (decode orig.length u) (decode orig.length v) from decode_xor orig.length u v 0,dot_add]
+  · let vals := (orig.map (maskRow n)).map Row.rhs
+    change bx p.2 r.2 = dot (decode orig.length (u ^^^ v)) vals
+    have ep : p.2 = dot (decode orig.length u) vals := hp.right
+    have er : r.2 = dot (decode orig.length v) vals := hr.right
+    rw [ep,er,show decode orig.length (u ^^^ v) = addVec (decode orig.length u) (decode orig.length v) from decode_xor orig.length u v 0,dot_add]
 
 theorem zero_mask_dot (n : Nat) (x : List Bool) : dot (decode n 0) x = false := by
   have hz : ∀ k j, decodeAt k 0 j = zeros k := by
@@ -134,18 +134,18 @@ theorem unit_dot_window (n a p k j : Nat) (h : j ≤ p) (hi : p-j < n) :
         | zero => intro _ _ _; rfl
         | succ m hm =>
           intro offset l ho
-          change bx (a.testBit l && (2^p).testBit offset)
+          change bx (a.testBit l && (2^p : Nat).testBit offset)
             (dot (decodeAt m a (l+1)) (decodeAt m (2^p) (offset+1))) = false
           rw [Nat.testBit_two_pow_of_ne (by omega : p ≠ offset),hm (offset+1) (l+1) (by omega)]
           cases a.testBit l <;> rfl
       have tail := hz n (p+1) (k+1) (by omega)
-      change bx (a.testBit k && (2^p).testBit p)
+      change bx (a.testBit k && (2^p : Nat).testBit p)
         (dot (decodeAt n a (k+1)) (decodeAt n (2^p) (p+1))) = a.testBit (k+(p-p))
       rw [Nat.testBit_two_pow_self,tail,Nat.sub_self,Nat.add_zero]
       cases a.testBit k <;> rfl
-    · have e : (2^p).testBit j = false := Nat.testBit_two_pow_of_ne he
+    · have e : (2^p : Nat).testBit j = false := Nat.testBit_two_pow_of_ne he
       have tail := ih (k+1) (j+1) (by omega) (by omega)
-      change bx (a.testBit k && (2^p).testBit j)
+      change bx (a.testBit k && (2^p : Nat).testBit j)
         (dot (decodeAt n a (k+1)) (decodeAt n (2^p) (j+1))) = _
       rw [e,tail]
       have eqk : k+1+(p-(j+1)) = k+(p-j) := by omega
@@ -192,6 +192,7 @@ theorem backstep_preserves_lower (n : Nat) (r q : Nat × Bool) (x p : Nat)
     simp only [e,Bool.false_eq_true,if_false]
     change (dot (decode n q.1) (decode n (x ^^^ 2^p)) = q.2) ↔ _
     rw [flip_coordinate n q.1 x p hn,Nat.testBit_lt_two_pow hq,bx_zero]
+    exact Iff.rfl
 
 -- For a fresh coordinate the Python OR and the mathematical XOR coincide.
 theorem fresh_or_xor (x p : Nat) (h : x < 2^p) :
@@ -201,7 +202,7 @@ theorem fresh_or_xor (x p : Nat) (h : x < 2^p) :
   rw [Nat.testBit_or,Nat.testBit_xor]
   by_cases e : p = i
   · subst i
-    rw [Nat.testBit_lt_two_pow h]
+    rw [Nat.testBit_lt_two_pow h,Nat.testBit_two_pow_self]
     rfl
   · rw [Nat.testBit_two_pow_of_ne e]
     cases x.testBit i <;> rfl

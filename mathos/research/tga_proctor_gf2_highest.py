@@ -79,7 +79,7 @@ def run(out,lean):
     combined="import Init.Data.Nat.Bitwise.Lemmas\n"+"\n".join(s.removeprefix("import Init\n") for s in src)
     strict=GF_NAMES+SOLVER_NAMES+CERT_NAMES+CHECK_NAMES
     formal=check(combined,out/"highest",lean,strict+MASK_NAMES+CODEC_NAMES+NAMES,"ProctorGF2")
-    log=(out/"codec/kernel.txt").read_text()
+    log=(out/"highest/kernel.txt").read_text()
     domain={n:next((l for l in log.splitlines() if l.startswith("'ProctorPNP."+n+"' ")),None) for n in PNP_NAMES+DOMAIN_NAMES}
     def allowed(ns,n,line,strict=False):
         head="'"+ns+"."+n+"' "
