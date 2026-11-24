@@ -61,7 +61,7 @@ theorem formula_value (f g : Formula) : (formulaMeter f g).1 = test (f=g) := by
       by_cases a : c=d
       · cases a
         by_cases b : cs=ds
-        · rw [if_pos rfl,if_pos b,if_pos (congrArg (List.cons c) b)]
+        · rw [if_pos rfl,if_pos b,if_pos (congrArg (List.cons c) b)] <;> rfl
         · have ne : c::cs ≠ c::ds := fun h => b (List.cons.inj h).2
           rw [if_pos rfl,if_neg b,if_neg ne] <;> rfl
       · have ne : c::cs ≠ d::ds := fun h => a (List.cons.inj h).1
@@ -147,8 +147,12 @@ theorem terminal_range_value (n : Nat) (t : Terminal) :
         (allMeter (fun g => clauseMeter n g.literals) c.groups).1)) =
       (validRefs n c.demands && (validRefs n c.conflicts &&
         every (fun g => validClause n g.literals) c.groups))
-    rw [refs_range_value,refs_range_value,
-      all_value _ _ _ (fun g => clause_value n g.literals)]
+    have h : (allMeter (fun g => clauseMeter n g.literals) c.groups).1 =
+        every (fun g => validClause n g.literals) c.groups := by
+      apply all_value
+      intro g
+      exact clause_value n g.literals
+    rw [refs_range_value,refs_range_value,h]
   | xor bs =>
     change (allMeter (fun b => both (allMeter (idMeter n) b.support)
       (refsRangeMeter n b.refs)) bs).1 =
@@ -188,8 +192,11 @@ def proofRangeBudget (p : Proof) : Nat :=
 
 theorem proof_range_value (n : Nat) (p : Proof) :
     (proofRangeMeter n p).1 = validProof n p := by
-  unfold proofRangeMeter validProof both
-  rw [terminal_range_value]
+  change ((allMeter (fun batch => allMeter (fun s : Step =>
+    both (idMeter n s.pivot) (clauseMeter n s.tail)) batch) p.batches).1 &&
+    (terminalRangeMeter n p.terminal).1) =
+    (every (fun batch => every (fun s : Step => validId n s.pivot &&
+      validClause n s.tail) batch) p.batches && validTerminal n p.terminal)
   have h := all_value
     (fun batch => allMeter (fun s : Step =>
       both (idMeter n s.pivot) (clauseMeter n s.tail)) batch)
@@ -198,7 +205,7 @@ theorem proof_range_value (n : Nat) (p : Proof) :
       change (validId n s.pivot && (clauseMeter n s.tail).1) =
         (validId n s.pivot && validClause n s.tail)
       rw [clause_value]))
-  rw [h]
+  rw [h,terminal_range_value]
 
 theorem proof_range_bound (n : Nat) (p : Proof) :
     (proofRangeMeter n p).2 ≤ proofRangeBudget p := by
