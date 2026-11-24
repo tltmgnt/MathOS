@@ -117,6 +117,40 @@ def verify(n, clauses, result):
         return False
 
 
+def guarded_root_obstruction(t):
+    """Connected before propagation; F030 disjoint obstruction after a unit.
+
+    Non-tautological guard clauses connect one representative of every
+    gadget and the UNSAT core to a fresh forced-true variable.
+    This defeats root-only splitting, not dynamic residual decomposition.
+    """
+    n, cs = adaptive.search_obstruction(t)
+    guard = n + 1
+    reps = tuple(4*i+1 for i in range(t+1))
+    bridges = tuple((guard, a, b) for a, b in zip(reps, reps[1:]))
+    return guard, cs + ((guard, guard, guard),) + bridges
+
+
+def guarded_controls():
+    results = []
+    for t in (1, 2, 4, 6, 8):
+        n, cs = adaptive.search_obstruction(t)
+        base = adaptive.solve(n, cs, 100000)
+        n, cs = guarded_root_obstruction(t)
+        guarded = solve(n, cs, 100000)
+        if (base["status"] != "UNSAT" or guarded["status"] != "UNSAT"
+                or guarded["components"] != 1 or guarded["component_calls"] != 1
+                or not adaptive.verify(n-1, adaptive.search_obstruction(t)[1], base)
+                or not verify(n, cs, guarded)
+                or guarded["nodes"] != base["nodes"]
+                or guarded["nodes"] < 2**t):
+            raise AssertionError("guarded root obstruction mismatch")
+        results.append(dict(t=t, base_nodes=base["nodes"],
+                            guarded_root_nodes=guarded["nodes"],
+                            lower_bound=2**t, root_components=guarded["components"]))
+    return results
+
+
 def controls():
     rng = Random(31032)
     counts = dict(cases=0, sat=0, unsat=0, unknown=0)
@@ -157,6 +191,7 @@ def controls():
             raise AssertionError("connected control mismatch")
         connected.append(dict(t=t, plain_nodes=a["nodes"], component_nodes=b["nodes"]))
     return dict(**counts, disjoint=disjoint, connected_sat_control=connected,
+                guarded_root_obstruction=guarded_controls(),
                 cost_model="ABSTRACT_F030_SEARCH_NODES", resolution_status=PNP_RESOLUTION_STATUS,
                 machine_refinement=False, independent_review=False, original_scratch_port=False)
 

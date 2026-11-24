@@ -56,6 +56,17 @@ class ComponentSearchTests(unittest.TestCase):
                             ("subset", indices, {**proof, "status": "SAT"})):
                 self.assertFalse(c.verify(4, cs, {**r, "certificate": changed}))
 
+    def test_guarded_connected_root_obstruction(self):
+        for t in (1, 2, 3):
+            n, cs = c.guarded_root_obstruction(t)
+            self.assertEqual(len(cs), 25*t+9)
+            self.assertEqual(n, 4*t+4)
+            self.assertTrue(all(not any(-l in row for l in row) for row in cs))
+            r = c.solve(n, cs, 2**t-1)
+            self.assertEqual(r["components"], 1)
+            self.assertEqual(r["status"], "UNKNOWN")
+            self.assertFalse(c.verify(n, cs, r))
+
     def test_invalid_inputs(self):
         for cs in (((0,),), ((True,),), ((1, 1, 1, 1),), ((), (3,))):
             with self.assertRaises(ValueError):
