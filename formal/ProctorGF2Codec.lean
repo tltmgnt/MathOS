@@ -51,7 +51,8 @@ theorem encode_decode_mod (n a : Nat) :
     encodeBits (decode n a) = a % 2^n := by
   apply Nat.eq_of_testBit_eq
   intro i
-  exact (encode_decode_bit n a 0 i).trans (Nat.testBit_mod_two_pow a n i).symm
+  exact (encode_decode_bit n a 0 i).trans
+    ((congrArg (fun j => decide (i < n) && a.testBit j) (Nat.zero_add i)).trans (Nat.testBit_mod_two_pow a n i).symm)
 
 theorem encode_decode_exact (n a : Nat) (h : a < 2^n) :
     encodeBits (decode n a) = a :=
@@ -61,7 +62,15 @@ theorem encode_bound (bs : List Bool) : encodeBits bs < 2^bs.length := by
   induction bs with
   | nil => decide
   | cons b bs ih =>
-    cases b <;> simp only [encodeBits,List.length_cons,Nat.pow_succ,Bool.toNat] <;> omega
+    cases b with
+    | false =>
+      change 2 * encodeBits bs + 0 < 2^(bs.length+1)
+      rw [Nat.pow_succ]
+      omega
+    | true =>
+      change 2 * encodeBits bs + 1 < 2^(bs.length+1)
+      rw [Nat.pow_succ]
+      omega
 
 -- Count the set bits in exactly the declared window, then take oddness.
 def countAt : Nat → Nat → Nat → Nat
@@ -72,8 +81,15 @@ def odd (n : Nat) : Bool := decide (n % 2 = 1)
 
 theorem odd_add_bit (b : Bool) (c : Nat) :
     odd (b.toNat+c) = bx b (odd c) := by
-  cases b <;> simp [odd,bx,Bool.toNat]
-  split <;> rename_i h <;> simp_all <;> omega
+  cases b with
+  | false => simp [odd,bx,Bool.toNat]
+  | true =>
+    change decide ((1+c)%2=1) = !decide (c%2=1)
+    by_cases h : c%2=1
+    · have e : ¬ (1+c)%2=1 := by omega
+      simp [h,e]
+    · have e : (1+c)%2=1 := by omega
+      simp [h,e]
 
 theorem count_parity (n a k : Nat) :
     odd (countAt n a k) = parityAt n a k := by
@@ -112,9 +128,10 @@ theorem count_stable (n a extra : Nat) (h : a < 2^n) :
   induction extra with
   | zero => rfl
   | succ e ih =>
+    have hle : n ≤ 0+(n+e) := by omega
     have hb : a.testBit (0+(n+e)) = false :=
       Nat.testBit_lt_two_pow (Nat.lt_of_lt_of_le h
-        (Nat.pow_le_pow_of_le_right Nat.zero_lt_two (Nat.le_add_right n e)))
+        (Nat.pow_le_pow_of_le_right Nat.zero_lt_two hle))
     exact (count_extend (n+e) a 0 hb).trans ih
 
 -- Transport original-row XOR selection to the exact projected affine system.
@@ -132,7 +149,10 @@ theorem mask_lhs (n : Nat) (rs : List (Nat × Bool)) (w : List Bool) (x : List B
     intro k
     induction k with
     | zero => intro _; rfl
-    | succ k ih => intro j; exact congrArg (List.cons false) (ih (j+1))
+    | succ k ih =>
+      intro j
+      exact (congrArg (fun v : Bool => v :: decodeAt k 0 (j+1)) (Nat.zero_testBit j)).trans
+        (congrArg (List.cons false) (ih (j+1)))
   have dz : ∀ k : Nat, ∀ ys : List Bool, dot (zeros k) ys = false := by
     intro k
     induction k with
@@ -175,7 +195,7 @@ theorem mask_certificate_sound (n : Nat) (rs : List (Nat × Bool)) (w : List Boo
   intro x _
   have e : encodeBits (decode n (xorMasks rs w).1) = 0 :=
     (encode_decode_mod n (xorMasks rs w).1).trans ha
-  have hlen := decode_length n (xorMasks rs w).1 0
+  have hlen : (decode n (xorMasks rs w).1).length = n := decode_length n (xorMasks rs w).1 0
   have hzero : decode n (xorMasks rs w).1 = decode n 0 := by
     have q := decode_encode (decode n (xorMasks rs w).1)
     rw [hlen,e] at q
@@ -184,7 +204,10 @@ theorem mask_certificate_sound (n : Nat) (rs : List (Nat × Bool)) (w : List Boo
     intro k
     induction k with
     | zero => intro _; rfl
-    | succ k ih => intro j; exact congrArg (List.cons false) (ih (j+1))
+    | succ k ih =>
+      intro j
+      exact (congrArg (fun v : Bool => v :: decodeAt k 0 (j+1)) (Nat.zero_testBit j)).trans
+        (congrArg (List.cons false) (ih (j+1)))
   have dz : ∀ a : Nat, ∀ ys : List Bool, dot (zeros a) ys = false := by
     intro a
     induction a with
