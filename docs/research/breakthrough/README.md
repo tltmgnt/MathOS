@@ -19,3 +19,15 @@ NS-B002 rules out an inference from the exact kinetic-energy and enstrophy scala
 [RH-B002 paper](RH-B002.md) · [Word](RH-B002.docx)
 
 [Cycle 2 machine evidence](cycle2-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45369503725)
+
+## Cycle 3 — three-attempt review
+
+NS-B003 excludes the exact compact concentrating path under full momentum dynamics using classical spatial analyticity and records a harmonic pressure-moment condition. RH-B003 establishes that the fixed local-floor gluing certificate fails on four translates, without implying negativity of the actual form. Both are scoped analytical results, not conjecture solutions. No canonical obligation is closed.
+
+**Decision: pivot the active research queue for the next cycle.** Pause the narrow NS compact-profile and RH fixed-floor strategies; retain the precise return conditions (quantitative approximate-profile rigidity and genuine relative-form coupling estimates). Next proposed primary: PNP.sat_runtime, test the total representation/bit-complexity of a precisely specified SAT method on an adversarial infinite family. Next proposed challenger: BSD.analytic_selmer, trace an actual higher-rank comparison theorem to its missing arithmetic hypothesis, without using BSD to certify its own evidence. This allocation is a research-planning decision, not a claim of comparative solution probability. Historical cycle configuration remains pinned so prior evidence can be replayed; activate the revised queue explicitly at the start of the next cycle.
+
+[NS-B003 paper](NS-B003.md) · [Word](NS-B003.docx)
+
+[RH-B003 paper](RH-B003.md) · [Word](RH-B003.docx)
+
+[Cycle 3 machine evidence](cycle3-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45370481721)

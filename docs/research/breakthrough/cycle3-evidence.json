@@ -1,0 +1,99 @@
+{
+  "source_commit": "c3c70b1138988d9648f1d87d82e19093c16c2018",
+  "workflow_run": 45370481721,
+  "job_id": 138363207644,
+  "report": {
+    "status": "RESEARCH_ONLY",
+    "promotion": "NONE",
+    "cycle": 3,
+    "open_obligations": 14,
+    "results": {
+      "NS-B003": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "NS.critical_bound",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "scaling_checks": 8,
+          "moment_checks": 4,
+          "moment_examples": [
+            {
+              "diagonal": [
+                1,
+                1,
+                1
+              ],
+              "harmonic_moments": [
+                0,
+                0
+              ]
+            },
+            {
+              "diagonal": [
+                2,
+                1,
+                1
+              ],
+              "harmonic_moments": [
+                1,
+                0
+              ]
+            },
+            {
+              "diagonal": [
+                2,
+                3,
+                4
+              ],
+              "harmonic_moments": [
+                -1,
+                -1
+              ]
+            },
+            {
+              "diagonal": [
+                7,
+                7,
+                7
+              ],
+              "harmonic_moments": [
+                0,
+                0
+              ]
+            }
+          ],
+          "pde_solution_established": false,
+          "compact_profile_exclusion": "analytic unique continuation (external theorem)"
+        }
+      },
+      "RH-B003": {
+        "intake": {
+          "status": "METADATA_ACCEPTED_FOR_REVIEW",
+          "claim_id": "RH.zero_identity",
+          "outcome": "SCOPED_RESULT_CANDIDATE",
+          "promotion": "NONE",
+          "mathematical_proof_established": false,
+          "external_review_verified": false
+        },
+        "controls": {
+          "window_count": 4,
+          "support_length": "1/1024",
+          "cross_abs_lower_bounds": [
+            "251/640",
+            "125/384",
+            "247/1152"
+          ],
+          "interior_row_lower": "2131/1920",
+          "constant_vector_rayleigh_lower": "5881/5760",
+          "prior_local_floor": "317/768",
+          "global_positivity_proved": false,
+          "scope": "obstruction to fixed-floor triangle-inequality certificate, not to actual normalized block positivity"
+        }
+      }
+    }
+  }
+}
