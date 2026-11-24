@@ -7,11 +7,11 @@ abbrev Assignment := Nat → Bool
 abbrev Family := Nat → Assignment
 
 structure Literal where
-  variable : Nat
+  varId : Nat
   positive : Bool
 
 def Literal.holds (l : Literal) (x : Assignment) : Prop :=
-  x l.variable = l.positive
+  x l.varId = l.positive
 
 abbrev Clause := List Literal
 def Clause.holds (c : Clause) (x : Assignment) : Prop :=
@@ -45,18 +45,18 @@ theorem assemble_local (shared : Nat → Bool) (sigma : Assignment)
     rw [ho] <;> rfl
 
 theorem clause_agrees (c : Clause) (x y : Assignment)
-    (h : ∀ l ∈ c, x l.variable = y l.variable) :
+    (h : ∀ l ∈ c, x l.varId = y l.varId) :
     Clause.holds c x ↔ Clause.holds c y := by
   constructor
   · intro hx
     unfold Clause.holds at hx ⊢
     obtain ⟨l, hl, ht⟩ := hx
-    change x l.variable = l.positive at ht
+    change x l.varId = l.positive at ht
     exact ⟨l, hl, (h l hl).symm.trans ht⟩
   · intro hy
     unfold Clause.holds at hy ⊢
     obtain ⟨l, hl, ht⟩ := hy
-    change y l.variable = l.positive at ht
+    change y l.varId = l.positive at ht
     exact ⟨l, hl, (h l hl).trans ht⟩
 
 -- The labels are a certificate of separation. Each original clause is
@@ -64,7 +64,7 @@ theorem clause_agrees (c : Clause) (x y : Assignment)
 def ValidPartition (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (owner component : Nat → Nat) : Prop :=
   ∀ i, i < m → ∀ l ∈ clauses i,
-    shared l.variable = true ∨ owner l.variable = component i
+    shared l.varId = true ∨ owner l.varId = component i
 
 def GlobalSat (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment) : Prop :=
@@ -88,9 +88,9 @@ theorem separator_forward (clauses : Nat → Clause) (m : Nat)
   apply (clause_agrees (clauses i) x _ ?_).mp (hc i hi)
   intro l _
   unfold localView
-  cases e : shared l.variable with
+  cases e : shared l.varId with
   | false => rfl
-  | true => exact hs l.variable e
+  | true => exact hs l.varId e
 
 theorem separator_backward (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment)
@@ -105,7 +105,7 @@ theorem separator_backward (clauses : Nat → Clause) (m : Nat)
   · intro i hi
     apply (clause_agrees (clauses i) _ _ ?_).mpr (hc i hi)
     intro l hl
-    exact assemble_local shared sigma owner locals (component i) l.variable
+    exact assemble_local shared sigma owner locals (component i) l.varId
       (valid i hi l hl)
 
 theorem separator_iff (clauses : Nat → Clause) (m : Nat)
