@@ -9,7 +9,9 @@ from mathos.research.tga_proctor_factor_decomposition import controls
 
 ROOT=Path(__file__).resolve().parents[2]
 NAMES=("assemble_shared","assemble_local","clause_agrees","separator_forward",
-       "separator_backward","separator_iff","component_iff")
+       "separator_backward","separator_iff","component_iff",
+       "finite_component_witnesses","component_witness_union","finite_component_iff",
+       "component_unsat_lifts")
 
 
 def run(out,lean):
