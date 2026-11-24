@@ -1,8 +1,14 @@
-# TGA-PROCTOR-601 — Advanced formal verification and research supervision
+# TGA-PROCTOR-601 — Autonomous Mathematical Research and Formal Verification
 
 **MathOS Academy | 10/10 design target | 8-week advanced extension | 64–80 hours**
 
 Prerequisite: TGA-PROCTOR-501 or documented equivalent. Together the 12-week foundation and 8-week extension provide 160–200 hours. The objective is defensible proctor competence, not a Clay award or academic accreditation. This edition implements technical improvements; independent educational effectiveness and live model operation remain unvalidated. No numerical quality score can be inferred from CI.
+
+## Central objective — unified mathematical research environment
+
+Integrate the proctor, research agents, formal proof kernel and mathematical evidence engine into a unified research environment. Progress from generating mathematical proof candidates to producing machine-verifiable mathematical theorems. Autonomy is bounded by operator-approved budgets, typed tools and explicit proof scope; the course does not guarantee novel theorems or solutions to open problems.
+
+The unified practical exercise runs the existing four-role agent, audits its checkpoint through the read-only proctor, validates an operator-supplied Boolean equality candidate, exhaustively checks its assignments and generates a safe Lean proof from a restricted grammar. It records the exact theorem, source and log digests, toolchain, axiom audit and the linked attempt. A failed equality yields a counterexample rather than proof promotion. With no Lean run the status remains FINITE_CHECK_ONLY. A verified Boolean identity is a real universal theorem of that finite formal domain, not a proof of the linked Millennium research hypothesis. Offline roles are scripted; the current integration does not translate arbitrary natural-language AI arguments into Lean or autonomously discharge canonical research gaps. Live AI candidate generation remains a separate authorized exercise.
 
 ## Advanced eight-week sequence
 
@@ -28,7 +34,7 @@ Replay 501's proctor audit on an unmodified checkpoint; simulate a failed reques
 Design a preregistered pilot with unseen assessment variants, two accountable scorers, accessibility accommodations, private records and an equivalent-time comparator. Use learner-level analysis, not treating multiple questions as independent learners. Freeze rubric and analysis before recruitment. Produce a consent and retention plan, simulated blank reporting template (not simulated outcomes), and documented scoring disagreement process. No outcome claim until real data exist.
 
 ### 8 — Advanced capstone and defense
-Submit a pinned evidence packet containing a proof-kernel replay (or explicitly record incomplete), dynamic graph comparison, exact specialist derivation and negative control, checkpoint audit, HMAC tamper checks, remediation plan and oral explanation. The assessor checks that the learner can reproduce an unseen equivalent task unaided by AI. No proof completion or certification follows from a course pass.
+Complete the unified theorem lab described below, including a valid Boolean identity and a false variant with an exact counterexample. Submit a pinned evidence packet containing a proof-kernel replay (or explicitly record incomplete), dynamic graph comparison, exact specialist derivation and negative control, checkpoint audit, HMAC tamper checks, remediation plan and oral explanation. The assessor checks that the learner can reproduce an unseen equivalent task unaided by AI. No proof completion or certification follows from a course pass.
 
 ## Assessment matrix (100 points)
 
@@ -44,6 +50,17 @@ python -m mathos.research.tga_proctor_advanced --assessment PRIVATE_RUBRIC.json
 ```
 
 The assessment file contains scores M1–M6, capstone keys oral_scope, practical_replay, adversarial_mathematics, dossier_and_defense, and integrity true/false. Keep all personal data outside public repository. The rubric tool only applies 501 practice thresholds, not the 601 capstone rubric.
+
+## Unified practical: candidate to machine-verifiable theorem
+
+From the repository root:
+
+```sh
+python -m mathos.research.tga_agent --attempts 1 --max-calls 4 --output-dir artifacts/proctor601-agent
+python -m mathos.research.tga_proctor_unified --checkpoint artifacts/proctor601-agent/state.json --lean lean
+```
+
+Use a fresh agent directory or resume explicitly. The default candidate is the distributive Boolean identity (A AND B) OR C = (A OR C) AND (B OR C). The typed candidate format has attempt_id, variables (1–4), left and right. Integer leaves denote zero-based variable indices; true/false are constants; internal arrays are ["not", expr], ["and", left, right] or ["or", left, right]. The learner may supply a separate JSON file via --candidate. Change the right side to false to produce a counterexample. Only internally generated Lean syntax reaches the compiler; no arbitrary candidate code executes. The linked attempt is a provenance reference, not evidence that the agent proposed or proved the identity. Read theorem-report.json, Candidate.lean, kernel.txt and version.txt; explain the difference between finite replay and the scoped kernel-checked theorem. The CI workflow includes the actual unified replay.
 
 ## Ten quality dimensions: acceptance evidence
 

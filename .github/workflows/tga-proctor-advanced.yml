@@ -4,6 +4,8 @@ on:
     paths:
       - 'curriculum/academy/proctor/**'
       - 'mathos/research/tga_proctor_advanced.py'
+      - 'mathos/research/tga_proctor_unified.py'
+      - 'tests/test_tga_proctor_unified.py'
       - 'tests/test_tga_proctor_advanced.py'
       - 'formal/Proctor601.lean'
       - '.github/workflows/tga-proctor-advanced.yml'
@@ -11,6 +13,8 @@ on:
     paths:
       - 'curriculum/academy/proctor/**'
       - 'mathos/research/tga_proctor_advanced.py'
+      - 'mathos/research/tga_proctor_unified.py'
+      - 'tests/test_tga_proctor_unified.py'
       - 'tests/test_tga_proctor_advanced.py'
       - 'formal/Proctor601.lean'
       - '.github/workflows/tga-proctor-advanced.yml'
@@ -53,6 +57,9 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Install pinned Lean 4.14.0 (existing MathOS toolchain)
         run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
@@ -81,6 +88,20 @@ jobs:
           sha256sum formal/Proctor601.lean | tee artifacts/proctor601-kernel/source.sha256
           cp formal/Proctor601.lean artifacts/proctor601-kernel/
           echo "PASS: eight scoped logical lemmas; no Millennium conjecture verified."
+      - name: Unified agent-proctor-evidence-kernel replay
+        run: |
+          python -m mathos.research.tga_agent --attempts 1 --max-calls 4 --output-dir artifacts/proctor601-agent
+          python -m mathos.research.tga_proctor_unified --checkpoint artifacts/proctor601-agent/state.json --lean lean --output-dir artifacts/proctor601-kernel/unified
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from mathos.research.tga_proctor_unified import DEMO,run
+          p=Path("artifacts/proctor601-kernel/unified/theorem-report.json")
+          assert json.loads(p.read_text())["status"]=="KERNEL_VERIFIED_SCOPED_THEOREM"
+          bad=dict(DEMO,right=False)
+          r=run("artifacts/proctor601-agent/state.json",bad,"artifacts/proctor601-kernel/negative","lean")
+          assert r["status"]=="COUNTEREXAMPLE" and r["formal"] is None
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: proctor601-kernel
