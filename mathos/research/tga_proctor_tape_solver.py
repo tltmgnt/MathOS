@@ -22,8 +22,16 @@ from mathos.research.tga_proctor_bit_cells import CELL_NAMES,NAMES as WIRE_NAMES
 TAPE_NAMES=("initTape","tapeXor","tapeScan","tapeUpdate","tapeClearAll","tapeStripAll","tapeBase","solveTape","tapeCertify","tape_output_valid","tape_cost_bound")
 def bits(n,a):return [(a>>i)&1 for i in range(n)]
 def mirror_tape(n,rows):
+    # Legacy fixture adapter only; the shared solver operates on cells.
+    return mirror_cells(n,[(bits(n,a),b) for a,b in rows])
+
+def mirror_cells(n,rows):
+    if n<0:raise ValueError("negative width")
+    rows=[(list(a),b) for a,b in rows]
+    if any(len(a)!=n or any(v not in (0,1) for v in a) or b not in (0,1) for a,b in rows):
+        raise ValueError("invalid rectangular Boolean rows")
     m=len(rows)
-    ts=[(bits(n,a),b,bits(m,1<<i)) for i,(a,b) in enumerate(rows)]
+    ts=[([bool(v) for v in a],bool(b),[i==j for j in range(m)]) for i,(a,b) in enumerate(rows)]
     init=2*m*(m+1)
     def go(k,ts):
         if not k:
@@ -47,7 +55,10 @@ def mirror_tape(n,rows):
         if not ok:return (False,x),scans+updates+cost+1
         if pivot is None:return (True,[0]+x),scans+updates+cost+1
         a,b,_=pivot
-        return (True,[b^(sum(u*v for u,v in zip(a[1:],x))%2)]+x),scans+updates+cost+4*(k-1)+4
+        d=False
+        for u,v in zip(a[1:],x):
+            d^=u and v
+        return (True,[b^d]+x),scans+updates+cost+4*(k-1)+4
     ans,cost=go(n,ts)
     return ans,init+cost
 def bound(n,m):return 4*m*m+4*m+n*(m*(4*(n+m+1)+6)+4*n+4)+2*m
