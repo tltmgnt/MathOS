@@ -37,6 +37,8 @@ on:
       - 'formal/ProctorTerminalPolynomialMain.lean'
       - 'formal/ProctorEncodedSize.lean'
       - 'formal/ProctorEncodedSizeMain.lean'
+      - 'formal/ProctorParserConsumption.lean'
+      - 'formal/ProctorParserConsumptionMain.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -79,6 +81,8 @@ on:
       - 'formal/ProctorTerminalPolynomialMain.lean'
       - 'formal/ProctorEncodedSize.lean'
       - 'formal/ProctorEncodedSizeMain.lean'
+      - 'formal/ProctorParserConsumption.lean'
+      - 'formal/ProctorParserConsumptionMain.lean'
       - 'formal/ProctorDimacsMain.lean'
       - 'scripts/build_proctor_dimacs_checker.sh'
       - 'scripts/build_proctor_data_checker.sh'
@@ -242,6 +246,9 @@ jobs:
           cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorEncodedSizeMain.lean > artifacts/pnp-f030/f034-encoded-size-combined.lean
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-encoded-size-combined.lean -- artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-encoded-size-kernel.txt
           grep -Fx 'F034_ENCODED_SIZE_OK cases=53 accepted=19 rejected=34' artifacts/pnp-f030/f034-encoded-size-kernel.txt
+          cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorParserConsumptionMain.lean > artifacts/pnp-f030/f034-parser-consumption-combined.lean
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-parser-consumption-combined.lean -- artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-parser-consumption-kernel.txt
+          grep -Fx 'F034_PARSER_CONSUMPTION_OK cases=67 accepted=19' artifacts/pnp-f030/f034-parser-consumption-kernel.txt
           python - <<'PY'
           import hashlib
           import json
@@ -275,6 +282,7 @@ jobs:
           groups.append(("ProctorPolynomialMeter", "f034-polynomial-meter-kernel.txt", ("visits_uniform", "words_uniform", "words_depth_three", "toggle_length", "combine_length", "combine_uniform", "sum_length", "sum_uniform", "sum_quadratic", "sum_meter_quadratic", "shape_closed", "mass_rows", "lookup_mass", "parent_poly", "step_poly", "batch_poly", "chain_mass_head", "chain_steps_mass", "chain_uniform", "chain_polynomial", "chain_meter_polynomial")))
           groups.append(("ProctorTerminalPolynomial", "f034-terminal-polynomial-kernel.txt", ("mul_mono", "weighted_visits", "ref_row_mass", "refs_poly", "distinct_poly", "conflict_poly", "tuple_poly", "word_linear", "group_poly", "groups_poly", "demand_mass", "indices_length", "different_poly", "pairs_poly", "coverage_poly", "capacity_poly", "capacity_meter_poly", "xor_visits_eq", "pattern_poly", "binary_uniform", "binary_five", "block_poly", "xor_poly", "xor_meter_poly")))
           groups.append(("ProctorEncodedSize", "f034-encoded-size-kernel.txt", ("clause_size", "formula_size", "ref_size", "group_size", "block_size", "support_size", "batch_size", "chain_size", "target_mass", "terminal_sizes", "formula_binding_size", "clause_range_size", "formula_range_size", "refs_range_size", "terminal_range_size", "proof_range_size", "terminal_poly", "global_budget", "global_meter", "global_sound")))
+          groups.append(("ProctorParserConsumption", "f034-parser-consumption-kernel.txt", ("nat_converse", "bool_converse", "many_converse", "list_converse", "literal_converse", "clause_converse", "formula_converse", "ref_converse", "group_converse", "capacity_converse", "block_converse", "step_converse", "terminal_converse", "proof_converse", "expected_converse", "envelope_converse", "decode_converse", "wire_length", "expected_bytes", "envelope_bytes", "global_mono", "byte_budget", "accepted_byte_sound")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -388,6 +396,11 @@ jobs:
           report["f034_encoded_size_source_sha256"] = hashlib.sha256(Path("formal/ProctorEncodedSize.lean").read_bytes()).hexdigest()
           report["f034_global_polynomial_bound_verified"] = True
           report["f034_arbitrary_input_byte_size_bridge_verified"] = False
+          report["f034_total_cost_semantics_verified"] = False
+          report["f034_parser_consumption_scope"] = "CUSTOM_DATA_SUCCESSFUL_DECODE_SELECTED_CHARGES_ONLY"
+          report["f034_parser_consumption_sha256"] = hashlib.sha256(Path("formal/ProctorParserConsumption.lean").read_bytes()).hexdigest()
+          report["f034_custom_data_byte_size_bridge_verified"] = True
+          report["f034_dimacs_byte_size_bridge_verified"] = False
           report["f034_total_cost_semantics_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
