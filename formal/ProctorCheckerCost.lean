@@ -116,13 +116,11 @@ theorem shape_bound (pivot : Literal) (tail row : Clause) :
     · rw [if_pos e]
       exact Nat.add_le_add ih (Nat.succ_le_succ (Nat.zero_le tail.length))
     · rw [if_neg e]
-      cases h : (containsMeter l tail).1 with
+      cases (containsMeter l tail).1 with
       | false =>
-        rw [h]
         exact Nat.le_trans (Nat.succ_le_succ (contains_bound l tail))
           (Nat.le_add_left _ _)
       | true =>
-        rw [h]
         exact Nat.add_le_add ih (Nat.succ_le_succ (contains_bound l tail))
 
 end ProctorCheckerCost
