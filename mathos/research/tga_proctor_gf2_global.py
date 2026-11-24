@@ -28,7 +28,9 @@ def eval_source(data):
     def expr(d):
         n,rows,yes,value=d
         rs="["+",".join("("+str(a)+","+("true" if b else "false")+")" for a,b in rows)+"]"
-        return "(ProctorGF2.highestOutput "+str(n)+" "+rs+" (by decide) == ("+("true" if yes else "false")+","+str(value)+"))"
+        proof="True.intro"
+        for _ in rows:proof="⟨by decide,"+proof+"⟩"
+        return "(ProctorGF2.highestOutput "+str(n)+" "+rs+" ("+proof+") == ("+("true" if yes else "false")+","+str(value)+"))"
     return "\n".join("#eval (["+ ",\n".join(expr(d) for d in data[i:i+32])+"].all id)" for i in range(0,len(data),32))+"\n"
 def run(out,lean):
     out=Path(out).resolve()
