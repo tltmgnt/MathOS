@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "BSD.analytic_selmer",
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "statement": "For E:y²=x³−1681x, analytic rank, rational rank, and full 2-power Selmer corank are each 2; Sha[2^infty]=0.",
+  "hypotheses": "Classical modularity/functional equation, Tunnell central-value identity for odd squarefree twists, full rational 2-torsion descent and Monsky formula.",
+  "definitions": "Kummer map x,x−41,x+41 in rational squareclasses; pure 2-Selmer nullity; completed L= (sqrt(N)/(2pi))^s Gamma(s)L(s).",
+  "source_locators": "Tunnell doi:10.1007/BF01389327; Monsky appendix to Heath-Brown, Invent Math 118 (1994); https://doi.org/10.1142/S1793042119500362; https://webusers.imj-prg.fr/~pascal.molin/cours/cimpa2016/congruent.html",
+  "proof_or_gap": "Explicit independent Kummer classes modulo torsion plus zero 2x2 Monsky matrix give rank 2 and Sha[2]=0. Tunnell counts give exact central vanishing; sign +1 gives first derivative zero; rigorously outward-rounded Mellin second derivative bound establishes nonzero second derivative. No BSD assumption used.",
+  "implication_to_claim": "Independent equality in one genuine rank-two example, beyond the earlier local Euler-factor probes; not general rank comparison.",
+  "unproved_dependencies": "General higher-rank comparison, other primes of Sha, refined leading-term identity. External theorem hypotheses and arithmetic certificate await independent review.",
+  "adversarial_findings": "Exact 2-descent alone does not give analytic order; numerical small central value alone cannot prove vanishing. Here separate Tunnell identity and bounded integral address both for one curve."
+}
