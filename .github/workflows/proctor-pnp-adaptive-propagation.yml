@@ -1,0 +1,78 @@
+name: Proctor PNP adaptive propagation
+on:
+  push:
+    paths:
+      - 'formal/ProctorAdaptivePropagation.lean'
+      - 'formal/ProctorRenamableHorn.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - 'tests/test_tga_proctor*.py'
+      - 'docs/research/tga-universal/PNP-F030.md'
+      - '.github/workflows/proctor-pnp-adaptive-propagation.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorAdaptivePropagation.lean'
+      - 'formal/ProctorRenamableHorn.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - 'tests/test_tga_proctor*.py'
+      - 'docs/research/tga-universal/PNP-F030.md'
+      - '.github/workflows/proctor-pnp-adaptive-propagation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          mkdir -p artifacts/pnp-f030
+          python -m unittest discover -s tests -p 'test_tga_proctor_affine_backdoor.py' -v
+          python -m unittest discover -s tests -p 'test_tga_proctor_resolution_gates.py' -v
+          python -m unittest discover -s tests -p 'test_tga_proctor_renamable_horn.py' -v
+          python -m unittest discover -s tests -p 'test_tga_proctor_adaptive_propagation.py' -v
+          python -m mathos.research.tga_proctor_adaptive_propagation > artifacts/pnp-f030/controls.json
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee artifacts/pnp-f030/lean-version.txt
+          grep -E 'version 4\.14\.0\b' artifacts/pnp-f030/lean-version.txt
+          lean -DwarningAsError=true formal/ProctorRenamableHorn.lean 2>&1 | tee artifacts/pnp-f030/prior-kernel.txt
+          lean -DwarningAsError=true formal/ProctorAdaptivePropagation.lean 2>&1 | tee artifacts/pnp-f030/kernel.txt
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          out = Path("artifacts/pnp-f030")
+          groups = [
+              ("ProctorRenamableHorn", "prior-kernel.txt", ("pair_encoding", "guard_exact", "deletion_preserves_guard", "flip_involution")),
+              ("ProctorAdaptivePropagation", "kernel.txt", ("unit_forces", "pure_positive_preserves", "pure_negative_preserves", "false_residual_refutes", "split_refutes")),
+          ]
+          verified = []
+          for namespace, log, names in groups:
+              lines = (out / log).read_text().splitlines()
+              for name in names:
+                  full = f"{namespace}.{name}"
+                  if lines.count(f"'{full}' does not depend on any axioms") != 1:
+                      raise SystemExit(f"strict axiom check failed: {full}")
+                  verified.append(full)
+          report = dict(status="LOCAL_PROPAGATION_LEMMAS_ONLY", declarations=verified,
+                        source_sha256=hashlib.sha256(Path("formal/ProctorAdaptivePropagation.lean").read_bytes()).hexdigest(),
+                        universal_bound=False, machine_refinement=False, independent_review=False)
+          (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f030-scoped-evidence
+          path: artifacts/pnp-f030/
+          if-no-files-found: error
