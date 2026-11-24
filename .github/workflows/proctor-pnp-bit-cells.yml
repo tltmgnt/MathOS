@@ -1,0 +1,42 @@
+name: Proctor PNP bit cell primitives
+on:
+  push:
+    paths:
+      - 'formal/ProctorBitCells.lean'
+      - 'mathos/research/tga_proctor_bit_cells.py'
+      - 'tests/test_tga_proctor_bit_cells.py'
+      - 'docs/research/tga-universal/PNP-F013.md'
+      - '.github/workflows/proctor-pnp-bit-cells.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorBitCells.lean'
+      - 'mathos/research/tga_proctor_bit_cells.py'
+      - 'tests/test_tga_proctor_bit_cells.py'
+      - 'docs/research/tga-universal/PNP-F013.md'
+      - '.github/workflows/proctor-pnp-bit-cells.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_bit_cells.py' -v
+      - run: python -m mathos.research.tga_proctor_bit_cells --output-dir artifacts/pnp-bit-cells
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f013-evidence
+          path: artifacts/pnp-bit-cells/
+          if-no-files-found: error
