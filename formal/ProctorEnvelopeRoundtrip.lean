@@ -57,7 +57,7 @@ theorem ref_roundtrip (r : RefRow) (h : FitsRef r) :
     intro rest
     change (do
       let (c,ts) ← clauseToken (encClause row ++ rest)
-      some (⟨i,c⟩,ts)) = some (⟨i,row⟩,rest)
+      some (RefRow.mk i c,ts)) = some (RefRow.mk i row,rest)
     rw [clause_roundtrip row h rest] <;> rfl
 
 def encGroup (g : ProctorCapacityDeficiency.Group) : List Nat :=
@@ -73,7 +73,7 @@ theorem group_roundtrip (g : ProctorCapacityDeficiency.Group) (h : FitsGroup g) 
     change (do
       let (c,ts) ← clauseToken ((encClause vs ++ encNat cap) ++ rest)
       let (k,ts) ← natToken ts
-      some (⟨c,k⟩,ts)) = some (⟨vs,cap⟩,rest)
+      some (ProctorCapacityDeficiency.Group.mk c k,ts)) = some (ProctorCapacityDeficiency.Group.mk vs cap,rest)
     rw [append_assoc_local, clause_roundtrip vs h (encNat cap ++ rest)] <;> rfl
 
 def encCapacity (c : Certificate) : List Nat :=
@@ -97,16 +97,16 @@ theorem capacity_roundtrip (c : Certificate) (h : FitsCapacity c) :
         (encList encGroup gs ++ encList encRef rs)) ++ rest)
       let (g,ts) ← listToken groupToken ts
       let (r,ts) ← listToken refToken ts
-      some (⟨d,g,r⟩,ts)) = some (⟨ds,gs,rs⟩,rest)
+      some (Certificate.mk d g r,ts)) = some (Certificate.mk ds gs rs,rest)
     rw [append_assoc_local, append_assoc_local, hd]
     change (do
       let (g,ts) ← listToken groupToken (encList encGroup gs ++ (encList encRef rs ++ rest))
       let (r,ts) ← listToken refToken ts
-      some (⟨ds,g,r⟩,ts)) = _
+      some (Certificate.mk ds g r,ts)) = _
     rw [hg]
     change (do
       let (r,ts) ← listToken refToken (encList encRef rs ++ rest)
-      some (⟨ds,gs,r⟩,ts)) = _
+      some (Certificate.mk ds gs r,ts)) = _
     rw [hr] <;> rfl
 
 def encBlock (b : ProctorXorReplay.Block) : List Nat :=
@@ -127,16 +127,16 @@ theorem block_roundtrip (b : ProctorXorReplay.Block) (h : FitsBlock b) :
         (encBool rhs ++ encList encRef rs)) ++ rest)
       let (b,ts) ← boolToken ts
       let (r,ts) ← listToken refToken ts
-      some (⟨v,b,r⟩,ts)) = some (⟨vs,rhs,rs⟩,rest)
+      some (ProctorXorReplay.Block.mk v b r,ts)) = some (ProctorXorReplay.Block.mk vs rhs rs,rest)
     rw [append_assoc_local, append_assoc_local, hv]
     change (do
       let (b,ts) ← boolToken (encBool rhs ++ (encList encRef rs ++ rest))
       let (r,ts) ← listToken refToken ts
-      some (⟨vs,b,r⟩,ts)) = _
+      some (ProctorXorReplay.Block.mk vs b r,ts)) = _
     rw [bool_roundtrip rhs]
     change (do
       let (r,ts) ← listToken refToken (encList encRef rs ++ rest)
-      some (⟨vs,rhs,r⟩,ts)) = _
+      some (ProctorXorReplay.Block.mk vs rhs r,ts)) = _
     rw [hr] <;> rfl
 
 def encStep (s : Step) : List Nat :=
@@ -150,7 +150,7 @@ theorem step_roundtrip (s : Step) (h : FitsStep s) :
     intro rest
     change (do
       let (tail,ts) ← clauseToken (encClause t ++ rest)
-      some (⟨a,b,p,tail⟩,ts)) = some (⟨a,b,p,t⟩,rest)
+      some (Step.mk a b p tail,ts)) = some (Step.mk a b p t,rest)
     rw [clause_roundtrip t h rest] <;> rfl
 
 def encTerminal : Terminal → List Nat
@@ -202,16 +202,16 @@ theorem proof_roundtrip (p : Proof) (h : FitsProof p) :
         (encBool aug ++ encTerminal term)) ++ rest)
       let (a,ts) ← boolToken ts
       let (t,ts) ← terminalToken ts
-      some (⟨b,a,t⟩,ts)) = some (⟨bs,aug,term⟩,rest)
+      some (Proof.mk b a t,ts)) = some (Proof.mk bs aug term,rest)
     rw [append_assoc_local, append_assoc_local, hb]
     change (do
       let (a,ts) ← boolToken (encBool aug ++ (encTerminal term ++ rest))
       let (t,ts) ← terminalToken ts
-      some (⟨bs,a,t⟩,ts)) = _
+      some (Proof.mk bs a t,ts)) = _
     rw [bool_roundtrip aug]
     change (do
       let (t,ts) ← terminalToken (encTerminal term ++ rest)
-      some (⟨bs,aug,t⟩,ts)) = _
+      some (Proof.mk bs aug t,ts)) = _
     rw [terminal_roundtrip term h.right rest] <;> rfl
 
 def encEnvelope (e : Envelope) : List Nat :=
@@ -227,11 +227,11 @@ theorem envelope_roundtrip (e : Envelope) (h : FitsEnvelope e) :
     change (do
       let (g,ts) ← formulaToken ((encFormula f ++ encProof p) ++ rest)
       let (q,ts) ← proofToken ts
-      some (⟨n,g,q⟩,ts)) = some (⟨n,f,p⟩,rest)
+      some (Envelope.mk n g q,ts)) = some (Envelope.mk n f p,rest)
     rw [append_assoc_local, formula_roundtrip f h.left]
     change (do
       let (q,ts) ← proofToken (encProof p ++ rest)
-      some (⟨n,f,q⟩,ts)) = _
+      some (Envelope.mk n f q,ts)) = _
     rw [proof_roundtrip p h.right rest] <;> rfl
 
 theorem envelope_bytes_roundtrip (e : Envelope) (h : FitsEnvelope e)
