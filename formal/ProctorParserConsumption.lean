@@ -64,7 +64,7 @@ private theorem bind_success {α β : Type} (p : Parser α)
     cases pair with
     | mk a rest =>
       rw [e] at h
-      exact ⟨a,rest,e,h⟩
+      exact ⟨a,rest,rfl,h⟩
 
 theorem nat_converse : Consumes natToken encNat := by
   intro ts a rest h
@@ -130,9 +130,10 @@ theorem list_converse {α : Type} (p : Parser α) (enc : α → List Nat)
     · rw [if_pos size] at h
       obtain ⟨xs,hl,ho,ht⟩ := many_converse p enc hc k vs [] out rest h
       change out=xs at ho
+      have exactInput : k::vs=xs.length::(encItems enc xs++rest) := by
+        rw [hl,ht]
       cases ho
-      change k::vs=xs.length::(encItems enc xs++rest)
-      rw [hl,ht]
+      exact exactInput
     · rw [if_neg size] at h
       cases h
 
@@ -437,9 +438,10 @@ theorem envelope_converse : Consumes envelopeToken encEnvelope := by
         calc
           3402::ts = 3402::(encNat v0 ++ (encFormula v1 ++ (encProof v2 ++ (t2)))) := by rw [c0,c1,c2]
           _ = encEnvelope (Envelope.mk v0 v1 v2) ++ t2 := by
-            unfold encEnvelope
-            repeat rw [append_assoc_local]
-            all_goals rfl
+            change 3402::v0::(encFormula v1++(encProof v2++t2)) =
+              3402::v0::((encFormula v1++encProof v2)++t2)
+            exact congrArg (fun xs => 3402::v0::xs)
+              (append_assoc_local (encFormula v1) (encProof v2) t2).symm
       change some (Envelope.mk v0 v1 v2,t2)=some (out,rest) at next2
       cases next2
       exact exactInput
