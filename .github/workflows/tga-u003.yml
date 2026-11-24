@@ -1,0 +1,50 @@
+name: TGA persistent obstruction and Kummer orientation
+on:
+  push:
+    paths:
+      - 'mathos/research/tga_u003.py'
+      - 'tests/test_tga_u003.py'
+      - 'docs/research/tga-universal/TGA-U003*'
+      - '.github/workflows/tga-u003.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/tga_u003.py'
+      - 'tests/test_tga_u003.py'
+      - 'docs/research/tga-universal/TGA-U003*'
+      - '.github/workflows/tga-u003.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_tga_u003.py' -v
+      - run: |
+          mkdir -p artifacts/tga-u003
+          python -m mathos.research.tga_u003 > artifacts/tga-u003/report.json
+          cat artifacts/tga-u003/report.json
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx, verify
+          import base64
+          p=Path('docs/research/tga-universal/TGA-U003.md')
+          d=p.with_suffix('.docx')
+          if not d.exists():
+              make_docx(p,d)
+              s=base64.b64encode(d.read_bytes()).decode('ascii')
+              for i in range(0,len(s),3000):print('PAPER64 '+s[i:i+3000])
+          verify(p,d)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-u003-research
+          path: |
+            artifacts/tga-u003/report.json
+            docs/research/tga-universal/TGA-U003.docx
+          if-no-files-found: error
