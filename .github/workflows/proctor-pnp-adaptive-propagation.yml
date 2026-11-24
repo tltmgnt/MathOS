@@ -18,6 +18,9 @@ on:
       - 'formal/ProctorUnifiedReplay.lean'
       - 'formal/ProctorDataParser.lean'
       - 'formal/ProctorDataParserMain.lean'
+      - 'formal/ProctorWireRoundtrip.lean'
+      - 'formal/ProctorWireRoundtripMain.lean'
+      - 'scripts/build_proctor_data_checker.sh'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -38,6 +41,9 @@ on:
       - 'formal/ProctorUnifiedReplay.lean'
       - 'formal/ProctorDataParser.lean'
       - 'formal/ProctorDataParserMain.lean'
+      - 'formal/ProctorWireRoundtrip.lean'
+      - 'formal/ProctorWireRoundtripMain.lean'
+      - 'scripts/build_proctor_data_checker.sh'
       - 'formal/ProctorGF2.lean'
       - 'formal/ProctorRenamableHorn.lean'
       - 'mathos/research/tga_proctor*.py'
@@ -152,6 +158,19 @@ jobs:
           cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorDataParserMain.lean > artifacts/pnp-f030/f034-data-combined.lean
           lean -DwarningAsError=true --run artifacts/pnp-f030/f034-data-combined.lean -- --fixtures artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-data-kernel.txt
           grep -Fx 'F034_DATA_REPLAY_OK cases=67 accepted=19 rejected=48' artifacts/pnp-f030/f034-data-kernel.txt
+          cat artifacts/pnp-f030/f034-replay-combined.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorWireRoundtripMain.lean > artifacts/pnp-f030/f034-wire-combined.lean
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-wire-combined.lean -- artifacts/pnp-f030/f034-data-fixtures 2>&1 | tee artifacts/pnp-f030/f034-wire-kernel.txt
+          grep -Fx 'F034_WIRE_ROUNDTRIP_OK expected=53' artifacts/pnp-f030/f034-wire-kernel.txt
+          bash scripts/build_proctor_data_checker.sh artifacts/pnp-f030/f034-static-checker.lean
+          cmp artifacts/pnp-f030/f034-static-checker.lean artifacts/pnp-f030/f034-data-combined.lean
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-static-checker.lean -- artifacts/pnp-f030/f034-data-fixtures/0.cnfdata artifacts/pnp-f030/f034-data-fixtures/0.proofdata > artifacts/pnp-f030/f034-cli-positive.txt
+          grep -Fx CERTIFIED_UNSAT artifacts/pnp-f030/f034-cli-positive.txt
+          set +e
+          lean -DwarningAsError=true --run artifacts/pnp-f030/f034-static-checker.lean -- artifacts/pnp-f030/f034-data-fixtures/66.cnfdata artifacts/pnp-f030/f034-data-fixtures/66.proofdata > artifacts/pnp-f030/f034-cli-negative.txt
+          rc=$?
+          set -e
+          test "$rc" -eq 1
+          grep -Fx REJECTED artifacts/pnp-f030/f034-cli-negative.txt
           python - <<'PY'
           import hashlib
           import json
@@ -174,6 +193,7 @@ jobs:
           groups.append(("ProctorXorReplay", "f034-xor-replay-kernel.txt", ("pattern_sound", "false_member", "pattern_parity", "block_sound", "bx_zero", "bx_swap", "bx_mix", "toggle_sound", "combine_sound", "sum_sound", "xor_check_sound", "checked_chain_xor_refutes")))
           groups.append(("ProctorUnifiedReplay", "f034-unified-kernel.txt", ("terminal_sound", "target_entails", "check_sound", "bound_sound", "binding_exact", "original_range_sound")))
           groups.append(("ProctorDataParser", "f034-data-kernel.txt", ("accepted_decoded", "accepted_unsat", "accepted_binding")))
+          groups.append(("ProctorWireRoundtrip", "f034-wire-kernel.txt", ("nat_roundtrip", "bool_roundtrip", "items_roundtrip", "list_roundtrip", "literal_roundtrip", "clause_roundtrip", "formula_roundtrip", "expected_roundtrip", "expected_exact", "scan_word", "scan_words", "tokenize_words", "expected_bytes_roundtrip")))
           verified = []
           for namespace, log, names in groups:
               lines = (out / log).read_text().splitlines()
@@ -228,6 +248,12 @@ jobs:
           report["f034_data_decoder_soundness_gate"] = True
           report["f034_external_parser_verified"] = False
           report["f034_data_grammar_roundtrip_verified"] = False
+          report["f034_data_io_refinement_verified"] = False
+          report["f034_expected_wire_scope"] = "EXPECTED_CNF_GRAMMAR_TO_DECODER_ONLY"
+          report["f034_expected_wire_source_sha256"] = hashlib.sha256(Path("formal/ProctorWireRoundtrip.lean").read_bytes()).hexdigest()
+          report["f034_expected_wire_fixture_count"] = 53
+          report["f034_expected_wire_roundtrip_gate"] = True
+          report["f034_proof_encoder_roundtrip_verified"] = False
           report["f034_data_io_refinement_verified"] = False
           (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
           PY

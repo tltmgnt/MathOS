@@ -2,14 +2,34 @@
 generated from certificates is loaded on this path. -/
 namespace ProctorDataParserMain
 
-def readBytes (path : String) : IO (List Nat) := do
-  let bytes ← IO.FS.readBinFile (System.FilePath.mk path)
-  pure (bytes.data.toList.map (fun b => b.toNat))
+/-- Read at most limit+1 bytes from each stream, including a one-byte
+EOF probe at the exact limit. A short read is not assumed to be EOF. -/
+def readBounded (h : IO.FS.Handle) : Nat → ByteArray → IO (Option ByteArray)
+  | 0, _ => pure none
+  | fuel+1, acc => do
+    let remaining := ProctorDataParser.byteLimit + 1 - acc.size
+    let chunk ← h.read (min 65536 remaining).toUSize
+    if chunk.size = 0 then
+      pure (some acc)
+    else if acc.size + chunk.size > ProctorDataParser.byteLimit then
+      pure none
+    else
+      readBounded h fuel (acc ++ chunk)
+
+def readBytes (path : String) : IO (Option (List Nat)) := do
+  let h ← IO.FS.Handle.mk (System.FilePath.mk path) IO.FS.Mode.read
+  let bytes ← readBounded h (ProctorDataParser.byteLimit+1) ByteArray.empty
+  pure (bytes.map (fun b => b.data.toList.map (fun c => c.toNat)))
 
 def runPair (expected proof : String) : IO Bool := do
   let a ← readBytes expected
-  let b ← readBytes proof
-  pure (ProctorDataParser.checkBytes a b)
+  match a with
+  | none => pure false
+  | some a =>
+    let b ← readBytes proof
+    match b with
+    | none => pure false
+    | some b => pure (ProctorDataParser.checkBytes a b)
 
 def runFixtures (dir : String) : IO UInt32 := do
   let mut accepted : Nat := 0
