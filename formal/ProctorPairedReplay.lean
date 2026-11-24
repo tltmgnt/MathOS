@@ -60,7 +60,7 @@ inductive Chain : Formula → Formula → Prop where
 theorem chain_entails (original derived : Formula) (h : Chain original derived) :
     Entails original derived := by
   induction h with
-  | refl f =>
+  | refl =>
     intro x hx
     exact hx
   | next h e ih =>
