@@ -1,0 +1,52 @@
+name: Proctor specialist PNP projection
+on:
+  push:
+    paths:
+      - 'formal/ProctorPNPProjection.lean'
+      - 'mathos/research/tga_proctor_pnp.py'
+      - 'tests/test_tga_proctor_pnp.py'
+      - 'docs/research/tga-universal/PNP-F001.md'
+      - '.github/workflows/proctor-pnp.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorPNPProjection.lean'
+      - 'mathos/research/tga_proctor_pnp.py'
+      - 'tests/test_tga_proctor_pnp.py'
+      - 'docs/research/tga-universal/PNP-F001.md'
+      - '.github/workflows/proctor-pnp.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_pnp.py' -v
+      - run: |
+          python -m mathos.research.tga_proctor_pnp --output-dir artifacts/pnp-formal
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('artifacts/pnp-formal/report.json').read_text())
+          assert len(r['attempts'])==2
+          assert not r['attempts'][0]['accepted'] and r['attempts'][1]['accepted']
+          assert r['after']['remaining']==[['affine_encoding','bit_cost','elimination']]
+          assert r['global_promotion']=='NONE'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proctor-pnp-evidence
+          path: artifacts/pnp-formal/
+          if-no-files-found: error
