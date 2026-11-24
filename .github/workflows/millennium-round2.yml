@@ -1,0 +1,33 @@
+name: Seven Millennium second-round research (bounded)
+on:
+  push:
+    paths:
+      - 'mathos/research/millennium_followup_round2.py'
+      - 'tests/test_millennium_followup_round2.py'
+      - '.github/workflows/millennium-round2.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/millennium_followup_round2.py'
+      - 'tests/test_millennium_followup_round2.py'
+      - '.github/workflows/millennium-round2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_millennium_followup_round2.py' -v
+      - run: |
+          mkdir -p artifacts/millennium-round2
+          python -m mathos.research.millennium_followup_round2 | tee artifacts/millennium-round2/report.json
+          python -m json.tool artifacts/millennium-round2/report.json > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seven-track-round2
+          path: artifacts/millennium-round2/report.json
+          if-no-files-found: error

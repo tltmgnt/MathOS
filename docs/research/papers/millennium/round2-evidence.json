@@ -1,0 +1,306 @@
+{
+  "source_commit": "59416705b396f03a2839b9da8e641a955cfcba69",
+  "workflow_run": 45363907650,
+  "job_id": 138340580789,
+  "report": {
+    "status": "BOUNDED_RESEARCH_NOT_CERTIFIED",
+    "globally_proved": 0,
+    "rh": [
+      {
+        "real_pairs": 1,
+        "epsilon": "1/2",
+        "interpolation_bound": "1/4",
+        "minimum_degree": 3,
+        "negative_witness": "-25/32"
+      },
+      {
+        "real_pairs": 2,
+        "epsilon": "1/2",
+        "interpolation_bound": "1181/2304",
+        "minimum_degree": 5,
+        "negative_witness": "-7225/512"
+      },
+      {
+        "real_pairs": 3,
+        "epsilon": "1/2",
+        "interpolation_bound": "23213/32768",
+        "minimum_degree": 7,
+        "negative_witness": "-9891025/8192"
+      },
+      {
+        "real_pairs": 4,
+        "epsilon": "1/2",
+        "interpolation_bound": "4761077975/5549064192",
+        "minimum_degree": 9,
+        "negative_witness": "-41789580625/131072"
+      },
+      {
+        "real_pairs": 5,
+        "epsilon": "1/2",
+        "interpolation_bound": "674229576614215/690392370511872",
+        "minimum_degree": 11,
+        "negative_witness": "-426295511955625/2097152"
+      },
+      {
+        "real_pairs": 6,
+        "epsilon": "1/4",
+        "interpolation_bound": "4890232910557503867587777/22424420686470312961769472",
+        "minimum_degree": 13,
+        "negative_witness": "-90775192534626988305750625/2251799813685248"
+      }
+    ],
+    "p_vs_np": [
+      {
+        "n": 5,
+        "baseline_reads": 38,
+        "permuted_reads": 62,
+        "total_scans": 4
+      },
+      {
+        "n": 7,
+        "baseline_reads": 54,
+        "permuted_reads": 126,
+        "total_scans": 6
+      },
+      {
+        "n": 9,
+        "baseline_reads": 70,
+        "permuted_reads": 190,
+        "total_scans": 6
+      },
+      {
+        "n": 11,
+        "baseline_reads": 86,
+        "permuted_reads": 286,
+        "total_scans": 8
+      },
+      {
+        "n": 21,
+        "baseline_reads": 166,
+        "permuted_reads": 958,
+        "total_scans": 12
+      }
+    ],
+    "navier_stokes": {
+      "viscosity": 1,
+      "positive_threshold": "A > 46 nu",
+      "base_palinstrophy": "23/2",
+      "cases": [
+        {
+          "A": 1,
+          "half_enstrophy_derivative_mean": "-45/4"
+        },
+        {
+          "A": 45,
+          "half_enstrophy_derivative_mean": "-2025/4"
+        },
+        {
+          "A": 46,
+          "half_enstrophy_derivative_mean": "0"
+        },
+        {
+          "A": 47,
+          "half_enstrophy_derivative_mean": "2209/4"
+        },
+        {
+          "A": 100,
+          "half_enstrophy_derivative_mean": "135000"
+        }
+      ]
+    },
+    "yang_mills": [
+      {
+        "inverse_spacing": 4,
+        "overlap_power": 0,
+        "crossover_time": 1.464816385
+      },
+      {
+        "inverse_spacing": 4,
+        "overlap_power": 1,
+        "crossover_time": 3.610733601
+      },
+      {
+        "inverse_spacing": 4,
+        "overlap_power": 2,
+        "crossover_time": 5.524179635
+      },
+      {
+        "inverse_spacing": 8,
+        "overlap_power": 0,
+        "crossover_time": 1.255556901
+      },
+      {
+        "inverse_spacing": 8,
+        "overlap_power": 1,
+        "crossover_time": 3.924556805
+      },
+      {
+        "inverse_spacing": 8,
+        "overlap_power": 2,
+        "crossover_time": 6.332872623
+      },
+      {
+        "inverse_spacing": 16,
+        "overlap_power": 0,
+        "crossover_time": 1.171853108
+      },
+      {
+        "inverse_spacing": 16,
+        "overlap_power": 1,
+        "crossover_time": 4.419343708
+      },
+      {
+        "inverse_spacing": 16,
+        "overlap_power": 2,
+        "crossover_time": 7.39252775
+      },
+      {
+        "inverse_spacing": 32,
+        "overlap_power": 0,
+        "crossover_time": 1.134051395
+      },
+      {
+        "inverse_spacing": 32,
+        "overlap_power": 1,
+        "crossover_time": 5.000451186
+      },
+      {
+        "inverse_spacing": 32,
+        "overlap_power": 2,
+        "crossover_time": 8.585829157
+      }
+    ],
+    "hodge": [
+      {
+        "m": 1,
+        "primitive_dimension": 1,
+        "noncrossing_basis_size": 1
+      },
+      {
+        "m": 2,
+        "primitive_dimension": 2,
+        "noncrossing_basis_size": 2
+      },
+      {
+        "m": 3,
+        "primitive_dimension": 5,
+        "noncrossing_basis_size": 5
+      },
+      {
+        "m": 4,
+        "primitive_dimension": 14,
+        "noncrossing_basis_size": 14
+      },
+      {
+        "m": 5,
+        "primitive_dimension": 42,
+        "noncrossing_basis_size": 42
+      }
+    ],
+    "bsd": [
+      {
+        "degree": 3,
+        "d": 1,
+        "trace": 22,
+        "points": 104
+      },
+      {
+        "degree": 3,
+        "d": 2,
+        "trace": -22,
+        "points": 148
+      },
+      {
+        "degree": 4,
+        "d": 1,
+        "trace": -14,
+        "points": 640
+      },
+      {
+        "degree": 4,
+        "d": 2,
+        "trace": -14,
+        "points": 640
+      }
+    ],
+    "poincare": {
+      "conditional_only": true,
+      "forcing_limit": "2",
+      "initial_width": "3",
+      "rows": [
+        {
+          "step": 1,
+          "product": "2",
+          "normalized_width": "2",
+          "forcing": "1"
+        },
+        {
+          "step": 2,
+          "product": "4",
+          "normalized_width": "3/2",
+          "forcing": "3/2"
+        },
+        {
+          "step": 3,
+          "product": "8",
+          "normalized_width": "5/4",
+          "forcing": "7/4"
+        },
+        {
+          "step": 4,
+          "product": "16",
+          "normalized_width": "9/8",
+          "forcing": "15/8"
+        },
+        {
+          "step": 5,
+          "product": "32",
+          "normalized_width": "17/16",
+          "forcing": "31/16"
+        },
+        {
+          "step": 6,
+          "product": "64",
+          "normalized_width": "33/32",
+          "forcing": "63/32"
+        },
+        {
+          "step": 7,
+          "product": "128",
+          "normalized_width": "65/64",
+          "forcing": "127/64"
+        },
+        {
+          "step": 8,
+          "product": "256",
+          "normalized_width": "129/128",
+          "forcing": "255/128"
+        },
+        {
+          "step": 9,
+          "product": "512",
+          "normalized_width": "257/256",
+          "forcing": "511/256"
+        },
+        {
+          "step": 10,
+          "product": "1024",
+          "normalized_width": "513/512",
+          "forcing": "1023/512"
+        },
+        {
+          "step": 11,
+          "product": "2048",
+          "normalized_width": "1025/1024",
+          "forcing": "2047/1024"
+        },
+        {
+          "step": 12,
+          "product": "4096",
+          "normalized_width": "2049/2048",
+          "forcing": "4095/2048"
+        }
+      ]
+    }
+  }
+}

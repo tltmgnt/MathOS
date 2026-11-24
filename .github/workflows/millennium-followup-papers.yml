@@ -1,0 +1,35 @@
+name: Seven Millennium follow-up milestones (bounded)
+on:
+  push:
+    paths:
+      - 'mathos/research/millennium_followup_20261124.py'
+      - 'tests/test_millennium_followup_20261124.py'
+      - 'docs/research/papers/millennium/**'
+      - '.github/workflows/millennium-followup-papers.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/millennium_followup_20261124.py'
+      - 'tests/test_millennium_followup_20261124.py'
+      - 'docs/research/papers/millennium/**'
+      - '.github/workflows/millennium-followup-papers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_millennium_followup_20261124.py' -v
+      - run: |
+          mkdir -p artifacts/millennium-followup
+          python -m mathos.research.millennium_followup_20261124 | tee artifacts/millennium-followup/report.json
+          python -m json.tool artifacts/millennium-followup/report.json > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seven-track-followup
+          path: artifacts/millennium-followup/report.json
+          if-no-files-found: error

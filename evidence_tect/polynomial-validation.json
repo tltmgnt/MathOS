@@ -1,0 +1,26 @@
+{
+  "claim_id": "bounded-polynomial-multiply",
+  "result": "PASS",
+  "model_sha256": "d62a5c463699991d51ca143f926a551a7ecea722633e47d31d1e4f6872dad0c8",
+  "input_lengths": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "coefficient_range": [
+    -2,
+    2
+  ],
+  "evaluation_points": [
+    -2,
+    -1,
+    0,
+    1,
+    2
+  ],
+  "ordered_pairs": 24336,
+  "negative_oracle_control": "PASS",
+  "external_independent_reproduction": false,
+  "deployment_authorized": false
+}

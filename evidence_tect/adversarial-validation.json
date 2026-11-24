@@ -1,0 +1,22 @@
+{
+  "claim_id": "bounded-polynomial-multiply",
+  "result": "PASS",
+  "controls": {
+    "tampered_artifact": "PASS",
+    "path_traversal": "PASS",
+    "contradiction_injection": "PASS",
+    "failed_attack_not_ignored": "PASS",
+    "out_of_scope_attacks": "PASS",
+    "stale_claim_version": "PASS",
+    "expired_evidence": "PASS",
+    "unauthenticated_reproduction": "PASS",
+    "unauthorized_deployment": "PASS",
+    "compiled_arithmetic_mutant": "PASS"
+  },
+  "attack_classes": [
+    "assumption_violation",
+    "contradiction_injection",
+    "source_poisoning"
+  ],
+  "external_independent_reproduction": false
+}

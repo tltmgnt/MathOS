@@ -157,11 +157,73 @@ jobs:
             -s tests \
             -p "test_validate_activations.py" \
             -v
+      - name: Run MathOS multi-agent tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_agents.py" \
+            -v
+      - name: Run MathOS CLI tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_cli.py" \
+            -v
+      - name: Run MathOS web tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_web.py" \
+            -v
+      - name: Run MathOS HTTP integration tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_mathos_http.py" \
+            -v
+      - name: Run Omega welfare tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_omega_welfare.py" \
+            -v
+      - name: Run Omega welfare API tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_omega_welfare_api.py" \
+            -v
+
+  neural-experiments:
+    name: Real neural activation and arithmetic experiments
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      HF_HOME: ${{ github.workspace }}/.hf-cache
+      HF_HUB_DISABLE_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Install neural activation dependencies
         run: |
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
           python -m pip install "transformers>=4.40,<5"
 
+      - name: Cache Hugging Face model snapshots
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HF_HOME }}/hub
+          key: hf-models-${{ runner.os }}-gpt2-v1
+      - name: Prefetch real model files with bounded retries
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python experiments/internal_reasoning/prefetch_models.py
+      - name: Use prefetched cache for experiments
+        run: echo "HF_HUB_OFFLINE=1" >> "$GITHUB_ENV"
       - name: Capture real neural activations
         run: |
           python experiments/internal_reasoning/activation_capture.py \
@@ -439,45 +501,8 @@ jobs:
           path: artifacts/internal_reasoning/experiment_022.json
           if-no-files-found: error
       - name: Upload neural activation artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mathos-neural-activations
           path: artifacts/internal_reasoning/activations.json
           if-no-files-found: error
-      - name: Run MathOS multi-agent tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_mathos_agents.py" \
-            -v
-      - name: Run MathOS CLI tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_mathos_cli.py" \
-            -v
-      - name: Run MathOS web tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_mathos_web.py" \
-            -v
-      - name: Run MathOS HTTP integration tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_mathos_http.py" \
-            -v
-      - name: Run Omega welfare tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_omega_welfare.py" \
-            -v
-      - name: Run Omega welfare API tests
-        run: |
-          python -m unittest discover \
-            -s tests \
-            -p "test_omega_welfare_api.py" \
-            -v

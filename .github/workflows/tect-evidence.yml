@@ -11,6 +11,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Synthetic evidence-gate failure controls
         run: python3 evidence_tect/check.py --self-test
+      - name: Replay exhaustive bounded polynomial validation
+        run: python3 evidence_tect/validate_polynomials.py --check
+      - name: Replay exact validation with a second compiler (local only)
+        env:
+          CXX: clang++
+        run: python3 evidence_tect/validate_polynomials.py --check
+      - name: Replay adversarial controls on actual claim and C++ mutant
+        run: python3 evidence_tect/adversarial.py --check
       - name: Verify scoped claim register (not scientific assurance)
         run: python3 evidence_tect/check.py
       - name: Compile and run bounded C++17 reference model
