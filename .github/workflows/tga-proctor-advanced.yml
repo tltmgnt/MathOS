@@ -1,0 +1,88 @@
+name: Proctor 601 advanced curriculum verification
+on:
+  push:
+    paths:
+      - 'curriculum/academy/proctor/**'
+      - 'mathos/research/tga_proctor_advanced.py'
+      - 'tests/test_tga_proctor_advanced.py'
+      - 'formal/Proctor601.lean'
+      - '.github/workflows/tga-proctor-advanced.yml'
+  pull_request:
+    paths:
+      - 'curriculum/academy/proctor/**'
+      - 'mathos/research/tga_proctor_advanced.py'
+      - 'tests/test_tga_proctor_advanced.py'
+      - 'formal/Proctor601.lean'
+      - '.github/workflows/tga-proctor-advanced.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  applied:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor*.py' -v
+      - run: |
+          mkdir -p artifacts/proctor601
+          python -m mathos.research.tga_proctor_advanced > artifacts/proctor601/report.json
+          cat artifacts/proctor601/report.json
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx,verify
+          for p in sorted(Path("curriculum/academy/proctor").glob("*.md")):
+              d=Path("artifacts/proctor601")/p.with_suffix(".docx").name
+              make_docx(p,d)
+              verify(p,d)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proctor601-applied
+          path: artifacts/proctor601/
+          if-no-files-found: error
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lean 4.14.0 (existing MathOS toolchain)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel replay and false theorem control
+        run: |
+          mkdir -p artifacts/proctor601-kernel
+          lean --version | tee artifacts/proctor601-kernel/version.txt
+          lean -DwarningAsError=true formal/Proctor601.lean | tee artifacts/proctor601-kernel/axioms.txt
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("formal/Proctor601.lean")
+          assert not re.search(r'\b(sorry|admit|axiom|unsafe)\b',p.read_text())
+          s=Path("artifacts/proctor601-kernel/axioms.txt").read_text()
+          names=["rh_finite_observation","pnp_compose","ns_continuation","ym_single_channel_not_all","hodge_sum","bsd_zero_defect","poincare_extra_hypothesis","route_split"]
+          for name in names:
+              assert "'TGAProctor."+name+"' does not depend on any axioms" in s, (name,s)
+          PY
+          printf 'theorem deliberately_false : (0 : Nat) = 1 := by decide\n' >/tmp/ProctorFalse.lean
+          if lean -DwarningAsError=true /tmp/ProctorFalse.lean > artifacts/proctor601-kernel/false-control.txt 2>&1; then
+            echo "False theorem accepted"; exit 1
+          fi
+          grep -q 'error:' artifacts/proctor601-kernel/false-control.txt
+          sha256sum formal/Proctor601.lean | tee artifacts/proctor601-kernel/source.sha256
+          cp formal/Proctor601.lean artifacts/proctor601-kernel/
+          echo "PASS: eight scoped logical lemmas; no Millennium conjecture verified."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proctor601-kernel
+          path: artifacts/proctor601-kernel/
+          if-no-files-found: error
