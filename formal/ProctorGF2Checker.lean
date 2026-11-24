@@ -4,7 +4,7 @@ namespace ProctorGF2
 def weightedRow : List Row → List Bool → Row
   | [], _ => ⟨[],false⟩
   | _::_, [] => ⟨[],false⟩
-  | r::rs, false::ws => weightedRow rs ws
+  | _::rs, false::ws => weightedRow rs ws
   | r::rs, true::ws => addRow r (weightedRow rs ws)
 
 theorem weighted_lhs (rs : List Row) (w x : List Bool) :
