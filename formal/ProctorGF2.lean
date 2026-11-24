@@ -147,6 +147,7 @@ theorem clear_head (p r : Row) (hp : hd p.coeff = true) :
   | false =>
     unfold clear
     rw [h]
+    exact h
   | true =>
     unfold clear
     rw [h]
