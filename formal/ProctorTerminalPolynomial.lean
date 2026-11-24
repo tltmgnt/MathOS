@@ -223,10 +223,14 @@ theorem group_poly (rs : List RefRow) (g : Group) (B : Nat)
       exact Nat.le_trans (Nat.le_add_right _ _) (Nat.le_add_right _ _)
     have htwo : 2≤B+wordFactor B (leafUnit B)+2 :=
       Nat.le_add_left _ _
+    have hsum : distinctBudget g.literals+
+        wordsBudget g.literals (g.cap+1) (tupleBudget rs) ≤
+        g.literals.length*B+g.literals.length*wordFactor B (leafUnit B) :=
+      Nat.add_le_add hd hw'
     calc
       distinctBudget g.literals+wordsBudget g.literals (g.cap+1) (tupleBudget rs)+1+1
           ≤ (g.literals.length*B+g.literals.length*wordFactor B (leafUnit B))+2 :=
-        Nat.add_le_add (Nat.add_le_add (Nat.add_le_add hd hw') (Nat.le_refl 1)) (Nat.le_refl 1)
+        Nat.succ_le_succ (Nat.succ_le_succ hsum)
       _ ≤ g.literals.length*(B+wordFactor B (leafUnit B)+2)+
           (B+wordFactor B (leafUnit B)+2) := Nat.add_le_add ha htwo
   · rw [if_neg hc]
@@ -293,7 +297,8 @@ theorem coverage_poly (ds : List RefRow) (gs : List Group) (B : Nat)
     have h := weighted_visits (fun g : Group => g.literals.length) groupWeight gs 1
       (fun g _ => by
         change g.literals.length+1≤(g.literals.length+1)*1
-        rw [mulOne])
+        rw [mulOne]
+        exact Nat.le_refl _)
     rw [mulOne] at h
     exact Nat.le_trans h hg
   unfold coverageBudget
