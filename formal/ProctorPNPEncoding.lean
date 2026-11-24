@@ -76,7 +76,9 @@ theorem pad_sat (rs : List Row) (y : Bool) (ys : List Bool) :
 
 def containsBit (y : Bool) : List Bool → Bool
   | [] => false
-  | b::bs => if eqBit y b then true else containsBit y bs
+  | b::bs => match eqBit y b with
+    | true => true
+    | false => containsBit y bs
 
 theorem containsBit_iff (y : Bool) (bs : List Bool) :
     containsBit y bs = true ↔ y ∈ bs := by

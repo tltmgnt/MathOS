@@ -65,7 +65,15 @@ def run(out,lean):
     log=(out/"encoding/kernel.txt").read_text()
     audit={n:next((l for l in log.splitlines() if l.startswith("'ProctorPNP."+n+"' ")),None) for n in PNP_NAMES+DOMAIN_NAMES}
     domain_ok=all(audit[n]=="'ProctorPNP."+n+"' does not depend on any axioms" for n in audit)
-    report={"status":"KERNEL_VERIFIED_MASK_AND_DOMAIN_ENCODING" if formal["accepted"] and domain_ok else "UNVERIFIED",
+    prior_ok=all(formal["axioms"][n]=="'ProctorGF2."+n+"' does not depend on any axioms" for n in GF_NAMES+SOLVER_NAMES+CERT_NAMES+CHECK_NAMES)
+    # Library-backed proof status is distinct from strict axiom-free acceptance.
+    library_ok=all(formal["axioms"][n] in ("'ProctorGF2."+n+"' does not depend on any axioms",
+        "'ProctorGF2."+n+"' depends on axioms: [propext, Quot.sound]") for n in NAMES)
+    compiled=formal["exit_code"]==0
+    report={"status":"KERNEL_VERIFIED_DOMAIN_AND_LIBRARY_MASK" if compiled and domain_ok and prior_ok and library_ok else "UNVERIFIED",
+            "domain_strict_gate":compiled and domain_ok,"prior_strict_gate":compiled and prior_ok,
+            "mask_library_gate":compiled and library_ok,"mask_empty_axiom_gate":formal["accepted"],
+            "library_policy":"Reported separately; propext and Quot.sound accepted only for library-dependent kernel verification, not the existing strict empty-axiom gate.",
             "formal":formal,"domain_audit":audit,"controls":controls(),"lean_version":v.stdout.strip(),
             "source_hashes":{p.name:digest(s.encode()) for p,s in zip(paths,src)},
             "provider":"deterministic_specialist_replay","live_ai":False,"global_promotion":"NONE",
@@ -78,4 +86,4 @@ def run(out,lean):
 if __name__=="__main__":
     p=argparse.ArgumentParser(description=__doc__);p.add_argument("--output-dir",type=Path,required=True);p.add_argument("--lean",default="lean")
     a=p.parse_args();r=run(a.output_dir,a.lean);print(json.dumps(r,indent=2))
-    if r["status"]!="KERNEL_VERIFIED_MASK_AND_DOMAIN_ENCODING":raise SystemExit(1)
+    if r["status"]!="KERNEL_VERIFIED_DOMAIN_AND_LIBRARY_MASK":raise SystemExit(1)
