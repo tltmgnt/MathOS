@@ -1,0 +1,101 @@
+name: TGA full-target agentic research
+on:
+  push:
+    paths:
+      - 'mathos/research/tga_agent.py'
+      - 'tests/test_tga_agent.py'
+      - '.github/workflows/tga-agent.yml'
+      - 'docs/research/TGA_AGENT_PROCESS.md'
+  pull_request:
+    paths:
+      - 'mathos/research/tga_agent.py'
+      - 'tests/test_tga_agent.py'
+      - '.github/workflows/tga-agent.yml'
+      - 'docs/research/TGA_AGENT_PROCESS.md'
+  workflow_dispatch:
+    inputs:
+      provider:
+        type: choice
+        options: [offline, openai]
+        default: offline
+      attempts:
+        description: 'Number of four-role research attempts (1–8)'
+        type: choice
+        options: ['1','2','4','8']
+        default: '2'
+      resume_run_id:
+        description: 'Optional previous main-branch live run ID for resume'
+        type: string
+        required: false
+permissions:
+  contents: read
+jobs:
+  offline:
+    if: github.event_name != 'workflow_dispatch' || inputs.provider == 'offline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_tga_agent.py' -v
+      - name: Execute and resume deterministic offline agent
+        run: |
+          python -m mathos.research.tga_agent --attempts 2 --max-calls 8
+          python -m mathos.research.tga_agent --attempts 2 --max-calls 8 --resume
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-agent-offline
+          path: artifacts/tga-agent/
+          if-no-files-found: error
+  live:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.provider == 'openai'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      actions: read
+    concurrency:
+      group: tga-agent-live
+      cancel-in-progress: false
+    env:
+      ATTEMPTS: ${{ inputs.attempts }}
+      RESUME_ID: ${{ inputs.resume_run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restore only an explicit prior main-branch workflow artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ -n "$RESUME_ID" ]]; then
+            [[ "$RESUME_ID" =~ ^[0-9]+$ ]]
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_ID" > /tmp/tga-run.json
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/tga-run.json'))
+          assert d['head_branch']=='main' and d['event']=='workflow_dispatch'
+          assert d['path'].split('@')[0]=='.github/workflows/tga-agent.yml'
+          assert d['status']=='completed'
+          PY
+            gh run download "$RESUME_ID" -R "$GITHUB_REPOSITORY" -n tga-agent-live -D artifacts/tga-agent
+          fi
+      - name: Run explicitly authorized model-driven research
+        env:
+          OPENAI_MODEL: ${{ vars.MATHOS_OPENAI_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.MATHOS_OPENAI_API_KEY }}
+        run: |
+          test -n "$OPENAI_MODEL" && test -n "$OPENAI_API_KEY"
+          args=()
+          if [[ -n "$RESUME_ID" ]]; then args+=(--resume); fi
+          python -m mathos.research.tga_agent --provider openai --attempts "$ATTEMPTS" \
+            --max-calls "$((4*ATTEMPTS))" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tga-agent-live
+          path: artifacts/tga-agent/
+          if-no-files-found: error
