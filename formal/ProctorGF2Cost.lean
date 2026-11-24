@@ -117,7 +117,7 @@ def feedCount (n : Nat) (orig : List MRow) : (rs pre : List MRow) →
     have ht : tag.weight < 2^orig.length := by
       change 2^pre.length < 2^orig.length
       rw [e]
-      have hl : pre.length+1 ≤ (pre++r::rs).length := by simp; omega
+      have hl : pre.length+1 ≤ (pre++r::rs).length := by simp
       have hh : 2^pre.length < 2^(pre.length+1) := by rw [Nat.pow_succ]; have := Nat.two_pow_pos pre.length; omega
       exact Nat.lt_of_lt_of_le hh (Nat.pow_le_pow_of_le_right Nat.zero_lt_two hl)
     obtain ⟨res,v,c,hv,hc,wt⟩ := insertCount b tag hw.left hb ht
