@@ -1,6 +1,10 @@
 name: Proctor PNP adaptive propagation
 on:
+  # Research branches are validated by pull_request. Restrict push CI to
+  # main so an open PR never receives duplicate adaptive checks.
   push:
+    branches:
+      - main
     paths:
       - 'formal/ProctorAdaptivePropagation.lean'
       - 'formal/ProctorParityElimination.lean'
