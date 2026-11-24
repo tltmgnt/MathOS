@@ -56,14 +56,46 @@ def symbolic(t):
 def source(t,p):
     validate(p,t)
     if any(t[k]!=v for k,v in specification(t).items()):raise ValueError("statement mismatch")
-    head="namespace Proctor701\n"+t["definition"]+"\n\n"+t["statement"]+" := by\n"
-    if p["method"]=="reflexivity":body="  rfl\n"
-    else:
-        body=("  induction n with\n  | zero => rfl\n  | succ n ih =>\n"
-              f"    change {t['name']} n + {delta(t,'n')} = {poly(t,'(n+1)')}\n"
-              "    rw [ih]\n"
-              "    simp only [Nat.add_mul, Nat.mul_add, Nat.one_mul, Nat.mul_one, Nat.zero_add, Nat.add_zero] <;> ac_rfl\n")
-    return head+body+"end Proctor701\n#print axioms Proctor701.candidate\n"
+    head="namespace Proctor701\n"+t["definition"]+"\n\n"
+    if p["method"]=="reflexivity":
+        return head+t["statement"]+" := by\n  rfl\nend Proctor701\n#print axioms Proctor701.candidate\n"
+    # These trusted proof templates cover the two registered coefficient patterns.
+    # Explicit equality terms avoid the extra axioms used by ac_rfl/simp.
+    square="""theorem square_step (n : Nat) :
+    (n+1)*(n+1) = n*n+(n+n+1) :=
+  (Nat.succ_mul n (n+1)).trans
+    ((congrArg (fun x : Nat => x+(n+1)) (Nat.mul_succ n n)).trans
+      ((Nat.add_assoc (n*n) n (n+1)).trans
+        (congrArg (fun x : Nat => n*n+x) (Nat.add_assoc n n 1).symm)))
+
+"""
+    pattern=tuple(t[k] for k in ("a","b","c","d"))
+    if pattern==(2,1,1,0):
+        body="""  induction n with
+  | zero => rfl
+  | succ n ih =>
+    exact (congrArg (fun x : Nat => x+(n+n+1)) ih).trans (square_step n).symm
+"""
+        helpers=square
+    elif pattern==(2,2,1,1):
+        helpers=square+"""theorem even_reorder (n : Nat) :
+    (n*n+n)+(n+n+1+1) = (n*n+(n+n+1))+(n+1) :=
+  ((Nat.add_assoc (n*n+n) (n+n+1) 1).symm).trans
+    ((congrArg (fun x : Nat => x+1) (Nat.add_assoc (n*n) n (n+n+1))).trans
+      ((congrArg (fun x : Nat => n*n+x+1) (Nat.add_comm n (n+n+1))).trans
+        ((congrArg (fun x : Nat => x+1) (Nat.add_assoc (n*n) (n+n+1) n).symm).trans
+          (Nat.add_assoc (n*n+(n+n+1)) n 1))))
+
+"""
+        body="""  induction n with
+  | zero => rfl
+  | succ n ih =>
+    exact (congrArg (fun x : Nat => x+(n+n+1+1)) ih).trans
+      ((even_reorder n).trans (congrArg (fun x : Nat => x+(n+1)) (square_step n).symm))
+"""
+    else:raise ValueError("no trusted proof template for coefficient pattern")
+    return head+helpers+t["statement"]+" := by\n"+body+"end Proctor701\n#print axioms Proctor701.candidate\n"
+
 class Offline:
     name="deterministic_strategy_fixture"
     model="none"
