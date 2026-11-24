@@ -135,11 +135,18 @@ def positiveClause (vs : List Nat) : Clause :=
 theorem positive_clause_demand (vs : List Nat) (x : Assignment)
     (h : ClauseSat (positiveClause vs) x) :
     ∃ v, v ∈ vs ∧ x v = true := by
-  obtain ⟨l, hl, ht⟩ := h
-  change l ∈ vs.map (fun v => (v,true)) at hl
-  obtain ⟨v, hv, he⟩ := List.mem_map.mp hl
-  rw [← he] at ht
-  exact ⟨v,hv,ht⟩
+  induction vs with
+  | nil =>
+    obtain ⟨_, hl, _⟩ := h
+    cases hl
+  | cons a rest ih =>
+    obtain ⟨l, hl, ht⟩ := h
+    change l ∈ (a, true) :: positiveClause rest at hl
+    cases hl with
+    | head => exact ⟨a, List.Mem.head _, ht⟩
+    | tail _ hm =>
+      obtain ⟨v, hv, htrue⟩ := ih ⟨l, hm, ht⟩
+      exact ⟨v, List.Mem.tail _ hv, htrue⟩
 
 theorem negative_pair_capacity (a b : Nat) (x : Assignment)
     (h : ClauseSat [(a,false),(b,false)] x) :
