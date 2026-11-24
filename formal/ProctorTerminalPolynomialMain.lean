@@ -34,7 +34,7 @@ def run (dir : String) : IO UInt32 := do
         nx := nx+1
       | .empty => pure ()
     | _,_ => throw (IO.userError "typed fixture parse failure")
-  if nc!=24 || nx!=21 then throw (IO.userError "terminal count mismatch")
+  if nc != 24 || nx != 21 then throw (IO.userError "terminal count mismatch")
   IO.println "F034_TERMINAL_POLYNOMIAL_OK capacity=24 xor=21"
   pure 0
 end ProctorTerminalPolynomialMain

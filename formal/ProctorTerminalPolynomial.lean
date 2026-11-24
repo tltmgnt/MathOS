@@ -4,7 +4,7 @@ namespace ProctorTerminalPolynomial
 open ProctorHallDeficiency
 open ProctorCapacityDeficiency (Group)
 open ProctorCapacityReplay (RefRow Certificate getAt demandAt indices)
-open ProctorCapacityMeter (visitsBudget distinctBudget conflictBudget tupleBudget groupBudget differentBudget coverageBudget capacityBudget capacityMeter capacity_bound)
+open ProctorCapacityMeter (visitsBudget distinctBudget conflictBudget tupleBudget wordsBudget groupBudget differentBudget coverageBudget capacityBudget capacityMeter capacity_bound)
 open ProctorPolynomialMeter (formulaMass mass_rows lookup_mass visits_uniform words_uniform wordUnit supportMass sum_quadratic)
 open ProctorChainMeter (refBudget refsBudget)
 open ProctorExecutableReplay (lookup)
@@ -289,9 +289,12 @@ theorem coverage_poly (ds : List RefRow) (gs : List Group) (B : Nat)
     (hd : mass rowWeight ds≤B) (hg : mass groupWeight gs≤B) :
     coverageBudget ds gs≤B*(B+2) := by
   have hgroups : visitsBudget (fun g => g.literals.length) gs≤B := by
+    have mulOne (a : Nat) : a*1=a := Nat.zero_add a
     have h := weighted_visits (fun g : Group => g.literals.length) groupWeight gs 1
-      (fun g _ => by change g.literals.length+1≤(g.literals.length+1)*1
-                     exact Nat.le_refl _)
+      (fun g _ => by
+        change g.literals.length+1≤(g.literals.length+1)*1
+        rw [mulOne])
+    rw [mulOne] at h
     exact Nat.le_trans h hg
   unfold coverageBudget
   apply Nat.le_trans (weighted_visits _ rowWeight ds (B+2) _)
@@ -367,9 +370,12 @@ theorem binary_five (k L : Nat) (h : k≤5) :
     binaryUnit k L≤binaryUnit 5 L := by
   have step : ∀ n, binaryUnit n L≤binaryUnit (n+1) L :=
     fun n => Nat.le_trans (Nat.le_add_right _ _) (Nat.le_succ _)
-  induction h with
-  | refl => exact Nat.le_refl _
-  | step _ ih => exact Nat.le_trans ih (step _)
+  have mono : ∀ j : Nat, k≤j → binaryUnit k L≤binaryUnit j L := by
+    intro j hj
+    induction hj with
+    | refl => exact Nat.le_refl _
+    | step _ ih => exact Nat.le_trans ih (step _)
+  exact mono 5 h
 
 def blockUnit (B : Nat) : Nat := B*(B+(B+1))+binaryUnit 5 (6+B*6)+1
 
