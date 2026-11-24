@@ -71,17 +71,49 @@ def _nat(v):
     return str(v)
 
 
-def _clause(c):
-    return _list("("+_nat(abs(l))+","+("true" if l>0 else "false")+")" for l in c)
+class _LeanFixtureData:
+    """Share typed subterms and bound each generated list expression."""
 
+    def __init__(self, lines):
+        self.lines = lines
+        self.names = {}
 
-def _formula(cs):
-    return _list(_clause(c) for c in cs)
+    def bind(self, typ, expr):
+        key = (typ, expr)
+        if key not in self.names:
+            name = f"data{len(self.names)}"
+            self.names[key] = name
+            self.lines.append(f"def {name} : {typ} := {expr}")
+        return self.names[key]
 
+    def sequence(self, typ, items):
+        items = list(items)
+        # Name each chunk so Lean never elaborates a deeply nested list.
+        chunks = [self.bind(typ, _list(items[i:i + 16]))
+                  for i in range(0, len(items), 16)]
+        result = "[]"
+        for chunk in reversed(chunks):
+            result = chunk if result == "[]" else self.bind(typ, f"{chunk} ++ {result}")
+        return result
 
-def _batches(bs):
-    return _list(_list("⟨"+",".join((_nat(a),_nat(b),_nat(p),_clause(t)))+"⟩"
-                       for a,b,p,t in batch) for batch in bs)
+    def clause(self, row):
+        return self.sequence("Clause", (
+            self.bind("Literal", f"({_nat(abs(lit))},{'true' if lit > 0 else 'false'})")
+            for lit in row
+        ))
+
+    def formula(self, rows):
+        return self.sequence("Formula", (self.clause(row) for row in rows))
+
+    def batch(self, steps):
+        return self.sequence("Batch", (
+            self.bind("Step", "⟨" + ",".join(
+                (_nat(a), _nat(b), _nat(p), self.clause(tail))) + "⟩")
+            for a, b, p, tail in steps
+        ))
+
+    def batches(self, batches):
+        return self.sequence("List Batch", (self.batch(batch) for batch in batches))
 
 
 def cases():
@@ -133,14 +165,15 @@ def emit_lean():
     """
     fs=cases()
     lines=["", "namespace ReplayFixtures", "open ProctorHallDeficiency ProctorExecutableReplay"]
+    data = _LeanFixtureData(lines)
     for i,(_,n,cs,bs,final,ok,empty) in enumerate(fs):
         expected=check_shape(n,cs,bs)
         if (expected is not None)!=ok or (ok and expected!=final):
             raise AssertionError("bridge fixture disagrees")
         lines.extend((
-            f"def f{i} : Formula := "+_formula(cs),
-            f"def b{i} : List Batch := "+_batches(bs),
-            f"def t{i} : Formula := "+_formula(final),
+            f"def f{i} : Formula := "+data.formula(cs),
+            f"def b{i} : List Batch := "+data.batches(bs),
+            f"def t{i} : Formula := "+data.formula(final),
             f"def ok{i} : Bool := "+
             (f"(chainCheck f{i} b{i}) && (decide (frontier f{i} b{i} = t{i})) && "+
              (f"checkEmpty f{i} b{i}" if empty else f"!(checkEmpty f{i} b{i})")
@@ -148,7 +181,7 @@ def emit_lean():
         ))
     lines.append("end ReplayFixtures")
     lines.append("def main : IO Unit := do")
-    lines.append("  if "+" && ".join(f"ReplayFixtures.ok{i}" for i in range(len(fs)))+" then")
+    lines.append("  if " + _list(f"ReplayFixtures.ok{i}" for i in range(len(fs))) + ".all id then")
     lines.append(f'    IO.println "F034_EXECUTABLE_REPLAY_OK cases={len(fs)}"')
     lines.append('  else throw (IO.userError "F034 executable replay disagreement")')
     return "\n".join(lines)+"\n"
