@@ -1,0 +1,74 @@
+name: Proctor PNP TGA gap closure
+on:
+  push:
+    paths:
+      - 'formal/ProctorTGAGapClosure.lean'
+      - 'mathos/research/tga_pnp_gap_closure.py'
+      - 'mathos/research/tga_proctor*.py'
+      - 'mathos/research/tga_universal_bridges.py'
+      - 'mathos/proof_analysis/gap_analysis.py'
+      - 'tests/test_tga_pnp_gap_closure.py'
+      - 'docs/research/tga-universal/PNP-TGA-GAP-CLOSURE.md'
+      - '.github/workflows/proctor-pnp-tga-gap-closure.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorTGAGapClosure.lean'
+      - 'mathos/research/tga_pnp_gap_closure.py'
+      - 'mathos/research/tga_proctor*.py'
+      - 'mathos/research/tga_universal_bridges.py'
+      - 'mathos/proof_analysis/gap_analysis.py'
+      - 'tests/test_tga_pnp_gap_closure.py'
+      - 'docs/research/tga-universal/PNP-TGA-GAP-CLOSURE.md'
+      - '.github/workflows/proctor-pnp-tga-gap-closure.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          mkdir -p artifacts/pnp-tga-gap
+          python -m unittest discover -s tests -p 'test_tga_proctor_tree_decomposition.py' -v
+          python -m unittest discover -s tests -p 'test_tga_proctor_adaptive_propagation.py' -v
+          python -m unittest discover -s tests -p 'test_tga_pnp_gap_closure.py' -v
+          python -m mathos.research.tga_pnp_gap_closure > artifacts/pnp-tga-gap/controls.json
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee artifacts/pnp-tga-gap/lean-version.txt
+          grep -E 'version 4\.14\.0\b' artifacts/pnp-tga-gap/lean-version.txt
+          lean -DwarningAsError=true formal/ProctorTGAGapClosure.lean 2>&1 | tee artifacts/pnp-tga-gap/kernel.txt
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          out = Path("artifacts/pnp-tga-gap")
+          lines = (out / "kernel.txt").read_text().splitlines()
+          names = ("edge_has_left_support", "edge_has_right_support", "even_triangle_sat", "odd_triangle_unsat", "agreement_path")
+          for name in names:
+              full = f"ProctorTGAGapClosure.{name}"
+              if lines.count(f"'{full}' does not depend on any axioms") != 1:
+                  raise SystemExit(f"strict axiom check failed: {full}")
+          report = dict(status="LOCAL_COMPATIBILITY_LEMMAS_ONLY", declarations=list(names),
+                        source_sha256=hashlib.sha256(Path("formal/ProctorTGAGapClosure.lean").read_bytes()).hexdigest(),
+                        universal_bound=False, machine_refinement=False, independent_review=False)
+          (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-tga-gap-evidence
+          path: artifacts/pnp-tga-gap/
+          if-no-files-found: error
