@@ -1,0 +1,108 @@
+name: Proctor 701 agentic induction research
+on:
+  push:
+    paths:
+      - 'mathos/research/tga_proctor701.py'
+      - 'tests/test_tga_proctor701.py'
+      - 'curriculum/academy/proctor/701-*'
+      - 'curriculum/academy/proctor/TGA-PROCTOR-701.md'
+      - 'formal/ProctorScopeGap.lean'
+      - '.github/workflows/tga-proctor701.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/tga_proctor701.py'
+      - 'tests/test_tga_proctor701.py'
+      - 'curriculum/academy/proctor/701-*'
+      - 'curriculum/academy/proctor/TGA-PROCTOR-701.md'
+      - 'formal/ProctorScopeGap.lean'
+      - '.github/workflows/tga-proctor701.yml'
+  workflow_dispatch:
+    inputs:
+      provider:
+        type: choice
+        options: [offline, openai]
+        default: offline
+      target:
+        type: choice
+        options: [odd_sum, even_sum]
+        default: odd_sum
+permissions:
+  contents: read
+jobs:
+  offline:
+    if: github.event_name != 'workflow_dispatch' || inputs.provider == 'offline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Lean 4.14.0
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor*.py' -v
+      - name: Recheck previous strict axiom failure
+        run: |
+          mkdir -p artifacts/proctor701
+          lean -DwarningAsError=true formal/ProctorScopeGap.lean | tee artifacts/proctor701/prefix-axioms.txt
+          grep -F "'ProctorScopeGap.prefix_countermodel' does not depend on any axioms" artifacts/proctor701/prefix-axioms.txt
+          grep -F "'ProctorScopeGap.no_finite_prefix_rule' does not depend on any axioms" artifacts/proctor701/prefix-axioms.txt
+      - name: Execute proof rejection, repair and acceptance
+        run: |
+          python -m mathos.research.tga_proctor701 --target odd_sum --output-dir artifacts/proctor701/odd
+          python -m mathos.research.tga_proctor701 --target even_sum --output-dir artifacts/proctor701/even
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.millennium_docx import make_docx,verify
+          for target in ('odd','even'):
+              r=json.loads(Path('artifacts/proctor701',target,'report.json').read_text())
+              assert r['status']=='KERNEL_VERIFIED_REGISTERED_NAT_THEOREM'
+              assert len(r['attempts'])==2 and r['attempts'][0]['kernel']['exit_code']!=0
+              assert not r['attempts'][0]['kernel']['verified'] and r['attempts'][1]['kernel']['verified']
+              assert r['live_calls_reserved']==0 and r['after']['minimal_completion_sets']==[[]]
+          p=Path('curriculum/academy/proctor/TGA-PROCTOR-701.md')
+          d=Path('artifacts/proctor701/TGA-PROCTOR-701.docx')
+          make_docx(p,d)
+          verify(p,d)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proctor701-offline-evidence
+          path: artifacts/proctor701/
+          if-no-files-found: error
+  live:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.provider == 'openai'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Lean 4.14.0
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Explicitly authorized bounded live strategy selection
+        env:
+          OPENAI_MODEL: ${{ vars.MATHOS_OPENAI_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.MATHOS_OPENAI_API_KEY }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          python -m mathos.research.tga_proctor701 --provider openai --target "$TARGET" --max-attempts 2 --output-dir artifacts/proctor701-live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proctor701-live-evidence
+          path: artifacts/proctor701-live/
+          if-no-files-found: error

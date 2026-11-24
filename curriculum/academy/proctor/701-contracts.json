@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "scope": "TRAINING_NAT_IDENTITIES",
+  "targets": [
+    {
+      "id": "odd_sum",
+      "name": "oddSum",
+      "a": 2,
+      "b": 1,
+      "c": 1,
+      "d": 0,
+      "meaning": "For every natural n, the sum of the first n odd positive integers equals n squared.",
+      "definition": "def oddSum : Nat → Nat\n  | 0 => 0\n  | n+1 => oddSum n + (n + n + 1)",
+      "statement": "theorem candidate (n : Nat) : oddSum n = (n * n)"
+    },
+    {
+      "id": "even_sum",
+      "name": "evenSum",
+      "a": 2,
+      "b": 2,
+      "c": 1,
+      "d": 1,
+      "meaning": "For every natural n, the sum of the first n positive even integers equals n squared plus n.",
+      "definition": "def evenSum : Nat → Nat\n  | 0 => 0\n  | n+1 => evenSum n + (n + n + 1 + 1)",
+      "statement": "theorem candidate (n : Nat) : evenSum n = ((n * n) + n)"
+    }
+  ]
+}

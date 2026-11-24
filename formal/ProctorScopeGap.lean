@@ -8,9 +8,9 @@ theorem prefix_countermodel (N : Nat) :
       prefixFunction N (N+1) = 1 := by
   constructor
   · intro n h
-    simp [prefixFunction, h]
+    exact if_pos h
   · have h : ¬ N+1 ≤ N := Nat.not_le_of_gt (Nat.lt_succ_self N)
-    simp [prefixFunction, h]
+    exact if_neg h
 
 theorem no_finite_prefix_rule (N : Nat) :
     ¬ (∀ f : Nat → Nat, (∀ n : Nat, n ≤ N → f n = 0) → ∀ n, f n = 0) := by
