@@ -1,0 +1,72 @@
+name: Proctor PNP resolution gates
+on:
+  push:
+    paths:
+      - 'formal/ProctorHornTrace.lean'
+      - 'formal/ProctorAffineBackdoor.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - 'tests/test_tga_proctor*.py'
+      - 'docs/research/tga-universal/PNP-F028.md'
+      - '.github/workflows/proctor-pnp-resolution-gates.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorHornTrace.lean'
+      - 'formal/ProctorAffineBackdoor.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - 'tests/test_tga_proctor*.py'
+      - 'docs/research/tga-universal/PNP-F028.md'
+      - '.github/workflows/proctor-pnp-resolution-gates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          mkdir -p artifacts/pnp-f028
+          python -m unittest discover -s tests -p 'test_tga_proctor_affine_backdoor.py' -v
+          python -m unittest discover -s tests -p 'test_tga_proctor_resolution_gates.py' -v
+          python -m mathos.research.tga_proctor_resolution_gates > artifacts/pnp-f028/controls.json
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m mathos.research.tga_proctor_affine_backdoor_audit --output-dir artifacts/pnp-f027-replay
+      - shell: bash
+        run: |
+          set -euo pipefail
+          lean --version | tee artifacts/pnp-f028/lean-version.txt
+          grep -E 'version 4\.14\.0\b' artifacts/pnp-f028/lean-version.txt
+          lean -DwarningAsError=true formal/ProctorHornTrace.lean 2>&1 | tee artifacts/pnp-f028/kernel.txt
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          out = Path("artifacts/pnp-f028")
+          lines = (out / "kernel.txt").read_text().splitlines()
+          names = ("empty_forced", "extend_forced", "conflict_refutes")
+          for name in names:
+              expected = f"'ProctorHornTrace.{name}' does not depend on any axioms"
+              if lines.count(expected) != 1:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          report = dict(status="LOCAL_HORN_INVARIANT_ONLY", declarations=list(names),
+                        source_sha256=hashlib.sha256(Path("formal/ProctorHornTrace.lean").read_bytes()).hexdigest(),
+                        universal_bound=False, machine_refinement=False, independent_review=False)
+          (out / "lean-report.json").write_text(json.dumps(report, indent=2) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f028-scoped-evidence
+          path: |
+            artifacts/pnp-f028/
+            artifacts/pnp-f027-replay/
+          if-no-files-found: error
