@@ -143,7 +143,7 @@ theorem distinct_complete (xs : Clause) (h : Distinct xs) :
     cases e : contains a as with
     | true => exact (hn (contains_sound a as e)).elim
     | false =>
-      rw [e]
+      simp only [e, Bool.false_eq_true, if_false]
       exact ih
 
 /-- Check every ordered word of length k over xs. Repetitions are
