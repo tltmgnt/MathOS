@@ -86,25 +86,15 @@ is assigned. Each untouched gadget likewise has no units or pure
 literals. The heuristic must split in a gadget rather than in the
 core whenever an untouched gadget remains, since 18 > 8.
 
-For each of the 2^t choices of uniform assignments on the gadgets,
-follow consistent splits until the first core split. Unit and pure
-simplification preserve a compatible gadget model: in an untouched
-gadget neither rule applies; after its first split the chosen
-uniform assignment satisfies every clause and every forced unit,
-and any pure assignment cannot erase the earlier split. More directly,
-a pure assignment cannot contradict the uniform assignment in these
-gadgets: once a variable is fixed to the uniform value, any remaining
-mixed residual containing the opposite polarity of an unfixed
-variable also has a same-polarity occurrence unless that variable
-is already forced or absent; alternatively, even if a pure choice
-changes the remaining model, it preserves satisfiability of that
-component and the first split. No gadget can cause a conflict along
-a path chosen to preserve its satisfiability. The core cannot be
-discharged by renaming or propagation before a split. Each first-core
-split node therefore has fixed a first-split value in every gadget.
-All 2^t combinations are reachable by choosing that value when each
-untouched gadget is first split and continuing along a satisfiable
-child in that component. They reach distinct nodes in the unbudgeted
+For each of the 2^t vectors of desired first-split values, follow a
+path as follows. The first split in an untouched gadget permits either
+value, since both uniform assignments are models. After this split,
+unit and pure simplification preserve satisfiability of that component;
+whenever a later split is made there, choose a child preserving its
+satisfiability. No gadget then supplies a conflict on this path. The
+core cannot be discharged by renaming or propagation before a split.
+Each first-core split node therefore has fixed a first-split value in
+every gadget. All 2^t vectors are reachable in this way. They reach distinct nodes in the unbudgeted
 UNSAT tree. Thus at least 2^t visited nodes are required. The input has
 4t+3 variables, 24t+8 clauses and O(t log t) bits. This is a
 superpolynomial lower bound on this deterministic search policy,
