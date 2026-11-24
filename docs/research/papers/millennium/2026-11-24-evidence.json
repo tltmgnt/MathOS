@@ -1,0 +1,126 @@
+{
+  "source_commit": "f5345f298feec5ae4fe24b1de50b8ff737465ce6",
+  "workflow_run": 45362915859,
+  "job_id": 138337198601,
+  "artifact_id": 14906146016,
+  "failed_initial_run": 45362861519,
+  "report": {
+    "status": "BOUNDED_RESEARCH_NOT_CERTIFIED",
+    "globally_proved": 0,
+    "rh": {
+      "minimal_degree": 5,
+      "odd_block_determinant": "130267/1024",
+      "negative_square_sum": "-1221025/524288"
+    },
+    "p_vs_np": [
+      {
+        "n": 3,
+        "forward_reads": 22,
+        "reverse_reads": 22,
+        "forward_scans": 2,
+        "reverse_scans": 2
+      },
+      {
+        "n": 5,
+        "forward_reads": 38,
+        "reverse_reads": 38,
+        "forward_scans": 2,
+        "reverse_scans": 2
+      },
+      {
+        "n": 7,
+        "forward_reads": 54,
+        "reverse_reads": 54,
+        "forward_scans": 2,
+        "reverse_scans": 2
+      },
+      {
+        "n": 9,
+        "forward_reads": 70,
+        "reverse_reads": 70,
+        "forward_scans": 2,
+        "reverse_scans": 2
+      },
+      {
+        "n": 11,
+        "forward_reads": 86,
+        "reverse_reads": 86,
+        "forward_scans": 2,
+        "reverse_scans": 2
+      }
+    ],
+    "navier_stokes": {
+      "mean_vorticity_stretching": "-1/4",
+      "nonzero_integrated_stretching": true,
+      "initial_time_only": true
+    },
+    "yang_mills": [
+      {
+        "inverse_spacing": 2,
+        "crossover_step": 8,
+        "physical_crossover_time": 4
+      },
+      {
+        "inverse_spacing": 4,
+        "crossover_step": 22,
+        "physical_crossover_time": 5.5
+      },
+      {
+        "inverse_spacing": 8,
+        "crossover_step": 74,
+        "physical_crossover_time": 9.25
+      },
+      {
+        "inverse_spacing": 16,
+        "crossover_step": 274,
+        "physical_crossover_time": 17.125
+      },
+      {
+        "inverse_spacing": 32,
+        "crossover_step": 1058,
+        "physical_crossover_time": 33.0625
+      },
+      {
+        "inverse_spacing": 64,
+        "crossover_step": 4162,
+        "physical_crossover_time": 65.03125
+      }
+    ],
+    "hodge": {
+      "multiplication_rank": 4,
+      "primitive_dimension": 2,
+      "pairing_span_rank": 2,
+      "relation": "D12|34 - D13|24 + D14|23 = 0"
+    },
+    "bsd": [
+      {
+        "d": 1,
+        "a5": -2,
+        "euler_polynomial": [
+          1,
+          2,
+          5
+        ],
+        "a25": -1,
+        "points_F25": 32
+      },
+      {
+        "d": 2,
+        "a5": 2,
+        "euler_polynomial": [
+          1,
+          -2,
+          5
+        ],
+        "a25": -1,
+        "points_F25": 32
+      }
+    ],
+    "poincare": {
+      "conditional_only": true,
+      "toy_first_negative_step": 22,
+      "final_rescaled_width_sign": "negative",
+      "steps_checked": 22
+    }
+  }
+}

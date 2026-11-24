@@ -10,3 +10,7 @@ Each paper must include the question, specific contribution, mathematical statem
 |---|---|---|
 | M001 | [Exact finite-domain validation of a C++ polynomial multiplication kernel](M001-exact-polynomial-validation.md) | [Successful CI](https://github.com/tltmgnt/MathOS/actions/runs/45361551662) |
 | M002 | [Fail-closed adversarial testing and cross-compiler replay](M002-adversarial-cross-compiler.md) | [Successful CI](https://github.com/tltmgnt/MathOS/actions/runs/45362051952) |
+
+## Millennium Prize research
+
+The [seven-track Millennium paper series](millennium/README.md) applies this publication protocol to Riemann, P versus NP, Navier–Stokes, Yang–Mills, Hodge, Birch–Swinnerton-Dyer and Poincaré reconstruction. Each track has its own numbered research papers and evidence ledger.
