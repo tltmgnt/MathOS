@@ -15,7 +15,7 @@ def Literal.holds (l : Literal) (x : Assignment) : Prop :=
 
 abbrev Clause := List Literal
 def Clause.holds (c : Clause) (x : Assignment) : Prop :=
-  ∃ l : Literal, l ∈ c ∧ l.holds x
+  ∃ l : Literal, l ∈ c ∧ Literal.holds l x
 
 def localView (shared : Nat → Bool) (sigma : Assignment)
     (locals : Family) (j : Nat) : Assignment :=
@@ -30,8 +30,7 @@ theorem assemble_shared (shared : Nat → Bool) (sigma : Assignment)
     (h : shared v = true) :
     assemble shared sigma owner locals v = sigma v := by
   unfold assemble
-  rw [h]
-  rfl
+  rw [h] <;> rfl
 
 theorem assemble_local (shared : Nat → Bool) (sigma : Assignment)
     (owner : Nat → Nat) (locals : Family) (j v : Nat)
@@ -40,20 +39,22 @@ theorem assemble_local (shared : Nat → Bool) (sigma : Assignment)
   cases h with
   | inl hs =>
     unfold assemble localView
-    rw [hs]
+    rw [hs] <;> rfl
   | inr ho =>
     unfold assemble localView
-    rw [ho]
+    rw [ho] <;> rfl
 
 theorem clause_agrees (c : Clause) (x y : Assignment)
     (h : ∀ l ∈ c, x l.variable = y l.variable) :
-    c.holds x ↔ c.holds y := by
+    Clause.holds c x ↔ Clause.holds c y := by
   constructor
   · intro hx
+    unfold Clause.holds at hx ⊢
     obtain ⟨l, hl, ht⟩ := hx
     change x l.variable = l.positive at ht
     exact ⟨l, hl, (h l hl).symm.trans ht⟩
   · intro hy
+    unfold Clause.holds at hy ⊢
     obtain ⟨l, hl, ht⟩ := hy
     change y l.variable = l.positive at ht
     exact ⟨l, hl, (h l hl).trans ht⟩
@@ -69,13 +70,13 @@ def GlobalSat (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment) : Prop :=
   ∃ x : Assignment,
     (∀ v, shared v = true → x v = sigma v) ∧
-    ∀ i, i < m → (clauses i).holds x
+    ∀ i, i < m → Clause.holds (clauses i) x
 
 def LocalSat (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment)
     (component : Nat → Nat) : Prop :=
   ∃ locals : Family, ∀ i, i < m →
-    (clauses i).holds (localView shared sigma locals (component i))
+    Clause.holds (clauses i) (localView shared sigma locals (component i))
 
 theorem separator_forward (clauses : Nat → Clause) (m : Nat)
     (shared : Nat → Bool) (sigma : Assignment) (component : Nat → Nat)
