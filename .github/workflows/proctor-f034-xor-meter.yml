@@ -1,0 +1,67 @@
+name: Proctor F034 sparse XOR meter
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-xor-meter.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-xor-meter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-xor-meter
+          python -m unittest discover -s tests -p 'test_tga_proctor_data_fixtures.py' -v
+          python -m mathos.research.tga_proctor_data_fixtures artifacts/f034-xor-meter/data
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-xor-meter
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorXorMeter.lean formal/ProctorXorMeterMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" -- "$out/data" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_XOR_METER_OK cases=21 hand_controls=6' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-xor-meter")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["all_value","all_bound","any_value","any_bound","pattern_value","pattern_bound","patterns_value","patterns_bound","block_value","block_bound","toggle_value","toggle_bound","combine_value","combine_bound","sum_value","sum_bound","rhs_value","rhs_count","xor_value","xor_bound"]
+          for name in names:
+              required = f"'ProctorXorMeter.{name}' does not depend on any axioms"
+              if required not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorXorMeter.{name}")
+          report = dict(scope="SELECTED_EAGER_XOR_TERMINAL_CHARGES",
+                        verified=names, axiom_gate=True, fixtures=21,
+                        hand_controls=6, total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorXorMeter.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-xor-meter-evidence
+          path: artifacts/f034-xor-meter/
