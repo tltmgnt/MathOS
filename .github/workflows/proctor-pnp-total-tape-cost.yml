@@ -1,0 +1,46 @@
+name: Proctor PNP total structural tape cost
+on:
+  push:
+    paths:
+      - 'formal/ProctorPNPTotalTapeCost.lean'
+      - 'mathos/research/tga_proctor_pnp_total_tape_cost.py'
+      - 'mathos/research/tga_proctor_tape_solver.py'
+      - 'tests/test_tga_proctor_pnp_total_tape_cost.py'
+      - 'docs/research/tga-universal/PNP-F016.md'
+      - '.github/workflows/proctor-pnp-total-tape-cost.yml'
+  pull_request:
+    paths:
+      - 'formal/ProctorPNPTotalTapeCost.lean'
+      - 'mathos/research/tga_proctor_pnp_total_tape_cost.py'
+      - 'mathos/research/tga_proctor_tape_solver.py'
+      - 'tests/test_tga_proctor_pnp_total_tape_cost.py'
+      - 'docs/research/tga-universal/PNP-F016.md'
+      - '.github/workflows/proctor-pnp-total-tape-cost.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_tape_solver.py' -v
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_pnp_total_tape_cost.py' -v
+      - run: python -m unittest discover -s tests -p 'test_tga_proctor_pnp_tape_integration.py' -v
+      - run: python -m mathos.research.tga_proctor_pnp_total_tape_cost --output-dir artifacts/pnp-total-tape-cost
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-f016-evidence
+          path: artifacts/pnp-total-tape-cost/
+          if-no-files-found: error
