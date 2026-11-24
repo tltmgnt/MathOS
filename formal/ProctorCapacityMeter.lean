@@ -204,7 +204,7 @@ theorem group_value (refs : List RefRow) (g : Group) :
       (distinctCheck g.literals && words g.literals (g.cap+1)
         (fun ys => if distinctCheck ys then conflictCheck refs ys else true))
     rw [distinct_value,words_value _ _ _ _ (tuple_value refs)]
-  · rw [if_neg h,if_neg h]
+  · rw [if_neg h,if_neg h] <;> rfl
 
 theorem group_bound (refs : List RefRow) (g : Group) :
     (groupMeter refs g).2 ≤ groupBudget refs g := by
