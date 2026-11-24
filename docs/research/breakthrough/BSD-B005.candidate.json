@@ -1,0 +1,17 @@
+{
+  "promotion": "NONE",
+  "evidence_kind": "MATHEMATICAL_ARGUMENT",
+  "formal_status": "NOT_CHECKED",
+  "novelty_status": "NOT_CHECKED",
+  "review_status": "NOT_REVIEWED",
+  "claim_id": "BSD.analytic_selmer",
+  "outcome": "SCOPED_RESULT_CANDIDATE",
+  "statement": "For E_41 and p>=5 of good ordinary reduction, Castella's CM Theorem B reduces nonvanishing of its admissibly constructed generalized Kato class to p-primary Sha finiteness, using the known rank-two equality and nonzero localization. Five ordinary primes have explicit local parameter certificates.",
+  "hypotheses": "Prior cycle-four analytic and rational rank certificates; CM by Z[i]; good ordinary p>=5; auxiliary characters satisfying (1.5) and Theorem A(i)-(ii) of Castella's paper.",
+  "definitions": "Bloch-Kato Selmer group of V_pE; restriction to E(Q_p) completed and tensored Q_p; formal parameter -x/y; p-primary Sha.",
+  "source_locators": "Castella, Generalised Kato classes on CM elliptic curves of rank 2, version Feb 13 2026, Theorem B, pp.4–5, https://web.math.ucsb.edu/~castella/Kato-Schoen.pdf; BSD-B004.",
+  "proof_or_gap": "Rank two and Selmer exact sequence give dim Sel=2 iff Sha[p^infty] finite by cofinitely generatedness. A nontorsion rational point remains nontorsion locally, hence restriction is nonzero. Theorem B now gives equivalence, not a new finiteness proof. Local formal parameter digits independently test restriction.",
+  "implication_to_claim": "Isolates an actual missing nonvanishing input for extending the rank comparison to odd p; conditional route only.",
+  "unproved_dependencies": "Explicit admissible auxiliary character construction and independent generalized Kato class nonvanishing, or other independent p-primary Sha finiteness proof. Universal rank comparison remains open.",
+  "adversarial_findings": "Nonzero localization is not sufficient without dimension two. Supersingular and bad primes fail the theorem setting; circular use of assumed Sha finiteness does not close the obligation."
+}
