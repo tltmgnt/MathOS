@@ -51,3 +51,13 @@ PNP-B005 establishes an exact exponential auxiliary-free CNF+XOR projection boun
 [BSD-B005 paper](BSD-B005.md) · [Word](BSD-B005.docx)
 
 [Cycle 5 machine evidence](cycle5-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45372843485)
+
+## Cycle 6 — use-case completion
+
+Independent review is optional and nonblocking for internal scoped results under the new use-case policy. The PNP-AND-XOR use case is complete: polynomial decision and independent certificate replay. BSD-E41-P5 is complete under the stated classical CM and CLS theorems: exact normalized Hecke value 141800/1681 and trivial 5-primary Sha. The Gaussian denominator was corrected and all calculations replayed. These are scoped results, not closures of the 14 global proof obligations. The broader SAT and BSD research remains open. Do not promote any canonical claim or claim independent review.
+
+[PNP-B006 paper](PNP-B006.md) · [Word](PNP-B006.docx)
+
+[BSD-B006 paper](BSD-B006.md) · [Word](BSD-B006.docx)
+
+[Cycle 6 machine evidence](cycle6-evidence.json) · [Execution](https://github.com/tltmgnt/MathOS/actions/runs/45374313360) · [Use-case policy](../BREAKTHROUGH_USE_CASE_POLICY.v1.json)
