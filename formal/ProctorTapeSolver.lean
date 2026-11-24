@@ -115,7 +115,7 @@ def tapeScan {orig shift n} : (ts : List (TapeTag orig shift n)) → ScanCells t
   | [] => ⟨.none (fun _ h => nomatch h),0,Nat.le_refl 0⟩
   | t::ts => by
     cases h : hd t.tag.row.coeff with
-    | true => exact ⟨.pivot t h,2,by simp⟩
+    | true => exact ⟨.pivot t h,2,by simp only [List.length_cons]; omega⟩
     | false =>
       let a := tapeScan ts
       have hb : a.steps+2 ≤ 2*(t::ts).length := by
@@ -149,7 +149,7 @@ def tapeUpdate {orig shift n} (p t : TapeTag orig shift (n+1))
       exact a.row_eq
     have hz : hd a.value.tag.row.coeff = false :=
       (congrArg (fun r : Row => hd r.coeff) e).trans (clear_head p.tag.row t.tag.row hp)
-    exact ⟨tapeStrip a.value hz,congrArg strip e,a.steps+4,by rw [a.exact_cost]⟩
+    exact ⟨tapeStrip a.value hz,congrArg strip e,a.steps+4,by rw [a.exact_cost]; exact Nat.le_refl _⟩
 
 structure TapeBatch {orig shift n} (ts : List (TapeTag orig shift (n+1))) (target : List Row) (limit : Nat) where
   tags : List (TapeTag orig (fun x => tl (shift x)) n)
@@ -162,7 +162,7 @@ def tapeClearAll {orig shift n} (p : TapeTag orig shift (n+1))
     (hp : hd p.tag.row.coeff = true) :
     (ts : List (TapeTag orig shift (n+1))) →
     TapeBatch ts (reduced p.tag.row (rawTape ts)) (4*(n+1+orig.length+1)+4)
-  | [] => ⟨[],rfl,rfl,0,Nat.le_refl 0⟩
+  | [] => ⟨[],rfl,rfl,0,Nat.zero_le _⟩
   | t::ts => by
     let a := tapeUpdate p t hp
     let b := tapeClearAll p hp ts
@@ -202,7 +202,7 @@ def tapeBase {orig shift} : (ts : List (TapeTag orig shift 0)) → TapeBase ts
     | true =>
       exact ⟨.unsat t.tag.weights t.weightWidth (t.tag.rhs_ok.trans h)
         (fun x hx => (t.tag.lhs_ok x).trans ((congrArg (dot t.tag.row.coeff)
-          (empty_of_length_zero (shift x) hx)).trans (dot_nil _))),2,by simp⟩
+          (empty_of_length_zero (shift x) hx)).trans (dot_nil _))),2,by simp only [List.length_cons]; omega⟩
     | false =>
       let a := tapeBase ts
       have hb : a.steps+2 ≤ 2*(t::ts).length := by
@@ -229,7 +229,7 @@ def solveTape (orig : List Row) (U : Nat) :
     (ts : List (TapeTag orig shift n)) → n ≤ U → TapeSolve ts U
   | 0, _, ts, _ =>
     let a := tapeBase ts
-    ⟨a.result,a.steps,a.bound⟩
+    ⟨a.result,a.steps,by simpa [tapeBudget] using a.bound⟩
   | n+1, shift, ts, hn => by
     let a := tapeScan ts
     have hscan := a.bound
@@ -243,7 +243,6 @@ def solveTape (orig : List Row) (U : Nat) :
       have hc : a.steps+b.steps+1 ≤ columnBudget U orig.length ts.length := by
         have hmul := Nat.mul_le_mul_left ts.length (show 6 ≤ 4*(U+orig.length+1)+6 by omega)
         unfold columnBudget
-        rw [Nat.mul_add] at hmul
         omega
       have hb : a.steps+b.steps+s.steps+1 ≤ tapeBudget U orig.length ts.length (n+1) := by
         unfold tapeBudget at hs ⊢
