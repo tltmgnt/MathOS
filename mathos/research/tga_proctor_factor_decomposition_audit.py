@@ -27,6 +27,8 @@ def run(out,lean):
                         capture_output=True,text=True,timeout=120)
     log=proc.stdout+proc.stderr
     (out/"kernel.txt").write_text(log,encoding="utf-8")
+    if proc.returncode != 0:
+        print(log)
     audit={n:next((l for l in log.splitlines()
                    if l.startswith("'ProctorFactorDecomposition."+n+"' ")),None)
            for n in NAMES}
