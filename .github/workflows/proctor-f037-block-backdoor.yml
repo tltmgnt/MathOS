@@ -1,0 +1,20 @@
+name: Proctor F037 block backdoor audit
+on:
+  push:
+    branches: ['research/pnp-f037-block-backdoor']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_block_backdoor | tee /tmp/block-backdoor.txt
+          grep -Fx 'F037_BLOCK_BACKDOOR_OK formulas=4096 chains=7 max_blocks=255 articulation_conflict=1 sparse=2' /tmp/block-backdoor.txt
