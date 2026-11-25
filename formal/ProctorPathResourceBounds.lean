@@ -9,6 +9,14 @@ open ProctorReachabilityCompleteness (Extends Known missing missing_bound missin
 open ProctorResolutionBridge (copySteps extend compile)
 open ProctorUnifiedReplay (Proof)
 
+private theorem len_append {α : Type} (xs ys : List α) :
+    (xs++ys).length=xs.length+ys.length := by
+  induction xs with
+  | nil => exact (Nat.zero_add _).symm
+  | cons a as ih =>
+    change (as++ys).length+1=as.length+1+ys.length
+    rw [ih,Nat.add_assoc,Nat.add_comm 1 ys.length,← Nat.add_assoc]
+
 theorem route_mem (rs : Routes) (a : Literal) (ps : List Literal)
     (h : routeFor a rs=some ps) : (a,ps)∈rs := by
   induction rs with
@@ -43,7 +51,7 @@ theorem relax_short (rs : Routes) (e : Arc) (h : Short rs) :
       cases hd' with
       | head =>
         change (ps++[e.2]).length<rs.length+1
-        rw [List.length_append]
+        rw [len_append]
         exact Nat.succ_lt_succ hp
       | tail _ hm => exact Nat.lt_trans (h d hm) (Nat.lt_succ_self _)
 
@@ -78,6 +86,7 @@ theorem relax_budget (es : List Arc) (rs : Routes) (e : Arc) (he : e∈es) :
         refine ⟨ps++[e.2],?_⟩
         change (if e.2=e.2 then some (ps++[e.2]) else routeFor e.2 rs)=_
         rw [if_pos rfl]
+      rw [hs,hd] at hx
       have hm := missing_strict rs qs es e hx he hd hk
       change rs.length+1+missing qs es≤rs.length+missing rs es
       rw [Nat.add_assoc,Nat.add_comm 1 (missing qs es)]
@@ -145,7 +154,7 @@ theorem arcs_bound (f : Formula) : (arcs f).length≤occurrences f := by
   | nil => exact Nat.le_refl _
   | cons c cs ih =>
     change (rowArcs c++arcs cs).length≤c.length+occurrences cs
-    rw [List.length_append]
+    rw [len_append]
     exact Nat.add_le_add (row_arcs_bound c) ih
 
 theorem copy_length (v i : Nat) (f : Formula) :
@@ -187,7 +196,17 @@ theorem compile_steps (v : Nat) (f : Formula) (ss : List Step) :
     rw [extend_length,ih]
     change f.length+1+((f.length+1)*ss.length+triangular ss.length)=_
     rw [Nat.add_mul,Nat.mul_add,Nat.one_mul,Nat.mul_one]
-    ac_rfl
+    calc
+      f.length+1+(f.length*ss.length+ss.length+triangular ss.length)
+          = f.length+(1+(f.length*ss.length+ss.length+triangular ss.length)) := Nat.add_assoc _ _ _
+      _ = f.length+(f.length*ss.length+(ss.length+1+triangular ss.length)) := by
+        rw [← Nat.add_assoc (f.length*ss.length) ss.length (triangular ss.length),
+          ← Nat.add_assoc 1 (f.length*ss.length+ss.length) (triangular ss.length),
+          Nat.add_comm 1 (f.length*ss.length+ss.length),
+          Nat.add_assoc (f.length*ss.length) ss.length 1,
+          Nat.add_assoc (f.length*ss.length) (ss.length+1) (triangular ss.length)]
+      _ = f.length*ss.length+f.length+(ss.length+1+triangular ss.length) := by
+        rw [← Nat.add_assoc,Nat.add_comm f.length (f.length*ss.length)]
 
 theorem triangular_bound (k : Nat) : triangular k≤k*k := by
   induction k with
@@ -198,9 +217,9 @@ theorem triangular_bound (k : Nat) : triangular k≤k*k := by
     have hh : k+1+triangular k≤k+1+k*k := Nat.add_le_add_left ih _
     exact Nat.le_trans hh (by
       calc
-        k+1+k*k = k*k+k+1 := by ac_rfl
+        k+1+k*k = k*k+k+1 := by rw [Nat.add_comm (k+1),Nat.add_assoc]
         _ ≤ k*k+k+(k+1) := Nat.add_le_add_left (Nat.succ_le_succ (Nat.zero_le k)) _
-        _ = k*k+k+k+1 := by ac_rfl)
+        _ = k*k+k+k+1 := (Nat.add_assoc _ _ _).symm)
 
 theorem compile_steps_bound (v : Nat) (f : Formula) (ss : List Step) :
     steps (compile v f ss)≤(f.length+ss.length)*ss.length := by
@@ -234,7 +253,7 @@ private theorem pathTail_length (s a : Literal) (g : Formula) (bs : List Literal
           rw [he] at h
           change some (t::ts,g')=some (ss,out) at h
           cases h
-          exact congrArg Nat.succ (ih b (t.tail::g) ts g' he)
+          exact congrArg Nat.succ (ih b (t.tail::g) ts out he)
 
 theorem pathStart_length (g : Formula) (s : Literal) (bs : List Literal)
     (ss : List Step) (out : Formula) (h : pathStart g s bs=some (ss,out)) :
@@ -297,7 +316,7 @@ theorem pair_size (f : Formula) (v : Nat) (pos neg : List Literal) (p : Proof)
           rw [compile_length,compile_steps]
           constructor
           · unfold ss
-            rw [List.length_append,List.length_append,h1,h2]
+            rw [len_append,len_append,h1,h2]
             rfl
           · rfl
 
