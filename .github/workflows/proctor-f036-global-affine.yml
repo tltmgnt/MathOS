@@ -1,0 +1,20 @@
+name: Proctor F036 global affine audit
+on:
+  push:
+    branches: ['research/pnp-f036-global-affine-views']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f036_global_affine | tee /tmp/global-affine.txt
+          grep -Fx 'F036_GLOBAL_AFFINE_OK chains=15 controls=15 coloring_gap=8 rejection=3' /tmp/global-affine.txt
