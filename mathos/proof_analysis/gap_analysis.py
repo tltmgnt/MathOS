@@ -24,7 +24,8 @@ def minimal(sets):
                   key=lambda s: (len(s), sorted(s)))
 
 
-def analyze(graph, target):
+def analyze_legacy(graph, target):
+    """Original recursive reference implementation; bounded fixtures only."""
     # Validate the whole graph, including unused alternative routes.
     seen, active = set(), set()
     def validate(k):
@@ -73,6 +74,12 @@ def analyze(graph, target):
             'common_to_all_modeled_routes': sorted(required),
             'claims': {k: {'label': c.label, 'state': c.state, 'routes': c.routes,
                            'note': c.note} for k, c in graph.items()}}
+
+
+def analyze(graph, target, *, limits=None):
+    """Exact bounded antichain analysis; raises on resource exhaustion."""
+    from .tga_engine import analyze_exact
+    return analyze_exact(graph, target, limits=limits)
 
 
 def model(name, gaps, note):

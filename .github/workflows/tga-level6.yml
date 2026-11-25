@@ -1,0 +1,62 @@
+name: TGA exact gap analysis and replay
+
+on:
+  pull_request:
+    paths:
+      - 'mathos/proof_analysis/**'
+      - 'mathos/research/tga_universal_bridges.py'
+      - 'mathos/research/tga_u003.py'
+      - 'tests/test_proof_*.py'
+      - 'tests/test_tga_*.py'
+      - 'scripts/tga_gap_benchmark.py'
+      - 'scripts/tga_exact_benchmark.py'
+      - '.github/workflows/tga-level6.yml'
+      - 'docs/proof-analysis/TGA_LEVEL6.md'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/proof_analysis/**'
+      - 'mathos/research/tga_universal_bridges.py'
+      - 'mathos/research/tga_u003.py'
+      - 'tests/test_proof_*.py'
+      - 'tests/test_tga_*.py'
+      - 'scripts/tga_gap_benchmark.py'
+      - 'scripts/tga_exact_benchmark.py'
+      - '.github/workflows/tga-level6.yml'
+      - 'docs/proof-analysis/TGA_LEVEL6.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-analysis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Exact, legacy and graph-oracle regression
+        run: |
+          python -m unittest discover -s tests -p 'test_proof_*.py' -v
+          python -m unittest discover -s tests -p 'test_tga_universal_bridges.py' -v
+          python -m unittest discover -s tests -p 'test_tga_u003.py' -v
+      - name: Replay current research route models
+        run: python -m mathos.proof_analysis.tga_level6 suite "$RUNNER_TEMP/tga-replay"
+      - name: Compare old and new on fixed software workloads
+        run: python scripts/tga_exact_benchmark.py --output "$RUNNER_TEMP/tga-benchmark.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tga-exact-evidence-py${{ matrix.python }}
+          path: |
+            ${{ runner.temp }}/tga-replay/
+            ${{ runner.temp }}/tga-benchmark.json
+          if-no-files-found: error
+          retention-days: 30
