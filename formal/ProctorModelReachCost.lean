@@ -59,7 +59,7 @@ theorem conflict_bound (f : Formula) (v : Nat) :
 theorem scan_bound (f : Formula) (vs : List Nat) :
     scanCost f vs≤vs.length*(2*queryCap (occurrences f)) := by
   induction vs with
-  | nil => exact Nat.le_refl _
+  | nil => exact Nat.zero_le _
   | cons v vs ih =>
     change conflictCost f v+(if conflictAt f v then 0 else scanCost f vs)≤
       (vs.length+1)*(2*queryCap (occurrences f))
@@ -78,7 +78,7 @@ theorem vertices_length (vs : List Nat) : (vertices vs).length=2*vs.length := by
 theorem score_bound (f : Formula) (a : Literal) (bs : List Literal) :
     scoreCost f a bs≤bs.length*queryCap (occurrences f) := by
   induction bs with
-  | nil => exact Nat.le_refl _
+  | nil => exact Nat.zero_le _
   | cons b bs ih =>
     change reachCost (arcs f) a b+scoreCost f a bs≤(bs.length+1)*queryCap (occurrences f)
     rw [add_mul',Nat.one_mul,Nat.add_comm (bs.length*queryCap (occurrences f))]
@@ -96,7 +96,7 @@ theorem value_bound (f : Formula) (v : Nat) :
 theorem materialize_bound (f : Formula) (vs : List Nat) :
     materializeCost f vs≤vs.length*(2*((2*occurrences f)*queryCap (occurrences f))) := by
   induction vs with
-  | nil => exact Nat.le_refl _
+  | nil => exact Nat.zero_le _
   | cons v vs ih =>
     change valueCost f v+materializeCost f vs≤
       (vs.length+1)*(2*((2*occurrences f)*queryCap (occurrences f)))
