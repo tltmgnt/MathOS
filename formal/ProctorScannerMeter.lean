@@ -26,15 +26,18 @@ private theorem spec_value (bytes : List Nat) (v digits : Nat) (acc : List Nat) 
   | cons b bs ih =>
     by_cases e : b=10
     · by_cases z : digits=0
-      · rw [scanSpec,scan,if_pos e,if_pos z]
+      · rw [scanSpec,scan,if_pos e,if_pos z] <;> rw [if_pos e,if_pos z]
       · rw [scanSpec,scan,if_pos e,if_neg z]
+        rw [if_pos e,if_neg z]
         exact ih 0 0 (v::acc)
     · by_cases d : 48≤b ∧ b≤57
       · by_cases bad : digits≥digitLimit ∨ (digits>0 ∧ v=0)
-        · rw [scanSpec,scan,if_neg e,if_pos d,if_pos bad]
+        · rw [scanSpec,scan,if_neg e,if_pos d,if_pos bad] <;>
+            rw [if_neg e,if_pos d,if_pos bad]
         · rw [scanSpec,scan,if_neg e,if_pos d,if_neg bad]
+          rw [if_neg e,if_pos d,if_neg bad]
           exact ih (10*v+(b-48)) (digits+1) acc
-      · rw [scanSpec,scan,if_neg e,if_neg d]
+      · rw [scanSpec,scan,if_neg e,if_neg d] <;> rw [if_neg e,if_neg d]
 
 private theorem spec_bound (bytes : List Nat) (v digits : Nat) (acc : List Nat) :
     (scanSpec bytes v digits acc).2≤bytes.length+1 := by
@@ -107,15 +110,20 @@ private theorem scan_aux_spec (bytes : List Nat) (v digits : Nat)
   | cons b bs ih =>
     by_cases e : b=10
     · by_cases z : digits=0
-      · rw [scanAux,scanSpec,if_pos e,if_pos z] <;> rfl
+      · rw [scanAux,scanSpec,if_pos e,if_pos z] <;>
+          rw [if_pos e,if_pos z] <;> rfl
       · rw [scanAux,scanSpec,if_pos e,if_neg z,ih]
+        rw [if_pos e,if_neg z]
         exact offset_bump k _
     · by_cases d : 48≤b ∧ b≤57
       · by_cases bad : digits≥digitLimit ∨ (digits>0 ∧ v=0)
-        · rw [scanAux,scanSpec,if_neg e,if_pos d,if_pos bad] <;> rfl
+        · rw [scanAux,scanSpec,if_neg e,if_pos d,if_pos bad] <;>
+            rw [if_neg e,if_pos d,if_pos bad] <;> rfl
         · rw [scanAux,scanSpec,if_neg e,if_pos d,if_neg bad,ih]
+          rw [if_neg e,if_pos d,if_neg bad]
           exact offset_bump k _
-      · rw [scanAux,scanSpec,if_neg e,if_neg d] <;> rfl
+      · rw [scanAux,scanSpec,if_neg e,if_neg d] <;>
+          rw [if_neg e,if_neg d] <;> rfl
 
 def scanMeter (bytes : List Nat) (v digits : Nat) (acc : List Nat) : Meter :=
   scanAux bytes v digits acc 0
