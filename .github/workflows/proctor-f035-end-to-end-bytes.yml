@@ -1,0 +1,71 @@
+name: Proctor F035 end to end bytes
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'docs/research/tga-universal/PNP-F035-END-TO-END-BYTES.md'
+      - '.github/workflows/proctor-f035-end-to-end-bytes.yml'
+  push:
+    branches: [main, 'research/pnp-f035-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f035-end-to-end-bytes
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f035-end-to-end-bytes
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorPathResourceBounds.lean formal/ProctorTotalTwoCNF.lean formal/ProctorFiniteModel.lean formal/ProctorSerializedTwoCNF.lean formal/ProctorDecimalEncoder.lean formal/ProctorEndToEndBytes.lean formal/ProctorEndToEndBytesMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F035_END_TO_END_BYTES_OK subsets=512 reversed=512 sparse=2 empty=2 rejection=6' "$out/kernel.txt"
+          python -m mathos.research.tga_pnp_resolution_gap > "$out/gap-report.json"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f035-end-to-end-bytes")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          groups = {"ProctorEndToEndBytes":["witness_bytes","check_encoded","produce_encoded","produce_bytes_sound","produce_bytes_total","encoded_total","encoded_sat","encoded_unsat","encoded_sound","malformed_rejected","byte_tags_exclusive"]}
+          names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
+          assert len(names)==11
+          for name in names:
+              if f"'{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          gap = json.loads((out/"gap-report.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          report = dict(scope="END_TO_END_BYTES",
+                        verified=names, axiom_gate=True, controls=1034,
+                        ordinary_typed_completeness_verified=True,
+                        ordinary_executable_generator_completeness_verified=True,
+                        bound_envelope_completeness_verified=True,
+                        universal_decimal_encoder_verified=False,
+                        total_cost_semantics_verified=False,
+                        polynomial_certificate_completeness_verified=False,
+                        deterministic_polynomial_discovery_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256={ns:hashlib.sha256(Path("formal/"+ns+".lean").read_bytes()).hexdigest()
+                                       for ns in groups})
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f035-end-to-end-bytes-evidence
+          path: artifacts/f035-end-to-end-bytes/
