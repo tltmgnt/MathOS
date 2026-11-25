@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X structured cut oracles
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-structured-cut-oracles']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_structured_cut_oracles.py
+          python -m mathos.research.f038_parity_cut_discovery | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_PARITY_CUT_OK {"controls":5,"mixed":[1024,8192,550,474,800],"separation":[256,32000,31377,527875,2589],"x3c":[256,183,175,175,6561]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_structured_cut_oracles | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=discovery,ordinary_complete,short_proofs,machine_cost status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_MRAX_STRUCTURED_CUT_OK {"controls":5,"graphic":[64,2187,1268,1584,20736],"grid":[32000,31377,192307,323625],"half":[256,6912,5415,1186,311,6601,114021]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_STRUCTURED_CUT_GATE_OK status=OPEN')
+          PY

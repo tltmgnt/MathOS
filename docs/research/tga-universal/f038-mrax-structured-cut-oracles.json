@@ -1,0 +1,166 @@
+{
+  "attempt_id": "F038-MRAX-STRUCTURED-CUT-ORACLES",
+  "base_commit": "60ff22df2668750024792f9e8cbc2c9476f6a880",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45724459043",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "short_proofs",
+    "machine_cost"
+  ],
+  "hypothesis": "Can useful exact parity-cut discovery avoid the general NP-hard oracle on structurally identifiable domains?",
+  "route": "certificate_route",
+  "topology": "Projected augmented affine span, graph cycle-space and two-sheet parity walks; fractional versus integer global section.",
+  "adversarial": [
+    "Graphic row-space promise is restrictive.",
+    "Half-integral discovery is not nonlinear consistency.",
+    "All parity cuts plus input inequalities can have a fractional feasible point on an UNSAT instance."
+  ],
+  "scope": "Explicit binary affine equations, rational points in the unit cube, violation threshold distance <1.",
+  "cost": "2^rho poly(L) generally; polynomial at half-integral or graphic inputs",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of structured separation and relaxation gap"
+    },
+    {
+      "key": "attempt_sufficient_discovery",
+      "label": "Universal sufficient inference and polynomial proof discovery"
+    },
+    {
+      "key": "attempt_unrestricted_transfer",
+      "label": "Unrestricted lower-bound transfer or universal selector proof"
+    }
+  ],
+  "independent_reference": "Independent JavaScript exhaustive source models, row combinations and graphic Eulerian subsets; not execution of submitted Python.",
+  "expected": {
+    "half": [
+      256,
+      6912,
+      5415,
+      1186,
+      311,
+      6601,
+      114021
+    ],
+    "grid": [
+      32000,
+      31377,
+      192307,
+      323625
+    ],
+    "graphic": [
+      64,
+      2187,
+      1268,
+      1584,
+      20736
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_structured_cut_oracles.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-STRUCTURED-CUT-ORACLES.md"
+  ],
+  "next": "Examine independent negative-route proof-search lower bounds and rigorous transfer requirements; avoid treating proof-system bounds as unrestricted SAT bounds.",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can useful exact parity-cut discovery avoid the general NP-hard oracle on structurally identifiable domains?",
+      "strategy": "Project augmented parity span onto fractional coordinates; polynomial half-integral separation.",
+      "alternative": "Exact two-sheet shortest-path separation for graphic cycle-space rows.",
+      "stop_rule": "Reject claims of universal coverage from restricted oracles; test full-cut relaxation gap.",
+      "literature_leads": [
+        "Prior MathOS parity-cut hardness and counting certificates; standard Gaussian elimination, cycle decomposition and shortest paths. No external novelty review."
+      ]
+    },
+    "construct": {
+      "claim": "Exact violated-cut separation has a fractional-image rank bound and is polynomial at half-integral points.",
+      "scope": "Explicit binary affine equations, rational points in the unit cube, violation threshold distance <1.",
+      "derivation": "Matching integral coordinates is necessary; projected augmented span retains provenance; at half-integral points test only zero/unit supports.",
+      "unresolved_steps": [
+        "Efficient discovery at unrestricted rational points and universal proof discovery."
+      ],
+      "candidate_tests": [
+        "Exhaustive half-integral and rational-grid cases; compare clipped distance and forced-bit semantics."
+      ]
+    },
+    "alternative": {
+      "claim": "Cycle-space rows with edge-label RHS admit polynomial exact violated-cut separation via a two-sheet graph.",
+      "scope": "Explicit undirected simple graph and fundamental-cycle basis, rational points.",
+      "derivation": "Lift parity labels to two sheets; odd Eulerian subset decomposes to a violating cycle; short odd walk cannot use an odd backtrack of weight D.",
+      "unresolved_steps": [
+        "General affine row spaces and sufficient universal hybrid inference."
+      ],
+      "candidate_tests": [
+        "All four-vertex graph/charge/point fixtures and checked cycle witnesses."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Graphic row-space promise is restrictive.",
+        "Half-integral discovery is not nonlinear consistency.",
+        "All parity cuts plus input inequalities can have a fractional feasible point on an UNSAT instance."
+      ],
+      "counterexample_candidates": [
+        "Mixed pigeonhole uniform fractional point 1/m."
+      ],
+      "equivalence_audit": "Both oracles preserve exact existence of violation below threshold; no claim about untruncated optimum outside it.",
+      "barrier_audit": "Relaxation gaps and restricted discovery hardness do not separate P and NP.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite bit encodings and exact integer distance numerators.",
+      "cost_ledger": {
+        "encoding": "Explicit source rows, graph basis, rational numerator and denominator",
+        "preprocessing": "Gaussian projection and provenance basis polynomial",
+        "inference": "Half-integral membership or nonnegative shortest paths and cycle decomposition",
+        "repetitions": "2^rho projected combinations for general rational points; polynomial membership or n shortest paths on special domains",
+        "arithmetic_bits": "Polynomial bit lengths",
+        "memory": "Polynomial special-domain memory; explicit image enumeration exponential in rho",
+        "reconstruction": "Lift row combination and forbidden pattern; replay actual inequality",
+        "overall": "2^rho poly(L) generally; polynomial at half-integral or graphic inputs"
+      },
+      "missing_bounds": [
+        "Universal sufficient hybrid inference",
+        "Universal polynomial proof size and discovery",
+        "Universal selector preservation and bit cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Fractional image equivalence and membership test",
+        "Odd-cycle threshold argument",
+        "Pigeonhole full-cut relaxation gap"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Compare exact discovery to exhaustive reference",
+        "Replay every returned cut and test invalid evidence",
+        "Verify full-cut fractional barriers"
+      ],
+      "formalization_plan": "Formalize projected span provenance and odd-walk decomposition; review exact threshold scope.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Avoid general NP-hard separation on two identifiable domains, while proving full-cut relaxation insufficiency.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "Universal sufficient proof discovery and size",
+        "Unrestricted positive and negative routes"
+      ],
+      "next_question": "Examine independent negative-route proof-search lower bounds and rigorous transfer requirements; avoid treating proof-system bounds as unrestricted SAT bounds.",
+      "human_review_requests": [
+        "Review projection equality, half-integral characterization, graphic threshold and relaxation gap."
+      ]
+    }
+  }
+}
