@@ -1,0 +1,22 @@
+name: Proctor F037 frozen model audit
+on:
+  push:
+    branches: ['research/pnp-f037-frozen-model-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_frozen_model | tee /tmp/frozen.txt
+          grep -Fx 'F037_FROZEN_MODEL_OK vertices=768 variables=2304 clauses=7680 girth=6 pairs=294528 models=6' /tmp/frozen.txt
