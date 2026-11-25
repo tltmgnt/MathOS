@@ -176,7 +176,7 @@ def compute(plan,c,select):
     for i in original:
         W=nodes[i][1]
         observed=tuple(z for z in sorted(bad[i]) if holds(
-            op((down[i],table(W,(z,))),(),n),0,n))
+            op((down[i],table(W,(z,))),()),0,n))
         pr.append(observed)
         qr.append(tuple(sorted(translation_predicate(W,original[i],observed))))
     pred=dict(zip(original,qr))
