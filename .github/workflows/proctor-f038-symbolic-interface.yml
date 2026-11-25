@@ -1,0 +1,36 @@
+name: Proctor F038 symbolic interface certification
+on:
+  push:
+    branches: ['research/pnp-f038-symbolic-interface-certification']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_factored_interface | tee /tmp/interface.txt
+          grep -Fx 'F038_FACTORED_INTERFACE_OK families=8192 total=592 non_total=7600 parameters=65536 witnesses=27344 message_checks=32768 max_messages=8' /tmp/interface.txt
+          grep -Fx 'F038_INTERFACE_SHATTER_OK families=276 tables=276 context_checks=2120' /tmp/interface.txt
+          python -m mathos.research.f038_symbolic_interface | tee /tmp/symbolic.txt
+          grep -Fx 'F038_SYMBOLIC_INTERFACE_OK families=8192 parameters=65536 row_checks=1835008 total=592 max_nodes=91' /tmp/symbolic.txt
+          grep -Fx 'F038_LOG_WIDTH_CERTIFICATION_OK formulas=4096 unsat=2736 sat=1360 parameters=32768 feasible=30464 address_checks=254608 max_bag=7 max_variables=55 max_clauses=74' /tmp/symbolic.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SYMBOLIC_INTERFACE_GATE_OK status=OPEN')
+          PY
