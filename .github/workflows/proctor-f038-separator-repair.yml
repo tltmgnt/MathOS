@@ -1,0 +1,39 @@
+name: Proctor F038 separator semantic repair
+on:
+  push:
+    branches: ['research/pnp-f038-separator-semantic-repair']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_separator_repair.py
+          python -m mathos.research.f038_semantic_repair | tee /tmp/semantic.txt
+          grep -Fx 'F038_SEMANTIC_REPAIR_OK formulas=4096 candidates=24576 bad_empty=18160 queries=163216 forbidden=32168 semantic_exists=20556 local_exists=9088 strict=11468 direction_checks=196608 semantic_directions=149184 local_directions=16936 repairs=4716' /tmp/semantic.txt
+          grep -Fx 'F038_SEMANTIC_2CNF_OK formulas=256 candidates=1024 bad_empty=672 queries=3936 forbidden=944 semantic_exists=792 local_exists=304 strict=488 direction_checks=4096 semantic_directions=2840 local_directions=400 repairs=160' /tmp/semantic.txt
+          grep -Fx 'F038_SEMANTIC_REPAIR_REDUCTIONS_OK sources=256 sat=255 unsat=1 projection_checks=8192 fixed_checks=256' /tmp/semantic.txt
+          python -m mathos.research.f038_separator_repair | tee /tmp/sep-repair.txt
+          grep -Fx 'F038_SEPARATOR_REPAIR_OK formulas=4096 inconsistent=2384 candidates=4736 bad_empty=3424 semantic_exists=4294 local_exists=4189 strict=105 nonvacuous_strict=35 up_checks=26320 down_checks=26320 projections=15528 direction_checks=11136 valid_directions=8587 repairs=1795 max_width=3' /tmp/sep-repair.txt
+          grep -Fx 'F038_SEPARATOR_REPAIR_FULL_OK formulas=256 inconsistent=1 candidates=896 bad_empty=0 semantic_exists=896 local_exists=896 strict=0 nonvacuous_strict=0 up_checks=6336 down_checks=6336 projections=3616 direction_checks=6944 valid_directions=3328 repairs=3328 max_width=3' /tmp/sep-repair.txt
+          grep -Fx 'F038_SEPARATOR_REPAIR_CYCLE_OK cycles=8 valid=4 impossible=4 max_global_rank=32 boundary_budget=4 corrupt_rejected=16' /tmp/sep-repair.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SEPARATOR_REPAIR_GATE_OK status=OPEN')
+          PY
