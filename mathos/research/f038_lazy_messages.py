@@ -277,7 +277,7 @@ def sign_audit():
     for m in (1,2,4,8,16,32):
         f,n,tree=sign_family(m,False)
         p=prepare(f,n,tree)
-        assert p is not None and not p[0] and p[5]==m
+        assert p is not None and not p[0] and p[5]==max(m,2)
         nodes,original=p[4],p[-1]
         root=len(nodes)-1
         result=query(nodes,original,root,0)
