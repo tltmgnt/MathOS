@@ -1,0 +1,169 @@
+{
+  "attempt_id": "F038-MRAX-MIXED-POLYMORPHISMS",
+  "base_commit": "de5b40c189ff6ca8357abb6eda4159574c5d5f6f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45720745106",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can large nonlinear interfaces be solved by compatible coordinate-wise tractability rather than global enumeration?",
+  "route": "certificate_route",
+  "topology": "Exact local-to-global gluing, semilattice synchronization and residual product decomposition.",
+  "adversarial": [
+    "Separate tractable blocks need not share a mixed type.",
+    "No typing is not UNSAT.",
+    "Large interface with no useful typing still needs a solver."
+  ],
+  "scope": "Boolean explicit tables, one supplied AND/OR/MAJ/XOR type per variable, checked closure.",
+  "cost": "Polynomial supplied typing; 2^O(h) poly(L)(1+4^a) including parameterized discovery",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of mixed operation theorem"
+    },
+    {
+      "key": "attempt_type_discovery",
+      "label": "Efficient general useful compatibility discovery"
+    },
+    {
+      "key": "attempt_universal_coverage",
+      "label": "Uniform coverage of arbitrary SAT inputs"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive Boolean point-set and typing checks, not Python execution.",
+  "expected": {
+    "tables": [
+      256,
+      16384,
+      4650,
+      4586,
+      15936,
+      8568,
+      12
+    ],
+    "mixed": [
+      1024,
+      912,
+      112,
+      262144,
+      31968,
+      960,
+      11952,
+      11952
+    ],
+    "source": [
+      2,
+      1,
+      1
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_mixed_polymorphisms.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-MIXED-POLYMORPHISMS.md"
+  ],
+  "next": "Certified compatibility discovery beyond full ambiguous-label enumeration and linkage to uniform selector costs.",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can large nonlinear interfaces be solved by compatible coordinate-wise tractability rather than global enumeration?",
+      "strategy": "Constructive mixed semilattice/majority/minority term decomposition.",
+      "alternative": "Exact local typing compatibility CSP and bounded ambiguity discovery with source block lifting.",
+      "stop_rule": "Reject malformed stages or unsupported universal bounds; UNKNOWN and NO_TYPING are not UNSAT.",
+      "literature_leads": [
+        "Bulatov and Jeavons, An Algebraic Approach to Multi-sorted Constraints, CP 2003, https://www.cs.ox.ac.uk/activities/constraints/publications/CP03multisorted.pdf",
+        "Earlier exact block projection and gluing."
+      ]
+    },
+    "construct": {
+      "claim": "Given a common coordinate typing, least semilattice pinning followed by majority/minority factorization decides explicit table CSP in polynomial time.",
+      "scope": "Boolean explicit tables, one supplied AND/OR/MAJ/XOR type per variable, checked closure.",
+      "derivation": "Use f(x,x,f(y,y,x)) to preserve non-H coordinates under least H pin; f(x,x,y) factors M/A; solve 2SAT and affine systems.",
+      "unresolved_steps": [
+        "Uniform discovery and existence of useful typing across arbitrary SAT inputs."
+      ],
+      "candidate_tests": [
+        "All 256 ternary tables and 64 typings, 1024 mixed conjunctions, replay and witnesses."
+      ]
+    },
+    "alternative": {
+      "claim": "Exact local type constraints and domain pruning give bounded-ambiguity discovery; merge equal boundary projections and lift source witnesses.",
+      "scope": "Bounded explicit blocks, parameter a ambiguous type variables after propagation.",
+      "derivation": "Enumerate local type tuples; remove unsupported labels; enumerate at most 4^a assignments and validate; check source gluing.",
+      "unresolved_steps": [
+        "General type discovery polynomial bound and structural coverage."
+      ],
+      "candidate_tests": [
+        "Exhaustive ternary recognition, cap UNKNOWN, mixed CNF projection and lifting."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Separate tractable blocks need not share a mixed type.",
+        "No typing is not UNSAT.",
+        "Large interface with no useful typing still needs a solver."
+      ],
+      "counterexample_candidates": [
+        "NAE triple and its two individually Horn/dual-Horn clauses."
+      ],
+      "equivalence_audit": "Least pin preserves globally attainable non-H assignments; residual factoring follows from a term identity; exact table conjunction and source lifting checked.",
+      "barrier_audit": "Restricted incompatibility is not a general SAT lower bound; known multi-sorted CSP context acknowledged.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite bit encodings; no physical Python metering.",
+      "cost_ledger": {
+        "encoding": "Explicit Boolean tables and dense variable indices",
+        "preprocessing": "2^O(h) poly(L) block projection and local type checks",
+        "inference": "Monotone least H, binary projection 2SAT, Gaussian elimination",
+        "repetitions": "At most n+1 H sweeps; 4^a type enumeration if needed",
+        "arithmetic_bits": "Polynomial in explicit table and variable lengths",
+        "memory": "Explicit tables and local type tuples, polynomial in 2^O(h) and L",
+        "reconstruction": "Original table checks and private-block witness gluing",
+        "overall": "Polynomial supplied typing; 2^O(h) poly(L)(1+4^a) including parameterized discovery"
+      },
+      "missing_bounds": [
+        "Universal structural coverage",
+        "General typing discovery complexity",
+        "Universal polynomial selector cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Term identities and least pin preservation",
+        "Majority binary projections and minority affine form",
+        "Exact local typing CSP and source witness gluing"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check all typed table outputs and model sets",
+        "Check type incompatibility and cap semantics",
+        "Reject altered certificates"
+      ],
+      "formalization_plan": "Formalize the term identities, least-model argument and majority projection induction before any acceptance.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Extend exact interface completion to a checked heterogeneous algebraic class; isolate typing compatibility as a new structural requirement.",
+      "remaining_gaps": [
+        "F037-F040",
+        "Selector totality, preservation and cost",
+        "Unrestricted negative route"
+      ],
+      "next_question": "Certified compatibility discovery beyond full ambiguous-label enumeration and linkage to uniform selector costs.",
+      "human_review_requests": [
+        "Review least-H preservation, M/A factorization and complexity quantifiers."
+      ]
+    }
+  }
+}
