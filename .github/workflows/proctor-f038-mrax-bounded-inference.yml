@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X bounded inference
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-bounded-inference']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_mrax_cycle.py mathos/research/f038_bounded_inference.py
+          python -m mathos.research.f038_affine_recovery | tee /tmp/prior.txt
+          grep -Fx 'F038_TECTX_RECOVERY_OK primary=4096,1206,32768,28658,1360,2124 full=256,28,2048,1936,255,956 binary=256,78,1024,881,95,120 guarded=256,6400,1407,4993,6075,14320,2064,676 families=3,278,96,1800,3 controls=5' /tmp/prior.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_bounded_inference | tee /tmp/mrax.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/mrax.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=ordinary_complete,short_proofs,discovery,machine_cost status=OPEN' /tmp/mrax.txt
+          grep -Fx 'F038_MRAX_BOUNDED_INFERENCE_OK {"binary":[256,417,1441,5764,896,3584,6400,1407,4993],"controls":8,"families":[[2,450,125,8,18],[3,2172,357,24,66],[4,6860,925,64,194]],"full":[256,865,1889,15112,224,1792,8960,5791,3169],"primary":[4096,27952,52528,420224,24108,192864,200704,34112,166592]}' /tmp/mrax.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/mrax.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/mrax.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_RESOLUTION_GATE_OK status=OPEN')
+          PY

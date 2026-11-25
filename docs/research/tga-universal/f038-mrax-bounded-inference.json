@@ -1,0 +1,199 @@
+{
+  "attempt_id": "F038-MRAX-BOUNDED-INFERENCE",
+  "base_commit": "962542a0ef94f8f61ced1b70577f119220f824df",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45719811421",
+  "targets": [
+    "ordinary_complete",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "Can useful hidden parity equations be recovered with polynomial certified local inference?",
+  "route": "certificate_route",
+  "topology": "Private-component gluing and exact incidence dual obstruction.",
+  "adversarial": [
+    "One retained support is not complete for arbitrary modes.",
+    "Fixed-width saturation misses implied units.",
+    "A consistent necessary affine system need not satisfy nonlinear constraints."
+  ],
+  "scope": "Fixed width, normalized explicit source, one retained proof per clause.",
+  "cost": "Polynomial restricted family; no general bound",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of bounded-resolution and gluing derivations"
+    },
+    {
+      "key": "attempt_interface_discovery",
+      "label": "Uniform efficient discovery of a useful interface and guards"
+    },
+    {
+      "key": "attempt_hybrid_bound",
+      "label": "Total polynomial hybrid proof and query cost"
+    }
+  ],
+  "independent_reference": "Independent JS closure and point-set implication checks, plus one-round family counts. Not execution of Python.",
+  "expected": {
+    "primary": [
+      4096,
+      27952,
+      52528,
+      420224,
+      24108,
+      192864,
+      200704,
+      34112,
+      166592
+    ],
+    "full": [
+      256,
+      865,
+      1889,
+      15112,
+      224,
+      1792,
+      8960,
+      5791,
+      3169
+    ],
+    "binary": [
+      256,
+      417,
+      1441,
+      5764,
+      896,
+      3584,
+      6400,
+      1407,
+      4993
+    ],
+    "families": [
+      [
+        2,
+        450,
+        125,
+        8,
+        18
+      ],
+      [
+        3,
+        2172,
+        357,
+        24,
+        66
+      ],
+      [
+        4,
+        6860,
+        925,
+        64,
+        194
+      ]
+    ],
+    "controls": 8
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_bounded_inference.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-BOUNDED-INFERENCE.md"
+  ],
+  "next": "Structural interface discovery and hybrid bounded-width proof search.",
+  "mrax": {
+    "planner": {
+      "target_id": "ordinary_complete",
+      "question": "Can useful hidden parity equations be recovered with polynomial certified local inference?",
+      "strategy": "One-round and fixed-point width-three resolution with guarded provenance.",
+      "alternative": "Exact private-block projection on a supplied interface.",
+      "stop_rule": "Stop before audit on malformed records, unsupported target, critic revise/reject, or verification not ready; never promote from tests.",
+      "literature_leads": [
+        "Prior MathOS Tseitin width and guarded recovery notes; no new external novelty review."
+      ]
+    },
+    "construct": {
+      "claim": "Width-three resolution recovers original clauses of the cyclic hiding gadget and supports guarded XOR extraction.",
+      "scope": "Fixed width, normalized explicit source, one retained proof per clause.",
+      "derivation": "Resolve A OR u with not u OR l, union source supports, extract complete parity classes.",
+      "unresolved_steps": [
+        "Uniform polynomial hybrid search and complete useful-guard discovery."
+      ],
+      "candidate_tests": [
+        "Exhaustive clause and equation implication tests; exact family counts; certificate replay."
+      ]
+    },
+    "alternative": {
+      "claim": "Supplied-interface bounded private components admit exact local projection and witness gluing.",
+      "scope": "Every private component plus its boundary has rank at most h; interface supplied.",
+      "derivation": "Enumerate each group, project, and assemble disjoint private witnesses under a common interface assignment.",
+      "unresolved_steps": [
+        "Efficient discovery of a suitable interface on arbitrary instances."
+      ],
+      "candidate_tests": [
+        "All cyclic gadget blocks, correct-root witness lifting, rank-cap rejection."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "One retained support is not complete for arbitrary modes.",
+        "Fixed-width saturation misses implied units.",
+        "A consistent necessary affine system need not satisfy nonlinear constraints."
+      ],
+      "counterexample_candidates": [
+        "Guarded odd Tseitin unit entailment with width lower bound."
+      ],
+      "equivalence_audit": "Bounded-width rule closure is not semantic implication completeness; local gluing uses disjoint private scopes.",
+      "barrier_audit": "Ordinary fixed-width lower bound does not cover combined XOR or unrestricted SAT.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite bit encodings; Python regression is not physical resource metering.",
+      "cost_ledger": {
+        "encoding": "Polynomial explicit CNF and guard fields",
+        "preprocessing": "O(w D(n,w)^2) candidate resolutions plus polynomial overhead",
+        "inference": "Checked proof DAG and affine elimination",
+        "repetitions": "Actual queries counted, no universal cap",
+        "arithmetic_bits": "Polynomial bit lengths",
+        "memory": "Polynomial for fixed width; exponential in block rank",
+        "reconstruction": "2^h poly(L) for supplied blocks or fallback",
+        "overall": "Polynomial restricted family; no general bound"
+      },
+      "missing_bounds": [
+        "Universal query exploration",
+        "Interface discovery",
+        "Uniform polynomial total certificate size"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Local resolution implication",
+        "Exact bounded-block projection and gluing",
+        "Conditional parity certificate checker"
+      ],
+      "unsupported_steps": [
+        "Independent expert review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check source support and earlier parent indices",
+        "Check every local signature and full witness"
+      ],
+      "formalization_plan": "Candidate statements require independent statement-faithful proof review; no Lean promotion.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Bypass the previous cyclic hiding family; prove restricted width barrier.",
+      "remaining_gaps": [
+        "F037-F040",
+        "Selector totality, preservation and bit cost",
+        "Universal negative lower bound"
+      ],
+      "next_question": "Structural interface discovery and hybrid bounded-width proof search.",
+      "human_review_requests": [
+        "Review guarded proof induction, literal substitution width transfer, and cost quantifiers."
+      ]
+    }
+  }
+}
