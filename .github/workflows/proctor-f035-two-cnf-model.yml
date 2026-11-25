@@ -1,0 +1,71 @@
+name: Proctor F035 two CNF model extraction
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'docs/research/tga-universal/PNP-F035-TWO-CNF-MODEL.md'
+      - '.github/workflows/proctor-f035-two-cnf-model.yml'
+  push:
+    branches: [main, 'research/pnp-f035-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f035-two-cnf-model
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f035-two-cnf-model
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorTwoCNFModelMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F035_TWO_CNF_MODEL_OK subsets=256 reversed=256 chains=20 sparse=2 emptyFormula=1' "$out/kernel.txt"
+          python -m mathos.research.tga_pnp_resolution_gap > "$out/gap-report.json"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f035-two-cnf-model")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          groups = {"ProctorTwoCNFModel":["r_iff","walk_index","walk_reaches","r_refl","r_edge","walk_append","r_trans","row_dual","arc_dual","walk_dual","r_dual","row_in_arcs","vertex_mem","rank_mono","rank_eq_bits","score_edge","score_distinct","model_lt","model_edge","model_satisfies","findConflict_none","findConflict_some","noConflict_of_none","conflict_routes","conflict_unsat","noConflict_iff_sat","discover_sound","discover_complete","discover_iff"]}
+          names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
+          assert len(names)==29
+          for name in names:
+              if f"'{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          gap = json.loads((out/"gap-report.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          report = dict(scope="TWO_CNF_MODEL",
+                        verified=names, axiom_gate=True, controls=535,
+                        ordinary_typed_completeness_verified=True,
+                        ordinary_executable_generator_completeness_verified=True,
+                        bound_envelope_completeness_verified=True,
+                        universal_decimal_encoder_verified=False,
+                        total_cost_semantics_verified=False,
+                        polynomial_certificate_completeness_verified=False,
+                        deterministic_polynomial_discovery_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256={ns:hashlib.sha256(Path("formal/"+ns+".lean").read_bytes()).hexdigest()
+                                       for ns in groups})
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f035-two-cnf-model-evidence
+          path: artifacts/f035-two-cnf-model/
