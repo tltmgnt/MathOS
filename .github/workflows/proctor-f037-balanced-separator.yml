@@ -1,0 +1,20 @@
+name: Proctor F037 balanced separator audit
+on:
+  push:
+    branches: ['research/pnp-f037-balanced-separator']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_balanced_separator | tee /tmp/separator.txt
+          grep -Fx 'F037_BALANCED_SEPARATOR_OK formulas=4096 ladders=6 max_variables=192 interface_conflict=1 rejection=1 ladder_unsat=1' /tmp/separator.txt
