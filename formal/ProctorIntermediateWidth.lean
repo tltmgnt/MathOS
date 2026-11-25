@@ -124,8 +124,8 @@ theorem index_lt (d i : Nat) (h : i ∈ indices d) : i<d := by
   | succ d ih =>
     change i ∈ d::indices d at h
     cases h with
-    | head => exact Nat.lt_succ_self d
-    | tail _ hm => exact Nat.lt_trans (ih hm) (Nat.lt_succ_self d)
+    | head => exact Nat.lt_succ_self _
+    | tail _ hm => exact Nat.lt_trans (ih hm) (Nat.lt_succ_self _)
 
 theorem index_fit (d : Nat) (h : d≤100000) :
     SupportFit (cap 17) (indices d) := by
