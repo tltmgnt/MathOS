@@ -172,11 +172,23 @@ theorem scan_projection (bytes : List Nat) (v c : List Bool) (acc : List Nat) :
     (scanGates bytes v c acc).1=scanCounted bytes v c acc :=
   core_projection zeroWord countZero checkedDigit nextCount digitGates countGates bytes v c acc
 
+-- Constructive length proof avoids the library length_replicate theorem
+-- (its transitive axiom dependencies are outside the strict gate).
+private theorem replicate_false_length (w : Nat) :
+    (List.replicate w false).length=w := by
+  induction w with
+  | zero => rfl
+  | succ w ih =>
+    change (List.replicate w false).length+1=w+1
+    exact congrArg Nat.succ ih
+
 private theorem reset_width : zeroWord.length≤512 := by
-  rw [zeroWord, List.length_replicate]
+  rw [zeroWord,replicate_false_length]
+  exact Nat.le_refl 512
 
 private theorem reset_count_width : countZero.length≤8 := by
-  rw [countZero, List.length_replicate]
+  rw [countZero,replicate_false_length]
+  exact Nat.le_refl 8
 
 theorem scan_gate_bound (bytes : List Nat) (v c : List Bool) (acc : List Nat)
     (hv : v.length≤512) (hc : c.length≤8) :
