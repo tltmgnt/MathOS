@@ -1,0 +1,40 @@
+name: Proctor F038 affine hull pruning
+on:
+  push:
+    branches: ['research/pnp-f038-affine-hull-pruning']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_hull_pruning.py
+          python -m mathos.research.f038_universal_message | tee /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_OK selections=4096 sat=1360 unsat=2736 witness_checks=32768 valid_witnesses=2304 extension_trials=524288 valid_extensions=11520 anchor_checks=49152' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_FULL_OK selections=256 sat=255 unsat=1 witness_checks=2048 valid_witnesses=1024 extension_trials=524288 valid_extensions=27648 anchor_checks=2048' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_2VAR_OK selections=256 sat=95 unsat=161 witness_checks=1024 valid_witnesses=128 extension_trials=1024 valid_extensions=128 anchor_checks=2048' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_TREE_OK sizes=1,2,3,4,5 presence_bits=2,8,26,64,130 actual_tables=2,8 table_rows=3,95' /tmp/universal.txt
+          python -m mathos.research.f038_hull_pruning | tee /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_OK formulas=4096 inconsistent=2384 queries=6398 sat=2622 unsat=3776 nodes=34130 exact_hulls=33619 relaxed=511 membership_checks=66390 strict=2637 empty=10538 root_empty=3748 root_false_positive=28 fiber_before=13452 fiber_after=3823' /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_FULL_OK formulas=256 inconsistent=1 queries=1148 sat=1148 unsat=0 nodes=7876 exact_hulls=4612 relaxed=3264 membership_checks=54172 strict=4936 empty=0 root_empty=0 root_false_positive=0 fiber_before=8848 fiber_after=2768' /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_FAMILIES_OK sign_cases=12 max_shared_rank=32 sign_root_trials_each=1 obstruction_sizes=1,2,3,4,5,6 obstruction_root_trials=2,4,8,16,32,64 corrupt_rejected=18' /tmp/hull.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HULL_PRUNING_GATE_OK status=OPEN')
+          PY
