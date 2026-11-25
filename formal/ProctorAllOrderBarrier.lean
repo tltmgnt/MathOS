@@ -240,6 +240,80 @@ theorem rich_lower (f : Formula) (m : Nat) (vs : List Nat) (u w : Nat)
     m≤f.length :=
   Nat.le_trans (h u hu w hw he true true) (count_length _ _)
 
+-- A prefix may be any sequence of distinct offered variables.
+-- Keep its unprocessed suffix as part of the invariant.
+def Distinct : List Nat → Prop
+  | [] => True
+  | v::vs => (∀ u∈vs,u≠v) ∧ Distinct vs
+
+def advance : List Nat → Formula → Formula
+  | [],f => f
+  | v::vs,f => advance vs (eliminate v f)
+
+def growth : Nat → Nat → Nat
+  | 0,m => m
+  | k+1,m => growth k (m+m*m)
+
+theorem rich_prefix (prefix suffix : List Nat) (f : Formula) (m : Nat)
+    (hd : Distinct (prefix++suffix)) (hr : Rich f m (prefix++suffix)) :
+    Rich (advance prefix f) (growth prefix.length m) suffix := by
+  induction prefix generalizing f m with
+  | nil => exact hr
+  | cons v vs ih =>
+    change (∀ u∈vs++suffix,u≠v) ∧ Distinct (vs++suffix) at hd
+    exact ih (eliminate v f) (m+m*m) hd.2 (rich_step f v (vs++suffix) m hr hd.1)
+
+theorem marked_prefix (prefix suffix : List Nat) (f : Formula)
+    (hd : Distinct (prefix++suffix)) (hm : Marked f (prefix++suffix)) :
+    Marked (advance prefix f) suffix := by
+  induction prefix generalizing f with
+  | nil => exact hm
+  | cons v vs ih =>
+    change (∀ u∈vs++suffix,u≠v) ∧ Distinct (vs++suffix) at hd
+    exact ih (eliminate v f) hd.2 (marked_step f v (vs++suffix) hm hd.1)
+
+theorem growth_exponential (k m : Nat) (hm : 1≤m) :
+    2^k*m≤growth k m := by
+  induction k generalizing m with
+  | zero =>
+    change 1*m≤m
+    rw [Nat.one_mul]
+  | succ k ih =>
+    have hmul : m≤m*m := by
+      have h := Nat.mul_le_mul_left m hm
+      rw [Nat.mul_one] at h
+      exact h
+    have hstep : m+m≤m+m*m := Nat.add_le_add_left hmul _
+    have hpos : 1≤m+m*m := Nat.le_trans hm (Nat.le_add_right _ _)
+    have h := ih (m+m*m) hpos
+    have h2 := Nat.mul_le_mul_left (2^k) hstep
+    have he : 2^(k+1)*m=2^k*(m+m) := by
+      rw [Nat.pow_succ,Nat.mul_succ,Nat.mul_one]
+      -- distribute without relying on propositional extensionality
+      have hadd : ∀ a b c : Nat,a*(b+c)=a*b+a*c := by
+        intro a b c
+        induction c with
+        | zero => rfl
+        | succ c ih =>
+          change a*(b+c+1)=a*b+a*(c+1)
+          rw [Nat.mul_succ,Nat.mul_succ,ih,Nat.add_assoc]
+      rw [Nat.mul_comm (2^k+2^k) m,hadd,hadd,Nat.mul_comm m (2^k)]
+    rw [he]
+    exact Nat.le_trans h2 h
+
+theorem all_order_prefix_bound (prefix suffix : List Nat) (f : Formula)
+    (hd : Distinct (prefix++suffix)) (hr : Rich f 1 (prefix++suffix))
+    (u w : Nat) (hu : u∈suffix) (hw : w∈suffix) (he : u≠w) :
+    2^prefix.length≤(advance prefix f).length := by
+  have h := growth_exponential prefix.length 1 (Nat.le_refl 1)
+  rw [Nat.mul_one] at h
+  exact Nat.le_trans h (rich_lower _ _ _ u w (rich_prefix prefix suffix f 1 hd hr) hu hw he)
+
+theorem all_order_prefix_unsupported (prefix suffix : List Nat) (f : Formula)
+    (hd : Distinct (prefix++suffix)) (hm : Marked f (prefix++suffix))
+    (u : Nat) (hu : u∈suffix) : supported (advance prefix f)=false :=
+  marked_blocks_leaf _ u (marked_prefix prefix suffix f hd hm u hu)
+
 end ProctorAllOrderBarrier
 
 #print axioms ProctorAllOrderBarrier.count_cons_ge
@@ -258,3 +332,9 @@ end ProctorAllOrderBarrier
 #print axioms ProctorAllOrderBarrier.marked_step
 #print axioms ProctorAllOrderBarrier.marked_blocks_leaf
 #print axioms ProctorAllOrderBarrier.rich_lower
+
+#print axioms ProctorAllOrderBarrier.rich_prefix
+#print axioms ProctorAllOrderBarrier.marked_prefix
+#print axioms ProctorAllOrderBarrier.growth_exponential
+#print axioms ProctorAllOrderBarrier.all_order_prefix_bound
+#print axioms ProctorAllOrderBarrier.all_order_prefix_unsupported
