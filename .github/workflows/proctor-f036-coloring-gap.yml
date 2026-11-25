@@ -1,0 +1,20 @@
+name: Proctor F036 coloring gap audit
+on:
+  push:
+    branches: ['research/pnp-f036-coloring-gap']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python mathos/research/f036_coloring_gap.py | tee /tmp/coloring-gap.txt
+          grep -Fx 'F036_COLORING_GAP_OK families=8 max_variables=117 max_clauses=384' /tmp/coloring-gap.txt
