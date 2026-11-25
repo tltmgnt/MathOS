@@ -21,7 +21,7 @@ def rh():
         ell = [prod((z-y)/F(x-y) for y in xs if y != x) for x in xs]
         require(all(sum(l*x**k for l,x in zip(ell,xs)) == z**k for k in range(m)), "interpolation")
         norm = sum(l*l for l in ell)
-        threshold = 1/norm
+        threshold = F(1)/norm
         # Choose polynomial values ell: sharpness of Cauchy-Schwarz.
         forms = [norm-w*norm**2 for w in (threshold/2, threshold, 2*threshold)]
         require(forms[0]>0 and forms[1]==0 and forms[2]<0, "sharp threshold")
