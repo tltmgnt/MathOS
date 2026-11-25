@@ -19,7 +19,7 @@ import tracemalloc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from mathos.proof_analysis.gap_analysis import Claim, analyze
+from mathos.proof_analysis.gap_analysis import Claim, analyze_legacy as analyze
 from mathos.proof_analysis.certification_audit import exhaustive_check
 
 
