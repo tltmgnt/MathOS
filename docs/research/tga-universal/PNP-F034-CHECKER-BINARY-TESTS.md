@@ -24,3 +24,7 @@ Marker F034_CHECKER_BINARY_TESTS_OK pairs=961 adapters=1641 wide=16. Strict Lean
 and zero-axiom gates unchanged. No local Lean execution.
 Require exact replay before PR. Independent review and resolution
 remain open.
+
+## Initial replay repair
+
+Exact head 6956c97c54157bf30879e25d5474dcfd3bdad3b8 failed [45555814873 / job 139007462688](https://github.com/tltmgnt/MathOS/actions/runs/45555814873/job/139007462688), artifact 14994979054. Lean parsed the unparenthesized Boolean negation in the private not_less_test statement as negation of a decidable equality, rather than equality of the negated Boolean. Parenthesize the complete negated Boolean on the left side. Two direct value proofs and two dependent adapter projections failed elaboration; six independent declarations printed no axioms. The executable marker was not reached. No public theorem statements, executable definitions, fixtures or gate requirements changed. Require fresh successful exact-head replay before PR.

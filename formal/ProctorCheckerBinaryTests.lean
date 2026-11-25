@@ -21,7 +21,7 @@ private theorem compare_test (a b : List Bool) :
     | true => exact False.elim (h ((compare_value a b).1 e))
 
 private theorem not_less_test (a b : Nat) :
-    !(test (a<b))=test (b≤a) := by
+    (!(test (a<b)))=test (b≤a) := by
   unfold test
   by_cases h : a<b
   · rw [if_pos h,if_neg (Nat.not_le_of_gt h)]
