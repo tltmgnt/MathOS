@@ -1,0 +1,40 @@
+name: Proctor F038 affine direct sum
+on:
+  push:
+    branches: ['research/pnp-f038-affine-direct-sum']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_affine_direct_sum.py
+          python -m mathos.research.f038_hybrid_affine | tee /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_AFFINE_OK formulas=4096 sat=1360 unsat=2736 nodes=4402 learned=2752 conflicts=2752 rows=12544 residual=11264 max_nodes=3 extraction_checks=32768' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_FULL_WIDTH_OK formulas=256 sat=255 unsat=1 nodes=832 learned=97 conflicts=82 rows=32 residual=896 max_nodes=7 extraction_checks=2048' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_RANK_ONE_OK sizes=3,8,16,32 nodes_each=3 learned_each=1' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_TSEITIN_ESCAPE_OK dimensions=2,3,4,5 branch_checks=8 nodes_each=1 wrong_learned_each=1 corrupt_rejected=4' /tmp/hybrid.txt
+          python -m mathos.research.f038_affine_direct_sum | tee /tmp/direct.txt
+          grep -Fx 'F038_AFFINE_DIRECT_SUM_OK formulas=4096 sat=1360 unsat=2736 inconsistent=2384 blocks=1136 constants=1680 probes=3312 failed=1344 witnesses=1360 max_rank=3 max_block=3 rank_sum=1599 projection_checks=3890 certificates=2736' /tmp/direct.txt
+          grep -Fx 'F038_AFFINE_DIRECT_SUM_FULL_OK formulas=256 sat=255 unsat=1 inconsistent=1 blocks=252 constants=0 probes=1904 failed=896 witnesses=255 max_rank=3 max_block=3 rank_sum=728 projection_checks=1907 certificates=1' /tmp/direct.txt
+          grep -Fx 'F038_AFFINE_DIRECT_SUM_CONNECTED_OK sizes=2,4,8,16,32 instances=10 max_global_rank=32 max_block_rank=1 corrupt_rejected=10' /tmp/direct.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_AFFINE_DIRECT_SUM_GATE_OK status=OPEN')
+          PY
