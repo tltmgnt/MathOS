@@ -67,7 +67,6 @@ def bucket (s : Side) (t : Buckets) : Formula :=
 theorem split_cons (s : Side) (v : Nat) (c : Clause) (f : Formula) :
     bucket s (split v (c::f))=bucket s (split v [c])++bucket s (split v f) := by
   rw [split,split]
-  dsimp only
   cases h0 : reduceRow v false c <;> cases h1 : reduceRow v true c <;> cases s <;> rfl
 
 theorem split_count (s : Side) (v : Nat) (c r : Clause) (f : Formula)
