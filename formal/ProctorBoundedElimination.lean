@@ -45,7 +45,9 @@ theorem occurrences_append (f g : Formula) :
 theorem row_product_occurrences (c : Clause) (g : Formula) :
     occurrences (rowProduct c g)=g.length*c.length+occurrences g := by
   induction g with
-  | nil => rw [Nat.zero_mul]; rfl
+  | nil =>
+    change 0=0*c.length+0
+    rw [Nat.zero_mul]
   | cons d ds ih =>
     change (c++d).length+occurrences (rowProduct c ds)=
       (ds.length+1)*c.length+(d.length+occurrences ds)
