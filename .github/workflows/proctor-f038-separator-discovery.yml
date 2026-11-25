@@ -1,0 +1,39 @@
+name: Proctor F038 separator discovery
+on:
+  push:
+    branches: ['research/pnp-f038-separator-discovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_separator_discovery.py
+          python -m mathos.research.f038_affine_separator | tee /tmp/separator.txt
+          grep -Fx 'F038_AFFINE_SEPARATOR_OK formulas=4096 sat=1360 unsat=2736 inconsistent=2384 nodes=7860 leaves=4786 joins=3074 entries=11948 leaf_trials=10226 join_trials=12666 compatible=4308 max_boundary=3 max_leaf=3 projection_checks=18496 empty_roots=352' /tmp/separator.txt
+          grep -Fx 'F038_AFFINE_SEPARATOR_FULL_OK formulas=256 sat=255 unsat=1 inconsistent=1 nodes=1543 leaves=899 joins=644 entries=8559 leaf_trials=6947 join_trials=27280 compatible=3264 max_boundary=3 max_leaf=3 projection_checks=12000 empty_roots=0' /tmp/separator.txt
+          grep -Fx 'F038_AFFINE_SEPARATOR_CYCLE_OK sizes=3,4,7,8,15,16,31,32 widths=3,2,4,2,4,2,4,2 sat=4 unsat=4 max_global_rank=32 corrupt_rejected=8' /tmp/separator.txt
+          python -m mathos.research.f038_separator_discovery | tee /tmp/discovery.txt
+          grep -Fx 'F038_SEPARATOR_OPTIMUM_OK cases=219 states=3489 split_trials=7154 trees=7135 rank_checks=3489 balanced_worse=51 width_hist=26,42,146,5 corrupt_rejected=219' /tmp/discovery.txt
+          grep -Fx 'F038_SEPARATOR_ALL_TREE_BARRIER_OK sizes=3,4,5 widths=2,3,4 bounds=2,3,4 states=8,64,1024 split_trials=6,301,28501' /tmp/discovery.txt
+          grep -Fx 'F038_SEPARATOR_CYCLE_DISCOVERY_OK sizes=3,4,7,8,15,16,31,32 bad_widths=3,4,7,8,15,16,31,32 optimal_width_each=2 max_rank=32' /tmp/discovery.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SEPARATOR_DISCOVERY_GATE_OK status=OPEN')
+          PY
