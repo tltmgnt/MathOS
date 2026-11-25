@@ -41,9 +41,9 @@ jobs:
           import hashlib, json
           out = Path("artifacts/f035-end-to-end-bytes")
           lines = set((out / "kernel.txt").read_text().splitlines())
-          groups = {"ProctorEndToEndBytes":["witness_bytes","check_encoded","produce_encoded","produce_bytes_sound","produce_bytes_total","encoded_total","encoded_sat","encoded_unsat","encoded_sound","malformed_rejected","byte_tags_exclusive"]}
+          groups = {"ProctorDecimalEncoder":["digit_range","digit_value","scan_digit","quotient_positive","digits_scan","word_scan","encode_scan","tokenize_encode","expected_bytes","envelope_bytes","proof_bytes_accept"],"ProctorEndToEndBytes":["witness_bytes","check_encoded","produce_encoded","produce_bytes_sound","produce_bytes_total","encoded_total","encoded_sat","encoded_unsat","encoded_sound","malformed_rejected","byte_tags_exclusive"]}
           names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
-          assert len(names)==11
+          assert len(names)==22
           for name in names:
               if f"'{name}' does not depend on any axioms" not in lines:
                   raise SystemExit(f"strict axiom check failed: {name}")
@@ -55,7 +55,7 @@ jobs:
                         ordinary_typed_completeness_verified=True,
                         ordinary_executable_generator_completeness_verified=True,
                         bound_envelope_completeness_verified=True,
-                        universal_decimal_encoder_verified=False,
+                        universal_decimal_encoder_verified=True,
                         total_cost_semantics_verified=False,
                         polynomial_certificate_completeness_verified=False,
                         deterministic_polynomial_discovery_verified=False,
