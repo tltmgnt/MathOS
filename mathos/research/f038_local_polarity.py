@@ -23,7 +23,12 @@ def occurrences(f):
 
 def partition(f,u,e):
     """Declared universal/existential masks; retain isolated existential bits."""
-    parent={v:v for v in vals(e) if v and not v&(v-1)}
+    parent={}
+    remaining=e
+    while remaining:
+        v=remaining&-remaining
+        remaining^=v
+        parent[v]=v
 
     def root(v):
         while parent[v]!=v:
