@@ -1,0 +1,41 @@
+name: Proctor F038 hybrid affine adaptive
+on:
+  push:
+    branches: ['research/pnp-f038-hybrid-affine-adaptive']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_hybrid_affine.py
+          python -m mathos.research.f038_adaptive_rup | tee /tmp/rup.txt
+          grep -Fx 'F038_ADAPTIVE_RUP_OK formulas=4096 sat=1360 unsat=2736 nodes=4415 branches=303 conflicts=2752 learned=2752 sat_learned=16 unsat_learned=2736 max_nodes=3' /tmp/rup.txt
+          grep -Fx 'F038_ADAPTIVE_FULL_WIDTH_OK formulas=256 sat=255 unsat=1 nodes=850 branches=510 conflicts=85 learned=103 max_nodes=7' /tmp/rup.txt
+          grep -Fx 'F038_ADAPTIVE_PREFIX_ESCAPE_OK families=6 nodes=6,7,8,9,10,11 learned_each=3' /tmp/rup.txt
+          grep -Fx 'F038_RUP_TRACE_COMPILER_OK patterns=4096 valid=216 refutations=4 valid_nonempty=212 invalid_normalized=2800' /tmp/rup.txt
+          python -m mathos.research.f038_hybrid_affine | tee /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_AFFINE_OK formulas=4096 sat=1360 unsat=2736 nodes=4402 learned=2752 conflicts=2752 rows=12544 residual=11264 max_nodes=3 extraction_checks=32768' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_FULL_WIDTH_OK formulas=256 sat=255 unsat=1 nodes=832 learned=97 conflicts=82 rows=32 residual=896 max_nodes=7 extraction_checks=2048' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_RANK_ONE_OK sizes=3,8,16,32 nodes_each=3 learned_each=1' /tmp/hybrid.txt
+          grep -Fx 'F038_HYBRID_TSEITIN_ESCAPE_OK dimensions=2,3,4,5 branch_checks=8 nodes_each=1 wrong_learned_each=1 corrupt_rejected=4' /tmp/hybrid.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HYBRID_AFFINE_GATE_OK status=OPEN')
+          PY
