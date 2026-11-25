@@ -25,6 +25,7 @@ theorem literal_value (w : Nat) (a b : Literal)
     (ha : a.1<cap w) (hb : b.1<cap w) :
     (literalMeter w a b).1=test (a=b) := by
   unfold literalMeter
+  dsimp only
   rw [checked_eq_value w a.1 b.1 ha hb]
   cases a with
   | mk x p =>
@@ -34,7 +35,14 @@ theorem literal_value (w : Nat) (a b : Literal)
       unfold test
       by_cases h : x=y
       · cases h
-        cases p <;> cases q <;> rfl
+        rw [if_pos rfl]
+        cases p <;> cases q
+        · rw [if_pos rfl] <;> rfl
+        · have ne : (x,false)≠(x,true) := fun e => Bool.noConfusion (congrArg Prod.snd e)
+          rw [if_neg ne] <;> rfl
+        · have ne : (x,true)≠(x,false) := fun e => Bool.noConfusion (congrArg Prod.snd e)
+          rw [if_neg ne] <;> rfl
+        · rw [if_pos rfl] <;> rfl
       · have ne : (x,p)≠(y,q) := fun e => h (congrArg Prod.fst e)
         rw [if_neg h,if_neg ne]
         rfl
@@ -42,6 +50,7 @@ theorem literal_value (w : Nat) (a b : Literal)
 theorem literal_bound (w : Nat) (a b : Literal) :
     (literalMeter w a b).2≤literalBudget w := by
   unfold literalMeter
+  dsimp only
   cases e : (checkedEq w a.1 b.1).1 with
   | none => exact Nat.le_trans (checked_eq_bound w a.1 b.1) (Nat.le_add_right _ _)
   | some bval => exact Nat.add_le_add (checked_eq_bound w a.1 b.1) (Nat.le_refl 3)
@@ -65,7 +74,7 @@ theorem contains_value (w : Nat) (l : Literal) (c : Clause)
     rw [literal_value w l a hl (hc a (List.Mem.head _))]
     unfold test
     by_cases e : l=a
-    · rw [if_pos e] <;> rfl
+    · rw [if_pos e,if_pos e] <;> rfl
     · rw [if_neg e,if_neg e]
       exact ih (fun b h => hc b (List.Mem.tail _ h))
 
@@ -144,6 +153,7 @@ theorem ref_value (w : Nat) (f : Formula) (r : RefRow)
     (hi : r.index<cap w) (hf : ∀ c ∈ f, Fits w c) (hr : Fits w r.row) :
     (refMeter w f r).1=refCheck f r := by
   unfold refMeter refCheck
+  dsimp only
   rw [checked_formula_projection w f r.index hi]
   cases e : lookup f r.index with
   | none => rfl
@@ -152,6 +162,7 @@ theorem ref_value (w : Nat) (f : Formula) (r : RefRow)
 theorem ref_visits (w : Nat) (f : Formula) (r : RefRow) :
     (refMeter w f r).2.1≤(w+1)*f.length := by
   unfold refMeter
+  dsimp only
   cases (checkedLookup w f r.index).1 <;> exact checked_bound w f r.index
 
 theorem ref_gates (w : Nat) (f : Formula) (r : RefRow) :
@@ -160,6 +171,7 @@ theorem ref_gates (w : Nat) (f : Formula) (r : RefRow) :
       | none => 0
       | some c => c.length) := by
   unfold refMeter
+  dsimp only
   cases (checkedLookup w f r.index).1 with
   | none => exact Nat.le_refl 0
   | some row => exact row_bound w row r.row

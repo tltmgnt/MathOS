@@ -22,3 +22,7 @@ Nine candidate declarations, 1337 executable control groups
 Marker F034_BINARY_REFERENCES_OK literals=256 rows=289 membership=272 refs=510 wide=4 extra=6. Strict Lean 4.14.0 warnings-as-errors and
 zero-axiom gates unchanged. No local Lean execution. Exact
 preflight required before PR. Independent review remains open.
+
+## Initial replay repair
+
+Exact head 56e7e888b37ca864905efd0198f3dc13d8798c17 failed [45593446578 / job 139133276984](https://github.com/tltmgnt/MathOS/actions/runs/45593446578/job/139133276984), artifact 15011868525. All nine declarations were contaminated by failed elaboration (sorryAx reported by Lean); executable marker not reached. The literal and reference proofs did not expose the let-bound match before rewriting or case analysis; use dsimp only as in existing verified ProctorChainMeter. Membership positive branch needs both propositional if rewrites; literal equality uses explicit constructive sign cases rather than relying on reduction of unknown Nat reflexive equality. No public statements, executable definitions, fixtures or verification gates changed. Require fresh successful exact-head replay before PR.
