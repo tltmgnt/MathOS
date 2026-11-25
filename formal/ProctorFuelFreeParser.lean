@@ -51,7 +51,13 @@ theorem double_refines {σ : Type} (step : σ → Option σ) (n : Nat) (s : σ) 
     cases e : step s with
     | none => rfl
     | some t =>
-      cases et : step t with
+      change (match step t with
+        | none => none
+        | some u => iterNat (doubleStep step) n u)=
+        (match step t with
+        | none => none
+        | some u => iterNat step (2*n) u)
+      cases step t with
       | none => rfl
       | some u => exact ih u
 
@@ -97,12 +103,7 @@ private theorem nat_parser {α : Type} (p : Parser α) (n : Nat)
   induction n generalizing ts acc with
   | zero => rfl
   | succ n ih =>
-    change finish (match advance p (acc,ts) with
-      | none => none
-      | some s => iterNat (advance p) n s)=
-      (do
-        let (a,rest) ← p ts
-        manyAux p n rest (a::acc))
+    rw [iterNat, manyAux]
     unfold advance
     change finish (match (match p ts with
       | none => none
