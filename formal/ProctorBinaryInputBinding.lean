@@ -203,7 +203,7 @@ def binaryCheck (n : Nat) (f : Formula) (e : Envelope) : Bool :=
   (bindingMeter 512 n f e).1 && (validProof n e.proof && check f e.proof)
 
 private theorem bool_assoc (a b c d : Bool) :
-    (a && (b && c)) && d = a && (b && (c && d)) := by
+    ((a && (b && c)) && d) = (a && (b && (c && d))) := by
   cases a <;> cases b <;> cases c <;> cases d <;> rfl
 
 theorem binary_check_value (n : Nat) (f : Formula) (e : Envelope)
