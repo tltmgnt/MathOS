@@ -1,0 +1,166 @@
+{
+  "attempt_id": "F038-MRAX-PARITY-CUT-DISCOVERY",
+  "base_commit": "deb82caf745797a26c09165ef25695ce54ccf01f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45723759340",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "short_proofs",
+    "machine_cost"
+  ],
+  "hypothesis": "Can a precisely defined Gaussian/counting proof system separate finite completeness from efficient certificate discovery?",
+  "route": "certificate_route",
+  "topology": "Affine incidence coset support obstruction; proof-obligation distinction between completeness, size and discovery.",
+  "adversarial": [
+    "Refutation completeness is not polynomial boundedness.",
+    "Exact separation hardness does not cover approximate or selective cut discovery.",
+    "Uniform-point reduction does not require initial-cut feasibility."
+  ],
+  "scope": "Explicit Boolean variables, parity rows and normalized clauses, exact integer sum/division, no extension variables.",
+  "cost": "Polynomial replay; rank-parameterized cut discovery; unrestricted exact separation NP-complete",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of hybrid calculus and separation reduction"
+    },
+    {
+      "key": "attempt_sufficient_discovery",
+      "label": "Efficient sufficient incomplete cut discovery with universal proof bounds"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Universal total selector preservation and bit cost"
+    }
+  ],
+  "independent_reference": "Independent JavaScript exhaustive mixed models, redundant cuts and X3C subfamilies; not Python execution.",
+  "expected": {
+    "mixed": [
+      1024,
+      8192,
+      550,
+      474,
+      800
+    ],
+    "separation": [
+      256,
+      32000,
+      31377,
+      527875,
+      2589
+    ],
+    "x3c": [
+      256,
+      183,
+      175,
+      175,
+      6561
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_parity_cut_discovery.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-PARITY-CUT-DISCOVERY.md"
+  ],
+  "next": "Investigate sufficient incomplete separation policies and proof-strength comparisons, or redirect to independent negative route.",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can a precisely defined Gaussian/counting proof system separate finite completeness from efficient certificate discovery?",
+      "strategy": "Define and check a hybrid calculus that simulates resolution.",
+      "alternative": "Analyze exact redundant parity-cut separation, rank algorithm and uniform-point hardness.",
+      "stop_rule": "Do not charge exact cut separation as polynomial or infer unrestricted separation from oracle hardness.",
+      "literature_leads": [
+        "Puchert and Tillmann, arXiv:2004.03387 (known general redundant parity-check separation hardness).",
+        "Garey and Johnson, Computers and Intractability (1979), X3C SP2."
+      ]
+    },
+    "construct": {
+      "claim": "The specified fixed-variable Gaussian-to-counting calculus is sound and refutation complete with polynomial-time proof checking.",
+      "scope": "Explicit Boolean variables, parity rows and normalized clauses, exact integer sum/division, no extension variables.",
+      "derivation": "Parity cuts exclude forbidden patterns; expand source rows to clauses; simulate each non-tautological resolution step using Boolean bounds and rounding.",
+      "unresolved_steps": [
+        "Polynomial proof size and uniform discovery on arbitrary inputs."
+      ],
+      "candidate_tests": [
+        "All mixed three-variable fixtures, actual proof replay and malformed certificates."
+      ]
+    },
+    "alternative": {
+      "claim": "Exact redundant affine parity-cut separation is rank-parameterized and NP-complete even on consistent systems at uniform rational points.",
+      "scope": "XOR combinations of supplied parity rows, arbitrary forbidden pattern; point need not satisfy initial cuts.",
+      "derivation": "Optimize forbidden pattern by nearest bits plus minimum parity-changing flip; reduce X3C to odd RHS affine coset sparse row search.",
+      "unresolved_steps": [
+        "Sufficient incomplete cut policies with universal polynomial bounds."
+      ],
+      "candidate_tests": [
+        "Rational grid exhaustive cuts and 256 X3C subfamilies."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Refutation completeness is not polynomial boundedness.",
+        "Exact separation hardness does not cover approximate or selective cut discovery.",
+        "Uniform-point reduction does not require initial-cut feasibility."
+      ],
+      "counterexample_candidates": [
+        "Consistent incidence systems without exact cover; even-row cuts cannot violate at the selected point."
+      ],
+      "equivalence_audit": "Exact forbidden-pattern cuts and resolution simulation; X3C reduction both directions.",
+      "barrier_audit": "Known general RPC hardness acknowledged; no proof of P!=NP.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit bit encodings, exact integer arithmetic, no physical runtime meter.",
+      "cost_ledger": {
+        "encoding": "Explicit parity masks, clauses, rational point and proof indices",
+        "preprocessing": "Polynomial Gaussian basis with source provenance",
+        "inference": "Integer sum/division and checked forbidden-pattern cuts",
+        "repetitions": "2^r basis combinations; full resolution closure can be exponential",
+        "arithmetic_bits": "Polynomial verification bit complexity in encoded proof size",
+        "memory": "Polynomial in supplied proof; exponential search possible",
+        "reconstruction": "Subset/pattern certificate and checked original witness",
+        "overall": "Polynomial replay; rank-parameterized cut discovery; unrestricted exact separation NP-complete"
+      },
+      "missing_bounds": [
+        "Universal polynomial proof size",
+        "Uniform efficient sufficient cut discovery",
+        "Universal selector preservation and bit cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Hybrid soundness and resolution simulation",
+        "Nearest forbidden-pattern optimization",
+        "Uniform-point X3C reduction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Actual proof producer/replay and SAT witness tests",
+        "Compare exact cut decisions and minimum distances to brute force",
+        "Check reduction and corrupted certificates"
+      ],
+      "formalization_plan": "Formalize parity-cut soundness, rounding and resolution simulation, then independently review reduction.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Separate general finite hybrid completeness and polynomial replay from NP-complete exact cut discovery.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "Universal polynomial proof discovery and size",
+        "Unrestricted positive and negative resolution routes"
+      ],
+      "next_question": "Investigate sufficient incomplete separation policies and proof-strength comparisons, or redirect to independent negative route.",
+      "human_review_requests": [
+        "Review calculus completeness, bit-cost bound and uniform-point hardness scope."
+      ]
+    }
+  }
+}

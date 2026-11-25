@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X parity cut discovery
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-parity-cut-discovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_parity_cut_discovery.py
+          python -m mathos.research.f038_local_width_counting | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_LOCAL_WIDTH_OK {"controls":4,"counting":[[2,14,13,8],[3,35,34,24],[4,70,69,56],[5,122,121,120],[6,194,193,248]],"local":[[2,3,7,13,15,49,73,2],[3,4,15,73,112,225,655,6],[4,5,31,501,925,961,6621,24],[5,6,63,4051,8556,3969,74977,120],[6,7,127,37633,88249,16129,942229,720]],"source":[7,4764,5,2,19]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_parity_cut_discovery | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=discovery,ordinary_complete,short_proofs,machine_cost status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_MRAX_PARITY_CUT_OK {"controls":5,"mixed":[1024,8192,550,474,800],"separation":[256,32000,31377,527875,2589],"x3c":[256,183,175,175,6561]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_PARITY_CUT_GATE_OK status=OPEN')
+          PY
