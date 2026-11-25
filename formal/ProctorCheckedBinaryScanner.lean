@@ -368,13 +368,16 @@ def scanBits : List Nat → List Bool → Nat → List Nat → Option (List Nat)
         | some out => scanBits bs out (digits+1) acc
     else none
 
+-- Use the cons equations once rather than unfolding recursive definitions.
+-- The local budget is for elaboration only, not an arithmetic or CI gate.
+set_option maxHeartbeats 1000000 in
 theorem scan_refines (bytes : List Nat) (v : List Bool) (k : Nat)
     (acc : List Nat) (hv : bitsValue v+1≤radix k) :
     scanBits bytes v k acc=ProctorDataParser.scan bytes (bitsValue v) k acc := by
   induction bytes generalizing v k acc with
   | nil => rfl
   | cons b bs ih =>
-    unfold scanBits ProctorDataParser.scan
+    rw [scanBits, ProctorDataParser.scan]
     by_cases lf : b=10
     · rw [if_pos lf] <;> try rw [if_pos lf]
       by_cases z : k=0
@@ -399,9 +402,10 @@ theorem scan_refines (bytes : List Nat) (v : List Bool) (k : Nat)
           have hk : k<digitLimit := Nat.lt_of_not_ge (fun h => g (Or.inl h))
           obtain ⟨out,eo,_,ev,hi⟩ := checked_digit_refines v k b hv hk digit.right
           rw [eo]
-          have e := ih out (k+1) acc hi
-          rw [ev] at e
-          exact e
+          change scanBits bs out (k+1) acc=
+            ProctorDataParser.scan bs (10*bitsValue v+(b-48)) (k+1) acc
+          exact (ih out (k+1) acc hi).trans
+            (congrArg (fun n => ProctorDataParser.scan bs n (k+1) acc) ev)
       · rw [if_neg digit] <;> try rw [if_neg digit]
 
 def tokenizeBits (bytes : List Nat) : Option (List Nat) :=

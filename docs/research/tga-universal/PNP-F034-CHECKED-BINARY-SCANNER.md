@@ -52,3 +52,24 @@ value-preservation and representability theorem statements, all controls
 and all strict gates remain unchanged. An independent Python model of
 the corrected algorithm passed 9225 controls (4608/4599/5/13); this is
 not Lean execution or a kernel proof. Corrected exact SHA needs replay.
+
+## Second preflight failure and targeted correction
+
+Exact candidate 81335713fe40309751a4ceaa13f17754964c1753 failed mandatory preflight
+45526431200, job 138910839982, artifact 14981939456 (exit 1).
+https://github.com/tltmgnt/MathOS/actions/runs/45526431200/job/138910839982
+Twelve of fourteen named declarations printed zero axioms, including
+all encoding/narrowing theorems and checked_digit_refines. The only
+reported elaboration error was a deterministic whnf timeout at
+combined.lean:8865:11 (200000 heartbeats), in scan_refines; that
+and tokenize_refines reported sorryAx as a consequence. No explicit
+sorry is present. The execution marker was not reached.
+The repair rewrites the scanner equations instead of unfolding,
+reduces the successful match explicitly, and transports the induction
+hypothesis with congrArg. A declaration-local elaboration heartbeat
+budget of 1000000 is used only for scan_refines. No global setting,
+theorem statement, implementation, fixtures, Lean version, warning
+or axiom gate changes. Corrected exact SHA must pass preflight.
+A fresh independent Python reference model executed all 9225 controls
+(4608/4599/5/13) successfully in the current review; this is not Lean
+execution or a kernel proof.
