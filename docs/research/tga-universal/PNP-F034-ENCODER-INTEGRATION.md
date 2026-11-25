@@ -41,3 +41,19 @@ Replace the simplifier in list_account with explicit equality rewrites
 of the four guard occurrences and the encoder projection. No theorem
 statements, executable code, controls, or gate requirements changed.
 A fresh exact-head replay is mandatory before opening a PR.
+
+## Second replay repair
+
+Exact head 819bf3b4b7677934aab9d81f158c04ade880d481 failed
+[45551505090 / job 138993509184](https://github.com/tltmgnt/MathOS/actions/runs/45551505090/job/138993509184), artifact 14994176889.
+The explicit rewrite sequence successfully removed all guards after
+three rewrites in each branch: the two identical ordinary-list guard
+occurrences are rewritten together. The fourth rewrite failed because
+no matching guard remained. Remove that redundant rewrite from both
+branches; retain encoder projection and case analysis. Six independent
+named declarations printed no axioms; the three dependent declarations
+reported sorryAx due to elaboration failure. Executable marker was not
+reached. No theorem, definition, fixture or verification gate changes.
+Independent nested amortization PR #215 passed exact replay
+45551676519/job 138994059868/artifact 14994637360 (11 zero-axiom proofs,
+1142 controls). Require fresh successful exact-head replay before PR.
