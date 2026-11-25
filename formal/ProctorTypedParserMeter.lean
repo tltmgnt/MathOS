@@ -386,8 +386,6 @@ theorem successful_reads {α : Type} (m : MeterParser α) (h : Good m)
   | mk r k =>
     rw [em] at hg
     intro he
-    change (m ts).1=some (a,rest) at he
-    rw [em] at he
     change r=some (a,rest) at he
     cases he
     exact hg
