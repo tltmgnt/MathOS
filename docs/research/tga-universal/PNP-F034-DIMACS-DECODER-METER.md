@@ -49,3 +49,25 @@ No independent review, proof discovery or proof-size guarantee.
 Next: combine decoded formula, proof decoder and verifier selected
 charges on acceptance and rejection; extend control/reversal and
 integer bit-cost accounting.
+
+## Initial preflight and correction
+
+Exact candidate bbbd326945322f843fee088589e2c9fd37c7ed27 failed
+preflight 45522077278 job 138896175071, exit 1, artifact
+14979804869. Actual error headers:
+```text
+artifacts/f034-dimacs-decoder-meter/combined.lean:7810:9: error: unsolved goals
+artifacts/f034-dimacs-decoder-meter/combined.lean:7861:2: error: type mismatch
+```
+Six of the eleven gated declarations printed zero axioms;
+five inherited sorryAx from failed elaboration. No explicit
+sorry was inserted and no fixture marker was reached.
+The correction closes the lex-failure count identity by rfl,
+and uses an explicit typed multiplication-affine lemma rather
+than reflexivity as the inference argument: Lean had inferred
+coefficients 3 and 9 and variable offsets A in place of
+coefficients 4 and 10 with zero offsets. No theorem statement,
+meter, test or gate changed. Exact corrected SHA preflight
+still required.
+PR #188 has merged at ef496ba3c66cda84416ef9afa12253fa34be6ac1.
+https://github.com/tltmgnt/MathOS/actions/runs/45522077278/job/138896175071

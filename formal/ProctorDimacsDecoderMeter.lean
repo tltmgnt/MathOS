@@ -80,7 +80,7 @@ theorem decode_count (bytes : List Nat) :
     have hz : (decodeRowsMeter bytes).2=0 := by
       unfold decodeRowsMeter
       rw [he]
-    rw [hz]
+    rw [hz] <;> rfl
   | some t =>
     have he : lexDimacs bytes=some t := hv.symm.trans e
     rw [stage_count bytes t he]
@@ -125,8 +125,10 @@ private theorem var_affine (A : Nat) : A=A*1+0 :=
 private theorem const_affine (A k : Nat) : k=A*0+k :=
   (Nat.zero_add k).symm
 
+private theorem mul_affine (A k : Nat) : A*k=A*k+0 := rfl
+
 theorem lex_unit_linear (A : Nat) : lexUnit A=A*31+24 :=
-  (affine_add (affine_add (var_affine A) (const_affine A 1)) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (affine_add (const_affine A 6) (affine_add (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (var_affine A)) (affine_add (affine_add (const_affine A 1) (affine_add (affine_add (affine_add (var_affine A) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 2)) (affine_add (var_affine A) (const_affine A 2))) (affine_add (var_affine A) (const_affine A 1)))) (const_affine A 1)) (affine_add (affine_add (var_affine A) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 2)) (affine_add (var_affine A) (const_affine A 2))) (affine_add (var_affine A) (const_affine A 1)))) (const_affine A 1)))) (affine_add (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (var_affine A)) (affine_add (affine_add (rfl : A*4=A*4+0) (rfl : A*10=A*10+0)) (const_affine A 1))))))))
+  (affine_add (affine_add (var_affine A) (const_affine A 1)) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (affine_add (const_affine A 6) (affine_add (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (var_affine A)) (affine_add (affine_add (const_affine A 1) (affine_add (affine_add (affine_add (var_affine A) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 2)) (affine_add (var_affine A) (const_affine A 2))) (affine_add (var_affine A) (const_affine A 1)))) (const_affine A 1)) (affine_add (affine_add (var_affine A) (affine_add (affine_add (affine_add (var_affine A) (const_affine A 2)) (affine_add (var_affine A) (const_affine A 2))) (affine_add (var_affine A) (const_affine A 1)))) (const_affine A 1)))) (affine_add (affine_add (affine_add (affine_add (var_affine A) (const_affine A 1)) (var_affine A)) (var_affine A)) (affine_add (affine_add (mul_affine A 4) (mul_affine A 10)) (const_affine A 1))))))))
 
 theorem row_unit_linear (A : Nat) : rowsUnit A+1=A*3+5 :=
   (affine_add (affine_add (affine_add (affine_add (affine_add (const_affine A 0) (affine_add (var_affine A) (const_affine A 1))) (affine_add (var_affine A) (const_affine A 1))) (affine_add (var_affine A) (const_affine A 1))) (const_affine A 1)) (const_affine A 1))
