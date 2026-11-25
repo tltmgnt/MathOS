@@ -1,0 +1,168 @@
+{
+  "attempt_id": "F038-MRAX-REFLECTION-TRANSFER",
+  "base_commit": "1803d62c812d9eea0b2954157cbf7f937c78eed1",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45724969824",
+  "targets": [
+    "universal_lower_bound",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "Which bounded-reflection and simulation premises could transfer a proof lower bound to unrestricted polynomial SAT algorithms?",
+  "route": "negative",
+  "topology": "Separate conditional proof-system transfer dependencies; reusable finite-domain rejection soundness.",
+  "adversarial": [
+    "Q is stronger than P; no lower bound for Q proved.",
+    "General bounded soundness checking is coNP-complete.",
+    "Specialized guard lower bounds do not constrain reflection proofs of every fixed correct decider."
+  ],
+  "scope": "Fixed sound complete base CNF proof system with polynomial verifier; unary bounded deterministic simulation.",
+  "cost": "Polynomial verification and conditional simulation; no general polynomial certificate production",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of reflection transfer and guard reduction"
+    },
+    {
+      "key": "attempt_reflection_simulation",
+      "label": "Noncircular polynomial reflection simulation of hypothetical correct polynomial deciders"
+    },
+    {
+      "key": "attempt_augmented_lower_bound",
+      "label": "Superpolynomial proof-size lower bound for augmented Q"
+    }
+  ],
+  "independent_reference": "Independent JavaScript exhaustive Boolean source and specialized reflection evaluation; not execution of submitted Python.",
+  "expected": {
+    "primary": [
+      256,
+      2048,
+      52488,
+      192,
+      95,
+      161,
+      3328,
+      1024
+    ],
+    "full": [
+      256,
+      2048,
+      52488,
+      1024,
+      255,
+      1,
+      5120,
+      1024
+    ],
+    "transfers": 162,
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_reflection_transfer.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-REFLECTION-TRANSFER.md"
+  ],
+  "next": "Seek noncircular simulation or actual lower bounds for a stronger explicit computation model, with certificate-free algorithms included.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Which bounded-reflection and simulation premises could transfer a proof lower bound to unrestricted polynomial SAT algorithms?",
+      "strategy": "Define a sound augmented proof system with clocked rejection reflection and state the exact transfer implication.",
+      "alternative": "Expose blanket reflection cost by guarded carrier rejectors and restriction-stable proof transfer.",
+      "stop_rule": "Do not equate a base proof-system lower bound with a universal SAT lower bound; leave missing premises open.",
+      "literature_leads": [
+        "Classical Cook-Levin bounded computation encodings and Cook-Reckhow proof systems; prior MathOS restricted proof barriers. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "A lower bound for an augmented reflection proof system would imply P!=NP under an explicit polynomial reflection simulation premise for hypothetical polynomial deciders.",
+      "scope": "Fixed sound complete base CNF proof system with polynomial verifier; unary bounded deterministic simulation.",
+      "derivation": "A checked proof of no false bounded rejections plus an actual rejecting run yields an UNSAT certificate; reuse it across all inputs within the bound.",
+      "unresolved_steps": [
+        "Polynomial reflection size for hypothetical correct deciders",
+        "Superpolynomial proof-size lower bound for augmented Q"
+      ],
+      "candidate_tests": [
+        "Audit exact implication and clock cost; specialized reflection regression on bounded guards."
+      ]
+    },
+    "alternative": {
+      "claim": "Bounded rejection soundness is coNP-complete even for explicit partial guard rejectors; specialized reflection preserves resolution lower bounds by restriction.",
+      "scope": "Formula-specific carrier program M_G and explicit clause-evaluation gate encoding R_G.",
+      "derivation": "Reject a satisfiable carrier iff its encoded assignment satisfies G; setting all indicator bits true recovers G; lift and restrict resolution traces.",
+      "unresolved_steps": [
+        "Whether the narrower simulation premise for true total polynomial SAT deciders can be established."
+      ],
+      "candidate_tests": [
+        "Exhaustive source/indicator assignments, carrier checks, actual resolution trace lifts and restrictions."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Q is stronger than P; no lower bound for Q proved.",
+        "General bounded soundness checking is coNP-complete.",
+        "Specialized guard lower bounds do not constrain reflection proofs of every fixed correct decider."
+      ],
+      "counterexample_candidates": [
+        "Satisfiable G produces an explicit false-rejection carrier; UNSAT G can be arbitrarily hard for a fixed restriction-stable calculus."
+      ],
+      "equivalence_audit": "Exact finite rejection soundness equivalence; conditional transfer stated separately from unsupported premises.",
+      "barrier_audit": "No unrestricted algorithm lower bound, no blanket polynomial reflection oracle.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit bit encoding, unary simulation bounds, deterministic polynomial proof verifier.",
+      "cost_ledger": {
+        "encoding": "CNF inputs, machine code, unary bounds, explicit certificates",
+        "preprocessing": "Polynomial bounded computation encoding; explicit carrier formula",
+        "inference": "Base proof checking and actual bounded machine simulation",
+        "repetitions": "One reusable reflection certificate per bounded domain; finite proof search exponential in regression",
+        "arithmetic_bits": "Polynomial in explicit encoded length; unary clock counted",
+        "memory": "Polynomial verifier storage in encoded proof length",
+        "reconstruction": "Check rejecting run or exact carrier counterexample; lift/restrict resolution trace",
+        "overall": "Polynomial verification and conditional simulation; no general polynomial certificate production"
+      },
+      "missing_bounds": [
+        "Reflection certificates for hypothetical polynomial SAT deciders",
+        "Superpolynomial lower bound for augmented Q",
+        "Unrestricted SAT complexity separation"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Conditional transfer implication and soundness of abstract Q",
+        "Guarded reflection reduction",
+        "Resolution restriction and lift proofs"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "General machine interpreter and reflection compiler not implemented."
+      ],
+      "proof_obligations": [
+        "Check finite source and reflection models",
+        "Check actual resolution transfer bounds and malformed evidence",
+        "Audit noncircularity and unary clocks"
+      ],
+      "formalization_plan": "Formalize bounded soundness, exact restriction and transfer quantifiers separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Isolate the exact missing simulation and lower-bound premises; demonstrate hidden hardness of blanket reflection certification.",
+      "remaining_gaps": [
+        "Universal lower bound against unrestricted deterministic SAT algorithms",
+        "Polynomial reflection simulation premise",
+        "Lower bound for augmented Q",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Seek noncircular simulation or actual lower bounds for a stronger explicit computation model, with certificate-free algorithms included.",
+      "human_review_requests": [
+        "Review quantifier order, completeness of Q, guard soundness reduction and restriction proof."
+      ]
+    }
+  }
+}
