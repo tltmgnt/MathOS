@@ -1,0 +1,35 @@
+name: Proctor F038 Horn cover obstruction
+on:
+  push:
+    branches: ['research/pnp-f038-horn-cover-obstruction']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_horn_cover | tee /tmp/cover.txt
+          grep -Fx 'F038_HORN_COVER_CONCRETE_OK families=4096 total=736 non_total=3360 near_probes=45056 alternative_checks=131072 outputs=43728 missing_near=17328 orientation_checks=65536' /tmp/cover.txt
+          python -m mathos.research.f038_horn_obstruction | tee /tmp/obstruction.txt
+          grep -Fx 'F038_HORN_OBSTRUCTION_LOCAL_OK subsets=512 closed=260 caps=8' /tmp/obstruction.txt
+          grep -Fx 'F038_HORN_OBSTRUCTION_OK orientations=584 models=4368 meet_checks=14728 deletions=584 successful=399 projection_witnesses=14 upper_cover_checks=258' /tmp/obstruction.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HORN_OBSTRUCTION_GATE_OK status=OPEN')
+          PY
