@@ -204,7 +204,7 @@ private theorem double_not_odd (m n : Nat) : 2*m≠1+2*n := by
       exact Nat.noConfusion (Nat.succ.inj h)
     | succ n =>
       intro h
-      rw [Nat.mul_succ,Nat.mul_succ,Nat.add_assoc] at h
+      rw [Nat.mul_succ,Nat.mul_succ,← Nat.add_assoc] at h
       exact ih n (Nat.add_right_cancel h)
 
 private theorem double_inj (m n : Nat) (h : 2*m=2*n) : m=n := by
@@ -214,12 +214,12 @@ private theorem double_inj (m n : Nat) (h : 2*m=2*n) : m=n := by
     | zero => rfl
     | succ n =>
       rw [Nat.mul_zero,Nat.mul_succ] at h
-      exact (Nat.noConfusion h).elim
+      exact Nat.noConfusion h
   | succ m ih =>
     cases n with
     | zero =>
       rw [Nat.mul_succ,Nat.mul_zero] at h
-      exact (Nat.noConfusion h).elim
+      exact Nat.noConfusion h
     | succ n =>
       rw [Nat.mul_succ,Nat.mul_succ] at h
       exact congrArg Nat.succ (ih n (Nat.add_right_cancel h))
