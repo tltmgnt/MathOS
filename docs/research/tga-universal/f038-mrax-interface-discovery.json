@@ -1,0 +1,183 @@
+{
+  "attempt_id": "F038-MRAX-INTERFACE-DISCOVERY",
+  "base_commit": "54c2cf9a53d30c2f6c2b4e123f62c566ccd45490",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45720311234",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can bounded private-component interfaces be discovered with certified costs rather than supplied?",
+  "route": "certificate_route",
+  "topology": "Primal connected cores, exact component gluing, incidence cokernel.",
+  "adversarial": [
+    "Minimum admissible interface is NP-complete even on positive 2-CNF.",
+    "Large interface may have nonlinear NP-hard projection.",
+    "Occurrence threshold is family-specific."
+  ],
+  "scope": "Explicit primal graphs, h>=3, size budget k.",
+  "cost": "poly(L)((h+1)^k+2^h+2^k) on promised class; polynomial affine family",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent mathematical review of graph and reduction theorems"
+    },
+    {
+      "key": "attempt_global_interface",
+      "label": "Efficient nonlinear global interface solving"
+    },
+    {
+      "key": "attempt_universal_structure",
+      "label": "Uniform structural coverage or certified alternative"
+    }
+  ],
+  "independent_reference": "Independent JS graph enumeration and padded reduction exhaustive checks; not Python execution.",
+  "expected": {
+    "graphs": [
+      1024,
+      2048,
+      65536,
+      36160,
+      209312,
+      136046,
+      12288,
+      1840,
+      7506,
+      2900
+    ],
+    "reduction": [
+      8,
+      512000,
+      1000,
+      20
+    ],
+    "families": [
+      [
+        2,
+        9,
+        18,
+        8
+      ],
+      [
+        3,
+        29,
+        66,
+        24
+      ],
+      [
+        4,
+        81,
+        194,
+        64
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_interface_discovery.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-INTERFACE-DISCOVERY.md"
+  ],
+  "next": "Certified global interface solving beyond affine projections and compatibility of tractable constraint classes.",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can bounded private-component interfaces be discovered with certified costs rather than supplied?",
+      "strategy": "Forbidden connected cores, exact budget search and certified approximation.",
+      "alternative": "Occurrence-based discovery followed by exact block projection and affine completion.",
+      "stop_rule": "Stop on invalid stages, missing scope evidence, or unsupported universal cost; reject unverified interfaces.",
+      "literature_leads": [
+        "Prior MathOS supplied-interface gluing and cyclic gadget; classical subcubic vertex-cover reduction derived in note."
+      ]
+    },
+    "construct": {
+      "claim": "Admissibility equals hitting bounded connected forbidden cores; exact FPT discovery and certified approximation follow.",
+      "scope": "Explicit primal graphs, h>=3, size budget k.",
+      "derivation": "A missed core lies in a violating private component; any violation contains a bounded core.",
+      "unresolved_steps": [
+        "Universal small-interface guarantee and efficient nonlinear interface solving."
+      ],
+      "candidate_tests": [
+        "All labeled five-vertex graphs, every interface and budget, disjoint-core certificates."
+      ]
+    },
+    "alternative": {
+      "claim": "Occurrence-based automatic discovery yields exact affine projection and witness gluing on the cyclic incidence family.",
+      "scope": "Validate occurrence-selected interface at h=6; only width-three affine projected systems.",
+      "derivation": "Private degree-four occurrence signature; exact block tables; guarded missing-pattern clauses; Gaussian solution and reverse lifting.",
+      "unresolved_steps": [
+        "General useful-interface discovery and mixed nonlinear projections."
+      ],
+      "candidate_tests": [
+        "Three cyclic families; wrong-root hybrid certificates and right-root witnesses."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Minimum admissible interface is NP-complete even on positive 2-CNF.",
+        "Large interface may have nonlinear NP-hard projection.",
+        "Occurrence threshold is family-specific."
+      ],
+      "counterexample_candidates": [
+        "Padded triangle-free subcubic vertex-cover reduction at h=4."
+      ],
+      "equivalence_audit": "Exact structural admissibility, not SAT equivalence of arbitrary interface heuristics.",
+      "barrier_audit": "Optimization hardness is not a SAT runtime lower bound.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite bit encodings; graph discovery, tables and witness cost included.",
+      "cost_ledger": {
+        "encoding": "Dense indices, explicit clause scopes and graph",
+        "preprocessing": "Polynomial core search; (h+1)^k exact branching or greedy",
+        "inference": "2^h block tables and affine extraction; 2^k explicit interface enumeration",
+        "repetitions": "All branches and interface assignments counted",
+        "arithmetic_bits": "Polynomial bit lengths",
+        "memory": "Polynomial graph search; block tables exponential in h",
+        "reconstruction": "Replay tables and verify full original witness",
+        "overall": "poly(L)((h+1)^k+2^h+2^k) on promised class; polynomial affine family"
+      },
+      "missing_bounds": [
+        "Universal small admissible interface",
+        "General nonlinear global interface solving",
+        "Uniform polynomial SAT certificate discovery"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Core hitting equivalence",
+        "Greedy packing certificate",
+        "Block projection and parity provenance",
+        "Vertex-cover reduction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check all finite interfaces and budgets",
+        "Check exact block tables and guarded query certificates",
+        "Test reduction and corrupted certificates"
+      ],
+      "formalization_plan": "Formalize graph neighborhood and connected core lemmas before considering promotion.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Replace supplied-interface assumption by parameterized discovery and family-specific automatic affine completion; identify structural NP-completeness.",
+      "remaining_gaps": [
+        "F037-F040",
+        "Selector totality, preservation and bit cost",
+        "Universal negative lower bound"
+      ],
+      "next_question": "Certified global interface solving beyond affine projections and compatibility of tractable constraint classes.",
+      "human_review_requests": [
+        "Review core equivalence, parameter bounds, and vertex-cover reduction."
+      ]
+    }
+  }
+}
