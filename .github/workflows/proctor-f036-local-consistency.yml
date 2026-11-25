@@ -1,0 +1,22 @@
+name: Proctor F036 local consistency audit
+on:
+  push:
+    branches: ['research/pnp-f036-local-consistency-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python mathos/research/f036_local_consistency.py | tee /tmp/local-consistency.txt
+          grep -Fx 'F036_LOCAL_CONSISTENCY_OK widths=2,3,4' /tmp/local-consistency.txt
