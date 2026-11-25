@@ -1,0 +1,43 @@
+name: Proctor F037 certificate complexity
+on:
+  push:
+    branches: ['research/pnp-f037-certificate-complexity']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_certificate_complexity | tee /tmp/choice.txt
+          grep -Fx 'F037_CERTIFICATE_COMPLEXITY_OK pairs=4096 guards=16 formulas=4096 rejection=3' /tmp/choice.txt
+          lean --version | grep -F 'version 4.14.0'
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorPathResourceBounds.lean formal/ProctorTotalTwoCNF.lean formal/ProctorFiniteModel.lean formal/ProctorSerializedTwoCNF.lean formal/ProctorDecimalEncoder.lean formal/ProctorEndToEndBytes.lean formal/ProctorWireTokenBounds.lean formal/ProctorDecimalSize.lean formal/ProctorTokenMagnitude.lean formal/ProctorPolynomialWireSize.lean formal/ProctorRankBitBounds.lean formal/ProctorBinaryByteSolver.lean formal/ProctorGeneralBranching.lean formal/ProctorChoiceCertificates.lean > /tmp/combined.lean
+          lean -DwarningAsError=true /tmp/combined.lean 2>&1 | tee /tmp/kernel.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          lines = set(Path("/tmp/kernel.txt").read_text().splitlines())
+          names = ["empty_unsat","restriction_unsat","covered_unsat_empty","trace_sound","trace_complete","trace_iff"]
+          for name in names:
+              assert f"'ProctorChoiceCertificates.{name}' does not depend on any axioms" in lines, name
+          gap=json.loads(Path("/tmp/gap.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          print("F037_CHOICE_CERTIFICATE_KERNEL_OK declarations=6 status=OPEN")
+          PY
