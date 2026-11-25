@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X section obstruction
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-section-obstruction']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_section_obstruction.py
+          python -m mathos.research.f038_bounded_width_types | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_BOUNDED_WIDTH_TYPES_OK {"controls":6,"global":[256,120,136,4096,1080,109,11],"terms":[528,256,4650,8955210]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_section_obstruction | tee /tmp/section.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/section.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=ordinary_complete,discovery,machine_cost,short_proofs status=OPEN' /tmp/section.txt
+          grep -Fx 'F038_MRAX_SECTION_OK {"charts":[1,6,15,18,15,6,0,9330,672],"gadget":{"multiplicities":[0,2,4,2,2,4,2,0],"section_histogram":[253976,8144,24,0,0,0,0],"source_models":10,"typed_double_unsat":1,"typed_single_sat":1},"sections":[768,6144,768,64]}' /tmp/section.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/section.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/section.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_SECTION_GATE_OK status=OPEN')
+          PY

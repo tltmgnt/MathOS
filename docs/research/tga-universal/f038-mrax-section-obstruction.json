@@ -1,0 +1,185 @@
+{
+  "attempt_id": "F038-MRAX-SECTION-OBSTRUCTION",
+  "base_commit": "37a8fb15856b27217754422c55179973a7bf8d5b",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45722516986",
+  "targets": [
+    "ordinary_complete",
+    "discovery",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can typable local representation transformations cover untypable Boolean constraints while preserving global witness gluing?",
+  "route": "certificate_route",
+  "topology": "Exact gluing of local decoder fibers; common sections and global compatibility obstruction.",
+  "adversarial": [
+    "The section assumption is stronger than decoder surjectivity.",
+    "An explicit chart count does not bound SAT decision runtime.",
+    "Local nonlinear decoding may fail to glue."
+  ],
+  "scope": "Disjoint code blocks, common typed operations, arbitrary existential auxiliaries, sound decoding and fixed representatives for every source row.",
+  "cost": "Unconditional restricted no-go theorem; no universal SAT cost bound",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of section transfer and cover obstruction"
+    },
+    {
+      "key": "attempt_nonlocal_transform",
+      "label": "Uniform useful nonlocal or nonsection representation transformation"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Universal selector preservation and total bit cost"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive recoding, NAE subrelation, cover and decoder fiber checks; not execution of Python.",
+  "expected": {
+    "sections": [
+      768,
+      6144,
+      768,
+      64
+    ],
+    "charts": [
+      1,
+      6,
+      15,
+      18,
+      15,
+      6,
+      0,
+      9330,
+      672
+    ],
+    "gadget": {
+      "multiplicities": [
+        0,
+        2,
+        4,
+        2,
+        2,
+        4,
+        2,
+        0
+      ],
+      "section_histogram": [
+        253976,
+        8144,
+        24,
+        0,
+        0,
+        0,
+        0
+      ],
+      "source_models": 10,
+      "typed_single_sat": 1,
+      "typed_double_unsat": 1
+    }
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_section_obstruction.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-SECTION-OBSTRUCTION.md"
+  ],
+  "next": "Investigate nonlocal solution-preserving transformations with explicit reconstruction costs; redirect if no useful uniform coverage lemma emerges.",
+  "mrax": {
+    "planner": {
+      "target_id": "ordinary_complete",
+      "question": "Can typable local representation transformations cover untypable Boolean constraints while preserving global witness gluing?",
+      "strategy": "Prove a section-preservation obstruction and a quantitative chart-cover bound.",
+      "alternative": "Construct nonlinear decoding of an affine relation and test composition.",
+      "stop_rule": "Do not treat local decoded image equality as global satisfiability preservation; stop on unsupported universal coverage.",
+      "literature_leads": [
+        "Prior MathOS bounded-width recognition and mixed typed solver; no external novelty review."
+      ]
+    },
+    "construct": {
+      "claim": "A sound typed code relation with a common coordinate section induces a four-operation typing of its source; NAE product requires exponentially many section-preserving charts.",
+      "scope": "Disjoint code blocks, common typed operations, arbitrary existential auxiliaries, sound decoding and fixed representatives for every source row.",
+      "derivation": "Closure survives conjunction and existential projection; compose block operations with fixed representatives and decoder; count proper NAE projections per chart.",
+      "unresolved_steps": [
+        "Nonlocal transformations, context-dependent witness reconstruction and unrestricted universal coverage."
+      ],
+      "candidate_tests": [
+        "All ternary typings, two-bit recodings, all NAE subrelations and small chart covers."
+      ]
+    },
+    "alternative": {
+      "claim": "A four-bit nonlinear decoder of a fixed affine gadget yields NAE exactly, but shared-block reuse can contradict a satisfiable source.",
+      "scope": "Explicit translation gadget y=x XOR 1,z=x XOR 2, fixed common decoder.",
+      "derivation": "Select u,v or u XOR v with two selector bits; enumerate six decoded patterns; compare two shared-variable atoms.",
+      "unresolved_steps": [
+        "Compositional nonsection representations and total uniform transformation costs."
+      ],
+      "candidate_tests": [
+        "All 16 affine rows, 64^3 sections, actual typed solver and shared-gadget composition."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "The section assumption is stronger than decoder surjectivity.",
+        "An explicit chart count does not bound SAT decision runtime.",
+        "Local nonlinear decoding may fail to glue."
+      ],
+      "counterexample_candidates": [
+        "Affine NAE image with no common section; two satisfiable NAE atoms whose code conjunction is inconsistent."
+      ],
+      "equivalence_audit": "Exact source relation under section; decoded image equality alone does not imply compositional equivalence.",
+      "barrier_audit": "Restricted representation lower bound only, no universal complexity separation.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean tables, finite bit encodings; chart count not physical runtime.",
+      "cost_ledger": {
+        "encoding": "Disjoint code blocks and existential auxiliary variables; explicit chart semantics",
+        "preprocessing": "No universal bound; section obstruction independent of size",
+        "inference": "Closure induction and projection; earlier polynomial typed solver",
+        "repetitions": "At least ceil((6/5)^m) explicit charts for full NAE product cover",
+        "arithmetic_bits": "Polynomial in individual explicit table encoding",
+        "memory": "Exponential chart count for exact explicit cover; implicit representations not bounded",
+        "reconstruction": "Common section gives compatible lifts; arbitrary decoder gluing not guaranteed",
+        "overall": "Unconditional restricted no-go theorem; no universal SAT cost bound"
+      },
+      "missing_bounds": [
+        "Uniform nonlocal representation transformation",
+        "Efficient context-dependent witness reconstruction",
+        "Universal selector preservation and bit cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Section-induced operation proof",
+        "Direct NAE non-typability proof",
+        "Chart volume and small exact-cover bounds",
+        "Affine decoded-image counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check induced operations and all NAE types",
+        "Check finite cover counts and affine decoding",
+        "Check composition with prior actual typed solver"
+      ],
+      "formalization_plan": "Formalize closure under projection and section transfer; separately review scope of compositional corollary.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Rule out section-preserving coverage of NAE and separate local nonlinear images from global gluing.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "Nonlocal representation coverage",
+        "Universal selector and unrestricted negative route"
+      ],
+      "next_question": "Investigate nonlocal solution-preserving transformations with explicit reconstruction costs; redirect if no useful uniform coverage lemma emerges.",
+      "human_review_requests": [
+        "Review quantifiers of the section obstruction, chart-cover scope and fixed-gadget corollary."
+      ]
+    }
+  }
+}
