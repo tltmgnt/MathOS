@@ -72,10 +72,10 @@ theorem shape_bound (w : Nat) (p : Literal) (t row : Clause) :
         (Nat.le_trans (literal_bound w l p) (Nat.le_add_right _ _))
     | false =>
       cases m : (containsMeter w l t).1 with
-      | true => exact Nat.add_le_add ih
-          (Nat.add_le_add (literal_bound w l p) (contains_bound w l t))
-      | false => exact Nat.le_trans
-          (Nat.add_le_add (literal_bound w l p) (contains_bound w l t))
+      | true =>
+        exact Nat.add_le_add ih (Nat.add_le_add (literal_bound w l p) (contains_bound w l t))
+      | false =>
+        exact Nat.le_trans (Nat.add_le_add (literal_bound w l p) (contains_bound w l t))
           (Nat.le_add_left _ _)
 
 -- Coordinates: Boolean result, lookup visits, selected literal gates.
