@@ -1,0 +1,36 @@
+name: Proctor F038 resolution certificate barrier
+on:
+  push:
+    branches: ['research/pnp-f038-resolution-certificate-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_resolution_certificate.py
+          python -m mathos.research.f038_switch_disagreement | tee /tmp/switch.txt
+          grep -Fx 'F038_SWITCH_DISAGREEMENT_OK relations=20 cases=25600 total=5712 probes=86400 failed=34872 reuse_checks=96528 disagreement_counts=3200,9600,9600,3200' /tmp/switch.txt
+          grep -Fx 'F038_SWITCH_QUERY_BARRIER_OK dimensions=5 holes=41 baseline_checks=248 hole_checks=1728 distinguished=41 max_variables=56 max_clauses=74' /tmp/switch.txt
+          python -m mathos.research.f038_resolution_certificate | tee /tmp/resolution.txt
+          grep -Fx 'F038_RESOLUTION_CERTIFICATE_OK graphs=4 charges=284 branch_checks=568 assignments=131728 witnesses=284 clauses=6672 minimal_supports=17652 balanced_cuts=196 cube_cuts=276 max_edges=8 max_clauses=18' /tmp/resolution.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RESOLUTION_CERTIFICATE_GATE_OK status=OPEN')
+          PY
