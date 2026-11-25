@@ -158,7 +158,9 @@ theorem bytes_model_accepts (n : Nat) (f : Formula) (rows : Clause)
     (hf : ProctorUnifiedReplay.validFormula n f=true)
     (hs : checkModel f rows=true) : checkModelBytes expected witness=true := by
   unfold checkModelBytes
-  rw [ProctorUnboundedRoundtrip.expected_exact n f expected he,model_decode rows witness hw,hf,hs]
+  rw [ProctorUnboundedRoundtrip.expected_exact n f expected he,model_decode rows witness hw]
+  change (ProctorUnifiedReplay.validFormula n f && checkModel f rows)=true
+  rw [hf,hs]
   rfl
 
 theorem bytes_model_sound (expected witness : List Nat)
