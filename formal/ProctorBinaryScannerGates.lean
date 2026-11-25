@@ -172,11 +172,17 @@ theorem scan_projection (bytes : List Nat) (v c : List Bool) (acc : List Nat) :
     (scanGates bytes v c acc).1=scanCounted bytes v c acc :=
   core_projection zeroWord countZero checkedDigit nextCount digitGates countGates bytes v c acc
 
+private theorem reset_width : zeroWord.length≤512 := by
+  rw [zeroWord, List.length_replicate]
+
+private theorem reset_count_width : countZero.length≤8 := by
+  rw [countZero, List.length_replicate]
+
 theorem scan_gate_bound (bytes : List Nat) (v c : List Bool) (acc : List Nat)
     (hv : v.length≤512) (hc : c.length≤8) :
     (scanGates bytes v c acc).2≤5235*bytes.length :=
   core_bound zeroWord countZero checkedDigit nextCount digitGates countGates
-    (by decide) (by decide) (fun v b out h => digit_width v out b h) count_width digit_gate_bound
+    reset_width reset_count_width (fun v b out h => digit_width v out b h) count_width digit_gate_bound
     next_gate_bound bytes v c acc hv hc
 
 def tokenizeGates (bytes : List Nat) : Option (List Nat) × Nat :=
@@ -199,7 +205,7 @@ theorem tokenize_gate_bound (bytes : List Nat) :
   unfold tokenizeGates
   by_cases h : byteOK bytes=true
   · rw [if_pos h]
-    exact scan_gate_bound bytes zeroWord countZero [] (by decide) (by decide)
+    exact scan_gate_bound bytes zeroWord countZero [] reset_width reset_count_width
   · rw [if_neg h]
     exact Nat.zero_le _
 
