@@ -190,6 +190,14 @@ theorem rank_mono (p q : Literal → Bool) (vs : List Literal)
     · change 1+2*rank p as≤1+2*rank q as
       exact Nat.add_le_add (Nat.le_refl 1) (Nat.mul_le_mul_left 2 ht)
 
+private theorem cancel_right (a b c : Nat) (h : a+c=b+c) : a=b := by
+  induction c with
+  | zero => exact h
+  | succ c ih => exact ih (Nat.succ.inj h)
+
+private theorem cancel_left (a b c : Nat) (h : c+a=c+b) : a=b :=
+  cancel_right a b c ((Nat.add_comm a c).trans (h.trans (Nat.add_comm c b)))
+
 private theorem double_not_odd (m n : Nat) : 2*m≠1+2*n := by
   induction m generalizing n with
   | zero =>
@@ -205,7 +213,7 @@ private theorem double_not_odd (m n : Nat) : 2*m≠1+2*n := by
     | succ n =>
       intro h
       rw [Nat.mul_succ,Nat.mul_succ,← Nat.add_assoc] at h
-      exact ih n (Nat.add_right_cancel h)
+      exact ih n (cancel_right _ _ _ h)
 
 private theorem double_inj (m n : Nat) (h : 2*m=2*n) : m=n := by
   induction m generalizing n with
@@ -222,7 +230,7 @@ private theorem double_inj (m n : Nat) (h : 2*m=2*n) : m=n := by
       exact Nat.noConfusion h
     | succ n =>
       rw [Nat.mul_succ,Nat.mul_succ] at h
-      exact congrArg Nat.succ (ih n (Nat.add_right_cancel h))
+      exact congrArg Nat.succ (ih n (cancel_right _ _ _ h))
 
 theorem rank_eq_bits (p q : Literal → Bool) (vs : List Literal)
     (h : rank p vs=rank q vs) : ∀ a∈vs, p a=q a := by
@@ -241,7 +249,7 @@ theorem rank_eq_bits (p q : Literal → Bool) (vs : List Literal)
         exact (double_not_odd _ _ ((Nat.zero_add _).symm.trans h.symm)).elim
       · rfl
     rw [he] at h
-    have ht : rank p as=rank q as := double_inj _ _ (Nat.add_left_cancel h)
+    have ht : rank p as=rank q as := double_inj _ _ (cancel_left _ _ _ h)
     intro b hb
     cases hb with
     | head => exact he
@@ -476,3 +484,8 @@ end ProctorTwoCNFModel
 #print axioms ProctorTwoCNFModel.discover_sound
 #print axioms ProctorTwoCNFModel.discover_complete
 #print axioms ProctorTwoCNFModel.discover_iff
+
+#print axioms ProctorTwoCNFModel.cancel_right
+#print axioms ProctorTwoCNFModel.cancel_left
+#print axioms ProctorTwoCNFModel.double_not_odd
+#print axioms ProctorTwoCNFModel.double_inj
