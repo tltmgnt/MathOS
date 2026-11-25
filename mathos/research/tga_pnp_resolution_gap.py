@@ -53,7 +53,20 @@ def graph():
         "direct_sat": opened(
             "Alternative unrestricted deterministic polynomial SAT algorithm",
             "Not logically required to use the MathOS certificate architecture."),
-        "positive": derived("P=NP", ("certificate_route",), ("cook_levin", "direct_sat")),
+        "selector_algorithm": opened(
+            "Explicit uniform total branch-selection algorithm on encoded 3-CNF",
+            "No universally successful candidate yet. Finite passing tests cannot close this."),
+        "selector_preservation": opened(
+            "Universal SAT preservation by that same selector",
+            "Conditional logical bridge ProctorSinglePathGate verified on d73b3c53; the premise itself remains open."),
+        "selector_bit_cost": opened(
+            "Uniform polynomial worst-case total bit complexity of that same selector",
+            "Include normalization, all discovery subroutines, intermediate representations and model reconstruction."),
+        "selector_route": derived(
+            "Positive resolution via the direct single-path gate",
+            ("cook_levin", "selector_algorithm", "selector_preservation", "selector_bit_cost"),
+            note="Algorithm, preservation and cost must refer to the identical implementation; no oracle or promise gap."),
+        "positive": derived("P=NP", ("certificate_route",), ("cook_levin", "direct_sat"), ("selector_route",)),
         "universal_lower_bound": opened(
             "SAT not in P against every uniform deterministic polynomial algorithm",
             "A lower bound for one proof system or heuristic is insufficient."),
@@ -74,6 +87,7 @@ def report():
         "PNP_RESOLUTION_STATUS": "OPEN",
         "scope": "AUTHORED_SUFFICIENT_ROUTES_NOT_MATHEMATICAL_PROOF",
         "certificate_route": analyze(g, "certificate_route"),
+        "selector_route": analyze(g, "selector_route"),
         "mathematical_resolution": analyze(g, "mathematical_resolution"),
         "evidence_gate": analyze(g, "resolution_evidence_gate"),
     }
@@ -82,6 +96,8 @@ def report():
 if __name__ == "__main__":
     result = report()
     assert result["certificate_route"]["status"] == "BLOCKED"
+    assert result["selector_route"]["status"] == "BLOCKED"
+    assert result["selector_route"]["minimal_completion_sets"] == [["selector_algorithm", "selector_bit_cost", "selector_preservation"]]
     assert result["mathematical_resolution"]["status"] == "BLOCKED"
     assert result["evidence_gate"]["common_to_all_modeled_routes"] == ["independent_review"]
     print(json.dumps(result, indent=2))
