@@ -112,14 +112,26 @@ theorem signed_aux_bound (ws : List (List Nat)) (acc : List Literal) (k : Nat) :
           Nat.add_le_add (Nat.add_le_add (Nat.le_refl _) h) (Nat.le_refl _)
         _ = k+((signedUnit w.length+2)+wordBudget ws) := Nat.add_assoc _ _ _
 
+-- Explicit associativity and commutativity avoid the quotient and
+-- propositional extensionality dependencies of the AC tactic.
+private theorem shuffle_add (a b c d : Nat) :
+    (a+b)+(c+d)=(a+c)+(b+d) := by
+  calc
+    (a+b)+(c+d) = a+(b+(c+d)) := Nat.add_assoc _ _ _
+    _ = a+((b+c)+d) := congrArg (fun z => a+z) (Nat.add_assoc _ _ _).symm
+    _ = a+((c+b)+d) := congrArg (fun z => a+(z+d)) (Nat.add_comm _ _)
+    _ = a+(c+(b+d)) := congrArg (fun z => a+z) (Nat.add_assoc _ _ _)
+    _ = (a+c)+(b+d) := (Nat.add_assoc _ _ _).symm
+
 private theorem word_charge (n : Nat) : signedUnit n+2=n*4+10 := by
   unfold signedUnit naturalUnit
   change n+((n+2)+(n+2)+(n+1))+1+2+2=0+n+n+n+n+10
   rw [Nat.zero_add]
-  calc
-    n+((n+2)+(n+2)+(n+1))+1+2+2 =
-      n+n+n+n+(2+2+1+1+2+2) := by ac_rfl
-    _ = n+n+n+n+10 := rfl
+  have h : (n+2)+(n+2)=(n+n)+4 := shuffle_add n 2 n 2
+  rw [h]
+  have j : (n+n+4)+(n+1)=(n+n+n)+5 := shuffle_add (n+n) 4 n 1
+  rw [j]
+  rw [← Nat.add_assoc n (n+n+n) 5, Nat.add_comm n (n+n+n)] <;> rfl
 
 theorem word_budget_linear (ws : List (List Nat)) :
     wordBudget ws=wordMass ws*4+ws.length*10+1 := by
@@ -130,9 +142,17 @@ theorem word_budget_linear (ws : List (List Nat)) :
       (w.length+wordMass ws)*4+(ws.length+1)*10+1
     rw [word_charge,ih,add_mul_local w.length (wordMass ws) 4,
       add_mul_local ws.length 1 10]
-    change w.length*4+10+(wordMass ws*4+ws.length*10+1) =
-      w.length*4+wordMass ws*4+(ws.length*10+10)+1
-    ac_rfl
+    let x := w.length*4
+    let y := wordMass ws*4
+    let z := ws.length*10
+    change x+10+(y+z+1)=x+y+(z+10)+1
+    calc
+      (x+10)+(y+z+1) = (x+10)+(y+(z+1)) :=
+        congrArg (fun t => (x+10)+t) (Nat.add_assoc y z 1)
+      _ = (x+y)+(10+(z+1)) := shuffle_add x 10 y (z+1)
+      _ = (x+y)+((z+10)+1) := congrArg (fun t => (x+y)+t)
+        ((Nat.add_assoc 10 z 1).symm.trans (congrArg (fun t => t+1) (Nat.add_comm 10 z)))
+      _ = (x+y)+(z+10)+1 := (Nat.add_assoc _ _ _).symm
 
 def signedWordsMeter (ws : List (List Nat)) : Meter (List Literal) :=
   signedAux ws [] 0

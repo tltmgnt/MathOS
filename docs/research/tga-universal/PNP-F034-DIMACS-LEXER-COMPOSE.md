@@ -52,3 +52,24 @@ preserved, production and main unchanged.
 Next: zero-terminated row parsing, custom parser control and
 reversal, bit costs, and independent review. No proof discovery
 or proof-size theorem; P vs NP remains open.
+
+## First candidate preflight failure and correction
+
+Exact candidate 963b3366dbd3c52a3421d1c57834cf59342979d5,
+preflight run 45520070646 job 138889394518, failed strict axiom
+validation with exit code 1:
+'ProctorDimacsLexerCompose.word_budget_linear' depends on axioms: [propext, Quot.sound]
+strict axiom check failed: ProctorDimacsLexerCompose.word_budget_linear
+
+Five downstream declarations inherited the same dependencies:
+signed_words_bound, body_bound, rest_bound, after_header_bound,
+lex_bound. The executable fixture marker did pass:
+F034_LEX_COMPOSE_OK files=73 hand_controls=6
+F034_LEX_COMPOSE_TOTAL lexical_accept=63 lexical_reject=10 selected=1641507
+Artifact 14979403248. These are actual first-candidate fixture
+results, not a successful kernel audit. Correction replaces
+both AC tactic invocations with explicit constructive Nat.add_assoc,
+Nat.add_comm, congrArg and equality transitivity. No theorem
+statement, meter implementation, fixture or gate is changed.
+Corrected candidate must pass exact-SHA preflight before PR.
+https://github.com/tltmgnt/MathOS/actions/runs/45520070646/job/138889394518
