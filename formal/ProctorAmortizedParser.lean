@@ -86,7 +86,8 @@ theorem word_run_success {α : Type} (p : ParserMeter α)
         change finish (ledger c (advanceMeter p) ([],ts)).1.1=_
         rw [e] <;> rfl
       rw [hf] at hs
-      cases hs
+      have hr : next=rest := congrArg Prod.snd (Option.some.inj hs)
+      rw [← hr]
       have hw := e
       rw [dispatch_projection c (advanceMeter p) ([],ts)] at hw
       have hd := word_success c (advanceMeter p) statePotential 3
@@ -190,7 +191,8 @@ theorem nat_amortized : Amortized natMeter := by
     | nil => cases hs
     | cons v vs =>
       change some (v,vs)=some (a,rest) at hs
-      cases hs
+      have hr : vs=rest := congrArg Prod.snd (Option.some.inj hs)
+      rw [← hr]
       change 3+potential vs≤potential vs+64
       rw [Nat.add_comm 3 (potential vs)]
       exact Nat.add_le_add (Nat.le_refl _) (by decide : 3≤64)

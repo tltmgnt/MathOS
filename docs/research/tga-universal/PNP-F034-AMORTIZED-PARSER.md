@@ -28,3 +28,17 @@ Eight candidate declarations; 1142 control cases: 1122 small,
 12 nested and 8 boundaries. Marker F034_AMORTIZED_PARSER_OK small=1122 nested=12 boundary=8.
 Strict Lean 4.14.0 warnings-as-errors and zero-axiom gate unchanged.
 No local Lean execution. Independent review and resolution remain open.
+
+## Initial replay and proof repair
+
+PR #207 merged at fd58817a54542ed3b68ef3e7d0307187a63e0ac9.
+Exact candidate 12b0f0409cdbc4998077bb96845d6f3e8bb2be5a failed
+[45541720654 / job 138961583886](https://github.com/tltmgnt/MathOS/actions/runs/45541720654/job/138961583886), artifact 14989162886.
+Three of eight declarations printed no axioms (advance_safe,
+word_run_all, all_bound). Six unknown-identifier errors stemmed from
+case elimination substituting away the remainder variables next and vs
+in word_run_success and nat_amortized. Preserve local variables by
+extracting remainder equality via Option.some.inj and congrArg Prod.snd,
+then rewrite only the goal. No changes to executable definitions,
+theorem statements, fixtures or strict verification gates. New exact
+head replay required before PR; the executable marker was not reached.
