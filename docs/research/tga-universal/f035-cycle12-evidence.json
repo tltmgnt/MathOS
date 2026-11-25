@@ -1,0 +1,179 @@
+{
+  "schema": "mathos-f035-cycle12-v1",
+  "PNP_RESOLUTION_STATUS": "OPEN",
+  "research_checkpoint": 12,
+  "baseline_reported": 1428,
+  "new_verified": 107,
+  "cumulative_reported": 1535,
+  "verified": [
+    {
+      "module": "Width-three graph obstruction",
+      "declarations": 14,
+      "sha": "24d2889f7d7838fb89550784fbee670657907edb",
+      "run_id": 45672857509,
+      "job_id": 139412493055,
+      "controls": 19,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "General CNF branching",
+      "declarations": 17,
+      "sha": "d4cadb5b5d8e5346e916e7c5d25ce2ac6b256026",
+      "run_id": 45673435454,
+      "job_id": 139414526916,
+      "controls": 4098,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Component factorization",
+      "declarations": 10,
+      "sha": "b6b79ba2acc06a72991fcec6184785fde2d15d61",
+      "run_id": 45674355215,
+      "job_id": 139417779743,
+      "controls": 4097,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Semantic projection",
+      "declarations": 16,
+      "sha": "0f5270e6fade849d5203e2aa394f4c88bf6365c3",
+      "run_id": 45674423596,
+      "job_id": 139418035158,
+      "controls": 98304,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Symbolic elimination",
+      "declarations": 11,
+      "sha": "137da8999a91cb089f095bdcbc1ed8f59cfb6f9e",
+      "run_id": 45675114803,
+      "job_id": 139420451905,
+      "controls": 87381,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Adaptive elimination",
+      "declarations": 8,
+      "sha": "dc45e97dd61333a004fefc3d1df74146965db763",
+      "run_id": 45675271168,
+      "job_id": 139421000942,
+      "controls": 98304,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Greedy obstruction",
+      "declarations": 9,
+      "sha": "78730ebf6c8eeaf69e9df8afbcacb8db51bb2450",
+      "run_id": 45675650144,
+      "job_id": 139422351427,
+      "controls": 124,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Bounded elimination",
+      "declarations": 12,
+      "sha": "ae8c671d5aafa4646f28161a8c28109a1a34ed06",
+      "run_id": 45676510162,
+      "job_id": 139425369152,
+      "controls": 32770,
+      "axiom_gate": "passed"
+    },
+    {
+      "module": "Normalized elimination",
+      "declarations": 10,
+      "sha": "e3ad59e7bb6bdb6e26c42a052a6771a7e6d94ae8",
+      "run_id": 45676972131,
+      "job_id": 139426969600,
+      "controls": 98304,
+      "axiom_gate": "passed"
+    }
+  ],
+  "pending": [
+    {
+      "module": "All-order raw multiplicity",
+      "declarations": 21,
+      "sha": "85081f36d28c04e097213b255f748d463821aa4a",
+      "run_id": 45677325798,
+      "status": "pending_no_credit"
+    },
+    {
+      "module": "Affine barrier",
+      "declarations": 15,
+      "sha": "41b01ab010a440117066ca505311244553ee6689",
+      "run_id": 45677238643,
+      "status": "pending_no_credit"
+    },
+    {
+      "module": "Nonlinear lift",
+      "declarations": 9,
+      "sha": "34c24ec71c4772665b9aeafd1904e4bc0001ea0f",
+      "run_id": 45677666627,
+      "status": "pending_no_credit"
+    }
+  ],
+  "independent_static_lift_reproduction": {
+    "formula": "pigeonhole 4 into 3",
+    "variables": 12,
+    "clauses": 22,
+    "truth_assignments": 4096,
+    "satisfiable": false,
+    "degree_results": [
+      [
+        2,
+        79,
+        204,
+        18,
+        false
+      ],
+      [
+        3,
+        299,
+        1472,
+        178,
+        false
+      ],
+      [
+        4,
+        794,
+        6224,
+        709,
+        false
+      ],
+      [
+        5,
+        1586,
+        17672,
+        1581,
+        false
+      ],
+      [
+        6,
+        2510,
+        34945,
+        2508,
+        true
+      ]
+    ],
+    "columns": [
+      "degree",
+      "monomials",
+      "rows_processed",
+      "rank_before_stop",
+      "constant_in_span"
+    ],
+    "scope": "independent computational reproduction, not Lean proof or degree lower bound for polynomial calculus"
+  },
+  "open_obligations": {
+    "direct_general_polynomial_sat": "open",
+    "universal_lower_bound": "open",
+    "polynomial_certificate_discovery": "open",
+    "total_bit_machine_cost": "open",
+    "independent_mathematical_review": "open"
+  },
+  "decision": "stop claiming forward resolution progress from fragment refinements; require a new general mechanism or a falsifiable universal complexity conjecture before expanding formal modules",
+  "notes": [
+    "Cumulative count uses prior reported baseline; no repository-wide deduplication audit.",
+    "Control counts are overlapping scoped checks, not distinct problems or a probability of resolution.",
+    "Evidence is per exact SHA on unmerged research branches, not one integrated verified head."
+  ]
+}
