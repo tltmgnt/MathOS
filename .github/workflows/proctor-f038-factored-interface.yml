@@ -1,0 +1,35 @@
+name: Proctor F038 factored interface
+on:
+  push:
+    branches: ['research/pnp-f038-factored-interface']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_horn_obstruction | tee /tmp/obstruction.txt
+          grep -Fx 'F038_HORN_OBSTRUCTION_OK orientations=584 models=4368 meet_checks=14728 deletions=584 successful=399 projection_witnesses=14 upper_cover_checks=258' /tmp/obstruction.txt
+          python -m mathos.research.f038_factored_interface | tee /tmp/interface.txt
+          grep -Fx 'F038_FACTORED_INTERFACE_OK families=8192 total=592 non_total=7600 parameters=65536 witnesses=27344 message_checks=32768 max_messages=8' /tmp/interface.txt
+          grep -Fx 'F038_INTERFACE_SHATTER_OK families=276 tables=276 context_checks=2120' /tmp/interface.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_FACTORED_INTERFACE_GATE_OK status=OPEN')
+          PY
