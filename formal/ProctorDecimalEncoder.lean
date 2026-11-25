@@ -47,7 +47,10 @@ theorem digit_value (d : Nat) : 48+d-48=d := by
     intro a b
     induction b with
     | zero => rfl
-    | succ b ih => exact ih
+    | succ b ih =>
+      change Nat.succ (a+b)-Nat.succ b=a
+      rw [Nat.succ_sub_succ_eq_sub]
+      exact ih
   rw [Nat.add_comm 48 d]
   exact cancel d 48
 
@@ -67,9 +70,28 @@ theorem scan_digit (v k d : Nat) (h : d<10)
     else none)=_
   rw [if_neg hs,if_pos hr,if_neg hb,digit_value]
 
+private theorem sub_add_cancel' (a b : Nat) (h : a≤b) : b-a+a=b := by
+  induction a generalizing b with
+  | zero => rfl
+  | succ a ih =>
+    cases b with
+    | zero => exact (Nat.not_succ_le_zero a h).elim
+    | succ b =>
+      rw [Nat.succ_sub_succ_eq_sub]
+      exact congrArg Nat.succ (ih b (Nat.le_of_succ_le_succ h))
+
+private theorem div_add_mod' (x y : Nat) : y*(x/y)+x%y=x := by
+  induction x,y using Nat.div.inductionOn with
+  | base x y h =>
+    rw [Nat.div_eq x y,Nat.mod_eq x y,if_neg h,Nat.mul_zero,Nat.zero_add]
+  | ind x y h ih =>
+    rw [Nat.div_eq x y,Nat.mod_eq x y,if_pos h,Nat.mul_succ]
+    rw [Nat.add_assoc,Nat.add_comm y ((x-y)%y),← Nat.add_assoc,ih]
+    exact sub_add_cancel' y x h.right
+
 theorem quotient_positive (n : Nat) (h : ¬n<10) : 0<n/10 := by
   have hm := Nat.mod_lt n (by decide : 0<10)
-  have he := Nat.div_add_mod n 10
+  have he := div_add_mod' n 10
   cases hq : n/10 with
   | zero =>
     rw [hq,Nat.mul_zero,Nat.zero_add] at he
@@ -92,8 +114,12 @@ theorem digits_scan (fuel n : Nat) (h : n<fuel) :
       rw [Nat.mul_zero,Nat.zero_add] at hd
       exact hd
     · have hpos := quotient_positive n small
-      have hn : 0<n := Nat.lt_of_lt_of_le (by decide : 0<10) (Nat.le_of_not_gt small)
-      have hlt : n/10<n := Nat.div_lt_self hn (by decide : 1<10)
+      have hlt : n/10<n := by
+        have hmul := Nat.mul_lt_mul_of_pos_right (by decide : 1<10) hpos
+        rw [Nat.one_mul] at hmul
+        have hh := Nat.le_add_right (10*(n/10)) (n%10)
+        rw [div_add_mod' n 10] at hh
+        exact Nat.lt_of_lt_of_le hmul hh
       have hf : n/10<fuel := Nat.lt_of_lt_of_le hlt (Nat.le_of_lt_succ h)
       obtain ⟨k,hk,hs⟩ := ih (n/10) hf
       refine ⟨k+1,Nat.zero_lt_succ k,?_⟩
@@ -102,7 +128,7 @@ theorem digits_scan (fuel n : Nat) (h : n<fuel) :
       rw [if_neg small,append_assoc']
       change scan (digits fuel (n/10)++(48+n%10)::rest) 0 0 acc=_
       rw [hs,scan_digit (n/10) k (n%10) (Nat.mod_lt n (by decide : 0<10))
-        (fun _ => Nat.ne_of_gt hpos),Nat.div_add_mod]
+        (fun _ => Nat.ne_of_gt hpos),div_add_mod']
 
 theorem word_scan (n : Nat) (rest acc : List Nat) :
     scan (word n++10::rest) 0 0 acc=scan rest 0 0 (n::acc) := by
@@ -159,8 +185,8 @@ end ProctorDecimalEncoder
 #print axioms ProctorDecimalEncoder.envelope_bytes
 #print axioms ProctorDecimalEncoder.proof_bytes_accept
 
-#print axioms Nat.div_add_mod
-#print axioms Nat.div_lt_self
-#print axioms Nat.mod_lt
-#print axioms Nat.le_of_not_gt
-#print axioms Nat.add_sub_cancel
+#print axioms ProctorDecimalEncoder.sub_add_cancel'
+#print axioms ProctorDecimalEncoder.div_add_mod'
+#print axioms Nat.div_eq
+#print axioms Nat.mod_eq
+#print axioms Nat.mul_lt_mul_of_pos_right
