@@ -1,0 +1,77 @@
+name: Proctor F035 nonlinear lift
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/f035_parity_projection_stress.py'
+      - 'mathos/research/f035_static_lift_audit.py'
+      - 'docs/research/tga-universal/PNP-F035-NONLINEAR-LIFT.md'
+      - '.github/workflows/proctor-f035-nonlinear-lift.yml'
+  push:
+    branches: [main, 'research/pnp-f035-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f035-nonlinear-lift
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f035-nonlinear-lift
+          python mathos/research/f035_parity_projection_stress.py | tee "$out/parity-stress.txt"
+          grep -Fx "F035_PARITY_PROJECTION_STRESS_OK k=1..12" "$out/parity-stress.txt"
+          python mathos/research/f035_static_lift_audit.py | tee "$out/static-lift.txt"
+          grep -Fx "F035_STATIC_LIFT_AUDIT_OK assignments=4096 degrees=5 first_refutation_degree=6" "$out/static-lift.txt"
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorPathResourceBounds.lean formal/ProctorTotalTwoCNF.lean formal/ProctorFiniteModel.lean formal/ProctorSerializedTwoCNF.lean formal/ProctorDecimalEncoder.lean formal/ProctorEndToEndBytes.lean formal/ProctorWireTokenBounds.lean formal/ProctorDecimalSize.lean formal/ProctorTokenMagnitude.lean formal/ProctorPolynomialWireSize.lean formal/ProctorRankBitBounds.lean formal/ProctorBinaryByteSolver.lean formal/ProctorGeneralBranching.lean formal/ProctorSemanticProjection.lean formal/ProctorComponentFactorization.lean formal/ProctorAdaptiveElimination.lean formal/ProctorAffineBarrier.lean formal/ProctorNonlinearLift.lean formal/ProctorNonlinearLiftMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F035_NONLINEAR_LIFT_OK expansion=96 pseudo=1' "$out/kernel.txt"
+          python -m mathos.research.tga_pnp_resolution_gap > "$out/gap-report.json"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f035-nonlinear-lift")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          groups = {"ProctorAffineBarrier":["bx_shuffle","bx_triple","eval_mix","equation_closed","system_closed","projected_closed","one_sat","two_sat","both_sat","mixed_false","no_affine_projection","factor_zero","product_zero","polynomial_correct","width_degree"],"ProctorNonlinearLift":["evaluate_append","multiply_eval","expand_exact","expanded_clause","relaxation_contains_models","lift_sound","relaxed_trap","trap_unsat","no_moment_realization"]}
+          names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
+          assert len(names)==24
+          for name in names:
+              if f"'{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          gap = json.loads((out/"gap-report.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          report = dict(scope="NONLINEAR_LIFT",
+                        verified=names, axiom_gate=True, controls=4198,
+                        ordinary_typed_completeness_verified=True,
+                        ordinary_executable_generator_completeness_verified=True,
+                        bound_envelope_completeness_verified=True,
+                        universal_decimal_encoder_verified=True,
+                        total_cost_semantics_verified=False,
+                        polynomial_certificate_completeness_verified=False,
+                        deterministic_polynomial_discovery_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256={ns:hashlib.sha256(Path("formal/"+ns+".lean").read_bytes()).hexdigest()
+                                       for ns in groups})
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f035-nonlinear-lift-evidence
+          path: artifacts/f035-nonlinear-lift/
