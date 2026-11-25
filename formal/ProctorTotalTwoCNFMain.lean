@@ -22,7 +22,7 @@ def check (n : Nat) (f : Formula) (sat : Bool) : IO Unit := do
     if sat || !boundCheck n f ⟨n,f,p⟩ || p.batches.length>cap ||
        steps p.batches>(f.length+cap)*cap then
       throw (IO.userError "bad bounded proof")
-    if ProctorExecutableReplay.hasEmpty f && p.batches.length!=0 then
+    if ProctorExecutableReplay.hasEmpty f && p.batches.length != 0 then
       throw (IO.userError "empty row must use zero batches")
   | _ => throw (IO.userError "unexpected result")
 def run : IO UInt32 := do
