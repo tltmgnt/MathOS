@@ -4,7 +4,7 @@ from mathos.research.f037_log_backdoor import restrict, satisfies
 
 
 def guarded(k,good):
-    # Selector is 1. The active guard is false at the unique good bit.
+    # Selector is 1. The guard literal is true at the unique good bit.
     # Every other variable has an owner pigeon and a value function
     # on that pigeon's chosen hole.
     g=1 if good else -1
