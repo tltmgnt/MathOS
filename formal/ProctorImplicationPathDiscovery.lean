@@ -126,13 +126,25 @@ private theorem row_arc_sound (c : Clause) (e : Arc) (he : e∈rowArcs c) :
           | tail _ hz => cases hz
       | cons d ds => cases he
 
+private theorem append_cases {α : Type} (xs ys : List α) (a : α)
+    (h : a∈xs++ys) : a∈xs ∨ a∈ys := by
+  induction xs with
+  | nil => exact Or.inr h
+  | cons b bs ih =>
+    cases h with
+    | head => exact Or.inl (List.Mem.head _)
+    | tail _ hm =>
+      cases ih hm with
+      | inl e => exact Or.inl (List.Mem.tail _ e)
+      | inr e => exact Or.inr e
+
 theorem arcs_sound (f : Formula) (e : Arc) (he : e∈arcs f) :
     Edge f e.1 e.2 := by
   induction f with
   | nil => cases he
   | cons c cs ih =>
     change e∈rowArcs c ++ arcs cs at he
-    cases ProctorEnvelopeCompleteness.append_cases (rowArcs c) (arcs cs) e he with
+    cases append_cases (rowArcs c) (arcs cs) e he with
     | inl h => exact ⟨c,List.Mem.head _,row_arc_sound c e h⟩
     | inr h =>
       obtain ⟨d,hd,hs⟩ := ih h
@@ -193,7 +205,7 @@ theorem relax_preserves (f : Formula) (a : Literal) (rs : Routes) (e : Arc)
   | none => exact h
   | some ps =>
     cases hd : routeFor e.2 rs with
-    | some qs => exact h
+    | some _qs => exact h
     | none =>
       intro p hp
       change p∈(e.2,ps++[e.2])::rs at hp
