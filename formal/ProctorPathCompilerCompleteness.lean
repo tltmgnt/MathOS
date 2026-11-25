@@ -226,7 +226,11 @@ theorem pathStart_complete (n : Nat) (f : Formula) (s z : Literal)
     obtain ⟨ss,out,hh,tr,hl,hn⟩ := pathTail_complete n f s b z rest hw hf hr.left
       (t.tail::g) (fun c hc => List.Mem.tail _ (sub c hc)) rfl
     refine ⟨t::ss,out,?_,Trace.cons t ht hv tr,hl,congrArg Nat.succ hn⟩
-    unfold pathStart
+    change (do
+      let i ← ProctorExecutableDiscovery.findRow (ProctorExecutableDiscovery.contained [opposite s,b]) g
+      let t := firstStep s b i
+      let (ts,h) ← pathTail s b (t.tail::g) rest
+      some (t::ts,h))=some (t::ss,out)
     rw [hi]
     change (do
       let (ts,h) ← pathTail s b (t.tail::g) rest
