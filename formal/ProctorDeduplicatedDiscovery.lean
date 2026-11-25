@@ -48,12 +48,12 @@ theorem unique_forward (vs : List Nat) (v : Nat) (h : v∈vs) : v∈unique vs :=
     dsimp only
     cases e : member a (unique as) with
     | true =>
-      rw [e]
+      change v∈unique as
       cases h with
       | head => exact member_sound _ _ e
       | tail _ hm => exact ih hm
     | false =>
-      rw [e]
+      change v∈a::unique as
       cases h with
       | head => exact List.Mem.head _
       | tail _ hm => exact List.Mem.tail _ (ih hm)
@@ -85,9 +85,9 @@ theorem unique_distinct (vs : List Nat) : Distinct (unique vs) := by
     unfold unique
     dsimp only
     cases e : member v (unique vs) with
-    | true => rw [e]; exact ih
+    | true => exact ih
     | false =>
-      rw [e]
+      change (v∉unique vs) ∧ Distinct (unique vs)
       exact ⟨fun h => Bool.noConfusion (e.symm.trans (member_complete _ _ h)),ih⟩
 
 theorem unique_ok (n : Nat) (vs : List Nat) (h : ∀ v∈vs, validId n v=true) :
@@ -180,20 +180,23 @@ theorem fast_sound (n : Nat) (f : Formula) (h : fast n f=true) : Unsat f := by
   | none => rw [e] at h; exact decide_sound n f h
   | some p =>
     rw [e] at h
-    cases b : boundCheck n f ⟨n,f,p⟩ with
-    | true => exact ProctorUnifiedReplay.bound_sound n f _ b
-    | false => rw [b] at h; exact decide_sound n f h
+    change (if boundCheck n f ⟨n,f,p⟩ then true else decide n f)=true at h
+    by_cases b : boundCheck n f ⟨n,f,p⟩=true
+    · exact ProctorUnifiedReplay.bound_sound n f _ b
+    · rw [if_neg b] at h
+      exact decide_sound n f h
 
 theorem fast_complete (n : Nat) (f : Formula) (hf : validFormula n f=true)
     (hu : Unsat f) : fast n f=true := by
   unfold fast
   cases e : unitCandidate f (unique (variables f)) with
-  | none => rw [e]; exact decide_complete n f hf hu
+  | none => exact decide_complete n f hf hu
   | some p =>
-    rw [e]
-    cases b : boundCheck n f ⟨n,f,p⟩ with
-    | true => rw [b]; rfl
-    | false => rw [b]; exact decide_complete n f hf hu
+    change (if boundCheck n f ⟨n,f,p⟩ then true else decide n f)=true
+    by_cases b : boundCheck n f ⟨n,f,p⟩=true
+    · rw [if_pos b] <;> rfl
+    · rw [if_neg b]
+      exact decide_complete n f hf hu
 
 theorem fast_iff (n : Nat) (f : Formula) (hf : validFormula n f=true) :
     fast n f=true ↔ Unsat f :=
