@@ -75,19 +75,16 @@ theorem expected_length (n : Nat) (f : Formula) :
     (encExpected n f).length=2*occurrences f+f.length+3 := by
   change (encFormula f).length+2=_
   rw [formula_length,Nat.add_assoc]
-  rfl
 
 theorem sat_tokens_length (f : Formula) (x : Assignment) :
     (tokens (.sat (materialize x (variables f)))).length=2*occurrences f+2 := by
   change (encClause (materialize x (variables f))).length+1=_
   rw [clause_length,materialize_length,variables_length,Nat.add_assoc]
-  rfl
 
 theorem step_length (s : Step) :
     (encStep s).length=2*s.tail.length+4 := by
   change (encClause s.tail).length+3=_
   rw [clause_length,Nat.add_assoc]
-  rfl
 
 def NarrowSteps (ss : List Step) : Prop := ∀ s∈ss, s.tail.length≤2
 def NarrowBatches (bs : List Batch) : Prop := ∀ b∈bs, NarrowSteps b
@@ -335,6 +332,9 @@ theorem solve_narrow (n : Nat) (f : Formula) (p : Proof)
       | none => rw [hc] at h; cases h
       | some v =>
         rw [hc] at h
+        change (match checked n f (tryVar f (arcs f) v) with
+          | none => ProctorTotalTwoCNF.Result.internalError
+          | some q => ProctorTotalTwoCNF.Result.unsat q)=_ at h
         cases hp : checked n f (tryVar f (arcs f) v) with
         | none => rw [hp] at h; cases h
         | some q =>
