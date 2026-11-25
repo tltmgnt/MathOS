@@ -68,7 +68,11 @@ theorem cover_correct (r : Rails) (f : Formula) :
     eval r (cover f)=true ↔ Covers r f := by
   induction f with
   | nil =>
-    exact ⟨fun _ c hc => by cases hc,fun _ => rfl⟩
+    constructor
+    · intro _ c hc
+      cases hc
+    · intro _
+      rfl
   | cons c cs ih =>
     change (eval r (coverRow c) && eval r (cover cs))=true ↔ Covers r (c::cs)
     constructor
@@ -81,11 +85,17 @@ theorem cover_correct (r : Rails) (f : Formula) :
     · intro h
       rw [(row_correct r c).2 (h c (List.Mem.head _)),
         ih.2 (fun d hd => h d (List.Mem.tail _ hd))]
+      rfl
 
 theorem conflict_correct (r : Rails) (vs : List Nat) :
     eval r (conflict vs)=false ↔ Consistent r vs := by
   induction vs with
-  | nil => exact ⟨fun _ v hv => by cases hv,fun _ => rfl⟩
+  | nil =>
+    constructor
+    · intro _ v hv
+      cases hv
+    · intro _
+      rfl
   | cons v vs ih =>
     change ((r (v,true) && r (v,false)) || eval r (conflict vs))=false ↔ Consistent r (v::vs)
     constructor
@@ -95,7 +105,9 @@ theorem conflict_correct (r : Rails) (vs : List Nat) :
         | false => rfl
         | true =>
           rw [e] at h
-          cases r (v,true) <;> cases r (v,false) <;> cases h
+          have bad : (r (v,true) && r (v,false)) || true = true := by
+            cases (r (v,true) && r (v,false)) <;> rfl
+          exact Bool.noConfusion (bad.symm.trans h)
       intro u hu hp
       cases hu with
       | head =>
@@ -126,7 +138,7 @@ theorem rails_consistent (x : Assignment) (vs : List Nat) :
   change (if x v=false then true else false)=false
   cases e : x v with
   | false => rw [e] at h; cases h
-  | true => rw [e] <;> rfl
+  | true => rfl
 
 theorem model_covers (f : Formula) (x : Assignment) (h : FormulaSat f x) :
     Covers (rails x) f := by
@@ -147,7 +159,7 @@ theorem selected_true (r : Rails) (vs : List Nat) (l : Literal)
       change r (v,true)=false
       cases e : r (v,true) with
       | false => rfl
-      | true => exact (Bool.noConfusion ((h v hv e).symm.trans hl)).elim
+      | true => exact Bool.noConfusion ((h v hv e).symm.trans hl)
 
 theorem consistent_cover_model (f : Formula) (r : Rails)
     (hc : Covers r f) (hs : Consistent r (variables f)) :
@@ -180,7 +192,7 @@ theorem distinguishes (f : Formula) (r : Rails) :
       have hc : eval r (cover f)=true := by
         cases z : eval r (cover f) with
         | true => rfl
-        | false => exact (e rfl).elim
+        | false => exact (e (by rw [z]; rfl)).elim
       exact ⟨(cover_correct r f).1 hc,(conflict_correct r _).1 h⟩
     · intro e
       have hc := (cover_correct r f).2 e.1
