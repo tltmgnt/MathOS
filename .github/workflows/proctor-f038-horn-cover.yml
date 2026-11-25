@@ -1,0 +1,38 @@
+name: Proctor F038 Horn cover compatibility
+on:
+  push:
+    branches: ['research/pnp-f038-horn-cover-compatibility']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_witness_composition | tee /tmp/composition.txt
+          grep -Fx 'F038_MAJORITY_COMPOSITION_OK families=16384 total=2484 failed=13900 seed_probes=172032 missing=91328 outputs=6686 majority=1592' /tmp/composition.txt
+          grep -Fx 'F038_MIXED_COMPOSITION_OK families=8192 total=356 failed=7836 parameters=24576 local_witnesses=188416 global_checks=196608' /tmp/composition.txt
+          python -m mathos.research.f038_horn_cover | tee /tmp/cover.txt
+          grep -Fx 'F038_HORN_COVER_ABSTRACT_OK k=1 cases=122 total=1 non_total=121 probes=488 worst_min_zeros=1' /tmp/cover.txt
+          grep -Fx 'F038_HORN_COVER_ABSTRACT_OK k=2 cases=7503 total=551 non_total=6952 probes=52521 worst_min_zeros=2' /tmp/cover.txt
+          grep -Fx 'F038_HORN_COVER_ABSTRACT_OK k=3 cases=310124 total=71609 non_total=238515 probes=2480992 worst_min_zeros=3' /tmp/cover.txt
+          grep -Fx 'F038_HORN_COVER_CONCRETE_OK families=4096 total=736 non_total=3360 near_probes=45056 alternative_checks=131072 outputs=43728 missing_near=17328 orientation_checks=65536' /tmp/cover.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HORN_COVER_GATE_OK status=OPEN')
+          PY
