@@ -1,0 +1,40 @@
+name: Proctor F038 guarded conflict learning
+on:
+  push:
+    branches: ['research/pnp-f038-guarded-conflict-learning']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_guarded_learning.py
+          python -m mathos.research.f038_relational_pruning | tee /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PROPAGATION_OK cases=4096 membership_checks=32768 empty=1710 true_empty=1710 false_positive=0 strict=3647 exact=4026 sweeps=6100 initial=12288 remaining=3808' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PRUNING_OK formulas=4096 inconsistent=2384 queries=6398 sat=2622 unsat=3776 nodes=34130 membership_checks=66390' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PRUNING_FULL_OK formulas=256 inconsistent=1 queries=1148 sat=1148 unsat=0 nodes=7876 membership_checks=54172' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_HIERARCHY_OK ranks=3,4,5 blocks=2,3 cases=6 lower_order_root_trials=36 higher_order_root_trials=0 corrupt_rejected=6' /tmp/relational.txt
+          python -m mathos.research.f038_guarded_learning | tee /tmp/guarded.txt
+          grep -Fx 'F038_GUARDED_LEARNING_OK formulas=4096 queries=200704 sat=34112 unsat=166592 model_checks=229376 bad_queries=24576 bad_sat=6416 pinned_queries=172032 pinned_sat=26336' /tmp/guarded.txt
+          grep -Fx 'F038_GUARDED_LEARNING_FULL_OK formulas=256 queries=8960 sat=5791 unsat=3169 model_checks=10240 bad_queries=1024 bad_sat=1024 pinned_queries=7680 pinned_sat=4512' /tmp/guarded.txt
+          grep -Fx 'F038_GUARDED_REUSE_OK non_up_refutation=1 direct_reuse=4 changed_mode_sat=4 corrupt_rejected=3' /tmp/guarded.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_GUARDED_LEARNING_GATE_OK status=OPEN')
+          PY
