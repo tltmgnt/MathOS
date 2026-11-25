@@ -189,8 +189,7 @@ theorem block_value (w : Nat) (f : Formula) (b : Block) :
   by_cases h : b.support.length≤5
   · rw [if_pos h,if_pos h]
     change ((refsMeter w f b.refs).1 && (patternsMeter b.support (patternMeter w b)).1)=_
-    rw [refs_value,patterns_value _ _ _ (pattern_value w b)]
-    rfl
+    rw [refs_value,patterns_value _ _ _ (pattern_value w b)] <;> rfl
   · rw [if_neg h,if_neg h] <;> rfl
 
 theorem block_bounds (w : Nat) (f : Formula) (b : Block) :
@@ -224,8 +223,7 @@ theorem combine_value (w : Nat) (a b : List Nat) :
   | nil => rfl
   | cons v vs ih =>
     change (toggleMeter w v (combineMeter w vs b).1).1=_
-    rw [ih]
-    rfl
+    rw [ih] <;> rfl
 
 theorem combine_bound (w : Nat) (a b : List Nat) :
     (combineMeter w a b).2≤combineBudget w a b := by
@@ -254,8 +252,7 @@ theorem sum_value (w : Nat) (bs : List Block) :
   | nil => rfl
   | cons b bs ih =>
     change (combineMeter w b.support (sumMeter w bs).1).1=_
-    rw [combine_value,ih]
-    rfl
+    rw [combine_value,ih] <;> rfl
 
 theorem sum_bound (w : Nat) (bs : List Block) :
     (sumMeter w bs).2≤sumBudget w bs := by
