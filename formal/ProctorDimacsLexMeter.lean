@@ -222,7 +222,13 @@ theorem signed_value (w : List Nat) :
   cases w with
   | nil => rfl
   | cons b ds =>
-    unfold signedMeter signedWord
+    change (if b=45 then
+      ((match (naturalMeter ds).1 with
+        | none => none
+        | some v => if v=0 then none else some (v,false)),(naturalMeter ds).2+2)
+      else ((naturalMeter (b::ds)).1.map (fun v => (v,true)),(naturalMeter (b::ds)).2+1)).1 =
+      (if b=45 then (do let v ← naturalWord ds; if v=0 then none else some (v,false))
+       else (do let v ← naturalWord (b::ds); some (v,true)))
     by_cases h : b=45
     · rw [if_pos h,if_pos h]
       change (match (naturalMeter ds).1 with
@@ -246,7 +252,12 @@ theorem signed_bound (w : List Nat) :
   cases w with
   | nil => exact (by decide : 1≤signedUnit 0)
   | cons b ds =>
-    unfold signedMeter signedUnit
+    change (if b=45 then
+      ((match (naturalMeter ds).1 with
+        | none => none
+        | some v => if v=0 then none else some (v,false)),(naturalMeter ds).2+2)
+      else ((naturalMeter (b::ds)).1.map (fun v => (v,true)),(naturalMeter (b::ds)).2+1)).2 ≤
+      naturalUnit (b::ds).length+2
     by_cases h : b=45
     · rw [if_pos h]
       exact Nat.add_le_add (Nat.le_trans (natural_bound ds)
