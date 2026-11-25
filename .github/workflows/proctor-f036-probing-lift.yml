@@ -1,0 +1,20 @@
+name: Proctor F036 probing lift audit
+on:
+  push:
+    branches: ['research/pnp-f036-probing-lift']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python mathos/research/f036_probing_lift.py | tee /tmp/probing-lift.txt
+          grep -Fx 'F036_PROBING_LIFT_OK degrees=4 min_depths=3,3,2,1' /tmp/probing-lift.txt
