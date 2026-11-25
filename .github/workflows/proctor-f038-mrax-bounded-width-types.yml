@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X bounded width types
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-bounded-width-types']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_bounded_width_types.py
+          python -m mathos.research.f038_orientation_discovery | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_ORIENTATION_OK {"controls":5,"families":[64,1,32,32],"global":[256,120,136,1466,20736,825,65536,109,11,109,27],"slices":[256,6912,2584,4650,49410,7866,1134]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_bounded_width_types | tee /tmp/types.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/types.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=discovery,ordinary_complete,machine_cost,short_proofs status=OPEN' /tmp/types.txt
+          grep -Fx 'F038_MRAX_BOUNDED_WIDTH_TYPES_OK {"controls":6,"global":[256,120,136,4096,1080,109,11],"terms":[528,256,4650,8955210]}' /tmp/types.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/types.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/types.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_BOUNDED_WIDTH_GATE_OK status=OPEN')
+          PY

@@ -1,0 +1,160 @@
+{
+  "attempt_id": "F038-MRAX-BOUNDED-WIDTH-TYPES",
+  "base_commit": "fead4da57c93cab22e208323c7538535c5c132b9",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45721840186",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the four-operation compatibility problem be recognized without any global label enumeration?",
+  "route": "certificate_route",
+  "topology": "Exact (2,3)-minimality gluing under common WNU identities; no universal SAT homology claim.",
+  "adversarial": [
+    "The bounded-width theorem is an external dependency.",
+    "Pair projections alone lose higher-order constraints.",
+    "No compatible typing does not imply Boolean UNSAT."
+  ],
+  "scope": "Explicit Boolean relations; four symmetric idempotent ternary Boolean operations.",
+  "cost": "2^O(h) poly(L) for supplied bounded-block interface; no ambiguity exponent",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of WNU terms and external bounded-width theorem application"
+    },
+    {
+      "key": "attempt_representation_coverage",
+      "label": "Uniform useful typable representation or certified alternative"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Universal total selector preservation and bit cost"
+    }
+  ],
+  "independent_reference": "Independent JS term and finite semijoin tests against exhaustive label assignments; not Python execution.",
+  "expected": {
+    "terms": [
+      528,
+      256,
+      4650,
+      8955210
+    ],
+    "global": [
+      256,
+      120,
+      136,
+      4096,
+      1080,
+      109,
+      11
+    ],
+    "controls": 6
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_bounded_width_types.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-BOUNDED-WIDTH-TYPES.md"
+  ],
+  "next": "Can certified representation transformations guarantee typable bounded-block interfaces, or can a specified transformation policy be ruled out?",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can the four-operation compatibility problem be recognized without any global label enumeration?",
+      "strategy": "Construct common WNU terms on operation labels and apply bounded relational width.",
+      "alternative": "Implement (2,3)-minimality and pinned self-reduction.",
+      "stop_rule": "Stop optimizing recognition after exact polynomial theorem; redirect to representation coverage; no proof promotion.",
+      "literature_leads": [
+        "Barto and Kozik, Constraint Satisfaction Problems of Bounded Width (FOCS 2009), https://www.karlin.mff.cuni.cz/~barto/Articles/SDBW.pdf",
+        "Barto, The collapse of the bounded width hierarchy, https://doi.org/10.1093/logcom/exu070"
+      ]
+    },
+    "construct": {
+      "claim": "Every local four-operation compatibility table has common weak near-unanimity polymorphisms of all arities >=3.",
+      "scope": "Explicit Boolean relations; four symmetric idempotent ternary Boolean operations.",
+      "derivation": "Compose typed operations to define t; derive priority selector s; cyclic s-folds followed by t yield WNU terms.",
+      "unresolved_steps": [
+        "Universal useful representation existence; formal review of external theorem applicability."
+      ],
+      "candidate_tests": [
+        "All WNU identities through arity 8 and all ternary type tables."
+      ]
+    },
+    "alternative": {
+      "claim": "Exact (2,3)-minimality and singleton-pinned self-reduction recognize and reconstruct compatible labels in polynomial explicit-table time.",
+      "scope": "Retain all input tables; add full scopes up to size three; invoke established bounded-width theorem.",
+      "derivation": "Intersect all unary and binary projections and filter rows to a fixed point; reconstruct with at most 4n+1 decisions.",
+      "unresolved_steps": [
+        "General bounded-block interface discovery and useful typing coverage."
+      ],
+      "candidate_tests": [
+        "All 256 four-variable fixtures and 4096 singleton pins; adversarial examples and replay."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "The bounded-width theorem is an external dependency.",
+        "Pair projections alone lose higher-order constraints.",
+        "No compatible typing does not imply Boolean UNSAT."
+      ],
+      "counterexample_candidates": [
+        "NAE; mask 127 type relation; equality/equality/disequality cycle with fixed H labels."
+      ],
+      "equivalence_audit": "WNU terms are uniform across all local type tables; nonempty (2,3)-minimality is exact by cited theorem, not finite evidence.",
+      "barrier_audit": "Polynomial recognition does not imply universal typable representation; general SAT remains open.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite tables over four labels, uniform bit computation.",
+      "cost_ledger": {
+        "encoding": "Explicit Boolean and type tables",
+        "preprocessing": "2^O(h) poly(L) local type generation",
+        "inference": "Polynomial (2,3)-minimality sweeps retaining source relations",
+        "repetitions": "At most 4n+1 decisions for reconstruction",
+        "arithmetic_bits": "Polynomial explicit lengths",
+        "memory": "Polynomial in explicit tables plus O(n^3) small scopes",
+        "reconstruction": "Checked label tuple, prior typed solver and witness lifting",
+        "overall": "2^O(h) poly(L) for supplied bounded-block interface; no ambiguity exponent"
+      },
+      "missing_bounds": [
+        "Universal useful representation or typing",
+        "General interface discovery",
+        "Universal selector preservation and bit cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Composition term and priority table",
+        "All-arity WNU identity argument",
+        "Exact consistency algorithm with cited bounded-width theorem"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check term closure and finite fixtures",
+        "Verify actual decisions and witness reconstruction",
+        "Reject altered evidence"
+      ],
+      "formalization_plan": "Formalize four-label algebra and WNU identities; independently review cited bounded-width theorem and exact scope.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Remove the global ambiguity exponent entirely for compatible-type discovery; redirect from recognition to representation coverage.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "Universal useful interface/typing existence",
+        "Unrestricted negative route"
+      ],
+      "next_question": "Can certified representation transformations guarantee typable bounded-block interfaces, or can a specified transformation policy be ruled out?",
+      "human_review_requests": [
+        "Review all-arity WNU construction, bounded-width theorem application and uniform explicit-table cost."
+      ]
+    }
+  }
+}
