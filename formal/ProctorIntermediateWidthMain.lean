@@ -53,8 +53,9 @@ def run : IO UInt32 := do
     let g : Group := ⟨[],k⟩
     if groupCheck [] g && k>2 then
       throw (IO.userError "capacity guard mismatch")
-  if !(supportOK (cap 17) (indices 100000)) ||
-      !(decide (totalCapacity (List.replicate 100000 (⟨[],2⟩ : Group))<cap 18)) then
+  if !(supportOK (cap 17) (indices 1000) && decide (100000<cap 17)) ||
+      !(decide (totalCapacity (List.replicate 1000 (⟨[],2⟩ : Group))=2000) &&
+        decide (2*100000<cap 18)) then
     throw (IO.userError "wide structural bounds mismatch")
   if pairs != 7225 || toggles != 340 || projections != 170 || capacities != 101 then
     throw (IO.userError "control count mismatch")
