@@ -37,7 +37,7 @@ theorem length_iff {α : Type} (xs : List α) (c : List Bool) :
     rw [lengthOK]
     cases e : (decMeter c).1 with
     | none =>
-      rw [e]
+      change false=true ↔ xs.length+1≤bitsValue c
       have hz := (dec_reject_iff c).mp e
       rw [hz]
       constructor
@@ -46,7 +46,7 @@ theorem length_iff {α : Type} (xs : List α) (c : List Bool) :
       · intro h
         cases h
     | some d =>
-      rw [e]
+      change lengthOK xs d=true ↔ xs.length+1≤bitsValue c
       have hd := (dec_sound c d e).right
       constructor
       · intro h
@@ -89,16 +89,10 @@ theorem visits_length_bound {α : Type} (xs : List α) (c : List Bool) :
     rw [visits]
     cases e : (decMeter c).1 with
     | none =>
-      change (decMeter c).2+(match (decMeter c).1 with
-        | none => 0
-        | some d => visits xs d)≤c.length*(xs.length+1)
-      rw [e]
+      change (decMeter c).2≤c.length*(xs.length+1)
       exact Nat.le_trans (dec_visit_bound c) (Nat.le_add_left _ _)
     | some d =>
-      change (decMeter c).2+(match (decMeter c).1 with
-        | none => 0
-        | some z => visits xs z)≤c.length*(xs.length+1)
-      rw [e]
+      change (decMeter c).2+visits xs d≤c.length*(xs.length+1)
       have h := ih d
       rw [(dec_sound c d e).left] at h
       calc
@@ -116,16 +110,10 @@ theorem visits_capacity_bound {α : Type} (xs : List α) (c : List Bool) :
     rw [visits]
     cases e : (decMeter c).1 with
     | none =>
-      change (decMeter c).2+(match (decMeter c).1 with
-        | none => 0
-        | some d => visits xs d)≤c.length*(bitsValue c+1)
-      rw [e]
+      change (decMeter c).2≤c.length*(bitsValue c+1)
       exact Nat.le_trans (dec_visit_bound c) (Nat.le_add_left _ _)
     | some d =>
-      change (decMeter c).2+(match (decMeter c).1 with
-        | none => 0
-        | some z => visits xs z)≤c.length*(bitsValue c+1)
-      rw [e]
+      change (decMeter c).2+visits xs d≤c.length*(bitsValue c+1)
       have hs := dec_sound c d e
       have h := ih d
       rw [hs.left,hs.right] at h
