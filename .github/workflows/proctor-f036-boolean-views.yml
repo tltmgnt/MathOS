@@ -1,0 +1,20 @@
+name: Proctor F036 Boolean views audit
+on:
+  push:
+    branches: ['research/pnp-f036-boolean-views']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f036_boolean_views | tee /tmp/boolean-views.txt
+          grep -Fx 'F036_BOOLEAN_VIEWS_OK parity=8 parity_sat=8 graph_unsat=6 graph_sat=6 random=128 rejection=3' /tmp/boolean-views.txt
