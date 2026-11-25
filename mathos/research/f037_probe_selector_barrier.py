@@ -1,7 +1,6 @@
 """A scalable adversary for bounded binary lookahead plus majority.
 Probe returns REJECT, MODEL, or OPEN, never calls OPEN a proof.
 """
-from itertools import product
 from mathos.research.f037_guarded_choice import guarded
 from mathos.research.f037_log_backdoor import normalize, restrict, satisfies
 
@@ -50,8 +49,8 @@ def adversary(d,good):
     g=1 if good else -1
     # In the wrong branch these bias clauses vanish. In the good
     # branch they are units, so they do not conceal a contradiction.
-    # A separate disjoint equality chain prevents the bounded
-    # probe from finding a complete model in the good branch.
+    # Disjoint fresh binary clauses prevent the bounded probe
+    # from finding a complete model in the good branch.
     first=max(tags)+1
     bias=sum(g in c for c in f)+1
     pad=tuple((-g,first+i) for i in range(bias))
