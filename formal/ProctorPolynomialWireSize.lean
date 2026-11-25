@@ -163,26 +163,28 @@ theorem producer_magnitude_pow (n : Nat) (f : Formula) (w : Witness)
     (h : produce n f=some w) :
     ∀ t∈tokens w, t<10^(2*inputSize n f+4) := by
   let N := inputSize n f
-  let cap := max n (max 3402 (N+N*N))
+  have hp : 0<10^(2*N+4) := Nat.lt_of_lt_of_le
+    (Nat.zero_lt_succ _) (successor_pow (2*N+4))
+  obtain ⟨cap,hcapEq⟩ : ∃ cap : Nat, 10^(2*N+4)=cap+1 := by
+    cases e : 10^(2*N+4) with
+    | zero => rw [e] at hp; exact (Nat.not_lt_zero _ hp).elim
+    | succ k => exact ⟨k,rfl⟩
+  have below : ∀ a : Nat, a<10^(2*N+4) → a≤cap := by
+    intro a ha
+    rw [hcapEq] at ha
+    exact Nat.le_of_lt_succ ha
   have hc := structural_counts n f
   have hs : N≤N+N*N := Nat.le_add_right _ _
-  have hcap : N+N*N≤cap :=
-    Nat.le_trans (Nat.le_max_right 3402 _) (Nat.le_max_right n _)
+  have hcap : N+N*N≤cap := below _ (structural_pow N)
   have hm := ProctorTokenMagnitude.producer_bound n cap f w
-    (Nat.le_max_left n _) (Nat.le_trans (Nat.le_max_left 3402 _) (Nat.le_max_right n _))
+    (below _ (identifier_pow n f))
+    (below _ (constants_pow N))
     (Nat.le_trans hc.1 (Nat.le_trans hs hcap))
     (Nat.le_trans hc.2.1 (Nat.le_trans hs hcap))
     (Nat.le_trans (structural_budget n f) hcap) h
   have hlt : cap<10^(2*N+4) := by
-    have max_lt' : ∀ a b c : Nat, a<c → b<c → max a b<c := by
-      intro a b c ha hb
-      by_cases hab : a≤b
-      · rw [Nat.max_eq_right hab]
-        exact hb
-      · rw [Nat.max_eq_left (Nat.le_of_not_ge hab)]
-        exact ha
-    exact max_lt' _ _ _ (identifier_pow n f)
-      (max_lt' _ _ _ (constants_pow N) (structural_pow N))
+    rw [hcapEq]
+    exact Nat.lt_succ_self _
   intro t ht
   exact Nat.lt_of_le_of_lt (hm t ht) hlt
 
