@@ -1,0 +1,33 @@
+name: Proctor F038 monotone choice barrier
+on:
+  push:
+    branches: ['research/pnp-f038-monotone-choice-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_monotone_choice | tee /tmp/choice.txt
+          grep -Fx 'F038_MONOTONE_CHOICE_OK graphs=2184 branch_checks=4368 no_promise=1' /tmp/choice.txt
+          grep -Fx 'color_only=1445 clique_only=727 neither=12 monotone_edges=10636 max_variables=53 max_clauses=231' /tmp/choice.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          gap=json.loads(Path('/tmp/gap.json').read_text())
+          assert gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert gap['selector_route']['status']=='BLOCKED'
+          assert gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_MONOTONE_CHOICE_GATE_OK status=OPEN')
+          PY
