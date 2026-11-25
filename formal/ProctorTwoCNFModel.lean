@@ -182,13 +182,47 @@ theorem rank_mono (p q : Literal → Bool) (vs : List Literal)
     change bit (p a)+2*rank p as≤bit (q a)+2*rank q as
     cases ep : p a <;> cases eq : q a
     · change 0+2*rank p as≤0+2*rank q as
-      omega
+      exact Nat.add_le_add (Nat.le_refl 0) (Nat.mul_le_mul_left 2 ht)
     · change 0+2*rank p as≤1+2*rank q as
-      omega
+      exact Nat.add_le_add (Nat.zero_le 1) (Nat.mul_le_mul_left 2 ht)
     · have hfalse : false=true := eq.symm.trans (hb ep)
       cases hfalse
     · change 1+2*rank p as≤1+2*rank q as
-      omega
+      exact Nat.add_le_add (Nat.le_refl 1) (Nat.mul_le_mul_left 2 ht)
+
+private theorem double_not_odd (m n : Nat) : 2*m≠1+2*n := by
+  induction m generalizing n with
+  | zero =>
+    intro h
+    rw [Nat.mul_zero,Nat.add_comm 1] at h
+    exact Nat.noConfusion h
+  | succ m ih =>
+    cases n with
+    | zero =>
+      intro h
+      rw [Nat.mul_succ,Nat.mul_zero] at h
+      exact Nat.noConfusion (Nat.succ.inj h)
+    | succ n =>
+      intro h
+      rw [Nat.mul_succ,Nat.mul_succ,Nat.add_assoc] at h
+      exact ih n (Nat.add_right_cancel h)
+
+private theorem double_inj (m n : Nat) (h : 2*m=2*n) : m=n := by
+  induction m generalizing n with
+  | zero =>
+    cases n with
+    | zero => rfl
+    | succ n =>
+      rw [Nat.mul_zero,Nat.mul_succ] at h
+      exact (Nat.noConfusion h).elim
+  | succ m ih =>
+    cases n with
+    | zero =>
+      rw [Nat.mul_succ,Nat.mul_zero] at h
+      exact (Nat.noConfusion h).elim
+    | succ n =>
+      rw [Nat.mul_succ,Nat.mul_succ] at h
+      exact congrArg Nat.succ (ih n (Nat.add_right_cancel h))
 
 theorem rank_eq_bits (p q : Literal → Bool) (vs : List Literal)
     (h : rank p vs=rank q vs) : ∀ a∈vs, p a=q a := by
@@ -201,13 +235,13 @@ theorem rank_eq_bits (p q : Literal → Bool) (vs : List Literal)
       · rfl
       · rw [ep,eq] at h
         change 0+2*rank p as=1+2*rank q as at h
-        omega
+        exact (double_not_odd _ _ ((Nat.zero_add _).symm.trans h)).elim
       · rw [ep,eq] at h
         change 1+2*rank p as=0+2*rank q as at h
-        omega
+        exact (double_not_odd _ _ ((Nat.zero_add _).symm.trans h.symm)).elim
       · rfl
     rw [he] at h
-    have ht : rank p as=rank q as := by omega
+    have ht : rank p as=rank q as := double_inj _ _ (Nat.add_left_cancel h)
     intro b hb
     cases hb with
     | head => exact he
@@ -257,7 +291,8 @@ theorem model_lt (f : Formula) (a : Literal) (hv : a.1∈variables f)
       · rw [if_pos e]
         exact ⟨fun h => (Bool.noConfusion h),fun h => (Nat.not_lt_of_ge (Nat.le_of_lt e) h).elim⟩
       · rw [if_neg e]
-        have hl : score f (v,false)<score f (v,true) := by omega
+        have hl : score f (v,false)<score f (v,true) :=
+          Nat.lt_of_le_of_ne (Nat.le_of_not_gt e) (fun he => hn he.symm)
         exact ⟨fun _ => hl,fun _ => rfl⟩
 
 theorem model_edge (f : Formula) (a b : Literal)
@@ -355,7 +390,12 @@ theorem conflict_routes (f : Formula) (v : Nat) (h : conflictAt f v=true) :
       reach (arcs f) (v,false) (v,true)=some qs := by
   have he : R (arcs f) (v,true) (v,false)=true ∧ R (arcs f) (v,false) (v,true)=true := by
     unfold conflictAt at h
-    cases hp : R (arcs f) (v,true) (v,false) <;> cases hq : R (arcs f) (v,false) (v,true) <;> simp_all
+    cases hp : R (arcs f) (v,true) (v,false) with
+    | false => rw [hp] at h; cases h
+    | true =>
+      cases hq : R (arcs f) (v,false) (v,true) with
+      | false => rw [hp,hq] at h; cases h
+      | true => exact ⟨rfl,rfl⟩
   obtain ⟨ps,hp⟩ := (r_iff _ _ _).1 he.left
   obtain ⟨qs,hq⟩ := (r_iff _ _ _).1 he.right
   exact ⟨ps,qs,hp,hq⟩
