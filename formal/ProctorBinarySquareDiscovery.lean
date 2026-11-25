@@ -115,8 +115,8 @@ theorem checked_complete (n : Nat) (f : Formula) (o : Option Proof) (p : Proof)
     (h : o=some p) (hc : boundCheck n f ⟨n,f,p⟩=true) :
     checked n f o=some p := by
   rw [h]
-  unfold checked
-  rw [hc] <;> rfl
+  change (if boundCheck n f ⟨n,f,p⟩ then some p else none)=some p
+  rw [if_pos hc]
 
 -- Return the checked proof itself, rather than discarding it as a Bool.
 def discover (n : Nat) (f : Formula) : Option Proof :=
