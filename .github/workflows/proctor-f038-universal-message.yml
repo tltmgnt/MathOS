@@ -1,0 +1,40 @@
+name: Proctor F038 universal message compilation
+on:
+  push:
+    branches: ['research/pnp-f038-universal-message-compilation']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_universal_message.py
+          python -m mathos.research.f038_certified_portfolio | tee /tmp/portfolio.txt
+          grep -Fx 'F038_PORTFOLIO_SCHEDULE_OK cases=5184 solved=4477 unknown=707 attempts=24190 charged=38546 max_ratio=3.25' /tmp/portfolio.txt
+          grep -Fx 'F038_PORTFOLIO_ENGINES_OK fixtures=3 engines=5 positive=9 negative=4 abstain=2 integrated=3 tiny_cap_unknown=1 rejected=1 verifier_timeout=1' /tmp/portfolio.txt
+          grep -Fx 'F038_PORTFOLIO_COMMON_MESSAGE_OK grids=2,3,4,8,16,32 induced_matching=1,2,4,15,60,231 max_rank=1024' /tmp/portfolio.txt
+          python -m mathos.research.f038_universal_message | tee /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_OK selections=4096 sat=1360 unsat=2736 witness_checks=32768 valid_witnesses=2304 extension_trials=524288 valid_extensions=11520 anchor_checks=49152' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_FULL_OK selections=256 sat=255 unsat=1 witness_checks=2048 valid_witnesses=1024 extension_trials=524288 valid_extensions=27648 anchor_checks=2048' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_2VAR_OK selections=256 sat=95 unsat=161 witness_checks=1024 valid_witnesses=128 extension_trials=1024 valid_extensions=128 anchor_checks=2048' /tmp/universal.txt
+          grep -Fx 'F038_UNIVERSAL_MESSAGE_TREE_OK sizes=1,2,3,4,5 presence_bits=2,8,26,64,130 actual_tables=2,8 table_rows=3,95' /tmp/universal.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNIVERSAL_MESSAGE_GATE_OK status=OPEN')
+          PY
