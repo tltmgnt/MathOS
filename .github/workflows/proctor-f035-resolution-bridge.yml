@@ -1,0 +1,75 @@
+name: Proctor F035 unbounded codec and resolution bridge
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_pnp_resolution_gap.py'
+      - '.github/workflows/proctor-f035-resolution-bridge.yml'
+  push:
+    branches: [main, 'research/pnp-f035-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f035-resolution-bridge
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f035-resolution-bridge
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorResolutionBridgeMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F035_RESOLUTION_BRIDGE_OK sequential=2 positives=4 digit=1 list=1 malformed=5 adapter=2' "$out/kernel.txt"
+          python -m mathos.research.tga_pnp_resolution_gap > "$out/gap-report.json"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f035-resolution-bridge")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          groups = {
+              "ProctorUnboundedCodec": ["scan_legacy_success","tokenize_legacy_success","bounded_expected_reject","bytes_sound"],
+              "ProctorUnboundedRoundtrip": ["list_roundtrip","literal_roundtrip","clause_roundtrip","formula_roundtrip","expected_roundtrip","ref_roundtrip","group_roundtrip","capacity_roundtrip","block_roundtrip","step_roundtrip","terminal_roundtrip","proof_roundtrip","envelope_roundtrip","decode_exact","expected_exact","envelope_exact"],
+              "ProctorResolutionBridge": ["contains_complete","shape_complete","step_complete","copy_step","copy_tails","copy_checked","copy_batch","extend_checked","extend_tails","compile_checked","compile_frontier","compile_refutation","decision_sound","decision_complete","decision_iff","sat_iff"],
+          }
+          names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
+          assert len(names)==36
+          for name in names:
+              if f"'{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          gap = json.loads((out/"gap-report.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          report = dict(scope="UNBOUNDED_CODEC_AND_CONDITIONAL_RESOLUTION_BRIDGE",
+                        verified=names, axiom_gate=True, controls=15,
+                        unrestricted_token_roundtrip_verified=True,
+                        universal_decimal_encoder_verified=False,
+                        sequential_resolution_embedding_verified=True,
+                        conditional_decision_bridge_verified=True,
+                        total_cost_semantics_verified=False,
+                        polynomial_certificate_completeness_verified=False,
+                        deterministic_polynomial_discovery_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256={ns:hashlib.sha256(Path("formal/"+ns+".lean").read_bytes()).hexdigest()
+                                       for ns in groups})
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f035-resolution-bridge-evidence
+          path: artifacts/f035-resolution-bridge/
