@@ -80,7 +80,8 @@ theorem relax_budget (es : List Arc) (rs : Routes) (e : Arc) (he : e∈es) :
         rw [if_pos rfl]
       have hm := missing_strict rs qs es e hx he hd hk
       change rs.length+1+missing qs es≤rs.length+missing rs es
-      omega
+      rw [Nat.add_assoc,Nat.add_comm 1 (missing qs es)]
+      exact Nat.add_le_add_left (Nat.succ_le_of_lt hm) _
 
 theorem sweep_budget (es work : List Arc) (rs : Routes)
     (h : ∀ e∈work, e∈es) :
@@ -106,9 +107,8 @@ theorem route_table_bound (es : List Arc) (a : Literal) (fuel : Nat) :
   have hm := missing_bound ([(a,[])] : Routes) es
   change (saturate es fuel [(a,[])]).length+missing (saturate es fuel [(a,[])]) es≤
     1+missing [(a,[])] es at hb
-  omega
-
-theorem reach_length_bound (es : List Arc) (a b : Literal) (ps : List Literal)
+  exact Nat.le_trans (Nat.le_trans (Nat.le_add_right _ _) hb)
+    (Nat.add_le_add_left hm 1) |>.trans (by rw [Nat.add_comm]) (es : List Arc) (a b : Literal) (ps : List Literal)
     (h : reach es a b=some ps) : ps.length≤es.length := by
   have h0 : Short [(a,[])] := by
     intro e he
@@ -119,9 +119,7 @@ theorem reach_length_bound (es : List Arc) (a b : Literal) (ps : List Literal)
   have hp := hs (b,ps) (route_mem _ b ps h)
   have hb := route_table_bound es a es.length
   change ps.length<(saturate es es.length [(a,[])]).length at hp
-  omega
-
-theorem row_arcs_bound (c : Clause) : (rowArcs c).length≤c.length := by
+  exact Nat.le_of_succ_le_succ (Nat.le_trans (Nat.succ_le_of_lt hp) hb) (c : Clause) : (rowArcs c).length≤c.length := by
   cases c with
   | nil => exact Nat.le_refl _
   | cons a cs =>
@@ -183,7 +181,7 @@ theorem compile_steps (v : Nat) (f : Formula) (ss : List Step) :
     rw [extend_length,ih]
     change f.length+1+((f.length+1)*ss.length+triangular ss.length)=_
     rw [Nat.add_mul,Nat.mul_add,Nat.one_mul,Nat.mul_one]
-    omega
+    ac_rfl
 
 theorem triangular_bound (k : Nat) : triangular k≤k*k := by
   induction k with
@@ -191,7 +189,12 @@ theorem triangular_bound (k : Nat) : triangular k≤k*k := by
   | succ k ih =>
     change k+1+triangular k≤(k+1)*(k+1)
     rw [Nat.add_mul,Nat.mul_add,Nat.mul_one,Nat.one_mul]
-    omega
+    have hh : k+1+triangular k≤k+1+k*k := Nat.add_le_add_left ih _
+    exact Nat.le_trans hh (by
+      calc
+        k+1+k*k = k*k+k+1 := by ac_rfl
+        _ ≤ k*k+k+(k+1) := Nat.add_le_add_left (Nat.succ_le_succ (Nat.zero_le k)) _
+        _ = k*k+k+(k+1) := rfl)
 
 theorem compile_steps_bound (v : Nat) (f : Formula) (ss : List Step) :
     steps (compile v f ss)≤(f.length+ss.length)*ss.length := by
@@ -312,7 +315,9 @@ theorem tryVar_size (f : Formula) (v : Nat) (p : Proof)
       have h1 := reach_length_bound (arcs f) _ _ pos hp
       have h2 := reach_length_bound (arcs f) _ _ neg hn
       have ha := arcs_bound f
-      have hb : p.batches.length≤2*occurrences f+1 := by omega
+      have hb : p.batches.length≤2*occurrences f+1 := by
+        rw [hs.left,Nat.two_mul]
+        exact Nat.add_le_add_right (Nat.add_le_add (Nat.le_trans h1 ha) (Nat.le_trans h2 ha)) 1
       refine ⟨hb,?_⟩
       rw [hs.right,Nat.add_mul]
       have hc := Nat.add_le_add (Nat.mul_le_mul_left f.length hb)
