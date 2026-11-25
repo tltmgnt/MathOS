@@ -118,7 +118,7 @@ theorem factor_zero (x : Assignment) (l : Literal) :
   | mk v b =>
     unfold falseFactor
     change bx (x v) b=false ↔ x v=b
-    cases hv : x v <;> cases b <;> exact ⟨fun h => by cases h; rfl,fun h => by cases h; rfl⟩
+    cases hv : x v <;> cases b <;> exact ⟨fun h => by cases h <;> rfl,fun h => by cases h <;> rfl⟩
 
 theorem product_zero (x : Assignment) (c : Clause) :
     falseProduct x c=false ↔ ClauseSat c x := by
