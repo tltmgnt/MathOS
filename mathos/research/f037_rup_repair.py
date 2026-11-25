@@ -108,16 +108,16 @@ def check_unsat(raw,cert):
 
 def family(t,bad):
     # One-hot gadgets with exactly one viable color, but no units.
-    # Opposite literals of u force the first color by failed literal.
+    # A binary implication chain forces the first color by failed literal.
     # Negative cross-color edges make cross-gadget folds invalid.
     f=[]
     for i in range(t):
-        a,b,c,u=range(4*i+1,4*i+5)
-        f.extend(((a,b,c),(-a,-b),(-a,-c),(-b,-c),(a,u),(a,-u)))
+        a,b,c,u,v=range(5*i+1,5*i+6)
+        f.extend(((a,b,c),(-a,-b),(-a,-c),(-b,-c),(a,u),(-u,v),(-v,a)))
     # Every pair is forbidden from sharing the *second* color.
-    f.extend((-4*i-2,-4*j-2) for i,j in combinations(range(t),2))
+    f.extend((-5*i-2,-5*j-2) for i,j in combinations(range(t),2))
     if bad:
-        f.append((-1,-5))
+        f.append((-1,-6))
     return tuple(f)
 
 
@@ -167,7 +167,7 @@ def run():
     assert not check(f,{1:True,2:False})
     assert replay(f,({99:True},)) is None
     print(f"accepted_overwrites={maps} model_transports={transports}")
-    print("F037_RUP_REPAIR_OK random=128 family=8 max_variables=64 simultaneous=1 rejection=3")
+    print("F037_RUP_REPAIR_OK random=128 family=8 max_variables=80 simultaneous=1 rejection=3")
 
 
 if __name__=='__main__':
