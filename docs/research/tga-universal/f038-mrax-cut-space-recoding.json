@@ -1,0 +1,180 @@
+{
+  "attempt_id": "F038-MRAX-CUT-SPACE-RECODING",
+  "base_commit": "ffae7e3b8162884cec595eb69a237ebd580ee2a3",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45722963563",
+  "targets": [
+    "ordinary_complete",
+    "discovery",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can a nonlocal difference representation preserve all NAE solutions and permit efficient global gluing?",
+  "route": "certificate_route",
+  "topology": "Exact graph cut-space / cycle-space orthogonality and witness gluing.",
+  "adversarial": [
+    "Unrestricted mixed cycle/OR compatibility is NP-complete.",
+    "Cycle rank may grow linearly.",
+    "Exact recoding is not a universal typability guarantee."
+  ],
+  "scope": "Monotone distinct-variable NAE triples, one pivot each, simple graph.",
+  "cost": "2^O(r) poly(L) including replay",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of cut-space, DP and hardness theorems"
+    },
+    {
+      "key": "attempt_global_completion",
+      "label": "Uniform polynomial mixed global compatibility or alternative"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Universal total selector preservation and bit cost"
+    }
+  ],
+  "independent_reference": "Independent JS direct source and edge enumeration and local gadget checks; not execution of submitted Python.",
+  "expected": {
+    "four": [
+      256,
+      256,
+      0,
+      2050,
+      4096,
+      7265,
+      982,
+      982,
+      41,
+      399,
+      3,
+      768
+    ],
+    "five": [
+      1024,
+      1023,
+      1,
+      10882,
+      32768,
+      182025,
+      5091,
+      5091,
+      92,
+      2895,
+      5,
+      5962
+    ],
+    "controls": [
+      16,
+      32,
+      64,
+      1,
+      3,
+      1
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_cut_space_recoding.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-CUT-SPACE-RECODING.md"
+  ],
+  "next": "Redirect to proof complexity of mixed algebraic and monotone global consistency, not increasing representation parameters.",
+  "mrax": {
+    "planner": {
+      "target_id": "ordinary_complete",
+      "question": "Can a nonlocal difference representation preserve all NAE solutions and permit efficient global gluing?",
+      "strategy": "Exact cut-space recoding with fundamental cycle equations.",
+      "alternative": "Fixed-parameter syndrome DP exploiting nonbridge degree structure.",
+      "stop_rule": "Stop on unsupported universal cost or coverage; redirect away from representation-only optimization after mixed hardness.",
+      "literature_leads": [
+        "Prior section obstruction and mixed typed solver; standard 3SAT NP-completeness, reduction derived in note."
+      ]
+    },
+    "construct": {
+      "claim": "NAE triples admit exact global difference representation by homogeneous cycle equations and positive incident-edge OR clauses.",
+      "scope": "Monotone distinct-variable NAE triples, one pivot each, simple graph.",
+      "derivation": "Take XOR edge differences; characterize image by fundamental cycles; lift via forest paths; characterize typing by bridge incidences.",
+      "unresolved_steps": [
+        "Universal tractable global compatibility and general SAT coverage."
+      ],
+      "candidate_tests": [
+        "All four-variable pivot configurations and five-variable triple subsets; verify cut image, lift and exact typing boundary."
+      ]
+    },
+    "alternative": {
+      "claim": "The graph-derived mixed system admits exact 2^O(r) polynomial-time-factor completion parameterized by cycle rank.",
+      "scope": "Positive incident-edge binary clauses on graph edge differences; no general bounded rank assumption.",
+      "derivation": "Fix bridges to one; enumerate high-degree incident edge bits; remaining OR graph has degree at most two; dynamic program with syndrome and combine by XOR.",
+      "unresolved_steps": [
+        "Uniform logarithmic cycle rank or a different universally efficient completion."
+      ],
+      "candidate_tests": [
+        "Actual DP against exhaustive source models, disjoint triples, long even and odd cycles."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Unrestricted mixed cycle/OR compatibility is NP-complete.",
+        "Cycle rank may grow linearly.",
+        "Exact recoding is not a universal typability guarantee."
+      ],
+      "counterexample_candidates": [
+        "All triples on five vertices; explicit 3SAT to monotone NAE reduction."
+      ],
+      "equivalence_audit": "Fundamental-cycle orthogonality is necessary and sufficient; bridge pinning is existence-preserving, not all-model preserving.",
+      "barrier_audit": "NP-completeness of mixed representation does not prove P!=NP; no optimal pivot claim.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite graph and bit encodings; no physical Python metering.",
+      "cost_ledger": {
+        "encoding": "Polynomial graph, incident clauses and r-bit syndrome columns",
+        "preprocessing": "Spanning forest and fundamental cycles polynomial",
+        "inference": "Path/cycle DP with r-bit syndrome and XOR convolution",
+        "repetitions": "At most 2^(6r) fixed-edge assignments; at most 4^r syndrome pairs per merge",
+        "arithmetic_bits": "Polynomial bit length per state",
+        "memory": "2^O(r) poly(L) including stored witnesses",
+        "reconstruction": "Forest lift and original NAE verification",
+        "overall": "2^O(r) poly(L) including replay"
+      },
+      "missing_bounds": [
+        "Universal polynomial cycle-rank completion",
+        "Universal useful representation coverage",
+        "Universal selector preservation and bit cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact cycle-space image and forest lift",
+        "Bridge typing condition",
+        "Degree bound and syndrome DP",
+        "Monotone NAE hardness reduction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Compare all small source and edge models",
+        "Validate actual DP and corrupted replay",
+        "Test reduction gadgets and long-cycle examples"
+      ],
+      "formalization_plan": "Formalize forest lift, degree inequality and DP invariant; independently review hardness scope.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Exact nonlocal recoding and fixed-parameter global completion; unrestricted compatibility barrier.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "Universal selector totality, preservation and bit cost",
+        "Unrestricted negative route"
+      ],
+      "next_question": "Redirect to proof complexity of mixed algebraic and monotone global consistency, not increasing representation parameters.",
+      "human_review_requests": [
+        "Review graph degree argument, syndrome DP, typing criterion and NP-hardness reduction."
+      ]
+    }
+  }
+}
