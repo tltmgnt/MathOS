@@ -1,0 +1,61 @@
+name: MathOS discovery reproducibility packet
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'formal/**'
+      - 'mathos/research/**'
+      - 'mathos/validation.py'
+      - 'benchmarks/lean/**'
+      - 'docs/research/**'
+      - 'docs/portfolio/STATUS.json'
+      - 'tests/test_discovery_release.py'
+      - '.github/workflows/discovery-release.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'formal/**'
+      - 'mathos/research/**'
+      - 'mathos/validation.py'
+      - 'benchmarks/lean/**'
+      - 'docs/research/**'
+      - 'docs/portfolio/STATUS.json'
+      - 'tests/test_discovery_release.py'
+      - '.github/workflows/discovery-release.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Run failure-path tests
+        run: |
+          for suite in discovery_release lean_first lean_benchmark validation; do
+            python -m unittest discover -s tests -p "test_${suite}.py" -v
+          done
+      - name: Install existing pinned Lean version
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build and check commit-bound packet
+        run: |
+          python -m mathos.research.discovery_release build "$RUNNER_TEMP/mathos-discovery"
+          python -m mathos.research.discovery_release verify "$RUNNER_TEMP/mathos-discovery"
+      - name: Publish bounded replay evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathos-discovery-replay
+          path: ${{ runner.temp }}/mathos-discovery/
+          if-no-files-found: error
+          retention-days: 30
