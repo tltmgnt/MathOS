@@ -184,12 +184,12 @@ theorem build_complete (n q : Nat) (hq : validId n q=true)
       let (b,h) ← build q vs g1 ((v,false)::path)
       let i ← findRow (fun c => test (c=(v,true)::path)) h
       let j ← findRow (fun c => test (c=(v,false)::path)) h
-      some (a++(b++[⟨i,j,v,path⟩]),path::h))=_
+      some (a++(b++[Step.mk i j v path]),path::h))=_
     rw [hb]
     change (do
       let i ← findRow (fun c => test (c=(v,true)::path)) g2
       let j ← findRow (fun c => test (c=(v,false)::path)) g2
-      some (a++(b++[⟨i,j,v,path⟩]),path::g2))=_
+      some (a++(b++[Step.mk i j v path]),path::g2))=_
     rw [hi,hj] <;> rfl
 
 def generate (n : Nat) (f : Formula) : Option Proof :=
