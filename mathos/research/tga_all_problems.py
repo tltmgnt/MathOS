@@ -15,6 +15,7 @@ from mathos.research.hypothesis_pipeline import OBLIGATIONS, ROOT
 from mathos.research import millennium_followup_20261124 as round1
 from mathos.research import millennium_followup_round2 as round2
 from mathos.research import millennium_followup_round3 as round3
+from mathos.research import millennium_followup_round4 as round4
 from mathos.research.tga_u003 import joint_gap
 
 # These attacks are concrete research directions, not generated or checked proofs.
@@ -119,7 +120,7 @@ def run_track(key):
     failures = []
     # No AI credentials, network, or generated code; every track replays real
     # existing bounded computations. A failing round never hides later rounds.
-    for name, module in (("round1", round1), ("round2", round2), ("round3", round3)):
+    for name, module in (("round1", round1), ("round2", round2), ("round3", round3), ("round4", round4)):
         try:
             controls[name] = {"status": "PASS", "result": getattr(module, fn)()}
         except Exception as exc:
@@ -145,7 +146,7 @@ def campaign(out, workers=7):
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     # Snapshot provenance for actual inputs; Git SHA identifies the checkout,
     # not an independent external attestation.
-    sources = (Path(__file__), Path(round1.__file__), Path(round2.__file__), Path(round3.__file__),
+    sources = (Path(__file__), Path(round1.__file__), Path(round2.__file__), Path(round3.__file__), Path(round4.__file__),
                ROOT / "mathos/proof_analysis/tga_engine.py",
                ROOT / "mathos/proof_analysis/tga_level6.py")
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}

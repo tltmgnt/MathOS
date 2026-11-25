@@ -35,6 +35,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tests -p 'test_tga_all_problems.py' -v
+      - run: python -m unittest discover -s tests -p 'test_millennium_followup_round4.py' -v
       - name: Run all seven tracks concurrently
         run: python -m mathos.research.tga_all_problems --workers 7 --output-dir "$RUNNER_TEMP/tga-all"
       - uses: actions/upload-artifact@v4

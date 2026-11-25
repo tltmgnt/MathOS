@@ -1,9 +1,9 @@
 # TGA Ω simultaneous Millennium research
 
 Run the seven tracks in a single bounded campaign with separate process workers.
-Every worker executes all three existing follow-up rounds, records individual
-failures, and reports a concrete next attack and falsifier. These are existing
-bounded research controls, not new mathematical derivations or an AI solve run.
+Every worker executes all four follow-up rounds, records individual
+failures, and reports a concrete next attack and falsifier. The first three rounds replay existing controls; the fourth adds scoped arguments
+and exact controls documented in TGA_SIMULTANEOUS_ROUND4.md. None is an AI solve run.
 
     python -m unittest discover -s tests -p 'test_tga_all_problems.py' -v
     python -m mathos.research.tga_all_problems --workers 7 --output-dir /tmp/tga-all

@@ -40,11 +40,13 @@ class AllProblemsTests(unittest.TestCase):
     def test_failure_does_not_skip_other_rounds(self):
         with patch.object(allp.round1, "rh", side_effect=ValueError("fixture failure")), \
              patch.object(allp.round2, "rh", return_value={"fixture": 2}), \
-             patch.object(allp.round3, "rh", return_value={"fixture": 3}):
+             patch.object(allp.round3, "rh", return_value={"fixture": 3}), \
+             patch.object(allp.round4, "rh", return_value={"fixture": 4}):
             r = allp.run_track("Riemann")
         self.assertEqual(r["status"], "FAILED")
         self.assertEqual(r["failed_rounds"], ["round1"])
         self.assertEqual(r["controls"]["round3"]["status"], "PASS")
+        self.assertEqual(r["controls"]["round4"]["status"], "PASS")
         self.assertFalse(r["new_proof_generated"])
 
 
