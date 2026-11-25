@@ -105,10 +105,10 @@ theorem word_magnitude (n : Nat) : n<10^(word n).length :=
 theorem pow_mono (a b : Nat) (h : a≤b) : 10^a≤10^b := by
   induction h with
   | refl => exact Nat.le_refl _
-  | step h ih =>
+  | @step b _ ih =>
     apply Nat.le_trans ih
     rw [Nat.pow_succ]
-    have hh := Nat.mul_le_mul_left (10^_) (by decide : 1≤10)
+    have hh := Nat.mul_le_mul_left (10^b) (by decide : 1≤10)
     rw [Nat.mul_one] at hh
     exact hh
 
