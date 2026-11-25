@@ -45,7 +45,7 @@ theorem route_witness (es : List Arc) (a b : Literal) (rs : Routes)
       · cases z
         rw [if_pos rfl] at hp
         cases hp
-        exact h (b,qs) (List.Mem.head _)
+        exact h _ (List.Mem.head _)
       · rw [if_neg z] at hp
         exact ih (fun e he => h e (List.Mem.tail _ he)) hp
 
@@ -217,19 +217,19 @@ theorem pathStart_complete (n : Nat) (f : Formula) (s z : Literal)
       Trace n g ss out ∧ lookup out 0=some [opposite s,z] ∧ ss.length=bs.length := by
   cases h with
   | nil => exact (hne rfl).elim
-  | @cons a b z rest he hw =>
-    obtain ⟨i,hi⟩ := edge_find f g a b (arcs_sound f (a,b) he) sub
-    let t := firstStep a b i
-    have ht : stepCheck g t=true := first_checked g a b i hi
-    have hr := arc_range n f (a,b) hf he
-    have hv : StepOK n t := first_range n a b i hr.left hr.right
-    obtain ⟨ss,out,hh,tr,hl,hn⟩ := pathTail_complete n f a b z rest hw hf hr.left
+  | @cons _a b z rest he hw =>
+    obtain ⟨i,hi⟩ := edge_find f g s b (arcs_sound f (s,b) he) sub
+    let t := firstStep s b i
+    have ht : stepCheck g t=true := first_checked g s b i hi
+    have hr := arc_range n f (s,b) hf he
+    have hv : StepOK n t := first_range n s b i hr.left hr.right
+    obtain ⟨ss,out,hh,tr,hl,hn⟩ := pathTail_complete n f s b z rest hw hf hr.left
       (t.tail::g) (fun c hc => List.Mem.tail _ (sub c hc)) rfl
     refine ⟨t::ss,out,?_,Trace.cons t ht hv tr,hl,congrArg Nat.succ hn⟩
     unfold pathStart
     rw [hi]
     change (do
-      let (ts,h) ← pathTail a b (t.tail::g) rest
+      let (ts,h) ← pathTail s b (t.tail::g) rest
       some (t::ts,h))=some (t::ss,out)
     rw [hh] <;> rfl
 
