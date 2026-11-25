@@ -131,8 +131,7 @@ theorem terminal_value (w n : Nat) (t : Terminal) (hn : n<cap w)
     change ((refsRange w n c.demands).1 &&
       ((refsRange w n c.conflicts).1 && (groupsRange w n c.groups).1))=_
     rw [refs_value w n c.demands hn ht.left,refs_value w n c.conflicts hn ht.right.left,
-      groups_value w n c.groups hn ht.right.right]
-    rfl
+      groups_value w n c.groups hn ht.right.right] <;> rfl
   | xor bs =>
     exact all_value _ _ bs (fun b hm => block_value w n b hn (ht b hm))
 
