@@ -61,10 +61,10 @@ theorem decision_preserves (d : Formula → Bool)
   unfold fromDecision
   cases he : d (restrict v false f) with
   | true =>
-    rw [he]
+    change Satisfiable (restrict v false f)
     exact (hd _).1 he
   | false =>
-    rw [he]
+    change Satisfiable (restrict v true f)
     cases (shannon v f).1 hs with
     | inl h =>
       have ht := (hd _).2 h
