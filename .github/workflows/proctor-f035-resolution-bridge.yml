@@ -6,11 +6,7 @@ on:
       - 'mathos/research/tga_pnp_resolution_gap.py'
       - '.github/workflows/proctor-f035-resolution-bridge.yml'
   push:
-    branches: [main]
-    paths:
-      - 'formal/Proctor*.lean'
-      - 'mathos/research/tga_pnp_resolution_gap.py'
-      - '.github/workflows/proctor-f035-resolution-bridge.yml'
+    branches: [main, 'research/pnp-f035-*']
   workflow_dispatch:
 permissions:
   contents: read
