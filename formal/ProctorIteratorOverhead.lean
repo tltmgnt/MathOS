@@ -93,9 +93,11 @@ theorem success_overhead_exact {σ : Type} (bs : List Bool)
       rw [ledger] at h ⊢
       cases e : (step s).1 with
       | none =>
+        rw [e] at h
         change none=some out at h
         cases h
       | some t =>
+        rw [e] at h
         change (ledger bs (doubleMeter step) t).1.1=some out at h
         change (ledger bs (doubleMeter step) t).2+2=(2*bs.length+1)+2
         exact congrArg (fun n => n+2) (ih (doubleMeter step) t out h)

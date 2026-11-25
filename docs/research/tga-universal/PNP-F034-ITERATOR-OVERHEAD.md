@@ -23,3 +23,16 @@ or proof of compiler behavior. Boundary encoding, parser transition work,
 nested aggregation, list reversal, data memory and full machine cost remain.
 Strict Lean 4.14.0 warnings and zero-axiom gates unchanged. No local Lean
 execution. No independent review or resolution claim.
+
+## Exact-overhead proof repair
+
+PR #202 merged at 6135f07bd8b524e34b80366a966bb41a1c979dff.
+Exact candidate 28ddfcfc068b34895a275481a99a09b5fd633810 failed
+[45536117967 / job 138943011446](https://github.com/tltmgnt/MathOS/actions/runs/45536117967/job/138943011446), artifact 14986243665.
+Five of six named declarations printed no axioms, including the joint
+bound and 200035 list bound. Only success_overhead_exact failed:
+case splitting rewrote the conclusion but not the local success
+hypothesis. Explicitly rewrite that hypothesis using the case equation
+before reducing it. No change to executable definitions, theorem
+statements, fixtures, warnings or strict axiom gate. Required executable
+marker was not reached; new exact SHA must pass replay before PR.
