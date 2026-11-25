@@ -114,10 +114,8 @@ def dense(t,bad):
              if (u-1)//6!=(v-1)//6)
     # Both mixed clauses are satisfied by a=true, leaving the
     # binary core untouched even when it is inconsistent.
-    p=6*t+1
-    f.extend(((1,p),(1,-p),(p,)))
-    if bad:
-        f.append((-p,))
+    p,q,r=range(6*t+1,6*t+4)
+    f.extend(((1,p),(1,-p),(p,),(-p,q),(-q,r),(-r,-p) if bad else (r,p)))
     return tuple(f)
 
 
@@ -166,7 +164,7 @@ def run():
     assert replay(f,({2:True},{2:False})) is None
     assert replay(f,({99:True},)) is None
     print(f"random_changed={changed} autarky_steps={steps}")
-    print("F037_LINEAR_AUTARKY_OK random=128 dense=8 max_variables=97 rejection=3")
+    print("F037_LINEAR_AUTARKY_OK random=128 dense=8 max_variables=99 rejection=3")
 
 
 if __name__=="__main__":
