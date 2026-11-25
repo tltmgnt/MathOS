@@ -214,10 +214,10 @@ theorem totalOutput_spec (ds : Domains) (rs : List MRow) (hw : InWidth ds.length
     | .unsat w => w < 2^(augmented ds rs).length ∧
       MaskProvenance ds.length (augmented ds rs) (0,true) w ∧ ¬ ∃ ps, OriginalSat ds rs ps := by
   unfold totalOutput
-  generalize h : totalSolve ds rs hw = t
+  generalize ht : totalSolve ds rs hw = t
   obtain ⟨res,p,a,l,hp,ha,hl⟩ := t
   cases res with
-  | sat ps h => exact h
+  | sat ps valid => exact valid
   | unsat w hb hc => exact ⟨hb,hc,augmented_refutes ds rs w hc⟩
 
 end ProctorPNP
