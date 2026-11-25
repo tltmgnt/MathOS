@@ -25,7 +25,15 @@ def cube : Formula :=
 def single : Formula := [[(1,true),(2,true),(3,true)]]
 
 theorem cube_row (a b c : Bool) : [(1,a),(2,b),(3,c)]∈cube := by
-  cases a <;> cases b <;> cases c <;> decide
+  cases a <;> cases b <;> cases c
+  · exact List.Mem.head _
+  · exact List.Mem.tail _ (List.Mem.head _)
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _))
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _)))
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _))))
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _)))))
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _))))))
+  · exact List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.tail _ (List.Mem.head _)))))))
 
 theorem cube_unsat : Unsat cube := by
   intro h
@@ -91,7 +99,7 @@ theorem cube_no_empty : hasEmpty cube=false := rfl
 theorem cube_no_conflict : findConflict cube (variables cube)=none := by decide
 theorem cube_no_conflict_semantic : NoConflict cube :=
   noConflict_of_none cube cube_no_conflict
-theorem cube_candidate_none : candidate cube=none := by decide
+theorem cube_candidate_none : candidate cube=none := rfl
 theorem cube_unsupported : solve 3 cube=.unsupported := rfl
 
 -- No Boolean function of this extracted graph alone can decide
