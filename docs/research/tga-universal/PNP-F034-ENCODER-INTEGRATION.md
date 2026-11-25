@@ -29,3 +29,15 @@ or complete machine-cost claim. Nine candidate declarations,
 4 exact). Marker F034_ENCODER_INTEGRATION_OK scanner=781 boundary=8 lists=1122 headers=8 exact=4. Strict Lean 4.14.0 warning and zero-axiom
 gates unchanged. No local Lean execution. Independent review and
 certificate-size/discovery remain outstanding.
+
+## Initial replay and constructive repair
+
+PR #214 merged at 6109ccc8c72f51bdbcdcc8682f3cfd828f9fbf3e.
+Exact head 32d6ae676ec1d88ca7a7f5eaa8488bd463d7b9df compiled and passed all 1923 controls,
+but [45550749776 / job 138991062461](https://github.com/tltmgnt/MathOS/actions/runs/45550749776/job/138991062461), artifact 14994445247,
+failed the strict axiom gate: list_account and its two dependent
+proofs reported propext. Six other declarations printed no axioms.
+Replace the simplifier in list_account with explicit equality rewrites
+of the four guard occurrences and the encoder projection. No theorem
+statements, executable code, controls, or gate requirements changed.
+A fresh exact-head replay is mandatory before opening a PR.

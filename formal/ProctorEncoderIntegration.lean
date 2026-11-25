@@ -150,9 +150,9 @@ theorem list_account {α : Type} (p : ParserMeter α) (ts : List Nat) :
         else (none,1)).2+
         (if k≤listLimit then (encodeMeter 17 k).2 else 0))
     by_cases h : k≤listLimit
-    · simp only [if_pos h,encode_projection]
+    · rw [if_pos h,if_pos h,if_pos h,if_pos h,encode_projection]
       cases e : encode 17 k <;> rfl
-    · simp only [if_neg h]
+    · rw [if_neg h,if_neg h,if_neg h,if_neg h]
 
 theorem list_projection {α : Type} (p : ParserMeter α) (ts : List Nat) :
     (listEncodeMeter p ts).1=(listMeter p ts).1 := by
