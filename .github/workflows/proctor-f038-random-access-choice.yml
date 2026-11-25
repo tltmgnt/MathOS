@@ -1,0 +1,34 @@
+name: Proctor F038 random access choice barrier
+on:
+  push:
+    branches: ['research/pnp-f038-random-access-choice-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_interactive_choice | tee /tmp/interactive.txt
+          grep -Fx 'F038_INTERACTIVE_CHOICE_OK cases=5460 branch_checks=10920 zero=1092 one=4368 fooling_pairs=2667 max_variables=17 max_clauses=23' /tmp/interactive.txt
+          python -m mathos.research.f038_random_access_choice | tee /tmp/random-access.txt
+          grep -Fx 'F038_RANDOM_ACCESS_CHOICE_OK cases=2340 branch_checks=4680 zero=1568 one=772 changed_coordinates=49488 max_variables=31 max_clauses=74' /tmp/random-access.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RANDOM_ACCESS_CHOICE_GATE_OK status=OPEN')
+          PY
