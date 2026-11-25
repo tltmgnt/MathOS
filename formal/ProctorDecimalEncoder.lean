@@ -29,11 +29,15 @@ private theorem append_nil' {α : Type} (a : List α) : a++[]=a := by
   | nil => rfl
   | cons x xs ih => exact congrArg (fun ys => x::ys) ih
 
+private theorem reverseAux_append' {α : Type} (xs ys zs : List α) :
+    xs.reverseAux (ys ++ zs)=xs.reverseAux ys++zs := by
+  induction xs generalizing ys with
+  | nil => rfl
+  | cons x xs ih => exact ih (x::ys)
+
 private theorem reverse_cons' {α : Type} (a : α) (as : List α) :
-    (a::as).reverse=as.reverse++[a] := by
-  -- Existing core reverse invariant proved by the library's structural
-  -- recursion; audited here as part of encode_scan.
-  exact List.reverse_cons
+    (a::as).reverse=as.reverse++[a] :=
+  reverseAux_append' as [] [a]
 
 theorem digit_range (d : Nat) (h : d<10) : 48≤48+d ∧ 48+d≤57 :=
   ⟨Nat.le_add_right _ _, Nat.add_le_add_left (Nat.le_of_lt_succ h) 48⟩
