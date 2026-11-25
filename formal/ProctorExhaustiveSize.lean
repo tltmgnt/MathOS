@@ -173,7 +173,6 @@ theorem padded_vars (k : Nat) : (variables (padded k)).length=k+2 := by
   | succ k ih =>
     change (variables (padded k)).length+1=(k+1)+2
     rw [ih]
-    rw [Nat.add_assoc,Nat.add_comm 2 1,← Nat.add_assoc]
 
 theorem padded_generator_lower (k : Nat) :
     ∃ p, generate 2 (padded k)=some p ∧
