@@ -1,0 +1,66 @@
+name: Proctor F034 nested certificate parser refinement
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-nested-parser.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-nested-parser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-nested-parser
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-nested-parser
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsSize.lean formal/ProctorScannerMeter.lean formal/ProctorDimacsLexMeter.lean formal/ProctorDimacsLexerCompose.lean formal/ProctorDimacsRowMeter.lean formal/ProctorDimacsDecoderMeter.lean formal/ProctorDecimalBitWidth.lean formal/ProctorBinaryPrimitives.lean formal/ProctorCheckedBinaryScanner.lean formal/ProctorStructuralCounters.lean formal/ProctorScannerCounters.lean formal/ProctorCheckedDecrement.lean formal/ProctorBytePrepass.lean formal/ProctorParserCounters.lean formal/ProctorNestedParser.lean formal/ProctorNestedParserMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_NESTED_PARSER_OK expected=8 envelope=12 checker=96 positive=1' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-nested-parser")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["list_congr","clause_refines","formula_refines","ref_refines","group_refines","capacity_refines","block_refines","step_refines","terminal_refines","proof_refines","expected_refines","envelope_refines","checked_contract","decode_refines","expected_bytes_refines","envelope_bytes_refines","check_refines","check_sound"]
+          for name in names:
+              if f"'ProctorNestedParser.{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorNestedParser.{name}")
+          report = dict(scope="NESTED_CERTIFICATE_PARSER_REFINEMENT_WITH_STRUCTURAL_FUEL",
+                        verified=names, axiom_gate=True, expected_controls=8, envelope_controls=12, checker_controls=96, positive_controls=1,
+                        nested_parser_refinement_verified=True,
+                        complete_decoder_cost_verified=False,
+                        total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorNestedParser.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-nested-parser-evidence
+          path: artifacts/f034-nested-parser/
