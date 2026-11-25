@@ -1,0 +1,66 @@
+name: Proctor F034 binary comparison and decimal shift-add
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-binary-primitives.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-binary-primitives.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-binary-primitives
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-binary-primitives
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsSize.lean formal/ProctorScannerMeter.lean formal/ProctorDimacsLexMeter.lean formal/ProctorDimacsLexerCompose.lean formal/ProctorDimacsRowMeter.lean formal/ProctorDimacsDecoderMeter.lean formal/ProctorDecimalBitWidth.lean formal/ProctorBinaryPrimitives.lean formal/ProctorBinaryPrimitivesMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_BINARY_PRIMITIVES_OK comparisons=961 additions=961 decimal=2560 wide=4' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-binary-primitives")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["borrow_step","borrow_value","borrow_gates","column_sum","pad_values","pad_length","compare_value","compare_gates","add_value","add_length","add_bound","decimal_value","decimal_bound","decimal_width_invariant"]
+          for name in names:
+              if f"'ProctorBinaryPrimitives.{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorBinaryPrimitives.{name}")
+          report = dict(scope="BINARY_COMPARISON_AND_DECIMAL_SHIFT_ADD_GATE_LEDGER",
+                        verified=names, axiom_gate=True, comparison_controls=961, addition_controls=961, decimal_controls=2560,
+                        wide_controls=4, primitive_gate_bounds_verified=True,
+                        complete_decoder_cost_verified=False,
+                        total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorBinaryPrimitives.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-binary-primitives-evidence
+          path: artifacts/f034-binary-primitives/
