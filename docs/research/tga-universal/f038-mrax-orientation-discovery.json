@@ -1,0 +1,172 @@
+{
+  "attempt_id": "F038-MRAX-ORIENTATION-DISCOVERY",
+  "base_commit": "2cfbe800a2402d5b35c93189754c69f088a347d6",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45721322210",
+  "targets": [
+    "discovery",
+    "ordinary_complete",
+    "machine_cost",
+    "short_proofs"
+  ],
+  "hypothesis": "Can algebraic compatibility discovery eliminate exponential orientation search while retaining exact feasibility?",
+  "route": "certificate_route",
+  "topology": "Exact component separation and implication-graph orientation compatibility.",
+  "adversarial": [
+    "Fixed family assignment may be wrong.",
+    "No typing is not UNSAT and compatible typing is not SAT.",
+    "Local support does not imply global orientation consistency."
+  ],
+  "scope": "Explicit local type tables with fixed coordinate family assignment.",
+  "cost": "2^O(h) poly(L)(1+sum_j 3^b_j) for supplied bounded-block interface",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of orientation majority closure and exact compilation"
+    },
+    {
+      "key": "attempt_family_choice",
+      "label": "General efficient family choice or sufficient coverage theorem"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Total universal selector preservation and bit cost"
+    }
+  ],
+  "independent_reference": "Independent JS point-set enumeration and fixed-family projection checks; not Python execution.",
+  "expected": {
+    "slices": [
+      256,
+      6912,
+      2584,
+      4650,
+      49410,
+      7866,
+      1134
+    ],
+    "global": [
+      256,
+      120,
+      136,
+      1466,
+      20736,
+      825,
+      65536,
+      109,
+      11,
+      109,
+      27
+    ],
+    "families": [
+      64,
+      1,
+      32,
+      32
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_orientation_discovery.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-ORIENTATION-DISCOVERY.md"
+  ],
+  "next": "Determine the complexity or tractable meta-language of family choice; redirect if no stronger coverage follows.",
+  "mrax": {
+    "planner": {
+      "target_id": "discovery",
+      "question": "Can algebraic compatibility discovery eliminate exponential orientation search while retaining exact feasibility?",
+      "strategy": "Prove fixed-family semilattice orientation relations majority-closed and compile them to 2SAT.",
+      "alternative": "Componentwise family discovery after local domain pruning.",
+      "stop_rule": "Do not equate typing failure with UNSAT; stop on unsupported universal coverage or malformed evidence.",
+      "literature_leads": [
+        "Earlier MathOS mixed coordinate polymorphism theorem and majority projection lemma; established multi-sorted CSP context."
+      ]
+    },
+    "construct": {
+      "claim": "For fixed H/M/A families the admissible H orientations are majority-closed and exactly representable by 2CNF.",
+      "scope": "Explicit local type tables with fixed coordinate family assignment.",
+      "derivation": "Compose f_p(f_q(x,y,z),f_r(x,y,z),f_r(x,y,z)); on H this is majority(p,q,r), on M/A the operation is unchanged.",
+      "unresolved_steps": [
+        "General family assignment discovery and universal structural coverage."
+      ],
+      "candidate_tests": [
+        "All ternary Boolean tables and family slices; all unary/binary membership checks."
+      ]
+    },
+    "alternative": {
+      "claim": "Disconnected family-compatibility components can be solved with summed 3^b_j enumeration and polynomial orientation completion.",
+      "scope": "Explicit local tables, optional family restrictions, per-component ambiguity cap.",
+      "derivation": "Project local family tables, prune domains, split scopes into disjoint components, enumerate families then solve exact 2SAT orientation constraints.",
+      "unresolved_steps": [
+        "Bound on largest ambiguous component for arbitrary source instances."
+      ],
+      "candidate_tests": [
+        "All four-variable fixture subsets, 64-variable equality chain and disjoint pairs, cap and corruption checks."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Fixed family assignment may be wrong.",
+        "No typing is not UNSAT and compatible typing is not SAT.",
+        "Local support does not imply global orientation consistency."
+      ],
+      "counterexample_candidates": [
+        "NAE triple; equality/equality/disequality cycle on fixed H families."
+      ],
+      "equivalence_audit": "Term closure proves exact orientation majority closure; component splitting is exact only for disjoint scope graphs.",
+      "barrier_audit": "No restricted compatibility obstruction implies an unrestricted complexity separation.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite bit encodings; local type tables included in cost.",
+      "cost_ledger": {
+        "encoding": "Explicit source and local typing tables",
+        "preprocessing": "2^O(h) poly(L) bounded-block enumeration and family domain propagation",
+        "inference": "Unary/binary projection to exact 2CNF per fixed family",
+        "repetitions": "At most sum_j 3^b_j family choices",
+        "arithmetic_bits": "Polynomial in explicit encodings",
+        "memory": "Polynomial in local tables plus search state",
+        "reconstruction": "Validate all types then use previous typed solver and source witness lifting",
+        "overall": "2^O(h) poly(L)(1+sum_j 3^b_j) for supplied bounded-block interface"
+      },
+      "missing_bounds": [
+        "Universal useful family existence",
+        "General family-choice complexity",
+        "Universal interface discovery and selector preservation/cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Term identity",
+        "Exact binary projection for majority-closed orientation relations",
+        "Disjoint component product and checked typing reconstruction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Exhaustive fixed-family slice membership checks",
+        "Actual 2SAT compatibility and typed solver comparison",
+        "Reject altered transcripts and respect cap"
+      ],
+      "formalization_plan": "Formalize operation composition and majority closure before statement-faithful review.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Remove global semilattice orientation enumeration and factor independent family choices.",
+      "remaining_gaps": [
+        "F037-F040",
+        "Universal selector totality, preservation and bit cost",
+        "Unrestricted negative route"
+      ],
+      "next_question": "Determine the complexity or tractable meta-language of family choice; redirect if no stronger coverage follows.",
+      "human_review_requests": [
+        "Review term composition, exact 2CNF characterization and cost scope."
+      ]
+    }
+  }
+}
