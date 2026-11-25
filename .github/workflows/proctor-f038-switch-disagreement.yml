@@ -1,0 +1,37 @@
+name: Proctor F038 switch disagreement
+on:
+  push:
+    branches: ['research/pnp-f038-switch-disagreement']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_switch_disagreement.py
+          python -m mathos.research.f038_local_polarity | tee /tmp/local.txt
+          grep -Fx 'F038_LOCAL_POLARITY_OK families=4096 total=648 non_total=3448 blocks=14336 seed_probes=22272 missing=6144 global_checks=32768 outputs=8648 max_local=4 max_global=8' /tmp/local.txt
+          grep -Fx 'F038_OPPOSITE_UNATE_UNION_OK matrices=512 sat=272 unsat=240 parameters=32768 projection_checks=65536 total=240 positive_violations=27984 negative_violations=18944 union_covered=32208 max_variables=56 max_clauses=71' /tmp/local.txt
+          python -m mathos.research.f038_switch_disagreement | tee /tmp/switch.txt
+          grep -Fx 'F038_SWITCH_DISAGREEMENT_OK relations=20 cases=25600 total=5712 probes=86400 failed=34872 reuse_checks=96528 disagreement_counts=3200,9600,9600,3200' /tmp/switch.txt
+          grep -Fx 'F038_SWITCH_QUERY_BARRIER_OK dimensions=5 holes=41 baseline_checks=248 hole_checks=1728 distinguished=41 max_variables=56 max_clauses=74' /tmp/switch.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SWITCH_DISAGREEMENT_GATE_OK status=OPEN')
+          PY
