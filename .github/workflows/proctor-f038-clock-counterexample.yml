@@ -1,0 +1,36 @@
+name: Proctor F038 clock counterexample compiler
+on:
+  push:
+    branches: ['research/pnp-f038-clock-counterexamples']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_clock_counterexample.py
+          python -m mathos.research.f038_universal_clock | tee /tmp/clock.txt
+          grep -Fx 'F038_UNIVERSAL_WITNESS_CLOCK_OK formulas=4096 sat=1360 unsat=2736 stage_checks=32768 accepting=3036 missed_sat=7844 unsat_deadlines=21888 proposals=131364 rejected=128328 deadline_bounds=2304 max_first=7 budget_checks=8 first_stages=0,0,0,128,248,60,300,624' /tmp/clock.txt
+          python -m mathos.research.f038_clock_counterexample | tee /tmp/counter.txt
+          grep -Fx 'F038_CLOCK_COUNTEREXAMPLE_OK stages=8 pinned_cases=32768 misses=7844 nonmisses=24924 early_candidates=19 witness_checks=262144 clauses_sum=115 max_variables=15 max_clauses=20 counts=1360,1360,1360,1232,984,924,624,0' /tmp/counter.txt
+          grep -Fx 'F038_CLOCK_DELAY_REDUCTION_OK cases=4096 parameters=32768 delayed=2304 source_sat=1360 unit_checks=491520' /tmp/counter.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_CLOCK_COUNTEREXAMPLE_GATE_OK status=OPEN')
+          PY
