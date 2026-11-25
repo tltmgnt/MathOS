@@ -75,17 +75,18 @@ theorem single_word (d : Nat) (h : d<10) : Word 0 0 [48+d] d := by
 
 theorem append_digit (v k out : Nat) (ds : List Nat)
     (h : Word v k ds out) (d : Nat) (hd : d<10) (hn : out≠0) :
-    Word v k (ds++[48+d]) (10*out+d) := by
-  induction h with
-  | done v k hk =>
-    change Word v k [48+d] (10*v+d)
-    have e : 10*v+(48+d-48)=10*v+d := congrArg (fun t => 10*v+t) (char_value d)
-    have sub : Word (10*v+(48+d-48)) (k+1) [] (10*v+d) :=
-      Eq.rec (motive := fun t _ => Word t (k+1) [] (10*v+d))
-        (Word.done (10*v+d) (k+1) (Nat.succ_ne_zero k)) e.symm
-    exact Word.digit (char_lo d) (char_hi d hd) (fun _ => hn) sub
-  | @digit v k b out bs lo hi nonzero sub ih =>
-    exact Word.digit lo hi nonzero (ih hn)
+    Word v k (ds++[48+d]) (10*out+d) :=
+  Word.rec (motive := fun v k ds out _ => out≠0 →
+    Word v k (ds++[48+d]) (10*out+d))
+    (fun v k _ nz =>
+      let e : 10*v+(48+d-48)=10*v+d :=
+        congrArg (fun t => 10*v+t) (char_value d)
+      let sub : Word (10*v+(48+d-48)) (k+1) [] (10*v+d) :=
+        Eq.rec (motive := fun t _ => Word t (k+1) [] (10*v+d))
+          (Word.done (10*v+d) (k+1) (fun h => Nat.noConfusion h)) e.symm
+      Word.digit (char_lo d) (char_hi d hd) (fun _ => nz) sub)
+    (fun lo hi nonzero _ ih nz => Word.digit lo hi nonzero (ih nz))
+    h hn
 
 def digitsAux : Nat → Nat → List Nat
   | 0,_ => []
@@ -196,3 +197,9 @@ end ProctorUnboundedWire
 #print axioms ProctorUnboundedWire.char_lo
 #print axioms ProctorUnboundedWire.char_hi
 #print axioms ProctorUnboundedWire.char_value
+
+#print axioms Nat.succ_ne_zero
+#print axioms Nat.div_lt_self
+#print axioms Nat.mod_add_div
+#print axioms Nat.mod_lt
+#print axioms Nat.le_of_not_gt
