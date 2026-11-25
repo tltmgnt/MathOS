@@ -1,0 +1,20 @@
+name: Proctor F036 all-order OBDD audit
+on:
+  push:
+    branches: ['research/pnp-f036-all-order-obdd']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f036_all_order_obdd | tee /tmp/obdd.txt
+          grep -Fx 'F036_ALL_ORDER_OBDD_OK cuts=13010 dimensions=2..8' /tmp/obdd.txt
