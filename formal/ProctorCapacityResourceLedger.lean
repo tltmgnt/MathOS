@@ -213,14 +213,23 @@ theorem disjoint_bounds (w : Nat) (a b : Clause) :
 -- Hoist the two checked demand lookups once per unequal index pair.
 -- demandBinary projects their rows; no extra lookup is charged for the
 -- row projection. This is a costed alternative, not a trace of old code.
+private def demandRow (x : Option RefRow) : Clause :=
+  match x with
+  | some r => r.row
+  | none => []
+
+private theorem demandRow_value (w : Nat) (ds : List RefRow) (i : Nat) :
+    demandRow (checkedLookup w ds i).1=demandBinary w ds i := by
+  unfold demandRow demandBinary
+  cases (checkedLookup w ds i).1 <;> rfl
+
 def differentMeter (w : Nat) (ds : List RefRow) (i j : Nat) : Meter :=
   let e := checkedEq w i j
   if optFalse e.1 then (true,0,e.2)
   else
     let a := checkedLookup w ds i
     let b := checkedLookup w ds j
-    let row := fun x : Option RefRow => match x with | none => [] | some r => r.row
-    let d := disjointMeter w (row a.1) (row b.1)
+    let d := disjointMeter w (demandRow a.1) (demandRow b.1)
     (d.1,a.2+b.2+d.2.1,e.2+d.2.2)
 
 def pairVisitBudget (w : Nat) (ds : List RefRow) : Nat :=
@@ -233,10 +242,10 @@ theorem different_value (w : Nat) (ds : List RefRow) (i j : Nat) :
     (differentMeter w ds i j).1=differentBinary w ds i j := by
   unfold differentMeter differentBinary natEq
   dsimp only
-  by_cases h : optFalse (checkedEq w i j).1=true
-  · simp only [if_pos h]
-  · simp only [if_neg h]
-    change (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).1=_
+  by_cases he : optFalse (checkedEq w i j).1=true
+  · rw [if_pos he,if_pos he] <;> rfl
+  · rw [if_neg he,if_neg he]
+    rw [demandRow_value w ds i,demandRow_value w ds j]
     exact disjoint_value w (demandBinary w ds i) (demandBinary w ds j)
 
 theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
@@ -245,19 +254,20 @@ theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
   unfold differentMeter pairVisitBudget pairGateBudget
   dsimp only
   by_cases he : optFalse (checkedEq w i j).1=true
-  · simp only [if_pos he]
+  · rw [if_pos he]
     exact ⟨Nat.zero_le _,Nat.le_trans (checked_eq_bound w i j) (Nat.le_add_right _ _)⟩
-  · simp only [if_neg he]
+  · rw [if_neg he]
+    rw [demandRow_value w ds i,demandRow_value w ds j]
     have h := disjoint_bounds w (demandBinary w ds i) (demandBinary w ds j)
+    have hz := Nat.le_antisymm h.left (Nat.zero_le _)
+    have hv : (checkedLookup w ds i).2+(checkedLookup w ds j).2≤
+        (w+1)*ds.length+(w+1)*ds.length :=
+      Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j)
     change (checkedLookup w ds i).2+(checkedLookup w ds j).2+
       (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.1≤
       (w+1)*ds.length+(w+1)*ds.length ∧
       (checkedEq w i j).2+(disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.2≤
         eqBudget w+disjointBudget w (demandBinary w ds i) (demandBinary w ds j)
-    have hz := Nat.le_antisymm h.left (Nat.zero_le _)
-    have hv : (checkedLookup w ds i).2+(checkedLookup w ds j).2≤
-        (w+1)*ds.length+(w+1)*ds.length :=
-      Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j)
     rw [hz]
     exact ⟨hv,Nat.add_le_add (checked_eq_bound w i j) h.right⟩
 
