@@ -70,18 +70,46 @@ theorem token_width (bytes ts : List Nat) (h : tokenize bytes=some ts) :
     ∀ v ∈ ts, v+1≤ceiling :=
   wire_bound bytes ts (ProctorEnvelopeRoundtrip.tokenize_converse bytes ts h).right
 
--- Symbolic induction avoids reducing a 512-bit closed power in
--- a single elaborator decision. No recursion-limit change.
+private theorem mul_add_local (n a b : Nat) : n*(a+b)=n*a+n*b := by
+  induction b with
+  | zero => rfl
+  | succ b ih =>
+    change n*(a+b)+n=n*a+(n*b+n)
+    rw [ih]
+    exact Nat.add_assoc _ _ _
+
+-- Constructive multiplication associativity and power addition.
+-- Avoid the library power lemma's transitive propositional axiom.
+private theorem mul_assoc_local (a b c : Nat) : (a*b)*c=a*(b*c) := by
+  induction c with
+  | zero => rfl
+  | succ c ih =>
+    change (a*b)*c+a*b=a*(b*c+b)
+    rw [ih]
+    exact (mul_add_local a (b*c) b).symm
+
+private theorem pow_add_local (a m n : Nat) : a^(m+n)=a^m*a^n := by
+  induction n with
+  | zero =>
+    change a^m=0+a^m
+    exact (Nat.zero_add _).symm
+  | succ n ih =>
+    change a^(m+n)*a=a^m*(a^n*a)
+    rw [ih]
+    exact mul_assoc_local (a^m) (a^n) a
+
 private theorem radix_pow (k : Nat) : radix k=2^(4*k) := by
   induction k with
   | zero => rfl
   | succ k ih =>
     change 16*radix k=2^(4*k+4)
     calc
-      16*radix k = 16*2^(4*k) := congrArg (fun v => 16*v) ih
-      _ = 2^(4*k)*2^4 := Nat.mul_comm _ _
-      _ = 2^(4*k+4) := (Nat.pow_add 2 (4*k) 4).symm
+      16*radix k = 2^4*2^(4*k) := congrArg (fun v => 16*v) ih
+      _ = 2^(4+4*k) := (pow_add_local 2 4 (4*k)).symm
+      _ = 2^(4*k+4) := congrArg (fun n : Nat => 2^n) (Nat.add_comm 4 (4*k))
 
+-- Allow the specified 512-bit exponent only at this declaration.
+set_option exponentiation.threshold 512 in
 theorem ceiling_bits : ceiling=2^512 :=
   radix_pow digitLimit
 
@@ -164,14 +192,6 @@ def rippleMeter : List (Bool × Bool) → Bool → List Bool × Nat
     let q := fullAdder a b c
     let r := rippleMeter xs q.2
     (q.1::r.1,r.2+5)
-
-private theorem mul_add_local (n a b : Nat) : n*(a+b)=n*a+n*b := by
-  induction b with
-  | zero => rfl
-  | succ b ih =>
-    change n*(a+b)+n=n*a+(n*b+n)
-    rw [ih]
-    exact Nat.add_assoc _ _ _
 
 theorem ripple_value (cols : List (Bool × Bool)) (c : Bool) :
     bitsValue (rippleMeter cols c).1=columnValue cols+bitVal c := by

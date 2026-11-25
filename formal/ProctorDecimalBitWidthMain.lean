@@ -18,6 +18,8 @@ def checkWord (a : List Nat) : IO Bool := do
       throw (IO.userError "decimal operand width mismatch")
     pure true
 
+-- The independent executable boundary control uses the same fixed exponent.
+set_option exponentiation.threshold 512 in
 def run (dir : String) : IO UInt32 := do
   if ceiling != 2^512 then throw (IO.userError "ceiling mismatch")
   let maxWord := List.replicate 128 57 ++ [10]
