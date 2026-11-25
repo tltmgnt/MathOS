@@ -158,14 +158,18 @@ theorem compare_total (as bs : List Bool) (h : as.length=bs.length) :
   | nil =>
     cases bs with
     | nil => exact ⟨.eq,rfl⟩
-    | cons b bs => cases h
+    | cons b bs => exact (Nat.noConfusion h : False).elim
   | cons a as ih =>
     cases bs with
-    | nil => cases h
+    | nil => exact (Nat.noConfusion h : False).elim
     | cons b bs =>
       have he : as.length=bs.length := Nat.succ.inj h
       obtain ⟨o,ho⟩ := ih bs he
-      unfold compareBits
+      change ∃ q, (match compareBits as bs with
+        | none => none
+        | some .eq => some (lowCompare a b)
+        | some .lt => some .lt
+        | some .gt => some .gt)=some q
       rw [ho]
       cases o
       · exact ⟨.lt,rfl⟩
@@ -200,16 +204,13 @@ theorem bit_model_eq (f : Formula) (v : Nat) : bitModel f v=model f v := by
   cases o with
   | lt =>
     change score f (v,true)<score f (v,false) at hm
-    rw [if_pos hm]
-    rfl
+    rw [if_pos hm] <;> rfl
   | eq =>
     change score f (v,true)=score f (v,false) at hm
-    rw [if_neg (fun h => Nat.lt_irrefl _ (hm ▸ h))]
-    rfl
+    rw [if_neg (fun h => Nat.lt_irrefl _ (hm ▸ h))] <;> rfl
   | gt =>
     change score f (v,false)<score f (v,true) at hm
-    rw [if_neg (Nat.not_lt_of_ge (Nat.le_of_lt hm))]
-    rfl
+    rw [if_neg (Nat.not_lt_of_ge (Nat.le_of_lt hm))] <;> rfl
 
 -- One paired position is visited per recursive comparison.
 def compareCharge : List Bool → List Bool → Nat
