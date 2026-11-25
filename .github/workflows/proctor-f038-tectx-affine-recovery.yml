@@ -1,0 +1,38 @@
+name: Proctor F038 TECT-X affine recovery
+on:
+  push:
+    branches: ['research/pnp-f038-tectx-affine-recovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_tectx_cycle.py mathos/research/f038_affine_recovery.py
+          python -m mathos.research.f038_guarded_affine | tee /tmp/prior.txt
+          grep -Fx 'F038_TECTX_GUARDED_AFFINE_OK full=256,8960,5791,3169,10240,665,672,512 binary=256,6400,1407,4993,5120,6055,14080,1920 parity_cases=3 split_cases=3 guard_controls=4' /tmp/prior.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_affine_recovery | tee /tmp/recovery.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=ordinary_complete,short_proofs,discovery,machine_cost status=OPEN' /tmp/recovery.txt
+          grep -Fx 'F038_TECTX_RECOVERY_OK primary=4096,1206,32768,28658,1360,2124 full=256,28,2048,1936,255,956 binary=256,78,1024,881,95,120 guarded=256,6400,1407,4993,6075,14320,2064,676 families=3,278,96,1800,3 controls=5' /tmp/recovery.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/recovery.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_TECTX_RECOVERY_GATE_OK status=OPEN')
+          PY

@@ -42,10 +42,20 @@ def run_attempt(plan_path,audit):
     require(before['mathematical_resolution']['status']=='BLOCKED','unexpected base closure')
     # Candidate-specific subgraph; no status promotion from executable checks.
     local=dict(g)
-    local['attempt_soundness_review']=Claim('Independent review of candidate guarded-affine derivation','open')
-    local['attempt_full_affine_integration']=Claim('Full affine separator-query integration and total resource accounting','open')
-    local['attempt_route']=Claim('Candidate hybrid route review and universal completion','derived',(
-        tuple(plan['targets'])+('attempt_soundness_review','attempt_full_affine_integration'),))
+    obligations=plan.get('local_obligations',[
+        {'key':'attempt_soundness_review','label':'Independent review of candidate guarded-affine derivation'},
+        {'key':'attempt_full_affine_integration','label':'Full affine separator-query integration and total resource accounting'}])
+    keys=[]
+    require(isinstance(obligations,list) and bool(obligations),'missing local obligations')
+    for item in obligations:
+        key,label=item['key'],item['label']
+        require(isinstance(key,str) and key.startswith('attempt_') and key not in local
+                and key!='attempt_route' and isinstance(label,str) and bool(label),
+                'invalid local obligation')
+        local[key]=Claim(label,'open')
+        keys.append(key)
+    local['attempt_route']=Claim('Candidate route review and universal completion','derived',(
+        tuple(plan['targets'])+tuple(keys),))
     local_before=analyze(local,'attempt_route')
     print('TECTX_PRE_GAP_OK targets='+','.join(plan['targets'])+' status=OPEN',flush=True)
     observed=audit()

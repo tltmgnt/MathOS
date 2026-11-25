@@ -1,0 +1,88 @@
+{
+  "attempt_id": "F038-TECTX-AFFINE-RECOVERY",
+  "base_commit": "167414996c40e61adc196190991abe5120add633",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45718688061",
+  "targets": [
+    "ordinary_complete",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "Certified degree-two existential elimination recovers hidden guarded parity rows in the previous split encoding.",
+  "route": "certificate_route",
+  "topology": "Exact local existential projection; incidence cokernel and reverse witness lifting.",
+  "adversarial": [
+    "Three-copy cyclic implication hiding gadget",
+    "Disabled source supports and altered elimination certificates",
+    "Complete implied-unit recovery is coNP-complete on satisfiable 3-CNF"
+  ],
+  "scope": "Width-three resolvents; exactly one positive and one negative occurrence; guarded static recovery; no universal bound.",
+  "cost": "Polynomial preprocessing and replay in explicit input length; arbitrary fallback search may be exponential.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent mathematical review of elimination and guarded recovery"
+    },
+    {
+      "key": "attempt_broader_recovery",
+      "label": "Recovery beyond degree-two elimination with bounded total cost"
+    },
+    {
+      "key": "attempt_full_affine_integration",
+      "label": "Full affine separator-query integration and total resource accounting"
+    }
+  ],
+  "independent_reference": "Separate JavaScript finite projection and conditional-equation enumeration; not execution of the Python implementation.",
+  "expected": {
+    "primary": [
+      4096,
+      1206,
+      32768,
+      28658,
+      1360,
+      2124
+    ],
+    "full": [
+      256,
+      28,
+      2048,
+      1936,
+      255,
+      956
+    ],
+    "binary": [
+      256,
+      78,
+      1024,
+      881,
+      95,
+      120
+    ],
+    "guarded": [
+      256,
+      6400,
+      1407,
+      4993,
+      6075,
+      14320,
+      2064,
+      676
+    ],
+    "families": [
+      3,
+      278,
+      96,
+      1800,
+      3
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_affine_recovery.py",
+    "docs/research/tga-universal/PNP-F038-TECTX-AFFINE-RECOVERY.md"
+  ],
+  "next": "Certified local block recovery and bounded-width inference with explicit complexity accounting."
+}
