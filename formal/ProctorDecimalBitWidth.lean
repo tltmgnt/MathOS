@@ -70,8 +70,20 @@ theorem token_width (bytes ts : List Nat) (h : tokenize bytes=some ts) :
     ∀ v ∈ ts, v+1≤ceiling :=
   wire_bound bytes ts (ProctorEnvelopeRoundtrip.tokenize_converse bytes ts h).right
 
--- Closed arithmetic equality, not native_decide or a new axiom.
-theorem ceiling_bits : ceiling=2^512 := by decide
+-- Symbolic induction avoids reducing a 512-bit closed power in
+-- a single elaborator decision. No recursion-limit change.
+private theorem radix_pow (k : Nat) : radix k=2^(4*k) := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+    change 16*radix k=2^(4*k+4)
+    calc
+      16*radix k = 16*2^(4*k) := congrArg (fun v => 16*v) ih
+      _ = 2^(4*k)*2^4 := Nat.mul_comm _ _
+      _ = 2^(4*k+4) := (Nat.pow_add 2 (4*k) 4).symm
+
+theorem ceiling_bits : ceiling=2^512 :=
+  radix_pow digitLimit
 
 theorem natural_width (w : List Nat) (v : Nat)
     (h : ProctorDimacsInput.naturalWord w=some v) : v+1≤ceiling := by
@@ -95,7 +107,11 @@ theorem signed_width (w : List Nat) (l : Literal)
   cases w with
   | nil => cases h
   | cons b ds =>
-    unfold ProctorDimacsInput.signedWord at h
+    change (if b=45 then
+      (do let v ← ProctorDimacsInput.naturalWord ds
+          if v=0 then none else some (v,false))
+      else (do let v ← ProctorDimacsInput.naturalWord (b::ds)
+               some (v,true)))=some l at h
     by_cases sign : b=45
     · rw [if_pos sign] at h
       cases e : ProctorDimacsInput.naturalWord ds with

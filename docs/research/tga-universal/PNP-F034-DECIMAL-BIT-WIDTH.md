@@ -56,3 +56,26 @@ arithmetic. Complete parser control/reversal accounting,
 allocation, machine/IO/compiler refinement and independent
 review remain outstanding. No required proof-size or proof
 discovery bound; no unrestricted SAT or P vs NP result.
+
+## Initial preflight and correction
+
+Exact candidate 2bf6604f3d59387c16cff2468d376fed820ad6dd
+failed mandatory preflight 45523977318 job 138902598589,
+exit 1, artifact 14981672372. Actual error headers:
+```text
+artifacts/f034-decimal-bit-width/combined.lean:7970:43: error: maximum recursion depth has been reached
+artifacts/f034-decimal-bit-width/combined.lean:7996:10: error: tactic 'rewrite' failed, did not find instance of the pattern in the target expression
+artifacts/f034-decimal-bit-width/combined.lean:8008:10: error: tactic 'rewrite' failed, did not find instance of the pattern in the target expression
+```
+Eleven of thirteen declarations printed zero axioms, including
+the digit invariant, wire/token bound and all ripple-adder
+results. ceiling_bits and signed_width printed sorryAx
+because of failed elaboration; no explicit sorry was added.
+The run did not reach the fixture marker. The correction
+replaces closed large-power decide with symbolic radix_pow
+induction and reduces the cons match explicitly before
+rewriting the sign condition. No theorem statement,
+arithmetic implementation, fixture, recursion limit or
+strict gate is changed. Corrected exact SHA requires replay.
+PR #190 has merged at 4a2c3b20b05a9bf3b9fe85910d8008d4d32a5cc5.
+https://github.com/tltmgnt/MathOS/actions/runs/45523977318/job/138902598589
