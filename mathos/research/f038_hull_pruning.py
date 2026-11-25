@@ -82,8 +82,8 @@ def fiber(nodes,pred,H,n,i,z):
     return size,generate()
 
 
-def solve(nodes,pred,n,h):
-    H=summaries(nodes,pred,n,h)
+def solve(nodes,pred,n,h,summary_fn=summaries,fiber_fn=fiber):
+    H=summary_fn(nodes,pred,n,h)
     root=len(nodes)-1
     memo={}
     chosen={}
@@ -95,7 +95,7 @@ def solve(nodes,pred,n,h):
         ch=nodes[i][3]
         count=0
         ok=False
-        size,options=fiber(nodes,pred,H,n,i,z)
+        size,options=fiber_fn(nodes,pred,H,n,i,z)
         for opt in options:
             count+=1
             if ch:
@@ -127,14 +127,14 @@ def solve(nodes,pred,n,h):
         t=lift(tuple(eq))
         assert t is not None
     cert=H,tuple(trace)
-    assert verify(nodes,pred,n,h,t,cert)
+    assert verify(nodes,pred,n,h,t,cert,summary_fn,fiber_fn)
     return t,cert
 
 
-def verify(nodes,pred,n,h,t,cert):
+def verify(nodes,pred,n,h,t,cert,summary_fn=summaries,fiber_fn=fiber):
     try:
         H,trace=cert
-        if H!=summaries(nodes,pred,n,h):
+        if H!=summary_fn(nodes,pred,n,h):
             return False
         known={}
         root=len(nodes)-1
@@ -145,7 +145,7 @@ def verify(nodes,pred,n,h,t,cert):
                 return False
             if type(ok) is not bool or type(count) is not int or count<0:
                 return False
-            size,options=fiber(nodes,pred,H,n,i,z)
+            size,options=fiber_fn(nodes,pred,H,n,i,z)
             if count>size or (not ok and count!=size):
                 return False
             hit=False

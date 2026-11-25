@@ -1,0 +1,40 @@
+name: Proctor F038 relational pruning
+on:
+  push:
+    branches: ['research/pnp-f038-relational-pruning']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_hull_pruning.py mathos/research/f038_relational_pruning.py
+          python -m mathos.research.f038_hull_pruning | tee /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_OK formulas=4096 inconsistent=2384 queries=6398 sat=2622 unsat=3776 nodes=34130 exact_hulls=33619 relaxed=511 membership_checks=66390 strict=2637 empty=10538 root_empty=3748 root_false_positive=28 fiber_before=13452 fiber_after=3823' /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_FULL_OK formulas=256 inconsistent=1 queries=1148 sat=1148 unsat=0 nodes=7876 exact_hulls=4612 relaxed=3264 membership_checks=54172 strict=4936 empty=0 root_empty=0 root_false_positive=0 fiber_before=8848 fiber_after=2768' /tmp/hull.txt
+          grep -Fx 'F038_HULL_PRUNING_FAMILIES_OK sign_cases=12 max_shared_rank=32 sign_root_trials_each=1 obstruction_sizes=1,2,3,4,5,6 obstruction_root_trials=2,4,8,16,32,64 corrupt_rejected=18' /tmp/hull.txt
+          python -m mathos.research.f038_relational_pruning | tee /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PROPAGATION_OK cases=4096 membership_checks=32768 empty=1710 true_empty=1710 false_positive=0 strict=3647 exact=4026 sweeps=6100 initial=12288 remaining=3808' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PRUNING_OK formulas=4096 inconsistent=2384 queries=6398 sat=2622 unsat=3776 nodes=34130 membership_checks=66390' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_PRUNING_FULL_OK formulas=256 inconsistent=1 queries=1148 sat=1148 unsat=0 nodes=7876 membership_checks=54172' /tmp/relational.txt
+          grep -Fx 'F038_RELATIONAL_HIERARCHY_OK ranks=3,4,5 blocks=2,3 cases=6 lower_order_root_trials=36 higher_order_root_trials=0 corrupt_rejected=6' /tmp/relational.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RELATIONAL_PRUNING_GATE_OK status=OPEN')
+          PY
