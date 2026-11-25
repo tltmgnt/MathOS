@@ -86,7 +86,7 @@ theorem product_mem (f g : Formula) (c d : Clause) (hc : c∈f) (hd : d∈g) :
   | nil => cases hc
   | cons a as ih =>
     cases hc with
-    | head => exact append_left _ _ _ (row_product_mem a g d hd)
+    | head => exact append_left _ _ _ (row_product_mem c g d hd)
     | tail _ hm => exact append_right _ _ _ (ih hm)
 
 theorem product_origin (f g : Formula) (r : Clause)
@@ -226,7 +226,7 @@ theorem parity_flip (b t : Bool) :
 theorem parity_neg (b : Bool) (xs ys : List Bool)
     (h : parity ys= !(parity xs)) :
     parity (b::ys)= !(parity (b::xs)) := by
-  change (if b then !(parity ys) else parity ys)=_
+  change (if b then !(parity ys) else parity ys)=Bool.not (if b then !(parity xs) else parity xs)
   rw [h]
   cases b <;> cases parity xs <;> rfl
 
@@ -261,7 +261,7 @@ theorem parity_pattern_unique (p : List (Option Bool)) (xs : List Bool)
     change (if !b then !(parity xs) else parity xs)=
       (if b then !(parity xs) else parity xs) at he
     rw [parity_flip] at he
-    cases b <;> cases parity xs <;> cases he
+    cases b <;> cases ht : parity xs <;> rw [ht] at he <;> cases he
 
 end ProctorSemanticProjection
 
