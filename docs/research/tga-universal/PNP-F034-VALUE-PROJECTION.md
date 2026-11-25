@@ -26,3 +26,7 @@ Ten candidate declarations and 1310 executable controls (511 words,
 Strict Lean 4.14.0 warnings-as-errors and zero-axiom gates unchanged.
 No local Lean execution. Require exact preflight before PR.
 Independent review and resolution remain open.
+
+## Initial replay repair
+
+Exact head 0ea7e1ac1ff215921226d1840ce00f5497650c17 failed [45555588011 / job 139006732549](https://github.com/tltmgnt/MathOS/actions/runs/45555588011/job/139006732549), artifact 14995528011. The line continuation in the successful digit branch of core_bound was parsed as a separate command, leaving Nat.le_trans partially applied. Move the exact tactic to its own indented branch line with both arguments on that line. Eight independent declarations printed no axioms; core_bound and tokenize_bound failed elaboration. Executable marker was not reached. No theorem statement, executable definition, fixtures or verification gates changed. Require successful exact-head replay before PR.

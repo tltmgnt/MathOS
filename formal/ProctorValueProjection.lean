@@ -136,8 +136,8 @@ theorem core_bound (reset cz : List Bool)
               | some out => emitCore reset cz step next bs out d acc).2≤_
             cases es : step v b with
             | none => exact Nat.zero_le _
-            | some out => exact Nat.le_trans (ih out d acc (hs v b out es))
-                (Nat.le_add_right _ _)
+            | some out =>
+              exact Nat.le_trans (ih out d acc (hs v b out es)) (Nat.le_add_right _ _)
       · rw [if_neg digit]
         exact Nat.zero_le _
 
