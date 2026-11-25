@@ -213,7 +213,7 @@ theorem relax_growth (rs : Routes) (e : Arc) :
     cases hd : routeFor e.2 rs with
     | some _ => exact Or.inl rfl
     | none =>
-      refine Or.inr ⟨hd,ps++[e.2],?_⟩
+      refine Or.inr ⟨rfl,ps++[e.2],?_⟩
       change (if e.2=e.2 then some (ps++[e.2]) else routeFor e.2 rs)=_
       rw [if_pos rfl]
 
