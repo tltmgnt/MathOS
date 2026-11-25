@@ -1,0 +1,66 @@
+name: Proctor F034 reusable amortized parser contract
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-amortized-parser.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-amortized-parser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-amortized-parser
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-amortized-parser
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsSize.lean formal/ProctorScannerMeter.lean formal/ProctorDimacsLexMeter.lean formal/ProctorDimacsLexerCompose.lean formal/ProctorDimacsRowMeter.lean formal/ProctorDimacsDecoderMeter.lean formal/ProctorDecimalBitWidth.lean formal/ProctorBinaryPrimitives.lean formal/ProctorCheckedBinaryScanner.lean formal/ProctorStructuralCounters.lean formal/ProctorFuelFreeParser.lean formal/ProctorIteratorDispatch.lean formal/ProctorIteratorOverhead.lean formal/ProctorParserMeterCompose.lean formal/ProctorInputSensitiveIterator.lean formal/ProctorAmortizedParser.lean formal/ProctorAmortizedParserMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_AMORTIZED_PARSER_OK small=1122 nested=12 boundary=8' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-amortized-parser")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["advance_safe","word_run_success","word_run_all","list_amortized","nat_amortized","all_bound","nested_nat_amortized","nested_nat_bound"]
+          for name in names:
+              if f"'ProctorAmortizedParser.{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorAmortizedParser.{name}")
+          report = dict(scope="REUSABLE_AMORTIZED_SELECTED_PARSER_CONTRACT",
+                        verified=names, axiom_gate=True, small_controls=1122, nested_controls=12, boundary_controls=8,
+                        amortized_list_contract_verified=True,
+                        complete_decoder_cost_verified=False,
+                        total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorAmortizedParser.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-amortized-parser-evidence
+          path: artifacts/f034-amortized-parser/
