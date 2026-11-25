@@ -235,7 +235,9 @@ theorem different_value (w : Nat) (ds : List RefRow) (i j : Nat) :
   dsimp only
   cases optFalse (checkedEq w i j).1 with
   | true => rfl
-  | false => exact disjoint_value w (demandBinary w ds i) (demandBinary w ds j)
+  | false =>
+    change (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).1=_
+    exact disjoint_value w (demandBinary w ds i) (demandBinary w ds j)
 
 theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
     (differentMeter w ds i j).2.1≤pairVisitBudget w ds ∧
@@ -246,7 +248,14 @@ theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
   | true => exact ⟨Nat.zero_le _,Nat.le_trans (checked_eq_bound w i j) (Nat.le_add_right _ _)⟩
   | false =>
     have h := disjoint_bounds w (demandBinary w ds i) (demandBinary w ds j)
-    exact ⟨Nat.add_le_add (Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j)) h.left,
+    change (checkedLookup w ds i).2+(checkedLookup w ds j).2+
+      (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.1≤
+      (w+1)*ds.length+(w+1)*ds.length ∧
+      (checkedEq w i j).2+(disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.2≤
+        eqBudget w+disjointBudget w (demandBinary w ds i) (demandBinary w ds j)
+    have hz := Nat.le_antisymm h.left (Nat.zero_le _)
+    rw [hz]
+    exact ⟨Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j),
       Nat.add_le_add (checked_eq_bound w i j) h.right⟩
 
 def pairsMeter (w : Nat) (ds : List RefRow) : Meter :=
