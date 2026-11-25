@@ -164,7 +164,17 @@ def concrete():
         _,h=threshold(d,r,hole=s)
         for f,expected in (((a,b),True),((h,b),False)):
             def solve(i,pins):
-                return 0 if sat(restrict(f[i],pins)) else None
+                # Extract a full witness via successive exact finite queries.
+                local=f[i]
+                if not sat(restrict(local,pins)):
+                    return None
+                assignment=dict(pins)
+                for v in sorted({abs(l) for c in local for l in c}-set(pins)):
+                    assignment[v]=False
+                    if not sat(restrict(local,assignment)):
+                        assignment[v]=True
+                assert all(any(assignment[abs(l)]==(l>0) for l in c) for c in local)
+                return sum(1<<(v-1) for v,value in assignment.items() if value)
             dm,table=seeds(f,(1<<d)-1,solve)
             assert dm==(1<<d)-1
             assert all(v is not None for v in table.values())==expected
