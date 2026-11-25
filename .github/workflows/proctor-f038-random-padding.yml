@@ -1,0 +1,35 @@
+name: Proctor F038 random padding coverage
+on:
+  push:
+    branches: ['research/pnp-f038-random-padding-coverage']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_random_padding.py
+          python -m mathos.research.f038_padding_propagation | tee /tmp/padding.txt
+          grep -Fx 'F038_PADDING_PROPAGATION_OK formulas=4096 sat=1360 padded_checks=32768 single_misses=5532 windows=147456 joint_misses=7752 sweep_witnesses=41208 certificate_checks=1179648 candidate_checks=946176 good_lengths=1 good_windows=23 collective_only=5 length_misses=1232,736,480,516,224,0,1360,984' /tmp/padding.txt
+          python -m mathos.research.f038_random_padding | tee /tmp/random.txt
+          grep -Fx 'F038_RANDOM_PADDING_OK formulas=4096 sat=1360 unsat=2736 variant_checks=126976 accepted=11944 missed=30216 unsat_checks=84816 mass_checks=20480 windows=61440 all_miss=3656 positive=16744 det_miss=4952 det_hit=15448 random_only=1296 certificate_checks=491520 good_half=3180 zero=3124 one=764 accepted_by_length=128,1000,2748,8068,0' /tmp/random.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RANDOM_PADDING_GATE_OK status=OPEN')
+          PY
