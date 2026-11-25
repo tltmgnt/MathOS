@@ -68,7 +68,7 @@ theorem single_word (d : Nat) (h : d<10) : Word 0 0 [48+d] d := by
   apply Word.digit (char_lo d) (char_hi d h)
   · intro hz
     exact (Nat.not_lt_zero _ hz).elim
-  · rw [char_value]
+  · rw [char_value,Nat.mul_zero,Nat.zero_add]
     exact Word.done d 1 (by decide)
 
 theorem append_digit (v k out : Nat) (ds : List Nat)
@@ -81,7 +81,7 @@ theorem append_digit (v k out : Nat) (ds : List Nat)
     rw [char_value]
     exact Word.done (10*v+d) (k+1) (Nat.succ_ne_zero k)
   | @digit v k b out bs lo hi nonzero sub ih =>
-    exact Word.digit lo hi nonzero ih
+    exact Word.digit lo hi nonzero (ih hn)
 
 def digitsAux : Nat → Nat → List Nat
   | 0,_ => []
