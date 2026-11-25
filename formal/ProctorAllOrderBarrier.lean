@@ -66,7 +66,7 @@ def bucket (s : Side) (t : Buckets) : Formula :=
 
 theorem split_cons (s : Side) (v : Nat) (c : Clause) (f : Formula) :
     bucket s (split v (c::f))=bucket s (split v [c])++bucket s (split v f) := by
-  unfold split
+  rw [split,split]
   dsimp only
   cases h0 : reduceRow v false c <;> cases h1 : reduceRow v true c <;> cases s <;> rfl
 
@@ -81,7 +81,10 @@ theorem split_count (s : Side) (v : Nat) (c r : Clause) (f : Formula)
     by_cases he : c=d
     · cases he
       rw [if_pos rfl,h]
-      change countRow c ds+1≤1+countRow r (bucket s (split v ds))
+      have h1 : countRow r [r]=1 := by
+        change (if r=r then 0+1 else 0)=1
+        rw [if_pos rfl]
+      rw [h1]
       rw [Nat.add_comm 1]
       exact Nat.succ_le_succ ih
     · rw [if_neg he]
@@ -109,6 +112,7 @@ theorem product_count (a b : Clause) (f g : Formula) :
   | nil =>
     change 0*countRow b g≤0
     rw [Nat.zero_mul]
+    exact Nat.le_refl _
   | cons c cs ih =>
     change (if a=c then countRow a cs+1 else countRow a cs)*countRow b g≤
       countRow (a++b) (rowProduct c g++orProduct cs g)
@@ -146,11 +150,12 @@ theorem common_single (v : Nat) (c : Clause) (h : ∀ l∈c,l.1≠v) :
 theorem left_single (v u : Nat) (b : Bool) (h : u≠v) :
     bucket .left (split v [[(v,true),(u,b)]])=[[(u,b)]] := by
   have h0 : reduceRow v false [(v,true),(u,b)]=some [(u,b)] := by
-    change reduceRow v false [(u,b)]=_
+    rw [reduceRow,if_pos rfl,if_neg (by decide : true≠false)]
     exact reduce_untouched v false _ (fun l hl => by cases hl with
       | head => exact h
       | tail _ hm => cases hm)
-  have h1 : reduceRow v true [(v,true),(u,b)]=none := rfl
+  have h1 : reduceRow v true [(v,true),(u,b)]=none := by
+    rw [reduceRow,if_pos rfl,if_pos rfl]
   unfold split
   dsimp only
   rw [h0,h1]
@@ -159,11 +164,12 @@ theorem left_single (v u : Nat) (b : Bool) (h : u≠v) :
 theorem right_single (v u : Nat) (b : Bool) (h : u≠v) :
     bucket .right (split v [[(v,false),(u,b)]])=[[(u,b)]] := by
   have h1 : reduceRow v true [(v,false),(u,b)]=some [(u,b)] := by
-    change reduceRow v true [(u,b)]=_
+    rw [reduceRow,if_pos rfl,if_neg (by decide : false≠true)]
     exact reduce_untouched v true _ (fun l hl => by cases hl with
       | head => exact h
       | tail _ hm => cases hm)
-  have h0 : reduceRow v false [(v,false),(u,b)]=none := rfl
+  have h0 : reduceRow v false [(v,false),(u,b)]=none := by
+    rw [reduceRow,if_pos rfl,if_pos rfl]
   unfold split
   dsimp only
   rw [h0,h1]
@@ -186,6 +192,7 @@ theorem rich_step (f : Formula) (v : Nat) (vs : List Nat) (m : Nat)
   let t := split v f
   have hc : ∀ l∈c,l.1≠v := by
     intro l hl
+    change l∈[(u,a),(w,b)] at hl
     cases hl with
     | head => exact fresh u hu
     | tail _ hm =>
@@ -240,7 +247,7 @@ theorem rich_lower (f : Formula) (m : Nat) (vs : List Nat) (u w : Nat)
     m≤f.length :=
   Nat.le_trans (h u hu w hw he true true) (count_length _ _)
 
--- A prefix may be any sequence of distinct offered variables.
+-- A pre may be any sequence of distinct offered variables.
 -- Keep its unprocessed suffix as part of the invariant.
 def Distinct : List Nat → Prop
   | [] => True
@@ -254,19 +261,19 @@ def growth : Nat → Nat → Nat
   | 0,m => m
   | k+1,m => growth k (m+m*m)
 
-theorem rich_prefix (prefix suffix : List Nat) (f : Formula) (m : Nat)
-    (hd : Distinct (prefix++suffix)) (hr : Rich f m (prefix++suffix)) :
-    Rich (advance prefix f) (growth prefix.length m) suffix := by
-  induction prefix generalizing f m with
+theorem rich_prefix (pre suffix : List Nat) (f : Formula) (m : Nat)
+    (hd : Distinct (pre++suffix)) (hr : Rich f m (pre++suffix)) :
+    Rich (advance pre f) (growth pre.length m) suffix := by
+  induction pre generalizing f m with
   | nil => exact hr
   | cons v vs ih =>
     change (∀ u∈vs++suffix,u≠v) ∧ Distinct (vs++suffix) at hd
     exact ih (eliminate v f) (m+m*m) hd.2 (rich_step f v (vs++suffix) m hr hd.1)
 
-theorem marked_prefix (prefix suffix : List Nat) (f : Formula)
-    (hd : Distinct (prefix++suffix)) (hm : Marked f (prefix++suffix)) :
-    Marked (advance prefix f) suffix := by
-  induction prefix generalizing f with
+theorem marked_prefix (pre suffix : List Nat) (f : Formula)
+    (hd : Distinct (pre++suffix)) (hm : Marked f (pre++suffix)) :
+    Marked (advance pre f) suffix := by
+  induction pre generalizing f with
   | nil => exact hm
   | cons v vs ih =>
     change (∀ u∈vs++suffix,u≠v) ∧ Distinct (vs++suffix) at hd
@@ -278,6 +285,7 @@ theorem growth_exponential (k m : Nat) (hm : 1≤m) :
   | zero =>
     change 1*m≤m
     rw [Nat.one_mul]
+    exact Nat.le_refl _
   | succ k ih =>
     have hmul : m≤m*m := by
       have h := Nat.mul_le_mul_left m hm
@@ -301,18 +309,18 @@ theorem growth_exponential (k m : Nat) (hm : 1≤m) :
     rw [he]
     exact Nat.le_trans h2 h
 
-theorem all_order_prefix_bound (prefix suffix : List Nat) (f : Formula)
-    (hd : Distinct (prefix++suffix)) (hr : Rich f 1 (prefix++suffix))
+theorem all_order_prefix_bound (pre suffix : List Nat) (f : Formula)
+    (hd : Distinct (pre++suffix)) (hr : Rich f 1 (pre++suffix))
     (u w : Nat) (hu : u∈suffix) (hw : w∈suffix) (he : u≠w) :
-    2^prefix.length≤(advance prefix f).length := by
-  have h := growth_exponential prefix.length 1 (Nat.le_refl 1)
+    2^pre.length≤(advance pre f).length := by
+  have h := growth_exponential pre.length 1 (Nat.le_refl 1)
   rw [Nat.mul_one] at h
-  exact Nat.le_trans h (rich_lower _ _ _ u w (rich_prefix prefix suffix f 1 hd hr) hu hw he)
+  exact Nat.le_trans h (rich_lower _ _ _ u w (rich_prefix pre suffix f 1 hd hr) hu hw he)
 
-theorem all_order_prefix_unsupported (prefix suffix : List Nat) (f : Formula)
-    (hd : Distinct (prefix++suffix)) (hm : Marked f (prefix++suffix))
-    (u : Nat) (hu : u∈suffix) : supported (advance prefix f)=false :=
-  marked_blocks_leaf _ u (marked_prefix prefix suffix f hd hm u hu)
+theorem all_order_prefix_unsupported (pre suffix : List Nat) (f : Formula)
+    (hd : Distinct (pre++suffix)) (hm : Marked f (pre++suffix))
+    (u : Nat) (hu : u∈suffix) : supported (advance pre f)=false :=
+  marked_blocks_leaf _ u (marked_prefix pre suffix f hd hm u hu)
 
 end ProctorAllOrderBarrier
 
