@@ -157,7 +157,10 @@ theorem words_distinct (k : Nat) : Distinct (words k) := by
   induction k with
   | zero =>
     change (∀ b∈([] : List (List Bool)), ([] : List Bool)≠b) ∧ True
-    exact ⟨fun _ h => nomatch h,True.intro⟩
+    constructor
+    · intro b hb
+      cases hb
+    · exact True.intro
   | succ k ih =>
     change Distinct ((words k).map (List.cons false)++(words k).map (List.cons true))
     apply distinct_append
