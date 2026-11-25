@@ -6,10 +6,10 @@ def family (vs : List Nat) : Formula :=
   vs.map marker ++ vs.flatMap (fun u => vs.flatMap (fun w =>
     if u=w then [] else [false,true].flatMap (fun a =>
       [false,true].map (fun b => [(u,a),(w,b)]))))
-def verify (prefix suffix : List Nat) : IO Unit := do
-  let f := family (prefix++suffix)
-  let g := advance prefix f
-  let m := growth prefix.length 1
+def verify (pre suffix : List Nat) : IO Unit := do
+  let f := family (pre++suffix)
+  let g := advance pre f
+  let m := growth pre.length 1
   for u in suffix do
     if countRow (marker u) g == 0 || supported g then
       throw (IO.userError "marker lost")
