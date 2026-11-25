@@ -198,7 +198,7 @@ theorem positive_complete (n : Nat) (f : Formula)
     ∃ p : Proof, boundCheck n f ⟨n,f,p⟩=true := by
   have hq : validId n 1=true := by
     unfold validId test
-    rw [if_pos (Nat.zero_lt_succ 0),if_pos hn] <;> rfl
+    rw [if_pos (Nat.zero_lt_succ 0),if_pos (Nat.succ_le_of_lt hn)] <;> rfl
   have ho := formula_ok n f hf
   obtain ⟨g,hr,he⟩ := split_complete n 1 hq f (variables f) [] (fun _ => false) hu
     (fun c hc l hl => Or.inl (ProctorOrdinaryCompleteness.variable_mem f c l hc hl))
