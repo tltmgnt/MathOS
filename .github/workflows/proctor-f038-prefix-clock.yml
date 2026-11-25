@@ -1,0 +1,38 @@
+name: Proctor F038 explicit prefix clock
+on:
+  push:
+    branches: ['research/pnp-f038-explicit-prefix-clock']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_prefix_clock.py
+          python -m mathos.research.f038_tape_support | tee /tmp/support.txt
+          grep -Fx 'F038_TAPE_SUPPORT_RANK_OK functions=276 degree_cases=824 evaluation_checks=294368 full_rank=438 support_exists=386 nonzero_supports=3348 zero_rows=3176' /tmp/support.txt
+          grep -Fx 'F038_DENSE_TAPE_SUPPORT_BARRIER_OK cases=48 tape_checks=4210944 full_rank=45 min_mass=3/4' /tmp/support.txt
+          python -m mathos.research.f038_prefix_clock | tee /tmp/prefix.txt
+          grep -Fx 'F038_PREFIX_SEARCH_OK formulas=4096 sat=1360 unsat=2736 events=5888 jumps=4528 skipped=25648 deadline_checks=36864 misses=3152 max_events=4 hist=0,2992,432,656,16,0,0,0,0' /tmp/prefix.txt
+          grep -Fx 'F038_PREFIX_COMPILER_OK deadlines=5 patterns=163840 misses=1360,1104,672,16,0 certificates=2304,1688,834,16,0 accepted=0,256,688,1344,1360' /tmp/prefix.txt
+          grep -Fx 'F038_PREFIX_CLOCK_BARRIER_OK families=6 events=8,17,34,67,132,261' /tmp/prefix.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_PREFIX_CLOCK_GATE_OK status=OPEN')
+          PY
