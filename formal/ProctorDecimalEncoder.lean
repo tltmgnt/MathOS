@@ -43,7 +43,13 @@ theorem digit_range (d : Nat) (h : d<10) : 48≤48+d ∧ 48+d≤57 :=
   ⟨Nat.le_add_right _ _, Nat.add_le_add_left (Nat.le_of_lt_succ h) 48⟩
 
 theorem digit_value (d : Nat) : 48+d-48=d := by
-  rw [Nat.add_comm 48 d,Nat.add_sub_cancel]
+  have cancel : ∀ a b : Nat, (a+b)-b=a := by
+    intro a b
+    induction b with
+    | zero => rfl
+    | succ b ih => exact ih
+  rw [Nat.add_comm 48 d]
+  exact cancel d 48
 
 theorem scan_digit (v k d : Nat) (h : d<10)
     (hn : k>0 → v≠0) (rest acc : List Nat) :
@@ -67,7 +73,8 @@ theorem quotient_positive (n : Nat) (h : ¬n<10) : 0<n/10 := by
   cases hq : n/10 with
   | zero =>
     rw [hq,Nat.mul_zero,Nat.zero_add] at he
-    exact (h (he.symm ▸ hm)).elim
+    rw [he] at hm
+    exact (h hm).elim
   | succ q => exact Nat.zero_lt_succ q
 
 theorem digits_scan (fuel n : Nat) (h : n<fuel) :
@@ -81,7 +88,9 @@ theorem digits_scan (fuel n : Nat) (h : n<fuel) :
       intro rest acc
       change scan ((if n<10 then [48+n] else digits fuel (n/10)++[48+n%10])++rest) 0 0 acc=_
       rw [if_pos small]
-      exact scan_digit 0 0 n small (fun e => (Nat.not_lt_zero _ e).elim) rest acc
+      have hd := scan_digit 0 0 n small (fun e => (Nat.not_lt_zero _ e).elim) rest acc
+      rw [Nat.mul_zero,Nat.zero_add] at hd
+      exact hd
     · have hpos := quotient_positive n small
       have hn : 0<n := Nat.lt_of_lt_of_le (by decide : 0<10) (Nat.le_of_not_gt small)
       have hlt : n/10<n := Nat.div_lt_self hn (by decide : 1<10)
@@ -149,3 +158,9 @@ end ProctorDecimalEncoder
 #print axioms ProctorDecimalEncoder.expected_bytes
 #print axioms ProctorDecimalEncoder.envelope_bytes
 #print axioms ProctorDecimalEncoder.proof_bytes_accept
+
+#print axioms Nat.div_add_mod
+#print axioms Nat.div_lt_self
+#print axioms Nat.mod_lt
+#print axioms Nat.le_of_not_gt
+#print axioms Nat.add_sub_cancel
