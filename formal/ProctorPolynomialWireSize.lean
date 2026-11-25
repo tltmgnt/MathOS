@@ -78,7 +78,7 @@ theorem successor_pow (N : Nat) : N+1≤10^N := by
 
 private theorem pow_add' (a b : Nat) : 10^(a+b)=10^a*10^b := by
   induction b with
-  | zero => rw [Nat.pow_zero,Nat.mul_one]
+  | zero => change 10^a=10^a*1; rw [Nat.mul_one]
   | succ b ih =>
     change 10^(a+b+1)=10^a*10^(b+1)
     rw [Nat.pow_succ,Nat.pow_succ,ih,Nat.mul_assoc]
@@ -87,7 +87,7 @@ theorem structural_pow (N : Nat) : N+N*N<10^(2*N+4) := by
   have h0 : N+N*N≤(N+1)*(N+1) := by
     rw [Nat.mul_succ,Nat.add_one_mul]
     have h := Nat.le_add_right (N*N+N) (N+1)
-    rw [Nat.add_comm (N*N) N] at h
+    rw [Nat.add_comm N (N*N)]
     exact h
   have h1 := Nat.mul_le_mul (successor_pow N) (successor_pow N)
   rw [← pow_add'] at h1
@@ -211,3 +211,8 @@ end ProctorPolynomialWireSize
 #print axioms ProctorPolynomialWireSize.producer_magnitude_pow
 #print axioms ProctorPolynomialWireSize.producer_byte_budget
 #print axioms ProctorPolynomialWireSize.canonical_byte_budget
+
+#print axioms ProctorPolynomialWireSize.pow_add'
+#print axioms Nat.pow_succ
+#print axioms Nat.mul_assoc
+#print axioms Nat.add_one_mul
