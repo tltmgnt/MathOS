@@ -85,7 +85,8 @@ theorem ref_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
       some (⟨i,row⟩,ts))
     ts (rfl) ?_
   intro i ts
-  simp only [clause_refines L hL ts]
+  dsimp only
+  rw [clause_refines L hL ts]
 
 def group (L : ListBuilder) : Parser ProctorCapacityDeficiency.Group := fun ts => do
   let (vs,ts) ← (clause L) ts
@@ -135,7 +136,8 @@ theorem capacity_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
       some (⟨ds,gs,rs⟩,ts))
     ts (list_congr L hL _ _ (group_refines L hL) ts) ?_
   intro gs ts
-  simp only [list_congr L hL _ _ (ref_refines L hL) ts]
+  dsimp only
+  rw [list_congr L hL _ _ (ref_refines L hL) ts]
 
 def block (L : ListBuilder) : Parser ProctorXorReplay.Block := fun ts => do
   let (vs,ts) ← (L Nat natToken) ts
@@ -166,7 +168,8 @@ theorem block_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
       some (⟨vs,rhs,rs⟩,ts))
     ts (rfl) ?_
   intro rhs ts
-  simp only [list_congr L hL _ _ (ref_refines L hL) ts]
+  dsimp only
+  rw [list_congr L hL _ _ (ref_refines L hL) ts]
 
 def step (L : ListBuilder) : Parser Step := fun ts => do
   let (a,ts) ← (natToken) ts
@@ -211,7 +214,8 @@ theorem step_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
       some (⟨a,b,p,tail⟩,ts))
     ts (rfl) ?_
   intro p ts
-  simp only [clause_refines L hL ts]
+  dsimp only
+  rw [clause_refines L hL ts]
 
 def terminal (L : ListBuilder) : Parser Terminal := fun ts => do
   let (tag,ts) ← natToken ts
@@ -248,17 +252,18 @@ theorem terminal_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
       else none)
     ts rfl ?_
   intro tag ts
+  dsimp only
   by_cases h0 : tag=0
-  · simp only [if_pos h0]
-  · simp only [if_neg h0]
+  · rw [if_pos h0] <;> try rw [if_pos h0]
+  · rw [if_neg h0] <;> try rw [if_neg h0]
     by_cases h1 : tag=1
-    · simp only [if_pos h1]
-      simp only [capacity_refines L hL ts]
-    · simp only [if_neg h1]
+    · rw [if_pos h1] <;> try rw [if_pos h1]
+      rw [capacity_refines L hL ts]
+    · rw [if_neg h1] <;> try rw [if_neg h1]
       by_cases h2 : tag=2
-      · simp only [if_pos h2]
-        simp only [list_congr L hL _ _ (block_refines L hL) ts]
-      · simp only [if_neg h2]
+      · rw [if_pos h2] <;> try rw [if_pos h2]
+        rw [list_congr L hL _ _ (block_refines L hL) ts]
+      · rw [if_neg h2] <;> try rw [if_neg h2]
 
 def proof (L : ListBuilder) : Parser Proof := fun ts => do
   let (bs,ts) ← (L (List Step) (L Step (step L))) ts
@@ -289,7 +294,8 @@ theorem proof_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
       some (⟨bs,aug,t⟩,ts))
     ts (rfl) ?_
   intro aug ts
-  simp only [terminal_refines L hL ts]
+  dsimp only
+  rw [terminal_refines L hL ts]
 
 def expected (L : ListBuilder) : Parser (Nat × Formula) := fun ts => do
   let (magic,ts) ← natToken ts
@@ -317,8 +323,9 @@ theorem expected_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
       else none)
     ts rfl ?_
   intro magic ts
+  dsimp only
   by_cases h : magic=3401
-  · simp only [if_pos h]
+  · rw [if_pos h] <;> try rw [if_pos h]
     refine bind_congr (β := (Nat × Formula) × List Nat) (natToken) (natToken)
       (fun n ts => do
         let (f,ts) ← (formula L) ts
@@ -328,8 +335,9 @@ theorem expected_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
         some ((n,f),ts))
       ts (rfl) ?_
     intro n ts
-    simp only [formula_refines L hL ts]
-  · simp only [if_neg h]
+    dsimp only
+    rw [formula_refines L hL ts]
+  · rw [if_neg h] <;> try rw [if_neg h]
 
 def envelope (L : ListBuilder) : Parser Envelope := fun ts => do
   let (magic,ts) ← natToken ts
@@ -360,8 +368,9 @@ theorem envelope_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
       else none)
     ts rfl ?_
   intro magic ts
+  dsimp only
   by_cases h : magic=3402
-  · simp only [if_pos h]
+  · rw [if_pos h] <;> try rw [if_pos h]
     refine bind_congr (β := Envelope × List Nat) (natToken) (natToken)
       (fun n ts => do
         let (f,ts) ← (formula L) ts
@@ -382,8 +391,9 @@ theorem envelope_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat)
         some (⟨n,f,p⟩,ts))
       ts (formula_refines L hL ts) ?_
     intro f ts
-    simp only [proof_refines L hL ts]
-  · simp only [if_neg h]
+    dsimp only
+    rw [proof_refines L hL ts]
+  · rw [if_neg h] <;> try rw [if_neg h]
 
 def checkedLists : ListBuilder := fun _ p => ProctorParserCounters.listBits p
 
