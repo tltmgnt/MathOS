@@ -99,13 +99,21 @@ theorem grammar_bound {α : Type} (m : ParserMeter α)
       (ProctorTerminalPolynomial.mul_mono (Nat.le_refl 64) (token_length bytes ts h))
       (Nat.le_refl 3))
 
+private theorem parse_grammar_charge {α : Type} (m : ParserMeter α)
+    (bytes : List Nat) : (parseMeter m bytes).2.grammarEvents=grammarCharge m bytes := by
+  unfold parseMeter grammarCharge
+  dsimp only
+  cases (ProctorValueProjection.tokenizeEmit bytes).1 <;> rfl
+
 theorem parse_bounds {α : Type} (m : ParserMeter α)
     (hm : ∀ ts, (m ts).2≤64*ts.length+3) (bytes : List Nat) :
     Below (parseMeter m bytes).2 (budget bytes.length) := by
   have h := ProctorScannerPaddingCompose.resource_bounds bytes
+  have hg : (parseMeter m bytes).2.grammarEvents≤(budget bytes.length).grammarEvents := by
+    rw [parse_grammar_charge m bytes]
+    exact grammar_bound m hm bytes
   exact ⟨h.left,h.right.left,h.right.right.left,h.right.right.right.left,
-    h.right.right.right.right,ProctorValueProjection.tokenize_bound bytes,
-    grammar_bound m hm bytes⟩
+    h.right.right.right.right,ProctorValueProjection.tokenize_bound bytes,hg⟩
 
 def expectedMeter := parseMeter ProctorGrammarMeter.expectedMeter
 def envelopeMeter := parseMeter ProctorGrammarMeter.envelopeMeter
