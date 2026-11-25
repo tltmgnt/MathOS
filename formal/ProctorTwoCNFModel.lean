@@ -95,8 +95,7 @@ theorem row_dual (c : Clause) (a b : Literal) (h : (a,b)∈rowArcs c) :
       change (a,b)∈[(opposite l,l)] at h
       cases h with
       | head =>
-        change (opposite l,opposite (opposite l))∈[(opposite l,l)]
-        rw [opposite_twice]
+        simp only [opposite_twice]
         exact List.Mem.head _
       | tail _ hz => cases hz
     | cons k ks =>
@@ -105,14 +104,12 @@ theorem row_dual (c : Clause) (a b : Literal) (h : (a,b)∈rowArcs c) :
         change (a,b)∈[(opposite l,k),(opposite k,l)] at h
         cases h with
         | head =>
-          change (opposite k,opposite (opposite l))∈[(opposite l,k),(opposite k,l)]
-          rw [opposite_twice]
+          simp only [opposite_twice]
           exact List.Mem.tail _ (List.Mem.head _)
         | tail _ ht =>
           cases ht with
           | head =>
-            change (opposite l,opposite (opposite k))∈[(opposite l,k),(opposite k,l)]
-            rw [opposite_twice]
+            simp only [opposite_twice]
             exact List.Mem.head _
           | tail _ hz => cases hz
       | cons _ _ => cases h
@@ -225,7 +222,7 @@ def NoConflict (f : Formula) : Prop :=
 
 theorem score_edge (f : Formula) (a b : Literal) (h : (a,b)∈arcs f) :
     score f b≤score f a :=
-  rank_mono _ _ _ (fun c _ hc => r_trans _ _ _ _ (r_edge _ a b h) hc)
+  rank_mono _ _ _ (fun _ _ hc => r_trans _ _ _ _ (r_edge _ a b h) hc)
 
 theorem score_distinct (f : Formula) (v : Nat) (hv : v∈variables f)
     (h : NoConflict f) : score f (v,true)≠score f (v,false) := by
@@ -356,7 +353,9 @@ theorem noConflict_of_none (f : Formula) (h : findConflict f (variables f)=none)
 theorem conflict_routes (f : Formula) (v : Nat) (h : conflictAt f v=true) :
     ∃ ps qs, reach (arcs f) (v,true) (v,false)=some ps ∧
       reach (arcs f) (v,false) (v,true)=some qs := by
-  have he := Bool.and_eq_true.mp h
+  have he : R (arcs f) (v,true) (v,false)=true ∧ R (arcs f) (v,false) (v,true)=true := by
+    unfold conflictAt at h
+    cases hp : R (arcs f) (v,true) (v,false) <;> cases hq : R (arcs f) (v,false) (v,true) <;> simp_all
   obtain ⟨ps,hp⟩ := (r_iff _ _ _).1 he.left
   obtain ⟨qs,hq⟩ := (r_iff _ _ _).1 he.right
   exact ⟨ps,qs,hp,hq⟩
