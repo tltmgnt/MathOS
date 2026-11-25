@@ -3,7 +3,8 @@ compilation for the existing implication graph. No fallback is used by
 the theorem for a pair of returned routes. -/
 namespace ProctorPathCompilerCompleteness
 open ProctorHallDeficiency
-open ProctorCapacityDeficiency (opposite every)
+open ProctorCapacityDeficiency (opposite)
+open ProctorCapacityReplay (every)
 open ProctorExecutableReplay (Step lookup stepCheck)
 open ProctorUnifiedReplay (Proof validId validFormula validProof boundCheck check)
 open ProctorResolutionBridge (compile compile_refutation)
@@ -144,11 +145,14 @@ theorem trace_lookup_shift {n : Nat} {g h : Formula} {ss : List Step}
     (tr : Trace n g ss h) (i : Nat) (c : Clause)
     (hi : lookup g i=some c) : lookup h (ss.length+i)=some c := by
   induction tr generalizing i with
-  | nil => exact hi
-  | cons t _ _ rest ih =>
-    have hs : lookup (t.tail::_) (i+1)=some c := hi
+  | nil =>
+    change lookup _ (0+i)=some c
+    rw [Nat.zero_add]
+    exact hi
+  | @cons g h ss t _ _ _ ih =>
+    have hs : lookup (t.tail::g) (i+1)=some c := hi
     have e := ih (i+1) hs
-    change lookup _ (ss.length+1+i)=some c
+    change lookup h (ss.length+1+i)=some c
     rw [Nat.add_assoc,Nat.add_comm 1 i]
     exact e
 
@@ -239,7 +243,7 @@ theorem walk_source_range (n : Nat) (f : Formula) (a z : Literal)
     (hne : a≠z) (hf : FormulaOK n f) : validId n a.1=true := by
   cases h with
   | nil => exact (hne rfl).elim
-  | @cons a b z rest he hw => exact (arc_range n f (a,b) hf he).left
+  | @cons a b _z _rest he _hw => exact (arc_range n f (a,b) hf he).left
 
 theorem compilePair_complete (n v : Nat) (f : Formula) (pos neg : List Literal)
     (hf : validFormula n f=true)
@@ -248,9 +252,9 @@ theorem compilePair_complete (n v : Nat) (f : Formula) (pos neg : List Literal)
     ∃ p, compilePair f v pos neg=some p ∧ boundCheck n f ⟨n,f,p⟩=true := by
   have ho := formula_ok n f hf
   have hv : validId n v=true := walk_source_range n f _ _ pos hp (opposite_ne v true) ho
-  obtain ⟨a,g,ha,ta,la,na⟩ := pathStart_complete n f _ _ pos hp (opposite_ne v true)
+  obtain ⟨a,g,ha,ta,la,_na⟩ := pathStart_complete n f _ _ pos hp (opposite_ne v true)
     ho f (fun _ hc => hc)
-  obtain ⟨b,h,hb,tb,lb,nb⟩ := pathStart_complete n f _ _ neg hn (opposite_ne v false)
+  obtain ⟨b,h,hb,tb,lb,_nb⟩ := pathStart_complete n f _ _ neg hn (opposite_ne v false)
     ho g (fun c hc => trace_mem ta c hc)
   have old := trace_lookup_shift tb 0 [(v,false),(v,false)] la
   have old' : lookup h b.length=some [(v,false),(v,false)] := by
