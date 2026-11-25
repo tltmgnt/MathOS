@@ -1,0 +1,44 @@
+# PNP-F034 — Reusable amortized parser contract
+
+PNP_RESOLUTION_STATUS = OPEN.
+
+Verified merged base 9af7c618d8eeb467c3ee7d0d6a4a990b202b72af (PR #206). Four files copied byte-identically
+from verified PR #207 head 3753b09b809a67dea0f7fea65b318a9b7cda2153, exact preflight 45540672200/job
+138958115532/artifact 14989710918, seven zero-axiom declarations and 1131
+controls. Do not open next PR until #207 merges and new exact replay passes.
+
+Use potential 64*remaining tokens. Success requires selected cost+2
+plus remaining potential <= initial potential; failure requires
+selected cost+2 <= initial potential+3. The two reserved units pay the
+base transition and its doubling potential. The verified iterator
+success theorem preserves residual potential; overhead <=35 for the
+17-bit list count. A header pays the 35 overhead, one header attempt
+and two reserved units (38<=64). On rejection the verified iterator
+bound adds 3+17+35=55; the header potential covers this and the list
+header/reserved units with slack. Thus the identical contract is
+closed under listMeter, with no multiplicative list-limit factor.
+Nested Nat lists have candidate uniform-in-depth linear bound
+64*input.length+3 (selected events; not a claim for arbitrary
+recursive grammar). This stage establishes reusable list closure;
+sequential/conditional grammar closure remains. Costs of actual
+allocation, encoding, reversal, Nat comparison and complete machine
+execution still excluded.
+
+Eight candidate declarations; 1142 control cases: 1122 small,
+12 nested and 8 boundaries. Marker F034_AMORTIZED_PARSER_OK small=1122 nested=12 boundary=8.
+Strict Lean 4.14.0 warnings-as-errors and zero-axiom gate unchanged.
+No local Lean execution. Independent review and resolution remain open.
+
+## Initial replay and proof repair
+
+PR #207 merged at fd58817a54542ed3b68ef3e7d0307187a63e0ac9.
+Exact candidate 12b0f0409cdbc4998077bb96845d6f3e8bb2be5a failed
+[45541720654 / job 138961583886](https://github.com/tltmgnt/MathOS/actions/runs/45541720654/job/138961583886), artifact 14989162886.
+Three of eight declarations printed no axioms (advance_safe,
+word_run_all, all_bound). Six unknown-identifier errors stemmed from
+case elimination substituting away the remainder variables next and vs
+in word_run_success and nat_amortized. Preserve local variables by
+extracting remainder equality via Option.some.inj and congrArg Prod.snd,
+then rewrite only the goal. No changes to executable definitions,
+theorem statements, fixtures or strict verification gates. New exact
+head replay required before PR; the executable marker was not reached.
