@@ -1,0 +1,33 @@
+name: Proctor F038 resolution first
+on:
+  push:
+    branches: ['research/pnp-f038-resolution-first']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_global_moment_barrier | tee /tmp/moments.txt
+          grep -Fx 'F038_GLOBAL_MOMENT_BARRIER_OK formulas=8 branches=16 direct_histograms=8 max_variables=20 maximum_equal_order=12' /tmp/moments.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gap=json.loads(Path('/tmp/gap.json').read_text())
+          assert gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert gap['selector_route']['status']=='BLOCKED'
+          assert gap['selector_route']['minimal_completion_sets']==[['selector_algorithm','selector_bit_cost','selector_preservation']]
+          assert gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_RESOLUTION_FIRST_GATE_OK selector_obligations=3 status=OPEN')
+          PY
