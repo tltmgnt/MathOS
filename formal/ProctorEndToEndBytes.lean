@@ -20,8 +20,7 @@ theorem witness_bytes (w : Witness) :
 theorem check_encoded (n : Nat) (f : Formula) (w : Witness) :
     checkBytes (encode (encExpected n f)) (witnessBytes w)=check n f w := by
   unfold checkBytes
-  rw [expected_bytes,witness_bytes]
-  rfl
+  rw [expected_bytes,witness_bytes] <;> rfl
 
 def produceBytes (expected : List Nat) : Option (List Nat) := do
   let (n,f) ← decodeExpected expected
@@ -36,8 +35,7 @@ theorem produce_encoded (n : Nat) (f : Formula) (w : Witness)
   change (do
     let q ← produce n f
     some (witnessBytes q))=_
-  rw [h]
-  rfl
+  rw [h] <;> rfl
 
 theorem produce_bytes_sound (expected out : List Nat)
     (h : produceBytes expected=some out) : checkBytes expected out=true := by
@@ -72,8 +70,7 @@ theorem produce_bytes_total (expected : List Nat) (n : Nat) (f : Formula)
     change (do
       let q ← produce n f
       some (witnessBytes q))=_
-    rw [hp]
-    rfl
+    rw [hp] <;> rfl
   exact ⟨_,h,produce_bytes_sound expected _ h⟩
 
 theorem encoded_total (n : Nat) (f : Formula)
@@ -111,8 +108,7 @@ theorem encoded_sound (n : Nat) (f : Formula) (out : List Nat)
 theorem malformed_rejected (expected : List Nat) (h : decodeExpected expected=none) :
     produceBytes expected=none := by
   unfold produceBytes
-  rw [h]
-  rfl
+  rw [h] <;> rfl
 
 theorem byte_tags_exclusive (n : Nat) (f : Formula) (rows : Clause)
     (e : ProctorUnifiedReplay.Envelope)
