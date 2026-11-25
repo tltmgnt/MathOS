@@ -47,7 +47,11 @@ theorem rowWidth_iff (c : Clause) : rowWidth c=true ↔ c.length≤2 := by
 theorem supported_iff (f : Formula) : supported f=true ↔ WidthTwo f := by
   induction f with
   | nil =>
-    exact ⟨fun _ c h => nomatch h,fun _ => rfl⟩
+    constructor
+    · intro _ c h
+      cases h
+    · intro _
+      rfl
   | cons c cs ih =>
     constructor
     · intro h d hd
@@ -156,6 +160,9 @@ theorem solve_spec (n : Nat) (f : Formula) : Spec n f (solve n f) := by
         | none =>
           exact ⟨hf,width,model_satisfies f (no_empty_two f width he) (noConflict_of_none f hc)⟩
         | some v =>
+          change Spec n f (match checked n f (tryVar f (arcs f) v) with
+            | none => Result.internalError
+            | some p => Result.unsat p)
           cases hp : checked n f (tryVar f (arcs f) v) with
           | none =>
             obtain ⟨ps,qs,hps,hqs⟩ := conflict_routes f v (findConflict_some f _ v hc)
