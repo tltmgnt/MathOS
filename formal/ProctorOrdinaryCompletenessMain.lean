@@ -30,7 +30,7 @@ def model (f : Formula) (x : Assignment) : Bool :=
   f.all (fun c => c.any (fun l => x l.1 == l.2))
 
 def checkCase (f : Formula) (vs : List Nat) (sat : Bool) : IO Unit := do
-  match build f vs [] (fun _ => false) with
+  match build vs f [] (fun _ => false) with
   | none =>
     if !sat then throw (IO.userError "finite UNSAT prototype failed")
   | some (ss,g) =>
