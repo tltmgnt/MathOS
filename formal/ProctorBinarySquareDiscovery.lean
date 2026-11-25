@@ -104,13 +104,12 @@ theorem checked_sound (n : Nat) (f : Formula) (o : Option Proof) (p : Proof)
   | none => cases h
   | some q =>
     change (if boundCheck n f ⟨n,f,q⟩ then some q else none)=some p at h
-    cases e : boundCheck n f ⟨n,f,q⟩ with
-    | false => rw [e] at h; cases h
-    | true =>
-      rw [e] at h
-      change some q=some p at h
+    by_cases e : boundCheck n f ⟨n,f,q⟩=true
+    · rw [if_pos e] at h
       cases h
       exact e
+    · rw [if_neg e] at h
+      cases h
 
 theorem checked_complete (n : Nat) (f : Formula) (o : Option Proof) (p : Proof)
     (h : o=some p) (hc : boundCheck n f ⟨n,f,p⟩=true) :
@@ -143,10 +142,9 @@ theorem discover_complete (n : Nat) (f : Formula)
     ∃ p, discover n f=some p := by
   unfold discover
   cases e : checked n f (scan f f) with
-  | some p => exact ⟨p,by rw [e]⟩
+  | some p => exact ⟨p,rfl⟩
   | none =>
     obtain ⟨p,hp,hc⟩ := ProctorExecutableDiscovery.generate_complete n f hf hu
-    rw [e]
     exact ⟨p,checked_complete n f _ p hp hc⟩
 
 theorem discover_iff (n : Nat) (f : Formula) (hf : validFormula n f=true) :
