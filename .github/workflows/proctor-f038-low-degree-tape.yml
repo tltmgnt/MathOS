@@ -1,0 +1,38 @@
+name: Proctor F038 low degree tape hitting
+on:
+  push:
+    branches: ['research/pnp-f038-low-degree-tape-hitting']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_low_degree_tape.py
+          python -m mathos.research.f038_affine_tape_hitting | tee /tmp/affine.txt
+          grep -Fx 'F038_AFFINE_TAPE_HITTING_OK fields=4 samples=1552 characters=56 bias_checks=37424 systems=5384 consistent=5056 inconsistent=328 hits=1130560 min_hits=6' /tmp/affine.txt
+          grep -Fx 'F038_AFFINE_TAPE_SCALE_OK bits=32 entries=16384 distinct=2289 rank_two_checks=16' /tmp/affine.txt
+          python -m mathos.research.f038_low_degree_tape | tee /tmp/degree.txt
+          grep -Fx 'F038_LOW_DEGREE_HITTING_OK polynomials=2196 nonzero=2192 zero=4 evaluations=33864 sparse_checks=23496 min_support=1 deletion_cases=24' /tmp/degree.txt
+          grep -Fx 'F038_QUADRATIC_AFFINE_BARRIER_OK dimensions=3 affine_spaces=26705 constant_one_spaces=743 max_dimensions=0,1,2 one_counts=1,6,28' /tmp/degree.txt
+          grep -Fx 'F038_GATED_UNIT_WITNESS_OK inputs=16 tape_checks=1024 valid_outputs=448 abstentions=576' /tmp/degree.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LOW_DEGREE_TAPE_GATE_OK status=OPEN')
+          PY
