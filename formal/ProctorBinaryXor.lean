@@ -108,8 +108,7 @@ theorem toggle_value (w v : Nat) (vs : List Nat)
     rw [checked_eq_value w v a hv (hs a (List.Mem.head _))]
     unfold optFalse test
     by_cases e : v=a
-    · rw [if_pos e,if_pos e]
-      rfl
+    · rw [if_pos e,if_pos e] <;> rfl
     · rw [if_neg e,if_neg e]
       change a::(toggleMeter w v as).1=a::toggle v as
       rw [ih (fun n hn => hs n (List.Mem.tail _ hn))]
