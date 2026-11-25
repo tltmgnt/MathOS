@@ -11,8 +11,8 @@ open ProctorDataParser (byteLimit)
 
 -- Static 20-bit little-endian representation of 1000000.
 def byteWord : List Bool :=
-  [false,false,false,false,false,false,true,false,false,false,
-   false,false,false,true,false,true,false,true,true,true]
+  [false,false,false,false,false,false,true,false,false,true,
+   false,false,false,false,true,false,true,true,true,true]
 
 theorem byte_word_value : bitsValue byteWord=byteLimit := by decide
 theorem byte_word_width : byteWord.length=20 := rfl
