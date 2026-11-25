@@ -59,3 +59,33 @@ checker changes or main changes. No proof discovery, proof
 size, independent review or unrestricted SAT theorem.
 Next: integrate verified lexer and row meter, then custom
 parser control/reversal and bit-cost refinement.
+
+## Initial preflight and correction
+
+Candidate 4b45de8a18f639b3ee928352d6158e92da9c9d4c failed
+exact-SHA preflight run 45521309027 job 138893570455, exit 1.
+Artifact 14979344978. The actual error headers were:
+```text
+artifacts/f034-dimacs-row-meter/combined.lean:7046:6: error: unsolved goals
+artifacts/f034-dimacs-row-meter/combined.lean:7080:12: error: type mismatch
+artifacts/f034-dimacs-row-meter/combined.lean:7080:12: error: tactic 'changeLocalDecl' failed, given type
+artifacts/f034-dimacs-row-meter/combined.lean:7087:14: error: type mismatch
+artifacts/f034-dimacs-row-meter/combined.lean:7087:14: error: tactic 'changeLocalDecl' failed, given type
+artifacts/f034-dimacs-row-meter/combined.lean:7135:4: error: type mismatch
+artifacts/f034-dimacs-row-meter/combined.lean:7135:4: error: tactic 'changeLocalDecl' failed, given type
+artifacts/f034-dimacs-row-meter/combined.lean:7201:8: error: unsolved goals
+artifacts/f034-dimacs-row-meter/combined.lean:7232:14: error: tactic 'rewrite' failed, did not find instance of the pattern in the target expression
+artifacts/f034-dimacs-row-meter/combined.lean:7245:14: error: tactic 'rewrite' failed, did not find instance of the pattern in the target expression
+```
+Only lex_token_bound printed zero axioms; the twelve other
+candidate declarations inherited sorryAx from failed elaboration
+(there were no explicit sorry terms added). No successful row
+fixture marker was reached. The correction explicitly rewrites
+local hypotheses using the case equations, reduces nested match
+expressions before conditional rewriting, closes negative branches
+by reflexivity, and uses explicit associativity for resource sums.
+The statements, meter algorithms, controls and gate remain unchanged.
+PR #187 has now merged at e30a40af7e3b2dbfdbacafb1fec9e27baf6a2f69.
+The row candidate remains independent until its own successful
+preflight. No new PR until the exact corrected SHA passes.
+https://github.com/tltmgnt/MathOS/actions/runs/45521309027/job/138893570455

@@ -89,7 +89,7 @@ theorem row_aux_value (n : Nat) (ts : List Literal) (acc : Clause) (k : Nat) :
           | mk c rest =>
             change some ((acc.reverse++[l])++c,rest)=some (acc.reverse++(l::c),rest)
             rw [append_assoc_local] <;> rfl
-      · rw [if_neg le,if_neg le]
+      · rw [if_neg le,if_neg le] <;> rfl
 
 def RowGood (ts : List Literal) (k : Nat) (r : Meter RowResult) : Prop :=
   match r with
@@ -119,8 +119,9 @@ theorem row_aux_good (n : Nat) (ts : List Literal) (acc : Clause) (k : Nat) :
       · rw [if_pos le]
         have h := ih (l::acc) (k+1)
         unfold RowGood at h ⊢
-        cases rowAux n ls (l::acc) (k+1) with
+        cases er : rowAux n ls (l::acc) (k+1) with
         | mk r j =>
+          rw [er] at h
           cases r with
           | none =>
             change j≤(k+1)+ls.length+1 at h
@@ -177,7 +178,7 @@ theorem row_count (n : Nat) (ts : List Literal) (c : Clause) (rest : List Litera
   unfold RowGood at hg
   cases e : rowMeter n ts with
   | mk r j =>
-    rw [e] at hg
+    rw [e] at hg h
     change r=some (c,rest) at h
     cases h
     change j+rest.length=0+ts.length at hg
@@ -244,7 +245,7 @@ theorem rows_aux_value (n m : Nat) (ts : List Literal) (acc : Formula) (k : Nat)
           | some f =>
             change some ((acc.reverse++[c])++f)=some (acc.reverse++(c::f))
             rw [append_assoc_local] <;> rfl
-        · rw [if_neg size,if_neg size]
+        · rw [if_neg size,if_neg size] <;> rfl
 
 def rowsUnit (T : Nat) : Nat := (T+1)*3+1
 
@@ -274,6 +275,9 @@ theorem rows_aux_bound (n m : Nat) (ts : List Literal) (acc : Formula) (k : Nat)
     | some pair =>
       cases pair with
       | mk c rest =>
+        change (if c.length≤listLimit then
+          rowsAux n m rest (c::acc) (k+(rowMeter n ts).2*3)
+          else (none,k+(rowMeter n ts).2*3)).2≤k+rowsUnit ts.length
         by_cases size : c.length≤listLimit
         · rw [if_pos size]
           have hc := row_count n ts c rest e
@@ -286,8 +290,9 @@ theorem rows_aux_bound (n m : Nat) (ts : List Literal) (acc : Formula) (k : Nat)
               have eq : ((rowMeter n ts).2+rest.length)+1 =
                   (rowMeter n ts).2+(rest.length+1) := Nat.add_assoc _ _ _
               rw [eq,add_mul_local (rowMeter n ts).2 (rest.length+1) 3]
-              rw [Nat.add_assoc k ((rowMeter n ts).2*3),
-                Nat.add_assoc ((rowMeter n ts).2*3)]
+              exact (Nat.add_assoc k ((rowMeter n ts).2*3) ((rest.length+1)*3+1)).trans
+                (congrArg (fun v => k+v)
+                  (Nat.add_assoc ((rowMeter n ts).2*3) ((rest.length+1)*3) 1).symm)
         · rw [if_neg size]
           exact h
 
