@@ -61,8 +61,10 @@ theorem scan_word (v k out : Nat) (ds : List Nat)
 private theorem char_lo (d : Nat) : 48≤48+d := Nat.le_add_right _ _
 private theorem char_hi (d : Nat) (h : d<10) : 48+d≤57 :=
   Nat.add_le_add (Nat.le_refl 48) (Nat.le_of_lt_succ h)
-private theorem char_value (d : Nat) : 48+d-48=d :=
-  Nat.add_sub_cancel_left 48 d
+private theorem char_value (d : Nat) : 48+d-48=d := by
+  calc
+    48+d-48 = d+48-48 := congrArg (fun a => a-48) (Nat.add_comm 48 d)
+    _ = d := rfl
 
 theorem single_word (d : Nat) (h : d<10) : Word 0 0 [48+d] d := by
   have e : 10*0+(48+d-48)=d := by
