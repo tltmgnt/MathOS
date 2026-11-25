@@ -1,0 +1,22 @@
+name: Proctor F037 guarded choice audit
+on:
+  push:
+    branches: ['research/pnp-f037-guarded-choice']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_guarded_choice | tee /tmp/guarded.txt
+          grep -Fx 'F037_GUARDED_CHOICE_OK capacities=2,3 polarities=2' /tmp/guarded.txt
