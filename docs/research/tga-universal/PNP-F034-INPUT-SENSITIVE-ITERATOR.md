@@ -23,3 +23,17 @@ Marker F034_INPUT_SENSITIVE_ITERATOR_OK small=1122 boundary=8 empty=1.
 Strict Lean 4.14.0 warnings-as-errors and zero-axiom gate unchanged.
 No local Lean execution. Exact preflight required before PR.
 Independent review and resolution remain open.
+
+## Initial replay and constructive repair
+
+PR #206 merged at 9af7c618d8eeb467c3ee7d0d6a4a990b202b72af.
+Exact candidate 2ac6250e88113ff93aba8ca88ec4bef08ccbf5ff failed
+[45540163698 / job 138956456235](https://github.com/tltmgnt/MathOS/actions/runs/45540163698/job/138956456235), artifact 14988757964.
+Three of seven named declarations (double_safe, word_bound,
+joint_bound) printed no axioms. Two proof branches reached reflexive
+Nat inequalities without discharging them: the empty word success
+case and the successful Nat-token step. Add explicit Nat.le_refl
+proofs. Four declarations had sorryAx dependencies from these errors.
+No change to executable definitions, statements, fixtures or strict
+gates. The executable marker was not reached. Require corrected
+exact-SHA replay before PR.

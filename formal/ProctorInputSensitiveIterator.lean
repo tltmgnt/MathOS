@@ -119,6 +119,7 @@ theorem word_success {σ : Type} (bs : List Bool) (step : Metered σ)
     cases hs
     change 0+potential s≤potential s
     rw [Nat.zero_add]
+    exact Nat.le_refl _
   | cons b bs ih =>
     have hd := double_safe step potential D h
     cases b with
@@ -186,6 +187,7 @@ theorem nat_safe : Safe (advanceMeter natMeter) natPotential 3 := by
         cases hs
         change 3+3*rest.length≤3*rest.length+3
         rw [Nat.add_comm 3 (3*rest.length)]
+        exact Nat.le_refl _
   · intro s hs
     cases s with
     | mk acc ts =>
