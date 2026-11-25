@@ -113,7 +113,7 @@ def check_leaf(f,p):
     if () in f or len(p)!=3 or p[0]!='paths':
         return False
     _,a,b=p
-    if not a or not b or a[0]!=-a[-1] or b[0]!=a[-1] or b[-1]!=a[0]:
+    if len(a)<2 or len(b)<2 or not a[0] or a[0]!=-a[-1] or b[0]!=a[-1] or b[-1]!=a[0]:
         return False
     g=arcs(f)
     return all(v in g.get(u,()) for seq in (a,b) for u,v in zip(seq,seq[1:]))
@@ -218,12 +218,13 @@ def run():
     indices,B,proofs=cert
     assert not check_unsat(f,(indices,B,()))
     assert not check_unsat(f,(indices,B,(('empty',),)))
+    assert not check_unsat(((1,),),((0,),(),(('paths',(0,),(0,)),)))
     # OBDD-hard family from the preceding note: decision at budget zero.
     d=8
     cube=tuple((u+1,(u^(1<<j))+1) for u in range(1<<d)
                for j in range(d) if u<(u^(1<<j)))
     assert decide(cube,0)[0]=='SAT'
-    print('F037_LOG_BACKDOOR_OK formulas=4096 budgets=3 components=128 cube=256 rejection=2')
+    print('F037_LOG_BACKDOOR_OK formulas=4096 budgets=3 components=128 cube=256 rejection=3')
 
 
 if __name__=='__main__':
