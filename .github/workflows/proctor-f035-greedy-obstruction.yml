@@ -1,0 +1,77 @@
+name: Proctor F035 greedy obstruction
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/f035_parity_projection_stress.py'
+      - 'mathos/research/f035_greedy_order_audit.py'
+      - 'docs/research/tga-universal/PNP-F035-GREEDY-OBSTRUCTION.md'
+      - '.github/workflows/proctor-f035-greedy-obstruction.yml'
+  push:
+    branches: [main, 'research/pnp-f035-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f035-greedy-obstruction
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f035-greedy-obstruction
+          python mathos/research/f035_parity_projection_stress.py | tee "$out/parity-stress.txt"
+          grep -Fx "F035_PARITY_PROJECTION_STRESS_OK k=1..12" "$out/parity-stress.txt"
+          python mathos/research/f035_greedy_order_audit.py | tee "$out/greedy-audit.txt"
+          grep -Fx "F035_GREEDY_ORDER_AUDIT_OK orders=120 minimum=14 greedy=22 maximum=2285" "$out/greedy-audit.txt"
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorPathResourceBounds.lean formal/ProctorTotalTwoCNF.lean formal/ProctorFiniteModel.lean formal/ProctorSerializedTwoCNF.lean formal/ProctorDecimalEncoder.lean formal/ProctorEndToEndBytes.lean formal/ProctorWireTokenBounds.lean formal/ProctorDecimalSize.lean formal/ProctorTokenMagnitude.lean formal/ProctorPolynomialWireSize.lean formal/ProctorRankBitBounds.lean formal/ProctorBinaryByteSolver.lean formal/ProctorGeneralBranching.lean formal/ProctorSemanticProjection.lean formal/ProctorComponentFactorization.lean formal/ProctorAdaptiveElimination.lean formal/ProctorGreedyObstruction.lean formal/ProctorGreedyObstructionMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F035_GREEDY_OBSTRUCTION_OK traces=2 comparison=1 order=1' "$out/kernel.txt"
+          python -m mathos.research.tga_pnp_resolution_gap > "$out/gap-report.json"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f035-greedy-obstruction")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          groups = {"ProctorAdaptiveElimination":["both_same","split_correct","eliminate_correct","eliminate_exists","estimate_exact","choose_first","choose_min","adaptive_local_bound"],"ProctorGreedyObstruction":["initial_costs","greedy_order","greedy_counts","alternative_counts","greedy_peak","alternative_peak","locally_cheaper","globally_worse","both_finish"]}
+          names = [f"{ns}.{name}" for ns, ds in groups.items() for name in ds]
+          assert len(names)==17
+          for name in names:
+              if f"'{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: {name}")
+          gap = json.loads((out/"gap-report.json").read_text())
+          assert gap["PNP_RESOLUTION_STATUS"]=="OPEN"
+          assert gap["mathematical_resolution"]["status"]=="BLOCKED"
+          report = dict(scope="GREEDY_OBSTRUCTION",
+                        verified=names, axiom_gate=True, controls=124,
+                        ordinary_typed_completeness_verified=True,
+                        ordinary_executable_generator_completeness_verified=True,
+                        bound_envelope_completeness_verified=True,
+                        universal_decimal_encoder_verified=True,
+                        total_cost_semantics_verified=False,
+                        polynomial_certificate_completeness_verified=False,
+                        deterministic_polynomial_discovery_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256={ns:hashlib.sha256(Path("formal/"+ns+".lean").read_bytes()).hexdigest()
+                                       for ns in groups})
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f035-greedy-obstruction-evidence
+          path: artifacts/f035-greedy-obstruction/
