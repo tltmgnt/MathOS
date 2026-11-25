@@ -1,0 +1,235 @@
+{
+  "attempt_id": "F038-MRAX-LOCAL-WIDTH-COUNTING",
+  "base_commit": "683f0823fdb1918d7827bf37d5f9e72d1aa26f50",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45723338973",
+  "targets": [
+    "ordinary_complete",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "How much global information is necessary for mixed affine/positive-binary inconsistency certificates, and can counting bypass a local-width obstruction?",
+  "route": "certificate_route",
+  "topology": "Compatible partial injections on overlapping scopes with no global section; cardinality obstruction.",
+  "adversarial": [
+    "Local width is a restricted proof-system measure, not general resolution size.",
+    "Explicit injection table size is not arbitrary solver runtime.",
+    "The family is not claimed to be graph-derived homogeneous cut-space."
+  ],
+  "scope": "Independent odd row parity, row and column pair exclusion, semantic rules with union of premises supported on <=k pigeons.",
+  "cost": "Polynomial proof construction and replay on this family; local width >=m+1",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of local width and counting separation"
+    },
+    {
+      "key": "attempt_hybrid_discovery",
+      "label": "Efficient discovery and proof-size bounds for general hybrid systems"
+    },
+    {
+      "key": "attempt_universal_selector",
+      "label": "Universal selector preservation and polynomial bit cost"
+    }
+  ],
+  "independent_reference": "Independent JavaScript injection, projection, source model and arithmetic checks; not execution of submitted Python.",
+  "expected": {
+    "local": [
+      [
+        2,
+        3,
+        7,
+        13,
+        15,
+        49,
+        73,
+        2
+      ],
+      [
+        3,
+        4,
+        15,
+        73,
+        112,
+        225,
+        655,
+        6
+      ],
+      [
+        4,
+        5,
+        31,
+        501,
+        925,
+        961,
+        6621,
+        24
+      ],
+      [
+        5,
+        6,
+        63,
+        4051,
+        8556,
+        3969,
+        74977,
+        120
+      ],
+      [
+        6,
+        7,
+        127,
+        37633,
+        88249,
+        16129,
+        942229,
+        720
+      ]
+    ],
+    "source": [
+      7,
+      4764,
+      5,
+      2,
+      19
+    ],
+    "counting": [
+      [
+        2,
+        14,
+        13,
+        8
+      ],
+      [
+        3,
+        35,
+        34,
+        24
+      ],
+      [
+        4,
+        70,
+        69,
+        56
+      ],
+      [
+        5,
+        122,
+        121,
+        120
+      ],
+      [
+        6,
+        194,
+        193,
+        248
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_local_width_counting.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-LOCAL-WIDTH-COUNTING.md"
+  ],
+  "next": "Study proof strength and discovery complexity of a precisely scoped Gaussian/cutting-plane hybrid, not just more restricted solver families.",
+  "mrax": {
+    "planner": {
+      "target_id": "ordinary_complete",
+      "question": "How much global information is necessary for mixed affine/positive-binary inconsistency certificates, and can counting bypass a local-width obstruction?",
+      "strategy": "Prove a semantic pigeon-support width lower bound using compatible partial injections.",
+      "alternative": "Construct and replay polynomial affine-to-integer-counting refutations.",
+      "stop_rule": "Do not infer a general proof-size or SAT lower bound from the restricted width system; no universal promotion.",
+      "literature_leads": [
+        "Earlier MathOS cut-space mixed compatibility result; classical pigeonhole and cutting-plane arguments, derived explicitly here."
+      ]
+    },
+    "construct": {
+      "claim": "No pigeon-support semantic refutation of the mixed pigeonhole family exists at width k<=m (k>=2).",
+      "scope": "Independent odd row parity, row and column pair exclusion, semantic rules with union of premises supported on <=k pigeons.",
+      "derivation": "Every local injection on conclusion scope extends to any allowed combined premise scope; induction preserves the injection table.",
+      "unresolved_steps": [
+        "General hybrid proof-complexity lower bound and unrestricted certificate completeness."
+      ],
+      "candidate_tests": [
+        "All small scope tables, one-pigeon extensions and intersection projections; full source enumeration."
+      ]
+    },
+    "alternative": {
+      "claim": "The same unsatisfiable family has uniformly constructible polynomial affine-to-counting certificates.",
+      "scope": "Boolean integer variables, odd parity row lower bound, pair inequalities, nonnegative combinations and exact-divisor rounding.",
+      "derivation": "Derive each column clique inequality incrementally, then sum all row lower and column upper bounds.",
+      "unresolved_steps": [
+        "Efficient discovery of such inequalities in arbitrary mixed systems and universal certificate bounds."
+      ],
+      "candidate_tests": [
+        "Generate and independently replay actual counting proofs, SAT cases, reject corrupted proof references and arithmetic."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Local width is a restricted proof-system measure, not general resolution size.",
+        "Explicit injection table size is not arbitrary solver runtime.",
+        "The family is not claimed to be graph-derived homogeneous cut-space."
+      ],
+      "counterexample_candidates": [
+        "Mixed pigeonhole has compatible small scopes but empty global relation; polynomial counting refutation bypasses the width barrier."
+      ],
+      "equivalence_audit": "Local injection tables exact; affine/positive clause subsystems separately feasible; row/column counting is globally sound.",
+      "barrier_audit": "Separation restricted to stated inference rules; no unconditional general complexity separation.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean and integer bit encodings; no physical resource meter.",
+      "cost_ledger": {
+        "encoding": "O(pm) bits/variables and polynomial pair clauses",
+        "preprocessing": "Construct row and column constraints in polynomial time",
+        "inference": "Polynomial counting proof with exact integer sums and rounded division",
+        "repetitions": "O(mp^2+p) lines and polynomial weighted references",
+        "arithmetic_bits": "Polynomial in explicit trace lengths; producer coefficients <=p",
+        "memory": "Polynomial proof storage; explicit local tables factorial in m only if materialized",
+        "reconstruction": "Check negative proof or one-hot positive witness against source",
+        "overall": "Polynomial proof construction and replay on this family; local width >=m+1"
+      },
+      "missing_bounds": [
+        "General efficient hybrid proof discovery",
+        "Universal certificate size",
+        "Universal selector preservation and cost"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Injection extension invariant",
+        "Sound counting inference rules and column inequality induction",
+        "Polynomial proof length and source equivalence"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Check small scope projections and extensions",
+        "Check actual integer proof and malformed evidence",
+        "Verify both SAT and UNSAT source cases"
+      ],
+      "formalization_plan": "Formalize injection extension and arithmetic proof soundness, then review exact proof-system scope.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Separate unrestricted local reasoning at bounded pigeon width from compact global counting on a mixed affine/monotone family.",
+      "remaining_gaps": [
+        "F037-F040 universal obligations",
+        "General hybrid proof discovery and size",
+        "Universal selector and unrestricted negative route"
+      ],
+      "next_question": "Study proof strength and discovery complexity of a precisely scoped Gaussian/cutting-plane hybrid, not just more restricted solver families.",
+      "human_review_requests": [
+        "Review support-width inference quantifiers, counting soundness and separation scope."
+      ]
+    }
+  }
+}
