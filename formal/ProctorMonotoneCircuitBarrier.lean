@@ -59,7 +59,7 @@ theorem row_correct (r : Rails) (c : Clause) :
     · intro h
       obtain ⟨a,ha,ht⟩ := h
       cases ha with
-      | head => rw [ht]; rfl
+      | head => rw [ht] <;> rfl
       | tail _ hm =>
         rw [ih.2 ⟨a,hm,ht⟩]
         cases r l <;> rfl
@@ -109,7 +109,7 @@ theorem conflict_correct (r : Rails) (vs : List Nat) :
       rw [ht]
       cases e : r (v,true) with
       | false => rfl
-      | true => rw [h v (List.Mem.head _) e]; rfl
+      | true => rw [h v (List.Mem.head _) e] <;> rfl
 
 def rails (x : Assignment) : Rails :=
   fun l => if x l.1=l.2 then true else false
@@ -126,7 +126,7 @@ theorem rails_consistent (x : Assignment) (vs : List Nat) :
   change (if x v=false then true else false)=false
   cases e : x v with
   | false => rw [e] at h; cases h
-  | true => rw [e]; rfl
+  | true => rw [e] <;> rfl
 
 theorem model_covers (f : Formula) (x : Assignment) (h : FormulaSat f x) :
     Covers (rails x) f := by
