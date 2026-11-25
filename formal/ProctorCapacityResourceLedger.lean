@@ -233,9 +233,9 @@ theorem different_value (w : Nat) (ds : List RefRow) (i j : Nat) :
     (differentMeter w ds i j).1=differentBinary w ds i j := by
   unfold differentMeter differentBinary natEq
   dsimp only
-  cases optFalse (checkedEq w i j).1 with
-  | true => rfl
-  | false =>
+  by_cases h : optFalse (checkedEq w i j).1=true
+  · simp only [if_pos h]
+  · simp only [if_neg h]
     change (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).1=_
     exact disjoint_value w (demandBinary w ds i) (demandBinary w ds j)
 
@@ -244,9 +244,10 @@ theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
     (differentMeter w ds i j).2.2≤pairGateBudget w ds i j := by
   unfold differentMeter pairVisitBudget pairGateBudget
   dsimp only
-  cases optFalse (checkedEq w i j).1 with
-  | true => exact ⟨Nat.zero_le _,Nat.le_trans (checked_eq_bound w i j) (Nat.le_add_right _ _)⟩
-  | false =>
+  by_cases he : optFalse (checkedEq w i j).1=true
+  · simp only [if_pos he]
+    exact ⟨Nat.zero_le _,Nat.le_trans (checked_eq_bound w i j) (Nat.le_add_right _ _)⟩
+  · simp only [if_neg he]
     have h := disjoint_bounds w (demandBinary w ds i) (demandBinary w ds j)
     change (checkedLookup w ds i).2+(checkedLookup w ds j).2+
       (disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.1≤
@@ -254,9 +255,11 @@ theorem different_bounds (w : Nat) (ds : List RefRow) (i j : Nat) :
       (checkedEq w i j).2+(disjointMeter w (demandBinary w ds i) (demandBinary w ds j)).2.2≤
         eqBudget w+disjointBudget w (demandBinary w ds i) (demandBinary w ds j)
     have hz := Nat.le_antisymm h.left (Nat.zero_le _)
+    have hv : (checkedLookup w ds i).2+(checkedLookup w ds j).2≤
+        (w+1)*ds.length+(w+1)*ds.length :=
+      Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j)
     rw [hz]
-    exact ⟨Nat.add_le_add (checked_bound w ds i) (checked_bound w ds j),
-      Nat.add_le_add (checked_eq_bound w i j) h.right⟩
+    exact ⟨hv,Nat.add_le_add (checked_eq_bound w i j) h.right⟩
 
 def pairsMeter (w : Nat) (ds : List RefRow) : Meter :=
   allMeter (fun i => allMeter (differentMeter w ds i) (indices ds.length)) (indices ds.length)
