@@ -45,16 +45,18 @@ theorem bind_value {α β : Type} (p : MeterParser α) (q : α → MeterParser �
       let (a,rest) ← P ts
       Q a rest) := by
   intro ts
-  have h := hp ts
-  unfold bindMeter
-  rw [← h]
-  cases e : p ts with
-  | mk r k =>
-    cases r with
-    | none => rfl
-    | some ar =>
-      cases ar with
-      | mk a rest => exact hq a rest
+  change (match (p ts).1 with
+    | none => (none,(p ts).2)
+    | some (a,rest) => ((q a rest).1,(p ts).2+(q a rest).2)).1 =
+    (do
+      let (a,rest) ← P ts
+      Q a rest)
+  rw [← hp ts]
+  cases (p ts).1 with
+  | none => rfl
+  | some ar =>
+    cases ar with
+    | mk a rest => exact hq a rest
 
 theorem bind_good {α β : Type} (p : MeterParser α) (q : α → MeterParser β)
     (hp : Good p) (hq : ∀ a, Good (q a)) : Good (bindMeter p q) := by
@@ -70,6 +72,9 @@ theorem bind_good {α β : Type} (p : MeterParser α) (q : α → MeterParser β
       cases ar with
       | mk a rest =>
         change k+rest.length=ts.length at h
+        change (match ((q a rest).1,k+(q a rest).2) with
+          | (none,j) => j≤ts.length+1
+          | (some (_,tail),j) => j+tail.length=ts.length)
         have hh := hq a rest
         cases ee : q a rest with
         | mk s j =>
@@ -93,7 +98,7 @@ theorem choose_value {α : Type} (c : Prop) [Decidable c]
     (hp : Value p P) (hq : Value q Q) :
     Value (chooseMeter c p q) (fun ts => if c then P ts else Q ts) := by
   intro ts
-  unfold chooseMeter
+  change ((if c then p else q) ts).1 = (if c then P ts else Q ts)
   by_cases h : c
   · rw [if_pos h,if_pos h] <;> exact hp ts
   · rw [if_neg h,if_neg h] <;> exact hq ts
@@ -188,6 +193,8 @@ private theorem many_run_spec {α : Type} (p : MeterParser α)
       | some ar =>
         cases ar with
         | mk a rest =>
+          change manyRun p k rest (a::acc) (c+j) =
+            ((manySpec p k (a::acc) rest).1,c+(j+(manySpec p k (a::acc) rest).2))
           rw [ih]
           change ((manySpec p k (a::acc) rest).1,(c+j)+(manySpec p k (a::acc) rest).2) =
             ((manySpec p k (a::acc) rest).1,c+(j+(manySpec p k (a::acc) rest).2))
@@ -201,7 +208,6 @@ theorem many_meter_spec {α : Type} (p : MeterParser α)
     manyMeter p k acc ts=manySpec p k acc ts := by
   unfold manyMeter
   rw [many_run_spec,Nat.zero_add]
-  cases manySpec p k acc ts <;> rfl
 
 private theorem many_exec_value {α : Type} (p : MeterParser α) (P : Parser α)
     (hp : Value p P) (k : Nat) (acc : List α) :
@@ -223,9 +229,11 @@ def listMeter {α : Type} (p : MeterParser α) : MeterParser (List α) :=
 theorem list_value {α : Type} (p : MeterParser α) (P : Parser α)
     (hp : Value p P) : Value (listMeter p) (listToken P) := by
   unfold listMeter listToken
-  apply bind_value _ _ _ _ nat_value
-  intro k
-  exact choose_value _ _ _ _ _ (many_exec_value p P hp k []) fail_value
+  exact bind_value natMeter
+    (fun k => chooseMeter (k≤listLimit) (manyMeter p k []) failMeter)
+    natToken (fun k ts => if k≤listLimit then manyAux P k ts [] else none)
+    nat_value (fun k => choose_value (k≤listLimit) _ _ _ _
+      (many_exec_value p P hp k []) fail_value)
 
 theorem list_good {α : Type} (p : MeterParser α) (hp : Good p) :
     Good (listMeter p) := by
@@ -239,19 +247,19 @@ def boolMeter : MeterParser Bool :=
   (bindMeter natMeter (fun v => (chooseMeter (v=0) (pureMeter false) (chooseMeter (v=1) (pureMeter true) failMeter))))
 
 theorem bool_value : Value boolMeter boolToken :=
-  (bind_value _ _ _ _ nat_value (fun v => (choose_value _ _ _ _ _ (pure_value _) (choose_value _ _ _ _ _ (pure_value _) fail_value))))
+  (bind_value _ _ _ _ nat_value (fun _v => (choose_value _ _ _ _ _ (pure_value _) (choose_value _ _ _ _ _ (pure_value _) fail_value))))
 
 theorem bool_good : Good boolMeter :=
-  (bind_good _ _ nat_good (fun v => (choose_good _ _ _ (pure_good _) (choose_good _ _ _ (pure_good _) fail_good))))
+  (bind_good _ _ nat_good (fun _v => (choose_good _ _ _ (pure_good _) (choose_good _ _ _ (pure_good _) fail_good))))
 
 def literalMeter : MeterParser Literal :=
   (bindMeter natMeter (fun v => (bindMeter boolMeter (fun sign => (pureMeter (v,sign))))))
 
 theorem literal_value : Value literalMeter literalToken :=
-  (bind_value _ _ _ _ nat_value (fun v => (bind_value _ _ _ _ bool_value (fun sign => (pure_value _)))))
+  (bind_value _ _ _ _ nat_value (fun _v => (bind_value _ _ _ _ bool_value (fun _sign => (pure_value _)))))
 
 theorem literal_good : Good literalMeter :=
-  (bind_good _ _ nat_good (fun v => (bind_good _ _ bool_good (fun sign => (pure_good _)))))
+  (bind_good _ _ nat_good (fun _v => (bind_good _ _ bool_good (fun _sign => (pure_good _)))))
 
 def clauseMeter : MeterParser Clause :=
   (listMeter literalMeter)
@@ -275,82 +283,82 @@ def refMeter : MeterParser RefRow :=
   (bindMeter natMeter (fun i => (bindMeter clauseMeter (fun row => (pureMeter (RefRow.mk i row))))))
 
 theorem ref_value : Value refMeter refToken :=
-  (bind_value _ _ _ _ nat_value (fun i => (bind_value _ _ _ _ clause_value (fun row => (pure_value _)))))
+  (bind_value _ _ _ _ nat_value (fun _i => (bind_value _ _ _ _ clause_value (fun _row => (pure_value _)))))
 
 theorem ref_good : Good refMeter :=
-  (bind_good _ _ nat_good (fun i => (bind_good _ _ clause_good (fun row => (pure_good _)))))
+  (bind_good _ _ nat_good (fun _i => (bind_good _ _ clause_good (fun _row => (pure_good _)))))
 
 def groupMeter : MeterParser Group :=
   (bindMeter clauseMeter (fun vs => (bindMeter natMeter (fun k => (pureMeter (Group.mk vs k))))))
 
 theorem group_value : Value groupMeter groupToken :=
-  (bind_value _ _ _ _ clause_value (fun vs => (bind_value _ _ _ _ nat_value (fun k => (pure_value _)))))
+  (bind_value _ _ _ _ clause_value (fun _vs => (bind_value _ _ _ _ nat_value (fun _k => (pure_value _)))))
 
 theorem group_good : Good groupMeter :=
-  (bind_good _ _ clause_good (fun vs => (bind_good _ _ nat_good (fun k => (pure_good _)))))
+  (bind_good _ _ clause_good (fun _vs => (bind_good _ _ nat_good (fun _k => (pure_good _)))))
 
 def capacityMeter : MeterParser Certificate :=
   (bindMeter (listMeter refMeter) (fun ds => (bindMeter (listMeter groupMeter) (fun gs => (bindMeter (listMeter refMeter) (fun rs => (pureMeter (Certificate.mk ds gs rs))))))))
 
 theorem capacity_value : Value capacityMeter capacityToken :=
-  (bind_value _ _ _ _ (list_value _ _ ref_value) (fun ds => (bind_value _ _ _ _ (list_value _ _ group_value) (fun gs => (bind_value _ _ _ _ (list_value _ _ ref_value) (fun rs => (pure_value _)))))))
+  (bind_value _ _ _ _ (list_value _ _ ref_value) (fun _ds => (bind_value _ _ _ _ (list_value _ _ group_value) (fun _gs => (bind_value _ _ _ _ (list_value _ _ ref_value) (fun _rs => (pure_value _)))))))
 
 theorem capacity_good : Good capacityMeter :=
-  (bind_good _ _ (list_good _ ref_good) (fun ds => (bind_good _ _ (list_good _ group_good) (fun gs => (bind_good _ _ (list_good _ ref_good) (fun rs => (pure_good _)))))))
+  (bind_good _ _ (list_good _ ref_good) (fun _ds => (bind_good _ _ (list_good _ group_good) (fun _gs => (bind_good _ _ (list_good _ ref_good) (fun _rs => (pure_good _)))))))
 
 def blockMeter : MeterParser Block :=
   (bindMeter (listMeter natMeter) (fun vs => (bindMeter boolMeter (fun rhs => (bindMeter (listMeter refMeter) (fun rs => (pureMeter (Block.mk vs rhs rs))))))))
 
 theorem block_value : Value blockMeter blockToken :=
-  (bind_value _ _ _ _ (list_value _ _ nat_value) (fun vs => (bind_value _ _ _ _ bool_value (fun rhs => (bind_value _ _ _ _ (list_value _ _ ref_value) (fun rs => (pure_value _)))))))
+  (bind_value _ _ _ _ (list_value _ _ nat_value) (fun _vs => (bind_value _ _ _ _ bool_value (fun _rhs => (bind_value _ _ _ _ (list_value _ _ ref_value) (fun _rs => (pure_value _)))))))
 
 theorem block_good : Good blockMeter :=
-  (bind_good _ _ (list_good _ nat_good) (fun vs => (bind_good _ _ bool_good (fun rhs => (bind_good _ _ (list_good _ ref_good) (fun rs => (pure_good _)))))))
+  (bind_good _ _ (list_good _ nat_good) (fun _vs => (bind_good _ _ bool_good (fun _rhs => (bind_good _ _ (list_good _ ref_good) (fun _rs => (pure_good _)))))))
 
 def stepMeter : MeterParser Step :=
   (bindMeter natMeter (fun a => (bindMeter natMeter (fun b => (bindMeter natMeter (fun pivot => (bindMeter clauseMeter (fun tail => (pureMeter (Step.mk a b pivot tail))))))))))
 
 theorem step_value : Value stepMeter stepToken :=
-  (bind_value _ _ _ _ nat_value (fun a => (bind_value _ _ _ _ nat_value (fun b => (bind_value _ _ _ _ nat_value (fun pivot => (bind_value _ _ _ _ clause_value (fun tail => (pure_value _)))))))))
+  (bind_value _ _ _ _ nat_value (fun _a => (bind_value _ _ _ _ nat_value (fun _b => (bind_value _ _ _ _ nat_value (fun _pivot => (bind_value _ _ _ _ clause_value (fun _tail => (pure_value _)))))))))
 
 theorem step_good : Good stepMeter :=
-  (bind_good _ _ nat_good (fun a => (bind_good _ _ nat_good (fun b => (bind_good _ _ nat_good (fun pivot => (bind_good _ _ clause_good (fun tail => (pure_good _)))))))))
+  (bind_good _ _ nat_good (fun _a => (bind_good _ _ nat_good (fun _b => (bind_good _ _ nat_good (fun _pivot => (bind_good _ _ clause_good (fun _tail => (pure_good _)))))))))
 
 def terminalMeter : MeterParser Terminal :=
   (bindMeter natMeter (fun tag => (chooseMeter (tag=0) (pureMeter Terminal.empty) (chooseMeter (tag=1) (bindMeter capacityMeter (fun cert => (pureMeter (Terminal.capacity cert)))) (chooseMeter (tag=2) (bindMeter (listMeter blockMeter) (fun bs => (pureMeter (Terminal.xor bs)))) failMeter)))))
 
 theorem terminal_value : Value terminalMeter terminalToken :=
-  (bind_value _ _ _ _ nat_value (fun tag => (choose_value _ _ _ _ _ (pure_value _) (choose_value _ _ _ _ _ (bind_value _ _ _ _ capacity_value (fun cert => (pure_value _))) (choose_value _ _ _ _ _ (bind_value _ _ _ _ (list_value _ _ block_value) (fun bs => (pure_value _))) fail_value)))))
+  (bind_value _ _ _ _ nat_value (fun _tag => (choose_value _ _ _ _ _ (pure_value _) (choose_value _ _ _ _ _ (bind_value _ _ _ _ capacity_value (fun _cert => (pure_value _))) (choose_value _ _ _ _ _ (bind_value _ _ _ _ (list_value _ _ block_value) (fun _bs => (pure_value _))) fail_value)))))
 
 theorem terminal_good : Good terminalMeter :=
-  (bind_good _ _ nat_good (fun tag => (choose_good _ _ _ (pure_good _) (choose_good _ _ _ (bind_good _ _ capacity_good (fun cert => (pure_good _))) (choose_good _ _ _ (bind_good _ _ (list_good _ block_good) (fun bs => (pure_good _))) fail_good)))))
+  (bind_good _ _ nat_good (fun _tag => (choose_good _ _ _ (pure_good _) (choose_good _ _ _ (bind_good _ _ capacity_good (fun _cert => (pure_good _))) (choose_good _ _ _ (bind_good _ _ (list_good _ block_good) (fun _bs => (pure_good _))) fail_good)))))
 
 def proofMeter : MeterParser Proof :=
   (bindMeter (listMeter (listMeter stepMeter)) (fun bs => (bindMeter boolMeter (fun aug => (bindMeter terminalMeter (fun terminal => (pureMeter (Proof.mk bs aug terminal))))))))
 
 theorem proof_value : Value proofMeter proofToken :=
-  (bind_value _ _ _ _ (list_value _ _ (list_value _ _ step_value)) (fun bs => (bind_value _ _ _ _ bool_value (fun aug => (bind_value _ _ _ _ terminal_value (fun terminal => (pure_value _)))))))
+  (bind_value _ _ _ _ (list_value _ _ (list_value _ _ step_value)) (fun _bs => (bind_value _ _ _ _ bool_value (fun _aug => (bind_value _ _ _ _ terminal_value (fun _terminal => (pure_value _)))))))
 
 theorem proof_good : Good proofMeter :=
-  (bind_good _ _ (list_good _ (list_good _ step_good)) (fun bs => (bind_good _ _ bool_good (fun aug => (bind_good _ _ terminal_good (fun terminal => (pure_good _)))))))
+  (bind_good _ _ (list_good _ (list_good _ step_good)) (fun _bs => (bind_good _ _ bool_good (fun _aug => (bind_good _ _ terminal_good (fun _terminal => (pure_good _)))))))
 
 def expectedMeter : MeterParser (Nat × Formula) :=
   (bindMeter natMeter (fun magic => (chooseMeter (magic=3401) (bindMeter natMeter (fun n => (bindMeter formulaMeter (fun f => (pureMeter (n,f)))))) failMeter)))
 
 theorem expected_value : Value expectedMeter expectedToken :=
-  (bind_value _ _ _ _ nat_value (fun magic => (choose_value _ _ _ _ _ (bind_value _ _ _ _ nat_value (fun n => (bind_value _ _ _ _ formula_value (fun f => (pure_value _))))) fail_value)))
+  (bind_value _ _ _ _ nat_value (fun _magic => (choose_value _ _ _ _ _ (bind_value _ _ _ _ nat_value (fun _n => (bind_value _ _ _ _ formula_value (fun _f => (pure_value _))))) fail_value)))
 
 theorem expected_good : Good expectedMeter :=
-  (bind_good _ _ nat_good (fun magic => (choose_good _ _ _ (bind_good _ _ nat_good (fun n => (bind_good _ _ formula_good (fun f => (pure_good _))))) fail_good)))
+  (bind_good _ _ nat_good (fun _magic => (choose_good _ _ _ (bind_good _ _ nat_good (fun _n => (bind_good _ _ formula_good (fun _f => (pure_good _))))) fail_good)))
 
 def envelopeMeter : MeterParser Envelope :=
   (bindMeter natMeter (fun magic => (chooseMeter (magic=3402) (bindMeter natMeter (fun n => (bindMeter formulaMeter (fun f => (bindMeter proofMeter (fun proof => (pureMeter (Envelope.mk n f proof)))))))) failMeter)))
 
 theorem envelope_value : Value envelopeMeter envelopeToken :=
-  (bind_value _ _ _ _ nat_value (fun magic => (choose_value _ _ _ _ _ (bind_value _ _ _ _ nat_value (fun n => (bind_value _ _ _ _ formula_value (fun f => (bind_value _ _ _ _ proof_value (fun proof => (pure_value _))))))) fail_value)))
+  (bind_value _ _ _ _ nat_value (fun _magic => (choose_value _ _ _ _ _ (bind_value _ _ _ _ nat_value (fun _n => (bind_value _ _ _ _ formula_value (fun _f => (bind_value _ _ _ _ proof_value (fun _proof => (pure_value _))))))) fail_value)))
 
 theorem envelope_good : Good envelopeMeter :=
-  (bind_good _ _ nat_good (fun magic => (choose_good _ _ _ (bind_good _ _ nat_good (fun n => (bind_good _ _ formula_good (fun f => (bind_good _ _ proof_good (fun proof => (pure_good _))))))) fail_good)))
+  (bind_good _ _ nat_good (fun _magic => (choose_good _ _ _ (bind_good _ _ nat_good (fun _n => (bind_good _ _ formula_good (fun _f => (bind_good _ _ proof_good (fun _proof => (pure_good _))))))) fail_good)))
 
 theorem read_bound {α : Type} (m : MeterParser α) (h : Good m)
     (ts : List Nat) : (m ts).2≤ts.length+1 := by
@@ -373,11 +381,15 @@ theorem successful_reads {α : Type} (m : MeterParser α) (h : Good m)
     (e : (m ts).1=some (a,rest)) :
     (m ts).2+rest.length=ts.length := by
   have hg := h ts
+  revert e
   cases em : m ts with
   | mk r k =>
     rw [em] at hg
-    change r=some (a,rest) at e
-    cases e
+    intro he
+    change (m ts).1=some (a,rest) at he
+    rw [em] at he
+    change r=some (a,rest) at he
+    cases he
     exact hg
 
 def decodeMeter {α : Type} (m : MeterParser α) (bytes : List Nat) :
@@ -396,6 +408,17 @@ theorem decode_value {α : Type} (m : MeterParser α) (p : Parser α)
     (h : Value m p) (bytes : List Nat) :
     (decodeMeter m bytes).1=decode p bytes := by
   unfold decodeMeter decode
+  change (match (ProctorScannerMeter.tokenizeMeter bytes).1 with
+    | none => (none,(ProctorScannerMeter.tokenizeMeter bytes).2)
+    | some ts =>
+      (match (m ts).1 with
+       | some (a,[]) => some a
+       | _ => none,
+       (ProctorScannerMeter.tokenizeMeter bytes).2+(m ts).2+1)).1 =
+    (do
+      let ts ← tokenize bytes
+      let (a,rest) ← p ts
+      match rest with | [] => some a | _::_ => none)
   rw [ProctorScannerMeter.tokenize_value]
   cases e : tokenize bytes with
   | none => rfl
