@@ -37,7 +37,7 @@ class Budget:
         # Compare before modifying so exhaustion cannot leak a partial result.
         self.tick()
         dominated = []
-        for old in frontier:
+        for old in ordered(frontier):
             self.tick()
             if old <= candidate:
                 return
