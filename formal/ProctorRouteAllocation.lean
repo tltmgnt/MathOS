@@ -35,11 +35,13 @@ theorem relax_cells (rs : Routes) (e : Arc) (cap : Nat)
   | none =>
     change 0+cap*rs.length≤cap*rs.length
     rw [Nat.zero_add]
+    exact Nat.le_refl _
   | some ps =>
     cases hdst : routeFor e.2 rs with
     | some qs =>
       change 0+cap*rs.length≤cap*rs.length
       rw [Nat.zero_add]
+      exact Nat.le_refl _
     | none =>
       have hp := hs (e.1,ps) (route_mem rs e.1 ps hsrc)
       have hcost : ps.length+2≤cap :=
@@ -62,6 +64,7 @@ theorem sweep_cells (es work : List Arc) (rs : Routes) (cap : Nat)
   | nil =>
     change 0+(cap+1)*rs.length≤(cap+1)*rs.length
     rw [Nat.zero_add]
+    exact Nat.le_refl _
   | cons e work ih =>
     have h1 := relax_cells rs e (cap+1) hs
       (Nat.succ_le_succ (Nat.le_trans (table_le_budget es rs) hb))
@@ -80,6 +83,7 @@ theorem saturate_cells (es : List Arc) (fuel : Nat) (rs : Routes) (cap : Nat)
   | zero =>
     change 0+(cap+1)*rs.length≤(cap+1)*rs.length
     rw [Nat.zero_add]
+    exact Nat.le_refl _
   | succ k ih =>
     have h1 := sweep_cells es es rs cap hs hb (fun _ h => h)
     have h2 := ih (sweep es rs) (sweep_short es rs hs)
