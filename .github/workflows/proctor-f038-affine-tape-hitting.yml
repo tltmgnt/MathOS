@@ -1,0 +1,36 @@
+name: Proctor F038 affine tape hitting
+on:
+  push:
+    branches: ['research/pnp-f038-affine-tape-hitting']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_affine_tape_hitting.py
+          python -m mathos.research.f038_random_padding | tee /tmp/random.txt
+          grep -Fx 'F038_RANDOM_PADDING_OK formulas=4096 sat=1360 unsat=2736 variant_checks=126976 accepted=11944 missed=30216 unsat_checks=84816 mass_checks=20480 windows=61440 all_miss=3656 positive=16744 det_miss=4952 det_hit=15448 random_only=1296 certificate_checks=491520 good_half=3180 zero=3124 one=764 accepted_by_length=128,1000,2748,8068,0' /tmp/random.txt
+          python -m mathos.research.f038_affine_tape_hitting | tee /tmp/affine-tape.txt
+          grep -Fx 'F038_AFFINE_TAPE_HITTING_OK fields=4 samples=1552 characters=56 bias_checks=37424 systems=5384 consistent=5056 inconsistent=328 hits=1130560 min_hits=6' /tmp/affine-tape.txt
+          grep -Fx 'F038_AFFINE_TAPE_SCALE_OK bits=32 entries=16384 distinct=2289 rank_two_checks=16' /tmp/affine-tape.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_AFFINE_TAPE_GATE_OK status=OPEN')
+          PY
