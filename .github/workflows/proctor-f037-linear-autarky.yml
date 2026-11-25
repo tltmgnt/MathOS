@@ -1,0 +1,21 @@
+name: Proctor F037 linear autarky audit
+on:
+  push:
+    branches: ['research/pnp-f037-linear-autarky']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install scipy==1.17.0
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_linear_autarky | tee /tmp/autarky.txt
+          grep -Fx 'F037_LINEAR_AUTARKY_OK random=128 dense=8 max_variables=99 rejection=3' /tmp/autarky.txt
