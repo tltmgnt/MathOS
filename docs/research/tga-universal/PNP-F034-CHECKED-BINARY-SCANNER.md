@@ -6,12 +6,11 @@ Candidate based on verified merged research base 41a181566e692a35c64fad5a433b57a
 The four binary-primitives files are copied byte-for-byte from exact
 head 9fd2fef7a0ec3badae645f5dbe8c464007c6dec5, whose strict preflight passed
 [45525367117 / job 138907240232](https://github.com/tltmgnt/MathOS/actions/runs/45525367117/job/138907240232)
-with 14 zero-axiom declarations and 4486 controls. PR #192 is open,
-not presumed merged. Do not open a new PR until #192 is merged and
+with 14 zero-axiom declarations and 4486 controls. PR #192 merged at f2d8f5722a97a0f981debdd8644a747cf64eaa76. Do not open a new PR until #192 is merged and
 the exact new head passes mandatory preflight.
 
 Candidate semantics: little-endian fixed-width lists, checked
-Nat-to-binary quotient conversion, zero-padding for short inputs,
+Nat-to-binary high-bit comparison/subtraction conversion, zero-padding for short inputs,
 and explicit rejection of nonzero discarded high bits. Soundness and
 completeness are separate theorems, not a modulo-truncation contract.
 Use recursive capacity cap(0)=1, cap(w+1)=2*cap(w). A candidate
@@ -35,3 +34,21 @@ Marker F034_CHECKED_BINARY_SCANNER_OK encode=4608 narrow=4599 wide=5 scanner=13.
 No local Lean execution available; all new statements and controls
 await exact-SHA replay. No total cost, conversion cost, independent
 review, proof discovery or unrestricted SAT claim.
+
+## Initial preflight failure and correction
+
+Exact candidate b44a678b4483369adcfd9619b61071ff3f3c83fd failed mandatory preflight
+45526025614, job 138909452282, artifact 14981779046 (exit 1).
+https://github.com/tltmgnt/MathOS/actions/runs/45526025614/job/138909452282
+The binary primitives replay passed, but the checked scanner had four
+elaboration errors (two redundant tactics, one unreduced conditional,
+one unreduced match) and three encoder declarations reported propext.
+Three of fourteen scanner declarations printed zero axioms; the
+required executable marker was not reached. No explicit sorry was
+introduced. The correction removes redundant tactics, reduces the
+conditional/match explicitly and replaces quotient/remainder encoding
+with recursive high-bit comparison and subtraction. The exact-width,
+value-preservation and representability theorem statements, all controls
+and all strict gates remain unchanged. An independent Python model of
+the corrected algorithm passed 9225 controls (4608/4599/5/13); this is
+not Lean execution or a kernel proof. Corrected exact SHA needs replay.

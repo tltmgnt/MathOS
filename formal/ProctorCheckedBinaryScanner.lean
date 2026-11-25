@@ -69,7 +69,6 @@ theorem zero_sound (xs : List Bool) (h : zeroBits xs=true) :
       change zeroBits xs=true at h
       change 0+2*bitsValue xs=0
       rw [ih h]
-      rfl
     | true => cases h
 
 theorem zero_complete (xs : List Bool) (h : bitsValue xs=0) :
@@ -147,7 +146,7 @@ theorem narrow_complete (w : Nat) (xs : List Bool)
       Nat.eq_zero_of_le_zero (Nat.le_of_succ_le_succ h)
     refine ⟨[],?_⟩
     change (if zeroBits xs then some [] else none)=some []
-    rw [zero_complete xs hz]
+    rw [zero_complete xs hz] <;> rfl
   | succ w ih =>
     have ht : bitsValue (high xs)<cap w := by
       apply half_bound (bitsValue (high xs)) (bitVal (low xs)) w
@@ -171,29 +170,68 @@ theorem narrow_iff (w : Nat) (xs : List Bool) :
     exact hb
   · exact narrow_complete w xs
 
-def smallBit : Nat → Bool
-  | 0 => false
-  | _+1 => true
-
-private theorem small_bit_value (m : Nat) (h : m<2) :
-    bitVal (smallBit m)=m := by
-  cases m with
+-- A constructive high-bit encoder avoids library quotient/remainder
+-- identities with transitive propext. Nat boundary operations are unmetered.
+private theorem sub_add_cancel_local (a b : Nat) (h : b≤a) :
+    (a-b)+b=a := by
+  induction b generalizing a with
   | zero => rfl
-  | succ m =>
-    cases m with
-    | zero => rfl
-    | succ m =>
-      exact False.elim (Nat.not_lt_of_ge
-        (Nat.succ_le_succ (Nat.succ_le_succ (Nat.zero_le m))) h)
+  | succ b ih =>
+    cases a with
+    | zero => cases h
+    | succ a =>
+      rw [Nat.succ_sub_succ_eq_sub]
+      exact congrArg Nat.succ (ih a (Nat.le_of_succ_le_succ h))
 
--- The Nat boundary conversion itself has no gate-cost claim.
--- At width zero reject a nonzero residual quotient.
+private theorem twice_add (a b : Nat) : 2*(a+b)=2*a+2*b := by
+  induction b with
+  | zero => rfl
+  | succ b ih =>
+    change 2*(a+b)+2=2*a+(2*b+2)
+    rw [ih]
+    exact Nat.add_assoc _ _ _
+
+private theorem twice_self (a : Nat) : 2*a=a+a := by
+  calc
+    2*a = a*2 := Nat.mul_comm _ _
+    _ = a+a := congrArg (fun n => n+a) (Nat.zero_add a)
+
+private theorem append_bit_length (xs : List Bool) (b : Bool) :
+    (xs++[b]).length=xs.length+1 := by
+  induction xs with
+  | nil => rfl
+  | cons a xs ih => exact congrArg Nat.succ ih
+
+private theorem append_false_value (xs : List Bool) :
+    bitsValue (xs++[false])=bitsValue xs := by
+  induction xs with
+  | nil => rfl
+  | cons a xs ih =>
+    change bitVal a+2*bitsValue (xs++[false])=bitVal a+2*bitsValue xs
+    rw [ih]
+
+private theorem append_true_value (xs : List Bool) :
+    bitsValue (xs++[true])=bitsValue xs+cap xs.length := by
+  induction xs with
+  | nil => rfl
+  | cons a xs ih =>
+    change bitVal a+2*bitsValue (xs++[true])=(bitVal a+2*bitsValue xs)+2*cap xs.length
+    rw [ih,twice_add]
+    exact (Nat.add_assoc _ _ _).symm
+
+-- Select the most significant bit by comparison and subtract its
+-- place value when set. The residual at width zero must be zero.
 def encode : Nat → Nat → Option (List Bool)
   | 0,n => if n=0 then some [] else none
   | w+1,n =>
-    match encode w (n/2) with
-    | none => none
-    | some t => some (smallBit (n%2)::t)
+    if n<cap w then
+      match encode w n with
+      | none => none
+      | some t => some (t++[false])
+    else
+      match encode w (n-cap w) with
+      | none => none
+      | some t => some (t++[true])
 
 theorem encode_sound (w n : Nat) (ys : List Bool)
     (h : encode w n=some ys) : ys.length=w ∧ bitsValue ys=n := by
@@ -207,20 +245,29 @@ theorem encode_sound (w n : Nat) (ys : List Bool)
     · rw [if_neg e] at h
       cases h
   | succ w ih =>
-    change (match encode w (n/2) with
-      | none => none
-      | some t => some (smallBit (n%2)::t))=some ys at h
-    cases e : encode w (n/2) with
-    | none => rw [e] at h; cases h
-    | some t =>
-      rw [e] at h
-      cases h
-      have ht := ih (n/2) t e
-      constructor
-      · exact congrArg Nat.succ ht.left
-      · change bitVal (smallBit (n%2))+2*bitsValue t=n
-        rw [ht.right,small_bit_value (n%2) (Nat.mod_lt n (by decide : 0<2))]
-        exact Nat.mod_add_div n 2
+    unfold encode at h
+    by_cases lo : n<cap w
+    · rw [if_pos lo] at h
+      cases e : encode w n with
+      | none => rw [e] at h; cases h
+      | some t =>
+        rw [e] at h
+        cases h
+        have ht := ih n t e
+        constructor
+        · rw [append_bit_length,ht.left]
+        · rw [append_false_value,ht.right]
+    · rw [if_neg lo] at h
+      cases e : encode w (n-cap w) with
+      | none => rw [e] at h; cases h
+      | some t =>
+        rw [e] at h
+        cases h
+        have ht := ih (n-cap w) t e
+        constructor
+        · rw [append_bit_length,ht.left]
+        · rw [append_true_value,ht.left,ht.right]
+          exact sub_add_cancel_local n (cap w) (Nat.le_of_not_gt lo)
 
 theorem encode_complete (w n : Nat) (h : n<cap w) :
     ∃ ys, encode w n=some ys := by
@@ -231,16 +278,25 @@ theorem encode_complete (w n : Nat) (h : n<cap w) :
     change (if n=0 then some [] else none)=some []
     rw [if_pos e]
   | succ w ih =>
-    have ht : n/2<cap w := by
-      apply half_bound (n/2) (n%2) w
-      rw [Nat.mod_add_div]
-      exact h
-    obtain ⟨t,e⟩ := ih (n/2) ht
-    refine ⟨smallBit (n%2)::t,?_⟩
-    change (match encode w (n/2) with
-      | none => none
-      | some u => some (smallBit (n%2)::u))=some (smallBit (n%2)::t)
-    rw [e]
+    by_cases lo : n<cap w
+    · obtain ⟨t,e⟩ := ih n lo
+      refine ⟨t++[false],?_⟩
+      unfold encode
+      rw [if_pos lo,e] <;> rfl
+    · have ge : cap w≤n := Nat.le_of_not_gt lo
+      have ht : n-cap w<cap w := by
+        apply Nat.lt_of_not_ge
+        intro bad
+        have hb : cap (w+1)≤n := calc
+          cap (w+1) = 2*cap w := rfl
+          _ = cap w+cap w := twice_self _
+          _ ≤ (n-cap w)+cap w := Nat.add_le_add_right bad _
+          _ = n := sub_add_cancel_local n (cap w) ge
+        exact Nat.not_lt_of_ge hb h
+      obtain ⟨t,e⟩ := ih (n-cap w) ht
+      refine ⟨t++[true],?_⟩
+      unfold encode
+      rw [if_neg lo,e] <;> rfl
 
 theorem encode_iff (w n : Nat) :
     (∃ ys, encode w n=some ys) ↔ n<cap w := by
@@ -279,7 +335,9 @@ theorem checked_digit_refines (v : List Bool) (k b : Nat)
   have ho := narrow_sound 512 (decimalMeter v d).1 out eo
   refine ⟨out,?_,ho.left,?_,?_⟩
   · unfold checkedDigit
-    rw [e,eo]
+    rw [e]
+    change narrow 512 (decimalMeter v d).1=some out
+    exact eo
   · rw [ho.right,decimal_value,hs.right]
   · rw [ho.right]
     exact hr
@@ -293,7 +351,6 @@ private theorem zeros_value (w : Nat) :
   | succ w ih =>
     change 0+2*bitsValue (List.replicate w false)=0
     rw [ih]
-    rfl
 
 theorem zero_word_value : bitsValue zeroWord=0 := zeros_value 512
 
