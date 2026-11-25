@@ -1,0 +1,23 @@
+name: Proctor F037 RUP repair audit
+on:
+  push:
+    branches: ['research/pnp-f037-rup-repair']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install scipy==1.17.0
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_rup_repair | tee /tmp/repair.txt
+          grep -Fx 'F037_RUP_REPAIR_OK random=128 family=8 max_variables=80 simultaneous=1 rejection=3' /tmp/repair.txt
