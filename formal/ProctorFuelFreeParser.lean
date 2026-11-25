@@ -104,17 +104,24 @@ private theorem nat_parser {α : Type} (p : Parser α) (n : Nat)
   | zero => rfl
   | succ n ih =>
     rw [iterNat, manyAux]
-    unfold advance
-    change finish (match (match p ts with
-      | none => none
-      | some (a,rest) => some (a::acc,rest)) with
-      | none => none
-      | some s => iterNat (advance p) n s)=_
     cases e : p ts with
-    | none => rfl
+    | none =>
+      have ha : advance p (acc,ts)=none := by
+        change (match p ts with
+          | none => none
+          | some (a,rest) => some (a::acc,rest))=none
+        rw [e]
+      rw [ha] <;> rfl
     | some pair =>
       cases pair with
-      | mk a rest => exact ih rest (a::acc)
+      | mk a rest =>
+        have ha : advance p (acc,ts)=some (a::acc,rest) := by
+          change (match p ts with
+            | none => none
+            | some (x,next) => some (x::acc,next))=some (a::acc,rest)
+          rw [e]
+        rw [ha]
+        exact ih rest (a::acc)
 
 def manyWord {α : Type} (p : Parser α) (c : List Bool)
     (ts : List Nat) (acc : List α) : Option (List α × List Nat) :=
