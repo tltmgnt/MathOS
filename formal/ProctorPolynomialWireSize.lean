@@ -76,12 +76,25 @@ theorem successor_pow (N : Nat) : N+1≤10^N := by
       exact Nat.le_trans h1 (Nat.mul_le_mul_left _ (by decide : 2≤10))
     exact Nat.le_trans h (Nat.mul_le_mul_right 10 ih)
 
+private theorem mul_add' (a b c : Nat) : a*(b+c)=a*b+a*c := by
+  induction c with
+  | zero => rfl
+  | succ c ih =>
+    change a*(b+c+1)=a*b+a*(c+1)
+    rw [Nat.mul_succ,Nat.mul_succ,ih,Nat.add_assoc]
+
+private theorem mul_assoc' (a b c : Nat) : (a*b)*c=a*(b*c) := by
+  induction c with
+  | zero => rfl
+  | succ c ih =>
+    rw [Nat.mul_succ (a*b),Nat.mul_succ b,ih,mul_add']
+
 private theorem pow_add' (a b : Nat) : 10^(a+b)=10^a*10^b := by
   induction b with
   | zero => change 10^a=10^a*1; rw [Nat.mul_one]
   | succ b ih =>
     change 10^(a+b+1)=10^a*10^(b+1)
-    rw [Nat.pow_succ,Nat.pow_succ,ih,Nat.mul_assoc]
+    rw [Nat.pow_succ,Nat.pow_succ,ih,mul_assoc']
 
 theorem structural_pow (N : Nat) : N+N*N<10^(2*N+4) := by
   have h0 : N+N*N≤(N+1)*(N+1) := by
