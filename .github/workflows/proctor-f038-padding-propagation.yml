@@ -1,0 +1,36 @@
+name: Proctor F038 padding clock propagation
+on:
+  push:
+    branches: ['research/pnp-f038-padding-clock-propagation']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_padding_propagation.py
+          python -m mathos.research.f038_clock_counterexample | tee /tmp/counter.txt
+          grep -Fx 'F038_CLOCK_COUNTEREXAMPLE_OK stages=8 pinned_cases=32768 misses=7844 nonmisses=24924 early_candidates=19 witness_checks=262144 clauses_sum=115 max_variables=15 max_clauses=20 counts=1360,1360,1360,1232,984,924,624,0' /tmp/counter.txt
+          grep -Fx 'F038_CLOCK_DELAY_REDUCTION_OK cases=4096 parameters=32768 delayed=2304 source_sat=1360 unit_checks=491520' /tmp/counter.txt
+          python -m mathos.research.f038_padding_propagation | tee /tmp/padding.txt
+          grep -Fx 'F038_PADDING_PROPAGATION_OK formulas=4096 sat=1360 padded_checks=32768 single_misses=5532 windows=147456 joint_misses=7752 sweep_witnesses=41208 certificate_checks=1179648 candidate_checks=946176 good_lengths=1 good_windows=23 collective_only=5 length_misses=1232,736,480,516,224,0,1360,984' /tmp/padding.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_PADDING_PROPAGATION_GATE_OK status=OPEN')
+          PY
