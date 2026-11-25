@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'formal/Proctor*.lean'
+      - 'mathos/research/f035_residual_cache_stress.py'
       - 'docs/research/tga-universal/PNP-F035-COMPONENT-FACTORIZATION.md'
       - '.github/workflows/proctor-f035-component-factorization.yml'
   push:
@@ -30,6 +31,8 @@ jobs:
       - run: |
           set -euo pipefail
           out=artifacts/f035-component-factorization
+          python mathos/research/f035_residual_cache_stress.py | tee "$out/cache-stress.txt"
+          grep -Fx "F035_RESIDUAL_CACHE_STRESS_OK k=1..12" "$out/cache-stress.txt"
           lean --version | tee "$out/lean-version.txt"
           grep -F 'version 4.14.0' "$out/lean-version.txt"
           cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorUnboundedCodec.lean formal/ProctorUnboundedRoundtrip.lean formal/ProctorResolutionBridge.lean formal/ProctorOrdinaryCompleteness.lean formal/ProctorEnvelopeCompleteness.lean formal/ProctorExecutableDiscovery.lean formal/ProctorBinarySquareDiscovery.lean formal/ProctorImplicationPathDiscovery.lean formal/ProctorPathCompilerCompleteness.lean formal/ProctorReachabilityCompleteness.lean formal/ProctorTwoCNFModel.lean formal/ProctorPathResourceBounds.lean formal/ProctorTotalTwoCNF.lean formal/ProctorFiniteModel.lean formal/ProctorSerializedTwoCNF.lean formal/ProctorDecimalEncoder.lean formal/ProctorEndToEndBytes.lean formal/ProctorWireTokenBounds.lean formal/ProctorDecimalSize.lean formal/ProctorTokenMagnitude.lean formal/ProctorPolynomialWireSize.lean formal/ProctorRankBitBounds.lean formal/ProctorBinaryByteSolver.lean formal/ProctorComponentFactorization.lean formal/ProctorComponentFactorizationMain.lean > "$out/combined.lean"
