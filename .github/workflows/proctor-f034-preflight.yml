@@ -1,0 +1,42 @@
+name: Proctor F034 pre-PR replay
+on:
+  push:
+    branches:
+      - 'research/pnp-f034-*'
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - 'tests/test_tga_proctor*.py'
+      - '.github/workflows/proctor-*.yml'
+      - 'scripts/proctor_preflight.py'
+  pull_request:
+    paths:
+      - '.github/workflows/proctor-f034-preflight.yml'
+      - 'scripts/proctor_preflight.py'
+      - 'tests/test_proctor_preflight.py'
+permissions:
+  contents: read
+concurrency:
+  group: proctor-preflight-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install PyYAML==6.0.2
+      - run: python -m unittest discover -s tests -p 'test_proctor_preflight.py' -v
+      - run: python scripts/proctor_preflight.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proctor-preflight-evidence
+          path: artifacts/
+          if-no-files-found: warn
