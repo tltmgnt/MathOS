@@ -56,16 +56,18 @@ theorem formula_cons (x : Assignment) (c : Clause) (cs : Formula) :
 theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
     RowMeaning x (reduceRow v b c) ↔ ClauseSat c (update x v b) := by
   induction c with
-  | nil => exact ⟨fun h => h,fun h => h⟩
+  | nil =>
+    exact ⟨fun h => by obtain ⟨l,hl,_⟩ := h; cases hl,
+      fun h => by obtain ⟨l,hl,_⟩ := h; cases hl⟩
   | cons l ls ih =>
-    rw [cons_sat]
+    have hcons := cons_sat (update x v b) l ls
+    apply Iff.trans _ hcons.symm
+    change RowMeaning x (if l.1=v then
+      (if l.2=b then none else reduceRow v b ls)
+      else (reduceRow v b ls).map (fun r => l::r)) ↔ _
     by_cases hv : l.1=v
     · have hu : update x v b l.1=b := by unfold update; rw [if_pos hv]
-      rw [hu]
-      change RowMeaning x (if l.1=v then
-        (if l.2=b then none else reduceRow v b ls)
-        else (reduceRow v b ls).map (fun r => l::r)) ↔ _
-      rw [if_pos hv]
+      rw [if_pos hv,hu]
       by_cases he : l.2=b
       · rw [if_pos he]
         exact ⟨fun _ => Or.inl he.symm,fun _ => True.intro⟩
@@ -74,11 +76,7 @@ theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
           | .inl e => (he e.symm).elim
           | .inr e => ih.2 e⟩
     · have hu : update x v b l.1=x l.1 := by unfold update; rw [if_neg hv]
-      rw [hu]
-      change RowMeaning x (if l.1=v then
-        (if l.2=b then none else reduceRow v b ls)
-        else (reduceRow v b ls).map (fun r => l::r)) ↔ _
-      rw [if_neg hv]
+      rw [if_neg hv,hu]
       cases hr : reduceRow v b ls with
       | none =>
         rw [hr] at ih
@@ -86,7 +84,7 @@ theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
       | some r =>
         rw [hr] at ih
         change ClauseSat (l::r) x ↔ _
-        rw [cons_sat]
+        apply Iff.trans (cons_sat x l r)
         exact ⟨fun h => match h with
           | .inl e => .inl e | .inr e => .inr (ih.1 e),
           fun h => match h with
@@ -95,10 +93,10 @@ theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
 theorem restriction_correct (v : Nat) (b : Bool) (f : Formula) (x : Assignment) :
     FormulaSat (restrict v b f) x ↔ FormulaSat f (update x v b) := by
   induction f with
-  | nil => exact ⟨fun h => h,fun h => h⟩
+  | nil => exact ⟨fun _ _ h => nomatch h,fun _ _ h => nomatch h⟩
   | cons c cs ih =>
     have h := row_correct v b c x
-    rw [formula_cons]
+    apply Iff.trans _ (formula_cons (update x v b) c cs).symm
     unfold restrict
     cases hr : reduceRow v b c with
     | none =>
@@ -107,7 +105,7 @@ theorem restriction_correct (v : Nat) (b : Bool) (f : Formula) (x : Assignment) 
     | some r =>
       rw [hr] at h
       change FormulaSat (r::restrict v b cs) x ↔ _
-      rw [formula_cons]
+      apply Iff.trans (formula_cons x r (restrict v b cs))
       exact ⟨fun e => ⟨h.1 e.1,ih.1 e.2⟩,fun e => ⟨h.2 e.1,ih.2 e.2⟩⟩
 
 theorem row_remaining (v : Nat) (b : Bool) (c r : Clause)
@@ -158,7 +156,7 @@ theorem restrict_remaining (v : Nat) (b : Bool) (f : Formula) :
       rw [he] at hr
       change r∈q::restrict v b cs at hr
       cases hr with
-      | head => exact ⟨c,List.Mem.head _,row_remaining v b c q he⟩
+      | head => exact ⟨c,List.Mem.head _,row_remaining v b c _ he⟩
       | tail _ hm =>
         obtain ⟨d,hd,ht⟩ := ih r hm
         exact ⟨d,List.Mem.tail _ hd,ht⟩
