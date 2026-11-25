@@ -73,3 +73,26 @@ or axiom gate changes. Corrected exact SHA must pass preflight.
 A fresh independent Python reference model executed all 9225 controls
 (4608/4599/5/13) successfully in the current review; this is not Lean
 execution or a kernel proof.
+
+## Third preflight failure and proof abstraction
+
+Exact candidate 4a49ed07150dd77d64f2855d95ef19c6aa772869 failed mandatory preflight
+45526655511, job 138911585230, artifact 14982637600 (exit 1).
+https://github.com/tltmgnt/MathOS/actions/runs/45526655511/job/138911585230
+Again twelve of fourteen declarations printed zero axioms; only
+scan_refines and its dependent tokenize_refines remained blocked.
+The sole reported elaboration error was deterministic whnf timeout
+at combined.lean:8868:8 (1000000 heartbeats). The required marker
+was not reached. No explicit sorry was introduced.
+Instead of raising the budget again, the correction factors scanner
+control into a recursive scanCore parameterized by reset word and
+checked digit transition, proves the simulation from their contracts,
+then specializes to zeroWord and checkedDigit. The initialization
+proof is also parameterized by its zero-valued reset. The concrete
+scanner delegates to the same control cases via this core; the public
+contracts and arithmetic are unchanged. The local heartbeat override
+is removed; the default applies. No warning, axiom or fixture gate
+changes. All new claims await exact-SHA replay.
+In this turn a separate Python reference model actually ran 9225
+controls (4608 encode, 4599 narrow, 5 wide, 13 scanner), all passed.
+This is model evidence, not Lean execution or kernel verification.

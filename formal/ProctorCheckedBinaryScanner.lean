@@ -356,39 +356,51 @@ theorem zero_word_value : bitsValue zeroWord=0 := zeros_value 512
 
 -- Byte and digit-count checks remain Nat operations, and emitted
 -- tokens are decoded to Nat. The accumulator arithmetic is checked.
-def scanBits : List Nat → List Bool → Nat → List Nat → Option (List Nat)
+-- Separate the recursive control proof from the concrete 512-bit
+-- word and arithmetic definitions. Both are ordinary parameters here,
+-- so proof elaboration need not normalize the reset list or arithmetic.
+def scanCore (reset : List Bool)
+    (step : List Bool → Nat → Option (List Bool)) :
+    List Nat → List Bool → Nat → List Nat → Option (List Nat)
   | [],_,digits,acc => if digits=0 then some acc.reverse else none
   | b::bs,v,digits,acc =>
     if b=10 then
-      if digits=0 then none else scanBits bs zeroWord 0 (bitsValue v::acc)
+      if digits=0 then none else scanCore reset step bs reset 0 (bitsValue v::acc)
     else if 48≤b ∧ b≤57 then
       if digits≥digitLimit ∨ (digits>0 ∧ zeroBits v=true) then none
-      else match checkedDigit v b with
+      else match step v b with
         | none => none
-        | some out => scanBits bs out (digits+1) acc
+        | some out => scanCore reset step bs out (digits+1) acc
     else none
 
--- Use the cons equations once rather than unfolding recursive definitions.
--- The local budget is for elaboration only, not an arithmetic or CI gate.
-set_option maxHeartbeats 1000000 in
-theorem scan_refines (bytes : List Nat) (v : List Bool) (k : Nat)
-    (acc : List Nat) (hv : bitsValue v+1≤radix k) :
-    scanBits bytes v k acc=ProctorDataParser.scan bytes (bitsValue v) k acc := by
+def scanBits (bytes : List Nat) (v : List Bool) (k : Nat) (acc : List Nat) :
+    Option (List Nat) := scanCore zeroWord checkedDigit bytes v k acc
+
+private theorem scan_core_refines (reset : List Bool)
+    (step : List Bool → Nat → Option (List Bool))
+    (hreset : bitsValue reset=0)
+    (hstep : ∀ (v : List Bool) (k b : Nat),
+      bitsValue v+1≤radix k → k<digitLimit → b≤57 →
+      ∃ out, step v b=some out ∧ out.length=512 ∧
+        bitsValue out=10*bitsValue v+(b-48) ∧ bitsValue out+1≤radix (k+1))
+    (bytes : List Nat) (v : List Bool) (k : Nat) (acc : List Nat)
+    (hv : bitsValue v+1≤radix k) :
+    scanCore reset step bytes v k acc=
+      ProctorDataParser.scan bytes (bitsValue v) k acc := by
   induction bytes generalizing v k acc with
   | nil => rfl
   | cons b bs ih =>
-    rw [scanBits, ProctorDataParser.scan]
+    rw [scanCore, ProctorDataParser.scan]
     by_cases lf : b=10
     · rw [if_pos lf] <;> try rw [if_pos lf]
       by_cases z : k=0
       · rw [if_pos z] <;> try rw [if_pos z]
       · rw [if_neg z] <;> try rw [if_neg z]
-        have hz : bitsValue zeroWord+1≤radix 0 := by
-          rw [zero_word_value]
+        have hz : bitsValue reset+1≤radix 0 := by
+          rw [hreset]
           exact Nat.le_refl 1
-        have e := ih zeroWord 0 (bitsValue v::acc) hz
-        rw [zero_word_value] at e
-        exact e
+        exact (ih reset 0 (bitsValue v::acc) hz).trans
+          (congrArg (fun n => ProctorDataParser.scan bs n 0 (bitsValue v::acc)) hreset)
     · rw [if_neg lf] <;> try rw [if_neg lf]
       by_cases digit : 48≤b ∧ b≤57
       · rw [if_pos digit] <;> try rw [if_pos digit]
@@ -400,28 +412,38 @@ theorem scan_refines (bytes : List Nat) (v : List Bool) (k : Nat)
             fun h => g (h.elim Or.inl (fun z => Or.inr ⟨z.left,zero_sound v z.right⟩))
           rw [if_neg gb,if_neg g]
           have hk : k<digitLimit := Nat.lt_of_not_ge (fun h => g (Or.inl h))
-          obtain ⟨out,eo,_,ev,hi⟩ := checked_digit_refines v k b hv hk digit.right
+          obtain ⟨out,eo,_,ev,hi⟩ := hstep v k b hv hk digit.right
           rw [eo]
-          change scanBits bs out (k+1) acc=
+          change scanCore reset step bs out (k+1) acc=
             ProctorDataParser.scan bs (10*bitsValue v+(b-48)) (k+1) acc
           exact (ih out (k+1) acc hi).trans
             (congrArg (fun n => ProctorDataParser.scan bs n (k+1) acc) ev)
       · rw [if_neg digit] <;> try rw [if_neg digit]
 
+theorem scan_refines (bytes : List Nat) (v : List Bool) (k : Nat)
+    (acc : List Nat) (hv : bitsValue v+1≤radix k) :
+    scanBits bytes v k acc=ProctorDataParser.scan bytes (bitsValue v) k acc :=
+  scan_core_refines zeroWord checkedDigit zero_word_value
+    checked_digit_refines bytes v k acc hv
+
 def tokenizeBits (bytes : List Nat) : Option (List Nat) :=
   if bytes.length≤byteLimit then scanBits bytes zeroWord 0 [] else none
+
+private theorem initial_scan (bytes : List Nat) (reset : List Bool)
+    (hreset : bitsValue reset=0) :
+    scanBits bytes reset 0 []=ProctorDataParser.scan bytes 0 0 [] := by
+  have hz : bitsValue reset+1≤radix 0 := by
+    rw [hreset]
+    exact Nat.le_refl 1
+  exact (scan_refines bytes reset 0 [] hz).trans
+    (congrArg (fun n => ProctorDataParser.scan bytes n 0 []) hreset)
 
 theorem tokenize_refines (bytes : List Nat) :
     tokenizeBits bytes=ProctorDataParser.tokenize bytes := by
   unfold tokenizeBits ProctorDataParser.tokenize
   by_cases h : bytes.length≤byteLimit
   · rw [if_pos h] <;> try rw [if_pos h]
-    have hz : bitsValue zeroWord+1≤radix 0 := by
-      rw [zero_word_value]
-      exact Nat.le_refl 1
-    have e := scan_refines bytes zeroWord 0 [] hz
-    rw [zero_word_value] at e
-    exact e
+    exact initial_scan bytes zeroWord zero_word_value
   · rw [if_neg h] <;> try rw [if_neg h]
 
 end ProctorCheckedBinaryScanner
