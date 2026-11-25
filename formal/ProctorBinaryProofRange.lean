@@ -212,7 +212,9 @@ theorem decoded_check_value (a b : List Nat) :
       cases hb : ProctorDataParser.decodeEnvelope b with
       | none => rfl
       | some e =>
-        unfold binaryCheck ProctorBinaryInputBinding.binaryCheck
+        change ((bindingMeter 512 n f e).1 &&
+          ((proofRange 512 n e.proof).1 && check f e.proof)) =
+          ((bindingMeter 512 n f e).1 && (validProof n e.proof && check f e.proof))
         rw [decoded_proof_value a b n f e ha hb]
 
 theorem decoded_check_sound (a b : List Nat) (h : checkBytes a b=true) :
