@@ -81,6 +81,63 @@ theorem mutual_paths_unsat (f : Formula) (v : Nat)
     have he : Holds x (v,false) := e
     exact opposite_excludes x (v,false) he (path_sound f x hn hx he)
 
+theorem path_append_edge (f : Formula) {a b c : Literal}
+    (h : Path f a b) (e : Edge f b c) : Path f a c := by
+  induction h with
+  | refl => exact Path.cons e (Path.refl _)
+  | cons h _ ih => exact Path.cons h (ih e)
+
+private theorem row_arc_sound (c : Clause) (e : Arc) (he : e∈rowArcs c) :
+    ∀ l∈c, l∈[opposite e.1,e.2] := by
+  cases c with
+  | nil => cases he
+  | cons a cs =>
+    cases cs with
+    | nil =>
+      change e∈[(opposite a,a)] at he
+      cases he with
+      | head =>
+        intro l hl
+        cases hl with
+        | head => exact List.Mem.tail _ (List.Mem.head _)
+        | tail _ hz => cases hz
+      | tail _ hz => cases hz
+    | cons b bs =>
+      cases bs with
+      | nil =>
+        change e∈[(opposite a,b),(opposite b,a)] at he
+        cases he with
+        | head =>
+          change ∀ l∈[a,b], l∈[opposite (opposite a),b]
+          rw [opposite_twice]
+          exact fun _ h => h
+        | tail _ ht =>
+          cases ht with
+          | head =>
+            change ∀ l∈[a,b], l∈[opposite (opposite b),a]
+            rw [opposite_twice]
+            intro l hl
+            cases hl with
+            | head => exact List.Mem.tail _ (List.Mem.head _)
+            | tail _ hm =>
+              cases hm with
+              | head => exact List.Mem.head _
+              | tail _ hz => cases hz
+          | tail _ hz => cases hz
+      | cons d ds => cases he
+
+theorem arcs_sound (f : Formula) (e : Arc) (he : e∈arcs f) :
+    Edge f e.1 e.2 := by
+  induction f with
+  | nil => cases he
+  | cons c cs ih =>
+    change e∈rowArcs c ++ arcs cs at he
+    cases ProctorEnvelopeCompleteness.append_cases (rowArcs c) (arcs cs) e he with
+    | inl h => exact ⟨c,List.Mem.head _,row_arc_sound c e h⟩
+    | inr h =>
+      obtain ⟨d,hd,hs⟩ := ih h
+      exact ⟨d,List.Mem.tail _ hd,hs⟩
+
 theorem edge_find (f g : Formula) (a b : Literal)
     (he : Edge f a b) (sub : ∀ c∈f, c∈g) :
     ∃ i, findRow (contained [opposite a,b]) g=some i := by
@@ -109,6 +166,75 @@ def saturate (es : List Arc) : Nat → Routes → Routes
 
 def reach (es : List Arc) (a b : Literal) : Option (List Literal) :=
   routeFor b (saturate es es.length [(a,[])])
+
+def RouteOK (f : Formula) (a : Literal) (rs : Routes) : Prop :=
+  ∀ e∈rs, Path f a e.1
+
+theorem routeFor_sound (f : Formula) (a b : Literal) (rs : Routes)
+    (h : RouteOK f a rs) (ps : List Literal) (hp : routeFor b rs=some ps) :
+    Path f a b := by
+  induction rs with
+  | nil => cases hp
+  | cons e rs ih =>
+    cases e with
+    | mk c qs =>
+      change (if b=c then some qs else routeFor b rs)=some ps at hp
+      by_cases z : b=c
+      · cases z
+        exact h (b,qs) (List.Mem.head _)
+      · rw [if_neg z] at hp
+        exact ih (fun e he => h e (List.Mem.tail _ he)) hp
+
+theorem relax_preserves (f : Formula) (a : Literal) (rs : Routes) (e : Arc)
+    (h : RouteOK f a rs) (he : Edge f e.1 e.2) :
+    RouteOK f a (relax rs e) := by
+  unfold relax
+  cases hs : routeFor e.1 rs with
+  | none => exact h
+  | some ps =>
+    cases hd : routeFor e.2 rs with
+    | some qs => exact h
+    | none =>
+      intro p hp
+      change p∈(e.2,ps++[e.2])::rs at hp
+      cases hp with
+      | head => exact path_append_edge f (routeFor_sound f a e.1 rs h ps hs) he
+      | tail _ hm => exact h p hm
+
+theorem sweep_preserves (f : Formula) (a : Literal) (es : List Arc) (rs : Routes)
+    (h : RouteOK f a rs) (he : ∀ e∈es, Edge f e.1 e.2) :
+    RouteOK f a (sweep es rs) := by
+  induction es generalizing rs with
+  | nil => exact h
+  | cons e es ih =>
+    change RouteOK f a (sweep es (relax rs e))
+    exact ih _ (relax_preserves f a rs e h (he e (List.Mem.head _)))
+      (fun e hm => he e (List.Mem.tail _ hm))
+
+theorem saturate_preserves (f : Formula) (a : Literal) (es : List Arc)
+    (fuel : Nat) (rs : Routes) (h : RouteOK f a rs)
+    (he : ∀ e∈es, Edge f e.1 e.2) :
+    RouteOK f a (saturate es fuel rs) := by
+  induction fuel generalizing rs with
+  | zero => exact h
+  | succ k ih =>
+    exact ih _ (sweep_preserves f a es rs h he)
+
+theorem reach_sound (f : Formula) (a b : Literal) (ps : List Literal)
+    (h : reach (arcs f) a b=some ps) : Path f a b := by
+  have h0 : RouteOK f a [(a,[])] := by
+    intro e he
+    cases he with
+    | head => exact Path.refl _
+    | tail _ hz => cases hz
+  exact routeFor_sound f a b _ (saturate_preserves f a (arcs f) (arcs f).length
+    _ h0 (arcs_sound f)) ps h
+
+theorem reach_pair_unsat (f : Formula) (v : Nat) (ps qs : List Literal)
+    (hp : reach (arcs f) (v,true) (v,false)=some ps)
+    (hq : reach (arcs f) (v,false) (v,true)=some qs) :
+    Unsat f :=
+  mutual_paths_unsat f v (reach_sound f _ _ ps hp) (reach_sound f _ _ qs hq)
 
 -- Local compilation preserves two-literal implication clauses.
 -- Duplicate literals in the final implication are allowed by the checker.
@@ -267,3 +393,12 @@ end ProctorImplicationPathDiscovery
 #print axioms ProctorImplicationPathDiscovery.discover_accepts
 #print axioms ProctorImplicationPathDiscovery.discover_complete
 #print axioms ProctorImplicationPathDiscovery.discover_iff
+
+#print axioms ProctorImplicationPathDiscovery.path_append_edge
+#print axioms ProctorImplicationPathDiscovery.arcs_sound
+#print axioms ProctorImplicationPathDiscovery.routeFor_sound
+#print axioms ProctorImplicationPathDiscovery.relax_preserves
+#print axioms ProctorImplicationPathDiscovery.sweep_preserves
+#print axioms ProctorImplicationPathDiscovery.saturate_preserves
+#print axioms ProctorImplicationPathDiscovery.reach_sound
+#print axioms ProctorImplicationPathDiscovery.reach_pair_unsat
