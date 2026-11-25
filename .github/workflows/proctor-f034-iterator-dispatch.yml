@@ -1,0 +1,66 @@
+name: Proctor F034 iterator dispatch ledger
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-iterator-dispatch.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-iterator-dispatch.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-iterator-dispatch
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-iterator-dispatch
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsSize.lean formal/ProctorScannerMeter.lean formal/ProctorDimacsLexMeter.lean formal/ProctorDimacsLexerCompose.lean formal/ProctorDimacsRowMeter.lean formal/ProctorDimacsDecoderMeter.lean formal/ProctorDecimalBitWidth.lean formal/ProctorBinaryPrimitives.lean formal/ProctorCheckedBinaryScanner.lean formal/ProctorStructuralCounters.lean formal/ProctorFuelFreeParser.lean formal/ProctorIteratorDispatch.lean formal/ProctorIteratorDispatchMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_ITERATOR_DISPATCH_OK small=2044 boundary=8' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-iterator-dispatch")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["double_projection","word_projection","double_potential","word_dispatch_bound","lifted_projection","lifted_dispatch_bound","list_dispatch_bound"]
+          for name in names:
+              if f"'ProctorIteratorDispatch.{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorIteratorDispatch.{name}")
+          report = dict(scope="SELECTED_ITERATOR_DISPATCH_LEDGER",
+                        verified=names, axiom_gate=True, small_controls=2044, boundary_controls=8,
+                        selected_iterator_dispatch_bound_verified=True,
+                        complete_decoder_cost_verified=False,
+                        total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorIteratorDispatch.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-iterator-dispatch-evidence
+          path: artifacts/f034-iterator-dispatch/
