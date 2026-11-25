@@ -50,6 +50,7 @@ def stepMeter (f : Formula) (s : Step) : Bool × Nat :=
 theorem step_value (f : Formula) (s : Step) :
     (stepMeter f s).1=stepCheck f s := by
   unfold stepMeter stepCheck
+  dsimp only
   rw [lookup_value,lookup_value]
   cases ha : lookup f s.left with
   | none => rfl
@@ -64,6 +65,7 @@ theorem step_value (f : Formula) (s : Step) :
 theorem step_bound (f : Formula) (s : Step) (hf : WidthTwo f) (hs : s.tail.length≤2) :
     (stepMeter f s).2≤f.length+f.length+12 := by
   unfold stepMeter
+  dsimp only
   rw [lookup_value,lookup_value]
   have h := Nat.add_le_add (lookup_bound f s.left) (lookup_bound f s.right)
   cases ha : lookup f s.left with
