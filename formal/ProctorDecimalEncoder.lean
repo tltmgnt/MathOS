@@ -83,9 +83,9 @@ private theorem sub_add_cancel' (a b : Nat) (h : a≤b) : b-a+a=b := by
 private theorem div_add_mod' (x y : Nat) : y*(x/y)+x%y=x := by
   induction x,y using Nat.div.inductionOn with
   | base x y h =>
-    rw [Nat.div_eq x y,Nat.mod_eq x y,if_neg h,Nat.mul_zero,Nat.zero_add]
+    rw [Nat.div_eq x y,Nat.mod_eq x y,if_neg h,if_neg h,Nat.mul_zero,Nat.zero_add]
   | ind x y h ih =>
-    rw [Nat.div_eq x y,Nat.mod_eq x y,if_pos h,Nat.mul_succ]
+    rw [Nat.div_eq x y,Nat.mod_eq x y,if_pos h,if_pos h,Nat.mul_succ]
     rw [Nat.add_assoc,Nat.add_comm y ((x-y)%y),← Nat.add_assoc,ih]
     exact sub_add_cancel' y x h.right
 
