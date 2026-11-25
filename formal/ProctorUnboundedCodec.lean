@@ -177,7 +177,7 @@ theorem bytes_sound (a b : List Nat) (h : checkBytes a b=true) :
       | none => rw [hb] at h; cases h
       | some e =>
         rw [hb] at h
-        exact ⟨n,f,ha,ProctorUnifiedReplay.bound_sound n f e h⟩
+        exact ⟨n,f,rfl,ProctorUnifiedReplay.bound_sound n f e h⟩
 
 end ProctorUnboundedCodec
 
