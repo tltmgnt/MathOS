@@ -1,0 +1,20 @@
+name: Proctor F037 symmetry selector audit
+on:
+  push:
+    branches: ['research/pnp-f037-symmetry-selector']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_symmetry_selector | tee /tmp/symmetry.txt
+          grep -Fx 'F037_SYMMETRY_SELECTOR_OK random=256 dense=12 max_variables=256 rejection=3' /tmp/symmetry.txt
