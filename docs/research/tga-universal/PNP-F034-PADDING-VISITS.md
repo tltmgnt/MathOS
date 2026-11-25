@@ -22,3 +22,7 @@ Eleven candidate declarations and 3525 executable control groups
 Strict Lean 4.14.0 warnings-as-errors and zero-axiom gates unchanged.
 No local Lean execution. Exact preflight required before PR.
 Independent review and resolution remain open.
+
+## Initial replay repair
+
+Exact head c5fed68a4396a7f39908f5311b3a8d6c86b99db6 failed [45556797014 / job 139010679709](https://github.com/tltmgnt/MathOS/actions/runs/45556797014/job/139010679709), artifact 14996317602. Nine independent declarations printed no axioms. decimal_projection rewrote both resource projections correctly but left a definitional equality against decimalMeter; close that residual goal with rfl. decimal_bounds depends on the repaired theorem. No public theorem statement, executable definition, fixture or gate changed. Initial executable marker not reached; require successful exact-head replay before PR.

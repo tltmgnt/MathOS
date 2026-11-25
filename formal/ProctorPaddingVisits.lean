@@ -108,7 +108,7 @@ theorem decimal_projection (v d : List Bool) :
   change ((addResources (addResources (false::v) (false::false::false::v)).1.1 d).1.1,
     (addResources (false::v) (false::false::false::v)).1.2+
       (addResources (addResources (false::v) (false::false::false::v)).1.1 d).1.2)=_
-  rw [add_projection,add_projection]
+  rw [add_projection,add_projection] <;> rfl
 
 theorem decimal_bounds (v d : List Bool) (w : Nat)
     (hv : v.length≤w) (hd : d.length≤4) :
