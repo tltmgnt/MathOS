@@ -76,13 +76,16 @@ def ref (L : ListBuilder) : Parser RefRow := fun ts => do
 theorem ref_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     ref L ts=ProctorDataParser.refToken ts := by
   unfold ref ProctorDataParser.refToken
-  apply bind_congr
-  · exact rfl
-  · intro i ts
-    apply bind_congr
-    · exact clause_refines L hL _
-    · intro row ts
-      rfl
+  refine bind_congr (β := RefRow × List Nat) (natToken) (natToken)
+    (fun i ts => do
+      let (row,ts) ← (clause L) ts
+      some (⟨i,row⟩,ts))
+    (fun i ts => do
+      let (row,ts) ← (ProctorDataParser.clauseToken) ts
+      some (⟨i,row⟩,ts))
+    ts (rfl) ?_
+  intro i ts
+  rw [clause_refines L hL ts]
 
 def group (L : ListBuilder) : Parser ProctorCapacityDeficiency.Group := fun ts => do
   let (vs,ts) ← (clause L) ts
@@ -92,13 +95,16 @@ def group (L : ListBuilder) : Parser ProctorCapacityDeficiency.Group := fun ts =
 theorem group_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     group L ts=ProctorDataParser.groupToken ts := by
   unfold group ProctorDataParser.groupToken
-  apply bind_congr
-  · exact clause_refines L hL _
-  · intro vs ts
-    apply bind_congr
-    · exact rfl
-    · intro cap ts
-      rfl
+  refine bind_congr (β := ProctorCapacityDeficiency.Group × List Nat) (clause L) (ProctorDataParser.clauseToken)
+    (fun vs ts => do
+      let (cap,ts) ← (natToken) ts
+      some (⟨vs,cap⟩,ts))
+    (fun vs ts => do
+      let (cap,ts) ← (natToken) ts
+      some (⟨vs,cap⟩,ts))
+    ts (clause_refines L hL ts) ?_
+  intro vs ts
+  rfl
 
 def capacity (L : ListBuilder) : Parser Certificate := fun ts => do
   let (ds,ts) ← (L RefRow (ref L)) ts
@@ -109,16 +115,27 @@ def capacity (L : ListBuilder) : Parser Certificate := fun ts => do
 theorem capacity_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     capacity L ts=ProctorDataParser.capacityToken ts := by
   unfold capacity ProctorDataParser.capacityToken
-  apply bind_congr
-  · exact list_congr L hL _ _ (ref_refines L hL) _
-  · intro ds ts
-    apply bind_congr
-    · exact list_congr L hL _ _ (group_refines L hL) _
-    · intro gs ts
-      apply bind_congr
-      · exact list_congr L hL _ _ (ref_refines L hL) _
-      · intro rs ts
-        rfl
+  refine bind_congr (β := Certificate × List Nat) (L RefRow (ref L)) (listToken ProctorDataParser.refToken)
+    (fun ds ts => do
+      let (gs,ts) ← (L ProctorCapacityDeficiency.Group (group L)) ts
+      let (rs,ts) ← (L RefRow (ref L)) ts
+      some (⟨ds,gs,rs⟩,ts))
+    (fun ds ts => do
+      let (gs,ts) ← (listToken ProctorDataParser.groupToken) ts
+      let (rs,ts) ← (listToken ProctorDataParser.refToken) ts
+      some (⟨ds,gs,rs⟩,ts))
+    ts (list_congr L hL _ _ (ref_refines L hL) ts) ?_
+  intro ds ts
+  refine bind_congr (β := Certificate × List Nat) (L ProctorCapacityDeficiency.Group (group L)) (listToken ProctorDataParser.groupToken)
+    (fun gs ts => do
+      let (rs,ts) ← (L RefRow (ref L)) ts
+      some (⟨ds,gs,rs⟩,ts))
+    (fun gs ts => do
+      let (rs,ts) ← (listToken ProctorDataParser.refToken) ts
+      some (⟨ds,gs,rs⟩,ts))
+    ts (list_congr L hL _ _ (group_refines L hL) ts) ?_
+  intro gs ts
+  rw [list_congr L hL _ _ (ref_refines L hL) ts]
 
 def block (L : ListBuilder) : Parser ProctorXorReplay.Block := fun ts => do
   let (vs,ts) ← (L Nat natToken) ts
@@ -129,16 +146,27 @@ def block (L : ListBuilder) : Parser ProctorXorReplay.Block := fun ts => do
 theorem block_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     block L ts=ProctorDataParser.blockToken ts := by
   unfold block ProctorDataParser.blockToken
-  apply bind_congr
-  · exact hL Nat natToken _
-  · intro vs ts
-    apply bind_congr
-    · exact rfl
-    · intro rhs ts
-      apply bind_congr
-      · exact list_congr L hL _ _ (ref_refines L hL) _
-      · intro rs ts
-        rfl
+  refine bind_congr (β := ProctorXorReplay.Block × List Nat) (L Nat natToken) (listToken natToken)
+    (fun vs ts => do
+      let (rhs,ts) ← (boolToken) ts
+      let (rs,ts) ← (L RefRow (ref L)) ts
+      some (⟨vs,rhs,rs⟩,ts))
+    (fun vs ts => do
+      let (rhs,ts) ← (boolToken) ts
+      let (rs,ts) ← (listToken ProctorDataParser.refToken) ts
+      some (⟨vs,rhs,rs⟩,ts))
+    ts (hL Nat natToken ts) ?_
+  intro vs ts
+  refine bind_congr (β := ProctorXorReplay.Block × List Nat) (boolToken) (boolToken)
+    (fun rhs ts => do
+      let (rs,ts) ← (L RefRow (ref L)) ts
+      some (⟨vs,rhs,rs⟩,ts))
+    (fun rhs ts => do
+      let (rs,ts) ← (listToken ProctorDataParser.refToken) ts
+      some (⟨vs,rhs,rs⟩,ts))
+    ts (rfl) ?_
+  intro rhs ts
+  rw [list_congr L hL _ _ (ref_refines L hL) ts]
 
 def step (L : ListBuilder) : Parser Step := fun ts => do
   let (a,ts) ← (natToken) ts
@@ -150,19 +178,40 @@ def step (L : ListBuilder) : Parser Step := fun ts => do
 theorem step_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     step L ts=ProctorDataParser.stepToken ts := by
   unfold step ProctorDataParser.stepToken
-  apply bind_congr
-  · exact rfl
-  · intro a ts
-    apply bind_congr
-    · exact rfl
-    · intro b ts
-      apply bind_congr
-      · exact rfl
-      · intro p ts
-        apply bind_congr
-        · exact clause_refines L hL _
-        · intro tail ts
-          rfl
+  refine bind_congr (β := Step × List Nat) (natToken) (natToken)
+    (fun a ts => do
+      let (b,ts) ← (natToken) ts
+      let (p,ts) ← (natToken) ts
+      let (tail,ts) ← (clause L) ts
+      some (⟨a,b,p,tail⟩,ts))
+    (fun a ts => do
+      let (b,ts) ← (natToken) ts
+      let (p,ts) ← (natToken) ts
+      let (tail,ts) ← (ProctorDataParser.clauseToken) ts
+      some (⟨a,b,p,tail⟩,ts))
+    ts (rfl) ?_
+  intro a ts
+  refine bind_congr (β := Step × List Nat) (natToken) (natToken)
+    (fun b ts => do
+      let (p,ts) ← (natToken) ts
+      let (tail,ts) ← (clause L) ts
+      some (⟨a,b,p,tail⟩,ts))
+    (fun b ts => do
+      let (p,ts) ← (natToken) ts
+      let (tail,ts) ← (ProctorDataParser.clauseToken) ts
+      some (⟨a,b,p,tail⟩,ts))
+    ts (rfl) ?_
+  intro b ts
+  refine bind_congr (β := Step × List Nat) (natToken) (natToken)
+    (fun p ts => do
+      let (tail,ts) ← (clause L) ts
+      some (⟨a,b,p,tail⟩,ts))
+    (fun p ts => do
+      let (tail,ts) ← (ProctorDataParser.clauseToken) ts
+      some (⟨a,b,p,tail⟩,ts))
+    ts (rfl) ?_
+  intro p ts
+  rw [clause_refines L hL ts]
 
 def terminal (L : ListBuilder) : Parser Terminal := fun ts => do
   let (tag,ts) ← natToken ts
@@ -178,24 +227,38 @@ def terminal (L : ListBuilder) : Parser Terminal := fun ts => do
 theorem terminal_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     terminal L ts=ProctorDataParser.terminalToken ts := by
   unfold terminal ProctorDataParser.terminalToken
-  apply bind_congr
-  · rfl
-  · intro tag ts
-    by_cases h0 : tag=0
-    · rw [if_pos h0] <;> try rw [if_pos h0]
-    · rw [if_neg h0] <;> try rw [if_neg h0]
-      by_cases h1 : tag=1
-      · rw [if_pos h1] <;> try rw [if_pos h1]
-        apply bind_congr
-        · exact capacity_refines L hL _
-        · intro c rest; rfl
-      · rw [if_neg h1] <;> try rw [if_neg h1]
-        by_cases h2 : tag=2
-        · rw [if_pos h2] <;> try rw [if_pos h2]
-          apply bind_congr
-          · exact list_congr L hL _ _ (block_refines L hL) _
-          · intro bs rest; rfl
-        · rw [if_neg h2] <;> try rw [if_neg h2]
+  refine bind_congr (β := Terminal × List Nat) natToken natToken
+    (fun tag ts =>
+      if tag=0 then some (.empty,ts)
+      else if tag=1 then do
+        let (c,ts) ← capacity L ts
+        some (.capacity c,ts)
+      else if tag=2 then do
+        let (bs,ts) ← L ProctorXorReplay.Block (block L) ts
+        some (.xor bs,ts)
+      else none)
+    (fun tag ts =>
+      if tag=0 then some (.empty,ts)
+      else if tag=1 then do
+        let (c,ts) ← ProctorDataParser.capacityToken ts
+        some (.capacity c,ts)
+      else if tag=2 then do
+        let (bs,ts) ← listToken ProctorDataParser.blockToken ts
+        some (.xor bs,ts)
+      else none)
+    ts rfl ?_
+  intro tag ts
+  by_cases h0 : tag=0
+  · rw [if_pos h0] <;> try rw [if_pos h0]
+  · rw [if_neg h0] <;> try rw [if_neg h0]
+    by_cases h1 : tag=1
+    · rw [if_pos h1] <;> try rw [if_pos h1]
+      rw [capacity_refines L hL ts]
+    · rw [if_neg h1] <;> try rw [if_neg h1]
+      by_cases h2 : tag=2
+      · rw [if_pos h2] <;> try rw [if_pos h2]
+        rw [list_congr L hL _ _ (block_refines L hL) ts]
+      · rw [if_neg h2] <;> try rw [if_neg h2]
 
 def proof (L : ListBuilder) : Parser Proof := fun ts => do
   let (bs,ts) ← (L (List Step) (L Step (step L))) ts
@@ -206,16 +269,27 @@ def proof (L : ListBuilder) : Parser Proof := fun ts => do
 theorem proof_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     proof L ts=ProctorDataParser.proofToken ts := by
   unfold proof ProctorDataParser.proofToken
-  apply bind_congr
-  · exact list_congr L hL _ _ (fun xs => list_congr L hL _ _ (step_refines L hL) xs) _
-  · intro bs ts
-    apply bind_congr
-    · exact rfl
-    · intro aug ts
-      apply bind_congr
-      · exact terminal_refines L hL _
-      · intro t ts
-        rfl
+  refine bind_congr (β := Proof × List Nat) (L (List Step) (L Step (step L))) (listToken (listToken ProctorDataParser.stepToken))
+    (fun bs ts => do
+      let (aug,ts) ← (boolToken) ts
+      let (t,ts) ← (terminal L) ts
+      some (⟨bs,aug,t⟩,ts))
+    (fun bs ts => do
+      let (aug,ts) ← (boolToken) ts
+      let (t,ts) ← (ProctorDataParser.terminalToken) ts
+      some (⟨bs,aug,t⟩,ts))
+    ts (list_congr L hL _ _ (fun xs => list_congr L hL _ _ (step_refines L hL) xs) ts) ?_
+  intro bs ts
+  refine bind_congr (β := Proof × List Nat) (boolToken) (boolToken)
+    (fun aug ts => do
+      let (t,ts) ← (terminal L) ts
+      some (⟨bs,aug,t⟩,ts))
+    (fun aug ts => do
+      let (t,ts) ← (ProctorDataParser.terminalToken) ts
+      some (⟨bs,aug,t⟩,ts))
+    ts (rfl) ?_
+  intro aug ts
+  rw [terminal_refines L hL ts]
 
 def expected (L : ListBuilder) : Parser (Nat × Formula) := fun ts => do
   let (magic,ts) ← natToken ts
@@ -228,18 +302,34 @@ def expected (L : ListBuilder) : Parser (Nat × Formula) := fun ts => do
 theorem expected_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     expected L ts=ProctorDataParser.expectedToken ts := by
   unfold expected ProctorDataParser.expectedToken
-  apply bind_congr
-  · rfl
-  · intro magic ts
-    by_cases h : magic=3401
-    · rw [if_pos h] <;> try rw [if_pos h]
-      apply bind_congr
-      · rfl
-      · intro n rest
-        apply bind_congr
-        · exact formula_refines L hL _
-        · intro f tail; rfl
-    · rw [if_neg h] <;> try rw [if_neg h]
+  refine bind_congr (β := (Nat × Formula) × List Nat) natToken natToken
+    (fun magic ts =>
+      if magic=3401 then do
+        let (n,ts) ← (natToken) ts
+        let (f,ts) ← (formula L) ts
+        some ((n,f),ts)
+      else none)
+    (fun magic ts =>
+      if magic=3401 then do
+        let (n,ts) ← (natToken) ts
+        let (f,ts) ← (ProctorDataParser.formulaToken) ts
+        some ((n,f),ts)
+      else none)
+    ts rfl ?_
+  intro magic ts
+  by_cases h : magic=3401
+  · rw [if_pos h] <;> try rw [if_pos h]
+    refine bind_congr (β := (Nat × Formula) × List Nat) (natToken) (natToken)
+      (fun n ts => do
+        let (f,ts) ← (formula L) ts
+        some ((n,f),ts))
+      (fun n ts => do
+        let (f,ts) ← (ProctorDataParser.formulaToken) ts
+        some ((n,f),ts))
+      ts (rfl) ?_
+    intro n ts
+    rw [formula_refines L hL ts]
+  · rw [if_neg h] <;> try rw [if_neg h]
 
 def envelope (L : ListBuilder) : Parser Envelope := fun ts => do
   let (magic,ts) ← natToken ts
@@ -253,21 +343,47 @@ def envelope (L : ListBuilder) : Parser Envelope := fun ts => do
 theorem envelope_refines (L : ListBuilder) (hL : ListContract L) (ts : List Nat) :
     envelope L ts=ProctorDataParser.envelopeToken ts := by
   unfold envelope ProctorDataParser.envelopeToken
-  apply bind_congr
-  · rfl
-  · intro magic ts
-    by_cases h : magic=3402
-    · rw [if_pos h] <;> try rw [if_pos h]
-      apply bind_congr
-      · rfl
-      · intro n rest
-        apply bind_congr
-        · exact formula_refines L hL _
-        · intro f tail
-          apply bind_congr
-          · exact proof_refines L hL _
-          · intro p endTokens; rfl
-    · rw [if_neg h] <;> try rw [if_neg h]
+  refine bind_congr (β := Envelope × List Nat) natToken natToken
+    (fun magic ts =>
+      if magic=3402 then do
+        let (n,ts) ← (natToken) ts
+        let (f,ts) ← (formula L) ts
+        let (p,ts) ← (proof L) ts
+        some (⟨n,f,p⟩,ts)
+      else none)
+    (fun magic ts =>
+      if magic=3402 then do
+        let (n,ts) ← (natToken) ts
+        let (f,ts) ← (ProctorDataParser.formulaToken) ts
+        let (p,ts) ← (ProctorDataParser.proofToken) ts
+        some (⟨n,f,p⟩,ts)
+      else none)
+    ts rfl ?_
+  intro magic ts
+  by_cases h : magic=3402
+  · rw [if_pos h] <;> try rw [if_pos h]
+    refine bind_congr (β := Envelope × List Nat) (natToken) (natToken)
+      (fun n ts => do
+        let (f,ts) ← (formula L) ts
+        let (p,ts) ← (proof L) ts
+        some (⟨n,f,p⟩,ts))
+      (fun n ts => do
+        let (f,ts) ← (ProctorDataParser.formulaToken) ts
+        let (p,ts) ← (ProctorDataParser.proofToken) ts
+        some (⟨n,f,p⟩,ts))
+      ts (rfl) ?_
+    intro n ts
+    refine bind_congr (β := Envelope × List Nat) (formula L) (ProctorDataParser.formulaToken)
+      (fun f ts => do
+        let (p,ts) ← (proof L) ts
+        some (⟨n,f,p⟩,ts))
+      (fun f ts => do
+        let (p,ts) ← (ProctorDataParser.proofToken) ts
+        some (⟨n,f,p⟩,ts))
+      ts (formula_refines L hL ts) ?_
+    intro f ts
+    rw [proof_refines L hL ts]
+  · rw [if_neg h] <;> try rw [if_neg h]
 
 def checkedLists : ListBuilder := fun _ p => ProctorParserCounters.listBits p
 
