@@ -1,0 +1,23 @@
+name: Proctor F037 case transport audit
+on:
+  push:
+    branches: ['research/pnp-f037-case-transport']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install scipy==1.17.0
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_case_transport | tee /tmp/transport.txt
+          grep -Fx 'F037_CASE_TRANSPORT_OK variables=2304 clauses=7680 choices=2 cases=16 transports=12 rejection=3' /tmp/transport.txt
