@@ -20,6 +20,7 @@ def meter (a b : List Nat) : Ledger :=
     ⟨c.1,r.2,c.2.1,c.2.2⟩
   | _,_ => ⟨false,r.2,0,0⟩
 
+set_option maxRecDepth 4096 in
 theorem checker_projection (a b : List Nat) :
     ((meter a b).accepted,(meter a b).lookupVisits,(meter a b).comparisonGates)=
       ProctorUnifiedResourceLedger.bytesMeter a b := by
