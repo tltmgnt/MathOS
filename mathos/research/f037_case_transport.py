@@ -5,8 +5,7 @@ is unit-refutable or supplies a signed variable permutation that maps
 its models to the requested branch. No general discovery claim.
 """
 from itertools import product, permutations
-from random import Random
-from mathos.research.f037_log_backdoor import normalize, restrict, satisfies
+from mathos.research.f037_log_backdoor import normalize, satisfies
 from mathos.research.f037_rup_repair import rup
 from mathos.research.f037_frozen_model import cover, cnf
 
@@ -109,7 +108,9 @@ def coloring_certificate(raw,n,vertex,target,permitted=tuple(permutations(range(
                 maps.append(m)
                 break
         else:
-            return None
+            if not rup(g,()):
+                return None
+            maps.append(None)
     assert check(f,v,True,scope,maps)
     return scope,tuple(maps)
 
