@@ -1,0 +1,34 @@
+name: Proctor F038 unrestricted read size barrier
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-read-size-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_linear_repetition | tee /tmp/linear.txt
+          grep -Fx 'F038_LINEAR_REPETITION_OK cases=456 branch_checks=912 zero=70 one=386 changed_coordinates=6704 max_variables=22 max_clauses=49' /tmp/linear.txt
+          python -m mathos.research.f038_unrestricted_read | tee /tmp/read.txt
+          grep -Fx 'F038_UNRESTRICTED_READ_OK cases=33312 branch_checks=66624 zero=16656 one=16656 signatures=552 max_variables=46 max_clauses=107' /tmp/read.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_READ_GATE_OK status=OPEN')
+          PY
