@@ -1,0 +1,55 @@
+{
+  "attempt_id": "F038-TECTX-GUARDED-AFFINE",
+  "base_commit": "7a3263d9ef9cda7032a7963dd1e85c9516a3decb",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45717978989",
+  "targets": [
+    "ordinary_complete",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "Guarded affine equations can certify reusable conflicts and bypass selected ordinary resolution barriers.",
+  "route": "certificate_route",
+  "topology": "Incidence image / dual parity obstruction, with explicit row-combination witness.",
+  "adversarial": [
+    "Disabled row guards and malformed XOR provenance",
+    "Private clause splitting defeats exact-scope extraction",
+    "Persistent proof restriction to ordinary resolution"
+  ],
+  "scope": "Conditional affine rows under explicit indicator pins; fixed-variable proof system; no universal bound.",
+  "cost": "Polynomial in actual trace/database length, not a polynomial search bound.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "independent_reference": "Separate finite point enumeration in JavaScript; counts below, not a proof of the Python implementation.",
+  "expected": {
+    "full": [
+      256,
+      8960,
+      5791,
+      3169,
+      10240,
+      665,
+      672,
+      512
+    ],
+    "binary": [
+      256,
+      6400,
+      1407,
+      4993,
+      5120,
+      6055,
+      14080,
+      1920
+    ],
+    "parity_cases": 3,
+    "split_cases": 3,
+    "guard_controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_guarded_affine.py",
+    "docs/research/tga-universal/PNP-F038-TECTX-GUARDED-AFFINE.md"
+  ],
+  "next": "Guarded recovery of implied affine rows across split encodings; challenge universal coverage."
+}
