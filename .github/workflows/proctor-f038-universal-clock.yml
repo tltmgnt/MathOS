@@ -1,0 +1,36 @@
+name: Proctor F038 universal witness clock
+on:
+  push:
+    branches: ['research/pnp-f038-universal-witness-clock']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_universal_clock.py
+          python -m mathos.research.f038_affine_interface | tee /tmp/affine.txt
+          grep -Fx 'F038_AFFINE_INTERFACE_OK systems=512 inconsistent=271 consistent=241 bijunctive=237 non_bijunctive=4 projection_checks=1928 closure_checks=4560 hybrid_cases=15168 sat=6972 unsat=8196' /tmp/affine.txt
+          grep -Fx 'F038_AFFINE_MIXED_BARRIER_OK cases=4096 parameters=32768 local_checks=851968 source_sat=1360 feasible=2304 max_variables=25 max_rows=12 max_clauses=36' /tmp/affine.txt
+          python -m mathos.research.f038_universal_clock | tee /tmp/clock.txt
+          grep -Fx 'F038_UNIVERSAL_WITNESS_CLOCK_OK formulas=4096 sat=1360 unsat=2736 stage_checks=32768 accepting=3036 missed_sat=7844 unsat_deadlines=21888 proposals=131364 rejected=128328 deadline_bounds=2304 max_first=7 budget_checks=8 first_stages=0,0,0,128,248,60,300,624' /tmp/clock.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNIVERSAL_WITNESS_CLOCK_GATE_OK status=OPEN')
+          PY
