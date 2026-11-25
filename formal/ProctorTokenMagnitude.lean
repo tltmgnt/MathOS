@@ -11,6 +11,7 @@ open ProctorWireRoundtrip (encNat encBool encLiteral encItems encList encClause 
 open ProctorEnvelopeRoundtrip (encStep encBatch encProof encEnvelope)
 open ProctorPathResourceBounds (occurrences steps)
 open ProctorWireTokenBounds (NarrowSteps NarrowBatches variables_length solve_narrow)
+open ProctorOrdinaryCompleteness (variables)
 open ProctorFiniteModel (materialize materialize_member materialize_length)
 open ProctorTotalTwoCNF (WidthTwo solve solve_spec solve_size)
 open ProctorSerializedTwoCNF (Witness tokens produce)
