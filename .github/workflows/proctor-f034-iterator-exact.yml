@@ -1,0 +1,66 @@
+name: Proctor F034 exact successful iterator ledger
+on:
+  pull_request:
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-iterator-exact.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'formal/Proctor*.lean'
+      - 'mathos/research/tga_proctor*.py'
+      - '.github/workflows/proctor-f034-iterator-exact.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/f034-iterator-exact
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          out=artifacts/f034-iterator-exact
+          lean --version | tee "$out/lean-version.txt"
+          grep -F 'version 4.14.0' "$out/lean-version.txt"
+          cat formal/ProctorHallDeficiency.lean formal/ProctorCapacityDeficiency.lean formal/ProctorMixedInference.lean formal/ProctorPairedReplay.lean formal/ProctorExecutableReplay.lean formal/ProctorCapacityReplay.lean formal/ProctorXorReplay.lean formal/ProctorUnifiedReplay.lean formal/ProctorDataParser.lean formal/ProctorWireRoundtrip.lean formal/ProctorEnvelopeRoundtrip.lean formal/ProctorCheckerCost.lean formal/ProctorChainMeter.lean formal/ProctorCapacityMeter.lean formal/ProctorXorMeter.lean formal/ProctorUnifiedMeter.lean formal/ProctorPolynomialMeter.lean formal/ProctorTerminalPolynomial.lean formal/ProctorEncodedSize.lean formal/ProctorParserConsumption.lean formal/ProctorDimacsInput.lean formal/ProctorDimacsLexical.lean formal/ProctorDimacsSize.lean formal/ProctorScannerMeter.lean formal/ProctorDimacsLexMeter.lean formal/ProctorDimacsLexerCompose.lean formal/ProctorDimacsRowMeter.lean formal/ProctorDimacsDecoderMeter.lean formal/ProctorDecimalBitWidth.lean formal/ProctorBinaryPrimitives.lean formal/ProctorCheckedBinaryScanner.lean formal/ProctorStructuralCounters.lean formal/ProctorFuelFreeParser.lean formal/ProctorIteratorDispatch.lean formal/ProctorIteratorOverhead.lean formal/ProctorIteratorExact.lean formal/ProctorIteratorExactMain.lean > "$out/combined.lean"
+          lean -DwarningAsError=true --run "$out/combined.lean" 2>&1 | tee "$out/kernel.txt"
+          grep -Fx 'F034_ITERATOR_EXACT_OK small=2044 boundary=8' "$out/kernel.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          out = Path("artifacts/f034-iterator-exact")
+          lines = set((out / "kernel.txt").read_text().splitlines())
+          names = ["double_exact","word_exact","unit_exact","joint_exact","encoded_exact"]
+          for name in names:
+              if f"'ProctorIteratorExact.{name}' does not depend on any axioms" not in lines:
+                  raise SystemExit(f"strict axiom check failed: ProctorIteratorExact.{name}")
+          report = dict(scope="EXACT_SUCCESSFUL_SELECTED_ITERATOR_LEDGER",
+                        verified=names, axiom_gate=True, small_controls=2044, boundary_controls=8,
+                        exact_successful_iterator_ledger_verified=True,
+                        complete_decoder_cost_verified=False,
+                        total_cost_semantics_verified=False,
+                        bit_machine_refinement_verified=False,
+                        independent_review=False, resolution_status="OPEN",
+                        source_sha256=hashlib.sha256(Path("formal/ProctorIteratorExact.lean").read_bytes()).hexdigest())
+          (out / "report.json").write_text(json.dumps(report, indent=2)+"\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f034-iterator-exact-evidence
+          path: artifacts/f034-iterator-exact/
