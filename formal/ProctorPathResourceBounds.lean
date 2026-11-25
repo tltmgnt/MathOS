@@ -107,8 +107,12 @@ theorem route_table_bound (es : List Arc) (a : Literal) (fuel : Nat) :
   have hm := missing_bound ([(a,[])] : Routes) es
   change (saturate es fuel [(a,[])]).length+missing (saturate es fuel [(a,[])]) es≤
     1+missing [(a,[])] es at hb
-  exact Nat.le_trans (Nat.le_trans (Nat.le_add_right _ _) hb)
-    (Nat.add_le_add_left hm 1) |>.trans (by rw [Nat.add_comm]) (es : List Arc) (a b : Literal) (ps : List Literal)
+  have h : (saturate es fuel [(a,[])]).length≤1+es.length :=
+    Nat.le_trans (Nat.le_trans (Nat.le_add_right _ _) hb) (Nat.add_le_add_left hm 1)
+  rw [Nat.add_comm 1] at h
+  exact h
+
+theorem reach_length_bound (es : List Arc) (a b : Literal) (ps : List Literal)
     (h : reach es a b=some ps) : ps.length≤es.length := by
   have h0 : Short [(a,[])] := by
     intro e he
@@ -119,7 +123,9 @@ theorem route_table_bound (es : List Arc) (a : Literal) (fuel : Nat) :
   have hp := hs (b,ps) (route_mem _ b ps h)
   have hb := route_table_bound es a es.length
   change ps.length<(saturate es es.length [(a,[])]).length at hp
-  exact Nat.le_of_succ_le_succ (Nat.le_trans (Nat.succ_le_of_lt hp) hb) (c : Clause) : (rowArcs c).length≤c.length := by
+  exact Nat.le_of_succ_le_succ (Nat.le_trans (Nat.succ_le_of_lt hp) hb)
+
+theorem row_arcs_bound (c : Clause) : (rowArcs c).length≤c.length := by
   cases c with
   | nil => exact Nat.le_refl _
   | cons a cs =>
@@ -194,7 +200,7 @@ theorem triangular_bound (k : Nat) : triangular k≤k*k := by
       calc
         k+1+k*k = k*k+k+1 := by ac_rfl
         _ ≤ k*k+k+(k+1) := Nat.add_le_add_left (Nat.succ_le_succ (Nat.zero_le k)) _
-        _ = k*k+k+(k+1) := rfl)
+        _ = k*k+k+k+1 := by ac_rfl)
 
 theorem compile_steps_bound (v : Nat) (f : Formula) (ss : List Step) :
     steps (compile v f ss)≤(f.length+ss.length)*ss.length := by
