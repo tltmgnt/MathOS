@@ -1,0 +1,35 @@
+name: Proctor F038 witness composition
+on:
+  push:
+    branches: ['research/pnp-f038-witness-composition']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_rule_certification | tee /tmp/rule.txt
+          grep -Fx 'F038_RULE_CERTIFICATION_OK matrices=4096 families=8192 safe=356 unsafe=7836 instances=24576 branch_checks=49152 unsafe_outputs=20912 repair_tables=131072 repair_families=356 max_variables=8 max_clauses=18' /tmp/rule.txt
+          python -m mathos.research.f038_witness_composition | tee /tmp/composition.txt
+          grep -Fx 'F038_MAJORITY_COMPOSITION_OK families=16384 total=2484 failed=13900 seed_probes=172032 missing=91328 outputs=6686 majority=1592' /tmp/composition.txt
+          grep -Fx 'F038_MIXED_COMPOSITION_OK families=8192 total=356 failed=7836 parameters=24576 local_witnesses=188416 global_checks=196608' /tmp/composition.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_WITNESS_COMPOSITION_GATE_OK status=OPEN')
+          PY
