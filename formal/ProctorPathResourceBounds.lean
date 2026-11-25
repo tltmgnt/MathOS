@@ -15,7 +15,7 @@ private theorem len_append {α : Type} (xs ys : List α) :
   | nil => exact (Nat.zero_add _).symm
   | cons a as ih =>
     change (as++ys).length+1=as.length+1+ys.length
-    rw [ih,Nat.add_assoc,Nat.add_comm 1 ys.length,← Nat.add_assoc]
+    rw [ih,Nat.add_assoc as.length 1 ys.length,Nat.add_comm 1 ys.length,← Nat.add_assoc]
 
 theorem route_mem (rs : Routes) (a : Literal) (ps : List Literal)
     (h : routeFor a rs=some ps) : (a,ps)∈rs := by
@@ -186,6 +186,16 @@ def triangular : Nat → Nat
   | 0 => 0
   | k+1 => k+1+triangular k
 
+private theorem mul_add' (a b c : Nat) : a*(b+c)=a*b+a*c := by
+  induction c with
+  | zero => rfl
+  | succ c ih =>
+    change a*(b+c+1)=a*b+a*(c+1)
+    rw [Nat.mul_succ,Nat.mul_succ,ih,Nat.add_assoc]
+
+private theorem add_mul' (a b c : Nat) : (a+b)*c=a*c+b*c := by
+  rw [Nat.mul_comm (a+b) c,mul_add',Nat.mul_comm c a,Nat.mul_comm c b]
+
 theorem compile_steps (v : Nat) (f : Formula) (ss : List Step) :
     steps (compile v f ss)=f.length*ss.length+triangular ss.length := by
   induction ss generalizing f with
@@ -195,25 +205,28 @@ theorem compile_steps (v : Nat) (f : Formula) (ss : List Step) :
       f.length*(ss.length+1)+(ss.length+1+triangular ss.length)
     rw [extend_length,ih]
     change f.length+1+((f.length+1)*ss.length+triangular ss.length)=_
-    rw [Nat.add_mul,Nat.mul_add,Nat.one_mul,Nat.mul_one]
+    rw [add_mul',mul_add',Nat.one_mul,Nat.mul_one]
     calc
       f.length+1+(f.length*ss.length+ss.length+triangular ss.length)
-          = f.length+(1+(f.length*ss.length+ss.length+triangular ss.length)) := Nat.add_assoc _ _ _
-      _ = f.length+(f.length*ss.length+(ss.length+1+triangular ss.length)) := by
-        rw [← Nat.add_assoc (f.length*ss.length) ss.length (triangular ss.length),
-          ← Nat.add_assoc 1 (f.length*ss.length+ss.length) (triangular ss.length),
-          Nat.add_comm 1 (f.length*ss.length+ss.length),
-          Nat.add_assoc (f.length*ss.length) ss.length 1,
-          Nat.add_assoc (f.length*ss.length) (ss.length+1) (triangular ss.length)]
-      _ = f.length*ss.length+f.length+(ss.length+1+triangular ss.length) := by
-        rw [← Nat.add_assoc,Nat.add_comm f.length (f.length*ss.length)]
+          = (f.length*ss.length+ss.length+triangular ss.length)+(f.length+1) := Nat.add_comm _ _
+      _ = f.length*ss.length+(ss.length+(triangular ss.length+(f.length+1))) := by
+        rw [Nat.add_assoc (f.length*ss.length) ss.length (triangular ss.length),
+          Nat.add_assoc (f.length*ss.length) (ss.length+triangular ss.length) (f.length+1),
+          Nat.add_assoc ss.length (triangular ss.length) (f.length+1)]
+      _ = f.length*ss.length+(ss.length+(f.length+(1+triangular ss.length))) := by
+        rw [Nat.add_comm (triangular ss.length) (f.length+1),Nat.add_assoc f.length 1 (triangular ss.length)]
+      _ = f.length*ss.length+(f.length+(ss.length+1+triangular ss.length)) := by
+        rw [← Nat.add_assoc ss.length f.length (1+triangular ss.length),
+          Nat.add_comm ss.length f.length,Nat.add_assoc f.length ss.length (1+triangular ss.length),
+          ← Nat.add_assoc ss.length 1 (triangular ss.length)]
+      _ = f.length*ss.length+f.length+(ss.length+1+triangular ss.length) := (Nat.add_assoc _ _ _).symm
 
 theorem triangular_bound (k : Nat) : triangular k≤k*k := by
   induction k with
   | zero => exact Nat.le_refl _
   | succ k ih =>
     change k+1+triangular k≤(k+1)*(k+1)
-    rw [Nat.add_mul,Nat.mul_add,Nat.mul_one,Nat.one_mul]
+    rw [add_mul',mul_add',Nat.mul_one,Nat.one_mul]
     have hh : k+1+triangular k≤k+1+k*k := Nat.add_le_add_left ih _
     exact Nat.le_trans hh (by
       calc
@@ -223,7 +236,7 @@ theorem triangular_bound (k : Nat) : triangular k≤k*k := by
 
 theorem compile_steps_bound (v : Nat) (f : Formula) (ss : List Step) :
     steps (compile v f ss)≤(f.length+ss.length)*ss.length := by
-  rw [compile_steps,Nat.add_mul]
+  rw [compile_steps,add_mul']
   exact Nat.add_le_add_left (triangular_bound ss.length) _
 
 private theorem pathTail_length (s a : Literal) (g : Formula) (bs : List Literal)
@@ -284,7 +297,7 @@ theorem pathStart_length (g : Formula) (s : Literal) (bs : List Literal)
           rw [he] at h
           change some (t::ts,g')=some (ss,out) at h
           cases h
-          exact congrArg Nat.succ (pathTail_length s b (t.tail::g) bs ts g' he)
+          exact congrArg Nat.succ (pathTail_length s b (t.tail::g) bs ts out he)
 
 theorem pair_size (f : Formula) (v : Nat) (pos neg : List Literal) (p : Proof)
     (h : compilePair f v pos neg=some p) :
@@ -344,7 +357,7 @@ theorem tryVar_size (f : Formula) (v : Nat) (p : Proof)
         rw [hs.left,Nat.two_mul]
         exact Nat.add_le_add_right (Nat.add_le_add (Nat.le_trans h1 ha) (Nat.le_trans h2 ha)) 1
       refine ⟨hb,?_⟩
-      rw [hs.right,Nat.add_mul]
+      rw [hs.right,add_mul']
       have hc := Nat.add_le_add (Nat.mul_le_mul_left f.length hb)
         (Nat.le_trans (triangular_bound p.batches.length) (Nat.mul_le_mul hb hb))
       exact hc
@@ -371,3 +384,7 @@ end ProctorPathResourceBounds
 #print axioms ProctorPathResourceBounds.pathStart_length
 #print axioms ProctorPathResourceBounds.pair_size
 #print axioms ProctorPathResourceBounds.tryVar_size
+
+#print axioms ProctorPathResourceBounds.len_append
+#print axioms ProctorPathResourceBounds.mul_add'
+#print axioms ProctorPathResourceBounds.add_mul'
