@@ -44,7 +44,9 @@ theorem many_refines {α : Type} (p : Parser α) (f : Nat)
       have hs := (dec_sound c d ed).right
       rw [e] at hs
       have hv : bitsValue d=k := Nat.succ.inj hs
-      have hk : k≤f := Nat.le_of_succ_le_succ h
+      have hk : k≤f := by
+        rw [e] at h
+        exact Nat.le_of_succ_le_succ h
       have hf : bitsValue d≤f := by
         rw [hv]
         exact hk
