@@ -1,0 +1,23 @@
+name: Proctor F037 probe selector barrier
+on:
+  push:
+    branches: ['research/pnp-f037-probe-selector-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_probe_selector_barrier | tee /tmp/probe.txt
+          grep -Fx 'F037_PROBE_SELECTOR_BARRIER_OK depths=0..4 polarities=2 orders=2 controls=3' /tmp/probe.txt
+          grep -Fx 'probe_nodes=456' /tmp/probe.txt
