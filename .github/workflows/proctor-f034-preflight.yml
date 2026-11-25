@@ -3,12 +3,8 @@ on:
   push:
     branches:
       - 'research/pnp-f034-*'
-    paths:
-      - 'formal/Proctor*.lean'
-      - 'mathos/research/tga_proctor*.py'
-      - 'tests/test_tga_proctor*.py'
-      - '.github/workflows/proctor-*.yml'
-      - 'scripts/proctor_preflight.py'
+    # Replay every research-branch head, including documentation-only commits.
+    # The preflight script still selects the relevant proof workflows.
   pull_request:
     paths:
       - '.github/workflows/proctor-f034-preflight.yml'
