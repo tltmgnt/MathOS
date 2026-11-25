@@ -37,7 +37,12 @@ def wordMeter {σ : Type} : List Bool → Metered σ → σ → Option σ × Nat
 theorem double_projection {σ : Type} (step : Metered σ) (plain : σ → Option σ)
     (h : ∀ s, (step s).1=plain s) (s : σ) :
     (doubleMeter step s).1=doubleStep plain s := by
-  unfold doubleMeter doubleStep
+  change (match (step s).1 with
+    | none => (none,(step s).2+1)
+    | some t => ((step t).1,(step s).2+(step t).2+1)).1=
+    (match plain s with
+    | none => none
+    | some t => plain t)
   rw [← h s]
   cases e : (step s).1 with
   | none => rfl
@@ -77,16 +82,24 @@ theorem double_potential {σ : Type} (step : Metered σ) (K : Nat)
     calc
       (step s).2+(step t).2+1+1 =
           ((step s).2+1)+((step t).2+1) := by
-        rw [Nat.add_assoc (step s).2 (step t).2 1,
-          Nat.add_comm (step t).2 1, ← Nat.add_assoc (step s).2 1 (step t).2,
-          Nat.add_assoc ((step s).2+1) (step t).2 1]
+        let a := (step s).2
+        let b := (step t).2
+        change (a+b)+1+1=(a+1)+(b+1)
+        calc
+          (a+b)+1+1 = (a+(b+1))+1 :=
+            congrArg (fun z => z+1) (Nat.add_assoc a b 1)
+          _ = a+((b+1)+1) := Nat.add_assoc a (b+1) 1
+          _ = a+(1+(b+1)) := congrArg (fun z => a+z) (Nat.add_comm (b+1) 1)
+          _ = (a+1)+(b+1) := (Nat.add_assoc a 1 (b+1)).symm
       _ ≤ K+K := Nat.add_le_add (h s) (h t)
 
 private theorem double_scale (K n : Nat) : (K+K)*n=K*(2*n) := by
-  have e : K+K=K*2 := by
-    change K+K=0+K+K
-    rw [Nat.zero_add]
-  rw [e,Nat.mul_assoc]
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    change (K+K)*n+(K+K)=(K*(2*n)+K)+K
+    rw [ih]
+    exact (Nat.add_assoc (K*(2*n)) K K).symm
 
 private theorem set_scale (K n : Nat) : K+(K+K)*n=K*(1+2*n) := by
   rw [double_scale,Nat.add_comm 1 (2*n)]
