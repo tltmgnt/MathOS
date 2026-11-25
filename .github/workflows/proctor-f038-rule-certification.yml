@@ -1,0 +1,34 @@
+name: Proctor F038 selector rule certification
+on:
+  push:
+    branches: ['research/pnp-f038-selector-rule-certification']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_selector_equivalence | tee /tmp/equiv.txt
+          grep -Fx 'F038_SELECTOR_EQUIVALENCE_OK formulas=4616 sat=1458 unsat=3158 states=51644 branch_checks=51284 leaves=26002 accepted=2436 rejected=23566 off_promise=20408' /tmp/equiv.txt
+          python -m mathos.research.f038_rule_certification | tee /tmp/rule.txt
+          grep -Fx 'F038_RULE_CERTIFICATION_OK matrices=4096 families=8192 safe=356 unsafe=7836 instances=24576 branch_checks=49152 unsafe_outputs=20912 repair_tables=131072 repair_families=356 max_variables=8 max_clauses=18' /tmp/rule.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RULE_CERTIFICATION_GATE_OK status=OPEN')
+          PY
