@@ -57,8 +57,13 @@ theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
     RowMeaning x (reduceRow v b c) ↔ ClauseSat c (update x v b) := by
   induction c with
   | nil =>
-    exact ⟨fun h => by obtain ⟨l,hl,_⟩ := h; cases hl,
-      fun h => by obtain ⟨l,hl,_⟩ := h; cases hl⟩
+    constructor
+    · intro h
+      obtain ⟨l,hl,_⟩ := h
+      cases hl
+    · intro h
+      obtain ⟨l,hl,_⟩ := h
+      cases hl
   | cons l ls ih =>
     have hcons := cons_sat (update x v b) l ls
     apply Iff.trans _ hcons.symm
@@ -93,7 +98,12 @@ theorem row_correct (v : Nat) (b : Bool) (c : Clause) (x : Assignment) :
 theorem restriction_correct (v : Nat) (b : Bool) (f : Formula) (x : Assignment) :
     FormulaSat (restrict v b f) x ↔ FormulaSat f (update x v b) := by
   induction f with
-  | nil => exact ⟨fun _ _ h => nomatch h,fun _ _ h => nomatch h⟩
+  | nil =>
+    constructor
+    · intro _ c hc
+      cases hc
+    · intro _ c hc
+      cases hc
   | cons c cs ih =>
     have h := row_correct v b c x
     apply Iff.trans _ (formula_cons (update x v b) c cs).symm
