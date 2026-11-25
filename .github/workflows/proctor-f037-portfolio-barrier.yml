@@ -1,0 +1,21 @@
+name: Proctor F037 portfolio barrier audit
+on:
+  push:
+    branches: ['research/pnp-f037-portfolio-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install scipy==1.17.0
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f037_portfolio_barrier | tee /tmp/portfolio.txt
+          grep -Fx 'F037_PORTFOLIO_BARRIER_OK families=5 cuts=736 articulation=2189 weights=27 max_variables=3147' /tmp/portfolio.txt
