@@ -90,14 +90,24 @@ theorem relax_cost_bound (es : List Arc) (rs : Routes) (e : Arc) (cap : Nat)
   Nat.add_le_add (Nat.le_trans (probes_bound e.1 rs) (Nat.le_trans (table_le_budget es rs) h))
     (Nat.le_trans (probes_bound e.2 rs) (Nat.le_trans (table_le_budget es rs) h))
 
+private theorem mul_add' (a b c : Nat) : a*(b+c)=a*b+a*c := by
+  induction c with
+  | zero => rfl
+  | succ c ih =>
+    change a*(b+c+1)=a*b+a*(c+1)
+    rw [Nat.mul_succ,Nat.mul_succ,ih,Nat.add_assoc]
+
+private theorem add_mul' (a b c : Nat) : (a+b)*c=a*c+b*c := by
+  rw [Nat.mul_comm (a+b) c,mul_add',Nat.mul_comm c a,Nat.mul_comm c b]
+
 theorem sweep_cost_bound (es work : List Arc) (rs : Routes) (cap : Nat)
     (h : budget es rs≤cap) (sub : ∀ e∈work, e∈es) :
     sweepCost work rs≤work.length*(cap+cap) := by
   induction work generalizing rs with
-  | nil => exact Nat.le_refl _
+  | nil => exact Nat.zero_le _
   | cons e work ih =>
     change relaxCost rs e+sweepCost work (relax rs e)≤(work.length+1)*(cap+cap)
-    rw [Nat.add_mul,Nat.one_mul,Nat.add_comm (work.length*(cap+cap))]
+    rw [add_mul',Nat.one_mul,Nat.add_comm (work.length*(cap+cap))]
     exact Nat.add_le_add (relax_cost_bound es rs e cap h)
       (ih _ (Nat.le_trans (relax_budget es rs e (sub e (List.Mem.head _))) h)
         (fun d hd => sub d (List.Mem.tail _ hd)))
@@ -106,10 +116,10 @@ theorem saturate_cost_bound (es : List Arc) (fuel : Nat) (rs : Routes) (cap : Na
     (h : budget es rs≤cap) :
     saturateCost es fuel rs≤fuel*(es.length*(cap+cap)) := by
   induction fuel generalizing rs with
-  | zero => exact Nat.le_refl _
+  | zero => exact Nat.zero_le _
   | succ k ih =>
     change sweepCost es rs+saturateCost es k (sweep es rs)≤(k+1)*(es.length*(cap+cap))
-    rw [Nat.add_mul,Nat.one_mul,Nat.add_comm (k*(es.length*(cap+cap)))]
+    rw [add_mul',Nat.one_mul,Nat.add_comm (k*(es.length*(cap+cap)))]
     exact Nat.add_le_add (sweep_cost_bound es es rs cap h (fun _ he => he))
       (ih _ (Nat.le_trans (sweep_budget es es rs (fun _ he => he)) h))
 
