@@ -63,14 +63,14 @@ private theorem all_complete {α : Type} (p : α → Bool) (xs : List α)
 theorem disjoint_sound (f g : Formula) (h : disjointCheck f g=true) : Disjoint f g := by
   intro v hv hg
   have hh := all_sound _ _ h v hv
-  change !(member v (variables g))=true at hh
+  change Bool.not (member v (variables g))=true at hh
   rw [member_complete v (variables g) hg] at hh
   cases hh
 
 theorem disjoint_complete (f g : Formula) (h : Disjoint f g) : disjointCheck f g=true := by
   apply all_complete
   intro v hv
-  change !(member v (variables g))=true
+  change Bool.not (member v (variables g))=true
   cases e : member v (variables g) with
   | false => rfl
   | true => exact (h v hv (member_sound v _ e)).elim
