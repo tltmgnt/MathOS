@@ -1,0 +1,20 @@
+name: Proctor F036 hybrid barrier audit
+on:
+  push:
+    branches: ['research/pnp-f036-hybrid-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f036_hybrid_barrier | tee /tmp/hybrid.txt
+          grep -Fx 'F036_HYBRID_BARRIER_OK variables=63 clauses=210 scopes=7546 patterns=347445 pairs=446103 recoloring=1764' /tmp/hybrid.txt
