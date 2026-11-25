@@ -1,0 +1,33 @@
+name: Proctor F038 parity complexity
+on:
+  push:
+    branches: ['research/pnp-f038-parity-complexity']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_parity_complexity | tee /tmp/parity-complexity.txt
+          grep -Fx 'F038_PARITY_COMPLEXITY_OK formulas=4096 expanded=256 graphs=76 path_cases=8 sat=1280' /tmp/parity-complexity.txt
+          grep -Fx 'odd_formulas=544 expanded_max_vertices=310 audit_max_width=4' /tmp/parity-complexity.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gap=json.loads(Path('/tmp/gap.json').read_text())
+          assert gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert gap['selector_route']['status']=='BLOCKED'
+          assert gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_PARITY_COMPLEXITY_GATE_OK status=OPEN')
+          PY
