@@ -155,9 +155,9 @@ function sortWorker(){
 }
 function encode(records){return records.map(([k,p])=>[...k].map(b=>"0"+b).join("")+"10"+[...p].map(b=>"0"+b).join("")+"11").join("");}
 function logicalRun(J,raw,limit=1000000){
- const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[];
- while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
- return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
+ const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[],copySteps=0,restoreSteps=0;
+ while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(/^(copy|append|newEnd|back)[01]/.test(state))copySteps++;if(/^(restoreScan|restoreBack|restoreSlot|restoreRight|eraseDest)/.test(state))restoreSteps++;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
+ return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,copySteps,restoreSteps,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
 }
 
 function physicalRun(M,raw,limit=50000000){
@@ -172,7 +172,7 @@ function physicalRun(M,raw,limit=50000000){
 }
 function audit(){
  const J=sortWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)};
- let counts={cases:0,records:0,rawBits:0,transitions:0,logical:0,passes:0,suffixChecks:0,cutoffs:0,malformed:0,malformedTransitions:0};
+ let counts={cases:0,records:0,rawBits:0,transitions:0,logical:0,passes:0,suffixChecks:0,copySteps:0,restoreSteps:0,cutoffs:0,malformed:0,malformedTransitions:0};
  let cmp=(a,b)=>a<b?-1:a>b?1:0;
  function check(rows,record=true){
   let raw=encode(rows),N=raw.length,w=M.width,want=encode(rows.slice().sort((a,b)=>cmp(a[0],b[0]))),r=physicalRun(M,raw),ref=logicalRun(J,raw,5000000);
@@ -180,6 +180,7 @@ function audit(){
   ok(ref.state==="ready"&&ref.out===want&&ref.steps===r.logical,"logical reference");
   let k=rows.length?rows[0][0].length:0;
   ok(ref.passes===k&&ref.snapshots.length===k,"pass count");
+  ok(ref.copySteps===k*(2*N*N+5*N)&&ref.restoreSteps===k*(3*N*N+5*N+2),"transfer clock "+JSON.stringify({N,k,copy:ref.copySteps,restore:ref.restoreSteps}));
   for(let j=1;j<=k;j++){
    let expected=encode(rows.slice().sort((a,b)=>cmp(a[0].slice(-j),b[0].slice(-j))));
    ok(ref.snapshots[j-1]===expected,"stable suffix pass");
@@ -190,7 +191,7 @@ function audit(){
   ok(JSON.stringify(r.ph)===JSON.stringify([prep,mid,serial]),"phase "+JSON.stringify({N,r:r.ph,expected:[prep,mid,serial]}));
   ok(r.head===(N?-(w+1)*N-2:0),"head");
   ok(r.span===(N?(2*w+1)*N+2*w+2:w),"span "+JSON.stringify({N,span:r.span}));
-  if(record){counts.cases++;counts.records+=rows.length;counts.rawBits+=N;counts.transitions+=r.t;counts.logical+=r.logical;counts.passes+=k;counts.suffixChecks+=k;}
+  if(record){counts.cases++;counts.records+=rows.length;counts.rawBits+=N;counts.transitions+=r.t;counts.logical+=r.logical;counts.passes+=k;counts.suffixChecks+=k;counts.copySteps+=ref.copySteps;counts.restoreSteps+=ref.restoreSteps;}
   return r;
  }
  let cases=[[],[["0",""]],[["1","10"],["0","1"],["1","0"]],[["11",""],["00","1"],["10","0"],["01","11"]],[["1",""],["1","0"],["1","01"],["1","1"]]];
@@ -218,10 +219,29 @@ function audit(){
   let k=Math.ceil(Math.log2(n)),rows=Array.from({length:n},(_,i)=>[(n-1-i).toString(2).padStart(k,"0"),i.toString(2).padStart(k,"0")]);
   let r=check(rows,false);scaling.push([n,k,encode(rows).length,r.t,r.logical,r.span,r.ph]);
  }
+ // Exhaust short raw strings against a separate grammar parser.
+ let grammar={cases:0,valid:0,rejected:0,transitions:0};
+ function parse(raw){
+  if(raw.length%2)return null;
+  let records=[],k="",p="",keyMode=true;
+  for(let i=0;i<raw.length;i+=2){
+   let t=raw.slice(i,i+2);
+   if(t[0]==="0"){if(keyMode)k+=t[1];else p+=t[1];}
+   else if(t==="10"){if(!keyMode||!k)return null;keyMode=false;}
+   else {if(keyMode)return null;records.push([k,p]);k="";p="";keyMode=true;}
+  }
+  return keyMode&&!k&&records.every(([k])=>k.length===records[0][0].length)?records:null;
+ }
+ for(let n=0;n<=8;n++)for(let i=0;i<2**n;i++){
+  let raw=n?i.toString(2).padStart(n,"0"):"",r=physicalRun(M,raw),rows=parse(raw);
+  ok(r.state===M.q,"grammar halt");grammar.cases++;grammar.transitions+=r.t;
+  if(rows===null){ok(!r.tape.has(r.head),"grammar rejection");grammar.rejected++;}
+  else {let want=encode(rows.slice().sort((a,b)=>cmp(a[0],b[0])));ok(r.tape.size===want.length&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b),"grammar output");grammar.valid++;}
+ }
  let pos=3;while(M.desc[pos]==="1")pos++;
  ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"length");
- return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling};
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,grammar};
 }
 if(process.argv.includes('--description')){let j=sortWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_STABLE_RECORD_SORT_OK '+JSON.stringify(audit()));
