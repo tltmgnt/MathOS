@@ -1,0 +1,61 @@
+name: Proctor F038 RE-X width-two selection
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-selection']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_selection
+          node --check "$p.js"
+          for suite in small select joint larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/selection-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/selection-replay.txt
+          node "$p.js" --descriptor > /tmp/selection.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_SELECTION_OK '){const a=fs.readFileSync('/tmp/selection-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c,d,e]=['small','select','joint','larger','controls'].map(s=>read(s));
+          for(const r of [a,b,c,d,e]){assert.equal(r.q,781408);assert.equal(r.descriptorBits,57042788);assert.equal(r.workerEntry,533704);assert.equal(r.selectionEntry,585083);}
+          assert.deepEqual(a.totals,{rawBits:303312,transitions:260755237,worker:715103,selection:597806,rankBits:162,relationBits:2724,localRows:145,liveRows:134,checks:51,sat:3,unsat:4,refused:1});
+          assert.deepEqual(b.totals,{rawBits:75828,transitions:89758033,worker:680923,selection:1002117,rankBits:108,relationBits:1230,localRows:54,liveRows:51,checks:31,sat:2,unsat:0,refused:0});
+          assert.deepEqual(c.totals,{rawBits:37914,transitions:58051426,worker:656107,selection:0,rankBits:0,relationBits:918,localRows:37,liveRows:29,checks:23,sat:0,unsat:1,refused:0});
+          assert.deepEqual(d.totals,{rawBits:161851,transitions:481125438,worker:1740283,selection:1131508,rankBits:81,relationBits:1914,localRows:67,liveRows:65,checks:32,sat:1,unsat:0,refused:0});
+          assert.equal([a,b,c,d].reduce((x,r)=>x+r.totals.transitions,0),889690134);
+          assert.deepEqual(e.controls,[0,1,100,34283826,34283827,34283828,34376349,34376350,34376351,34515003]);
+          assert.equal(e.rejects.length,7);assert.equal(e.exactBudget,34515004);
+          const r=read('replay','F038_REX_WIDTH_TWO_SELECTION_REPLAY_OK ');
+          assert.equal(r.transitions,68980376);
+          assert.deepEqual(r.rows,[{name:'sat',t:34515004,worker:92523,selection:138654,rankBits:54,relationBits:480,decision:1},{name:'joint-unsat',t:34465372,worker:124673,selection:0,rankBits:0,relationBits:372,decision:0}]);
+          JS
+          python -m mathos.research.f038_rex_width_two_selection_codec /tmp/selection.desc > /tmp/selection-codec.json
+          python -m mathos.research.tga_f038_rex_023d2 > /tmp/selection-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/selection-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/selection-gates.json') as f:
+              g=json.load(f)
+          assert r['transitions']==34515004 and r['mask_blocks']==129 and r['mask_bits']==834
+          assert r['parent_records']==9 and r['bag_records']==9 and r['output_bits']==737 and r['relation_bits']==480 and r['rank_bits']==54 and r['not_a_witness'] and r['decision']==1
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023D2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
