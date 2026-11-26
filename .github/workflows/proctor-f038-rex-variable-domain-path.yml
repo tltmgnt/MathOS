@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X variable domain path
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-domain-path']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_variable_domain_path.js
+          node mathos/research/f038_rex_variable_domain_path.js | tee /tmp/variable-path.txt
+          grep -Fx 'F038_REX_VARIABLE_DOMAIN_PATH_OK {"alphabet":29,"width":5,"logicalStates":122,"rules":3538,"states":15084,"bits":829624,"counts":{"valid":688,"sat":267,"unsat":421,"vertices":1395,"domainValues":2934,"edgeEntries":2717,"physical":13464629,"logical":615483,"checkpoints":955,"historyEntries":333,"malformed":66,"malformedTransitions":23666,"cutoffs":4},"scaling":[[2,24,17202,776,152,[3819,9968,3415]],[3,40,41383,1727,250,[10203,22255,8925]],[4,60,85382,3364,372,[22503,43436,19443]],[8,180,662358,23012,1100,[197103,298220,167035]],[16,612,7073174,225028,3708,[2256447,2921996,1894731]]],"digest":1242392580}' /tmp/variable-path.txt
+          sed -n 's/^F038_REX_VARIABLE_DOMAIN_PATH_OK //p' /tmp/variable-path.txt > /tmp/variable-path.json
+          python -m mathos.research.validate_f038_rex_variable_domain_path /tmp/variable-path.json
+          python -m mathos.research.tga_f038_rex_011 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_VARIABLE_DOMAIN_PATH_BRANCHING_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_VARIABLE_DOMAIN_PATH_GATE_OK status=OPEN promotion=NONE')
+          PY
