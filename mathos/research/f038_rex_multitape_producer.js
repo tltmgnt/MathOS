@@ -2,6 +2,7 @@
 function producer(raw,limit=Infinity){
  // Fixed controller, fixed number of tapes. Only Tape methods touch tape contents.
  // One charged primitive is one stationary read/write or unit head move.
+ if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
  let steps=0,phase="header",ledger={header:0,metadata:0,selector:0,output:0};
  const tick=()=>{if(steps>=limit)throw "TIMEOUT";steps++;ledger[phase]++;};
  class Tape{
@@ -10,6 +11,7 @@ function producer(raw,limit=Infinity){
   put(a){tick();this.cells[this.h]=a;}
   move(d){if(d!==1&&d!==-1)throw Error("unit move");tick();this.h+=d;if(this.h<0)throw Error("left boundary");}
  }
+ try{
  const I=new Tape(raw),work=()=>{let t=new Tape();t.put("L");return t;};
  const M=work(),M2=work(),Ym=work(),meta=[work(),work(),work()],tmp=work(),r1=work(),r2=work(),pins=work(),out=work(),width=work(),coord=[work(),work(),work()],bin=[work(),work(),work()];
  const masks=Array.from({length:7},()=>Array.from({length:7},work));
@@ -24,7 +26,6 @@ function producer(raw,limit=Infinity){
  function result(status){return {status,steps,ledger,prepared:status==="PREPARED"?out.cells.slice(1).join(""):null,pins:status==="PREPARED"?pins.cells.slice(1).join(""):null};}
  const fail=()=>{throw "OUTSIDE_NORMALIZED";};
  const rawBit=()=>{const a=I.read();if(a!=="0"&&a!=="1")fail();I.move(1);return a;};
- try{
   M.move(1);M2.move(1);let rem=7,atLeast=0;
   while(I.read()==="1"){I.move(1);if(++rem===19){rem=0;append(M,"x");append(M2,"x");atLeast=Math.min(2,atLeast+1);}}
   if(I.read()!=="0"||rem!==0||atLeast!==2)fail();I.move(1);
@@ -132,7 +133,7 @@ function producer(raw,limit=Infinity){
   }
   for(let j=0;j<7;j++)emit("010");
   return result("PREPARED");
- }catch(e){if(e==="TIMEOUT"||e==="OUTSIDE_NORMALIZED")return result(e);throw e;}
+ }catch(e){if(e==="TIMEOUT"||e==="OUTSIDE_NORMALIZED")return {status:e,steps,ledger,prepared:null,pins:null};throw e;}
 }
 function audit(produce){
  const ok=(v,s)=>{if(!v)throw Error(s)};
@@ -174,5 +175,35 @@ function audit(produce){
  ok(produce(fixture(2,[0,1],[[-1,-17]])).status==="OUTSIDE_FIXED_PATH","outside path");ok(produce(good,100).status==="TIMEOUT","timeout");
  return {results,controls,unsupported:1,timeout:1,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,preparedBits:a.preparedBits+r.N,steps:a.steps+r.steps}),{rawBits:0,preparedBits:0,steps:0})};
 }
-module.exports={producer,audit};
-if(require.main===module){if(process.argv.includes('--produce'))console.log(JSON.stringify(producer(require('fs').readFileSync(0,'utf8'))));else console.log('F038_REX_MULTITAPE_PRODUCER_OK '+JSON.stringify(audit(producer)));}
+function integration(P,E,A){
+ const ok=(v,s)=>{if(!v)throw Error(s)};
+ const results=[];
+ function plan(D){
+  let root=null,prev=null,bags=[];
+  for(let j=0;j<7;j++){let scope=[j,j+1,j+2],F=D.F.filter(f=>f.h.every(g=>scope.includes(g))),w=Math.ceil(Math.log2(D.m)),rows=[];
+   for(let z of E.tup(D.m,3))if(F.every(f=>f.S.has(f.h.map(g=>z[g-j]).join(","))))rows.push([...z.map(a=>a.toString(2).padStart(w,"0")),1]);
+   let bag={k:j?2:3,scope,rows,children:[]};if(prev)prev.children.push(bag);else root=bag;prev=bag;bags.push(bag);
+  }return {root,bags};
+ }
+ let J=A.worker(),M=A.compile(J.rules,J.symbols,J.projection);
+ for(let m of [2,3,4])for(let mode=0;mode<2;mode++){
+  let B=[];for(let g=0;g<9;g++)for(let a=0;a<m-1;a++)B.push([-(g*m+a+1)]);
+  for(let g=0;g<7;g++)B.push([-(g*m+1),-((g+1)*m+1),-((g+2)*m+1)]);
+  if(mode)B.push([-9*m]);
+  let pins=Array.from({length:m},(_,i)=>(i+mode)%2),raw=E.encode(m,pins,B),D=E.decode(raw),r=P(raw),p=plan(D),N=A.encode(p.root);
+  ok(r.status==="PREPARED"&&r.prepared===N&&r.pins===pins.join(""),"inherited decoder/encoder differential");
+  let q=A.physical(M,r.prepared,120000000);ok(q.state===M.q,"physical cutoff");let physicalSat=q.tape.has(q.head);ok(physicalSat===!mode,"physical status");
+  let witness=null;
+  if(physicalSat){let at=0,z=Array(9).fill(-1);
+   for(let b of p.bags){let s=Array.from({length:b.rows.length},(_,i)=>q.tape.get(q.head+at+i)).join("");at+=b.rows.length;ok(s.length===b.rows.length&&s.split("1").length===2,"row selection");let row=b.rows[s.indexOf("1")];b.scope.forEach((g,i)=>{let a=parseInt(row[i],2);ok(z[g]===-1||z[g]===a,"separator");z[g]=a;});}
+   ok(z.every(a=>a===m-1),"forced ranks");witness=E.witness(m,D.pins,z);ok(E.valid(raw,witness),"original clauses");
+  }
+  results.push({m,status:mode?"UNSAT":"SAT",rawBits:raw.length,preparedBits:N.length,producerSteps:r.steps,workerTransitions:q.t,witnessVerified:!!witness});
+ }
+ let raw=E.encode(2,[0,1],[]);for(let limit of [0,1,66,67,100]){let r=P(raw,limit);ok(r.status==="TIMEOUT"&&r.steps===limit,"early cutoff "+limit);}
+ // Distinguish a width-two graph outside this *fixed* path from malformed input.
+ let wide=E.encode(2,[0,1],[[-1,-17]]);ok(E.decode(wide)&&P(wide).status==="OUTSIDE_FIXED_PATH","fixed path restriction");
+ return {results,earlyCutoffs:5,descriptorBits:M.desc.length};
+}
+module.exports={producer,audit,integration};
+if(require.main===module){if(process.argv.includes('--produce'))console.log(JSON.stringify(producer(require('fs').readFileSync(0,'utf8'))));else if(process.argv.includes('--integration'))console.log('F038_REX_MULTITAPE_INTEGRATION_OK '+JSON.stringify(integration(producer,require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_nested_variable_overlap.js'))));else console.log('F038_REX_MULTITAPE_PRODUCER_OK '+JSON.stringify(audit(producer)));}
