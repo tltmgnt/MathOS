@@ -130,6 +130,19 @@ function audit(){
  let Q=census(4,(a,x,y)=>a>0&&x===a&&y===0,2);
  ok(Q.J[0][1]===0&&Q.W[0][1].miss===1,"null template corrected");
  let correctionControl=[Q.W[0][1].miss,Q.eta];
- return {n,selected,controls,correctionControl};
+ // Independent exact-route control with only one used nonself substitution.
+ let m=8,S=census(m,(a,x,y)=>a>0&&x===a&&y===0,2);
+ let R=0,hit=0;
+ for(let z of tup(m,6)){let [a,c,d,e,x,y]=z,b=(a===0&&c===0&&d===0&&e===0)?1:a;
+  let old=a>0&&x===a&&y===0,raw=b>0&&x===b&&y===0,j=S.J[a][b],template=j>0&&x===j&&y===0;
+  let err=!old&&raw&&!template;if(err){R++;ok(S.U[a][x*m+y]===1&&!old,"exact route witness");hit++;}
+ }
+ ok(R===1&&4*R<S.eta*m**3,"exact route preferred");
+ // Both missing and extra bits for two distinct nonzero near rows.
+ let F=(a,x,y)=>a===1?(x===0&&y<4):a===2?(x===0&&(y<3||y===4)):false;
+ let V=census(8,F,2);
+ ok(V.J[0][2]===1&&V.W[0][2].miss===1&&V.W[0][2].tw===4&&V.W[0][2].w===4,"one-sided correction despite extra bit");
+ ok(F(1,0,3)&&!F(2,0,3)&&!F(1,0,4)&&F(2,0,4),"extra and missing columns");
+ return {n,selected,controls,correctionControl,exactRoute:[R,S.eta*m**3,hit],extraControl:[V.J[0][2],V.W[0][2].miss,V.W[0][2].tw]};
 }
 console.log('F038_APPROXIMATE_DIFFERENCE_COVERS_OK '+JSON.stringify(audit()));
