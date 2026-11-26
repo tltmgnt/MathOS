@@ -1,5 +1,5 @@
 // REX-023D3 — original Boolean witness from general width-two forest.
-function compile(){
+function compile({packed=false}={}){
  // Fixed finite-state compiler. Tape workspace: binary columns (M,Y,A,B,C)
  // followed by three fixed-width group words. M=m-1, Y=m-2 after header.
  const defs=new Map(),r=(s,a)=>[s,a,1],l=(s,a)=>[s,a,-1],z=(s,a)=>[s,a,0];
@@ -870,13 +870,15 @@ function compile(){
   for(let a=0;a<3;a++){
    let [s,w,d]=f(a),nf=flag;if(s.endsWith("!")){nf=1;s=s.slice(0,-1);}
    if(s==="SUCCESS"&&nf)s="clean1";
-   rows.push([id(s,nf),w,d]);
+   rows.push((id(s,nf)<<4)|(w<<2)|(d+1));
   }
  }
- const q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
- const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
+ const q=names.length,b=q.toString(2).length,T=Uint32Array.from(rows,v=>v<0?(q<<4)|(v&15):v);
+ const descriptorBits=4+q+3*q*(b+4);
+ let desc=null;
+ if(!packed){const chunks=["111"+"1".repeat(q)+"0"];for(let i=0;i<T.length;i+=8192)chunks.push(Array.from(T.subarray(i,i+8192),v=>(v>>>4).toString(2).padStart(b,"0")+((v>>2)&3).toString(2).padStart(2,"0")+(v&3).toString(2).padStart(2,"0")).join(""));desc=chunks.join("");if(desc.length!==descriptorBits)throw Error("descriptor size");}
  const events=[];for(let i=0;i<q;i++){let [name,flag]=names[i];if(expected.has(name))events.push({state:i,flag,...expected.get(name)});}
- return{q,desc,events,workerEntry:ids.get("workerStart|0"),selectionEntry:ids.get("topStart|0"),witnessEntry:ids.get("witnessStart|0"),translationEntry:ids.get("outGroup0Read|0")};
+ return{q,desc,T,descriptorBits,events,workerEntry:ids.get("workerStart|0"),selectionEntry:ids.get("topStart|0"),witnessEntry:ids.get("witnessStart|0"),translationEntry:ids.get("outGroup0Read|0")};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
