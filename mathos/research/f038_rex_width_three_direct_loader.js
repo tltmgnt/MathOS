@@ -415,8 +415,8 @@ function compile(){
   return blanks(n,1,10,n+"Boundary");
  }
  // Scan the bound's M lane from LSB to MSB without altering any other lane.
- const first=walk("loadSkip", -1,15,"loadColumn");
- add("loadStart",a=>a===2?l(first,a):bad());
+ const loadFirst=walk("loadSkip", -1,15,"loadColumn");
+ add("loadStart",a=>a===2?l(loadFirst,a):bad());
  const toM=walk("loadLane",-1,4,"loadM");
  add("loadColumn",a=>a===2?z("loadBoundDone",a):z(toM,a));
  for(let b=0;b<2;b++){
