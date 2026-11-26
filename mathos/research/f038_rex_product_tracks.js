@@ -260,6 +260,43 @@ function audit(){
   let rejected=false;try{compile(rules)}catch(e){rejected=true;}
   ok(rejected,"invalid rules");generic.invalidRules++;
  }
- return {results,micro,microTransitions,invalidCodes,bags,bagRows,bagOutputs,bagTransitions,generic};
+ // Independent original-selector acceptance-contract replay. Mirror the retrieved
+ // Python decode_tm/tape_run/valid semantics, starting from the emitted descriptor.
+ // Actual Python module imports are separately exercised by the Proctor workflow.
+ function decodeDesc(desc){
+  let j=3;while(j<desc.length&&desc[j]==="1")j++;
+  let q=j-3,b=q.toString(2).length;ok(desc.startsWith("111")&&q>0&&desc[j++]==="0"&&desc.length-j===3*q*(b+4),"U decoder");
+  let T=[];
+  for(let i=0;i<3*q;i++){let a=parseInt(desc.slice(j,j+b),2),w=parseInt(desc.slice(j+b,j+b+2),2),d=parseInt(desc.slice(j+b+2,j+b+4),2);j+=b+4;ok(a<=q&&w<=2&&d<=2,"U transition");T.push([a,w,d-1]);}
+  return {q,T};
+ }
+ function pool(n){
+  let C=[];for(let i=1;i<=n;i++)for(let s of [-1,1])C.push([i*s]);
+  for(let i=1;i<=n;i++)for(let j=i+1;j<=n;j++)for(let s of [-1,1])for(let t of [-1,1])C.push([i*s,j*t]);return C;
+ }
+ function tapeRun(M,raw,n,budget){
+  let tape=new Map([...raw].map((v,i)=>[i,+v])),state=0,head=0;
+  for(let i=0;i<budget;i++){
+   let [a,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);head+=d;state=a;
+   if(state===M.q){let bits=Array.from({length:n},(_,j)=>tape.get(head+j)??2);return bits.every(v=>v<2)?bits.reduce((s,v,j)=>s+(v<<j),0):null;}
+  }return null;
+ }
+ const P=decodeDesc(compile(worker("prefixOr")).desc),Q=decodeDesc(G.desc);
+ let selector={selector_inputs:0,prefix_valid:0,prefix_timeouts:0,group_valid:0,group_blank:0};
+ for(let n of [1,2]){
+  let C=pool(n);
+  for(let p=0;p<2**C.length;p++){
+   let raw="1".repeat(n)+"0"+C.map((_,j)=>(p>>j)&1).join(""),N=raw.length,clock=10*N*N+51*N+63;
+   let valid=x=>Number.isInteger(x)&&x>=0&&x<2**n&&C.every((c,j)=>!(p>>j&1)||c.some(l=>!!(x>>(Math.abs(l)-1)&1)===(l>0)));
+   ok(tapeRun(P,raw,n,clock-1)===null,"original prefix cutoff");selector.prefix_timeouts++;
+   let x=tapeRun(P,raw,n,clock);ok(x===2**n-1,"original prefix result");selector.prefix_valid+=+valid(x);
+   let y=tapeRun(Q,raw,n,clock);
+   if(n===1&&p===1){ok(y===0&&valid(y),"group accidental witness");selector.group_valid++;}
+   else {ok(y===null,"group blank");selector.group_blank++;}
+   selector.selector_inputs++;
+  }
+ }
+ ok(JSON.stringify(selector)===JSON.stringify({selector_inputs:260,prefix_valid:34,prefix_timeouts:260,group_valid:1,group_blank:259}),"original acceptance totals");
+ return {results,micro,microTransitions,invalidCodes,bags,bagRows,bagOutputs,bagTransitions,generic,selector};
 }
 if(process.argv.includes('--description'))console.log(compile(worker(process.argv.includes('--group-or')?'groupOr':'prefixOr')).desc);else console.log('F038_REX_PRODUCT_TRACKS_OK '+JSON.stringify(audit()));
