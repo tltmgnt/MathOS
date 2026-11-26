@@ -1,0 +1,46 @@
+name: Proctor F038 unrestricted context sketches
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-context-sketches']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_context_sketches.js
+          node mathos/research/f038_unrestricted_context_sketches.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_CONTEXT_SKETCHES_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":16,"passes":48,"scoreChecks":2784,"fiberChecks":2784,"unionBits":215760,"greedyChecks":776,"fullChecks":484680,"success":170527,"heavy":5263,"head":1004,"tail":6736,"narrow":1039,"otherWide":0,"headModels":1006,"unionModels":7125,"rootChecks":1560,"localChecks":1304600,"membership":2080256,"childChoices":1292288,"relabels":199520,"paddingChecks":85568}
+          assert r['selected'] == {"0,0":12,"0,40":9,"1,1":16,"0,1":1,"0,90":10}
+          assert r['controls'] == [[64,32,1024,192,[[2,32,1536],[4,16,1792],[4,16,1792]],45],[512,256,65536,1536,[[4,128,114688],[8,64,122880],[8,64,122880]],363]]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_CONTEXT_SKETCHES_GATE_OK status=OPEN promotion=NONE')
+          PY
