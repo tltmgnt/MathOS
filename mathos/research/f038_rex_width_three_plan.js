@@ -333,7 +333,7 @@ function compile(){
  readAt("exhausted",58,"planHalt","pop");
  add("pop",a=>a===2?r("popErase0",a):bad());
  for(let i=0;i<F;i++)add("popErase"+i,a=>a<2?(i===F-1?l("popReturn",2):r("popErase"+(i+1),2)):bad());
- const popBack=cross("popBack",-1,F-2,"popAtSep");add("popReturn",a=>a===2?z(popBack,a):bad());
+ const popBack=cross("popBack",-1,F-1,"popAtSep");add("popReturn",a=>a===2?z(popBack,a):bad());
  const popParent=cross("popParent",-1,D-1,"search0_0");add("popAtSep",a=>a===2?l(popParent,a):bad());
  // Success keeps the entire ten-frame chain as the physical certificate.
  // Return to the root separator and set its status bit.
