@@ -60,7 +60,7 @@ function audit(){
    n.childBuild++;return intern(D,R,u,L);
   }
   const cap=t=>C*(mode==="dense"?t:t**4);
-  let roots=new Map(),over=[],mass=0,rootR=0;
+  let roots=new Map(),over=[],mass=0,rootR=0,extras=0;
   function tree(X,o,t,isRoot){
    let D=new Map(X.D.map(r=>[r.id,r.bits])),R=new Map(X.R.map(r=>[key(r.z),r.id])),seen=new Map(),positive=false,localR=0;
    for(let z of tup(t,4)){let v=z.map((a,i)=>a+o[i]),bits="",allowed=!filter||directPass(v,o,t);
@@ -92,8 +92,9 @@ function audit(){
    for(let q of tup(M/B,9))go(roots.get(key(q.slice(0,6))),q.map(a=>a*B),B);
    ok(got.size===expected.size&&[...got].every(k=>expected.has(k)),"exact full branch model set");n.models+=got.size;
    for(let z of tup(m,9))if(original(z)&&E(z.slice(0,6))){ok(got.has(key(z)),"original E witness preserved");n.recovery++;}
+   for(let k of got){let z=k.split(",").map(Number);if(!E(z.slice(0,6)))extras++;}
   }
-  return {mass,rootR,belongs,over:over.length};
+  return {mass,rootR,belongs,over:over.length,extras};
  }
  let cases=[];
  for(let m of [2,3])for(let mode=0;mode<4;mode++){
@@ -144,6 +145,17 @@ function audit(){
   // Every target has m^3/q contexts. Exact mass uses this multiplicity.
   controls.push([m,B,losses,first,marginal,intervalChecks,unfiltered*m**3/q,filtered*m**3/q,minEscape,witnesses]);
  }
- return {n,cases,controls};
+ // Nonleaf overflow control: source zero has three patterns, but x>=2
+ // forbids that source. Other sources see at most one nonzero pattern.
+ let overflowControls=[];
+ for(let B of [2,4]){
+  let F=[{h:[0,4,5],f:([a,x,y])=>a===3||a===1&&y%2===0||a===2&&y%2===1},
+   {h:[0,4],f:([a,x])=>a===0&&x>=2},{h:[6,7],f:([u,v])=>u===v}];
+  let get=z=>1+(z[1]+2*z[2])%3,X=make(4,B,1,F,get,a=>a,"dense",false,false),Y=make(4,B,1,F,get,a=>a,"dense",true,true);
+  ok(Y.mass>0&&Y.mass<X.mass&&Y.rootR<=X.rootR&&Y.extras>0,"nonleaf overflow and safe enlargement");
+  for(let z of tup(4,6)){ok(!Y.belongs(z)||X.belongs(z),"nonleaf overflow inclusion");n.dominance++;}
+  overflowControls.push([B,X.rootR,Y.rootR,X.mass,Y.mass,X.over,Y.over,Y.extras]);
+ }
+ return {n,cases,controls,overflowControls};
 }
 console.log('F038_INTERVAL_SEMIJOINS_OK '+JSON.stringify(audit()));
