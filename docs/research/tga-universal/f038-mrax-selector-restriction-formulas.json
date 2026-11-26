@@ -1,0 +1,264 @@
+{
+  "attempt_id": "F038-MRAX-SELECTOR-RESTRICTION-FORMULAS",
+  "base_commit": "e1f572b6615e833c9e2c4b947bc9c31422ca976c",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45728906720",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can many disjoint selector restrictions accumulate beyond the linear degree bound, and what sharing cost governs transfer to general circuits?",
+  "route": "negative",
+  "topology": "Disjoint selector restrictions, fixed formula skeleton and multiplicity of shared DAG paths.",
+  "adversarial": [
+    "Superlinear formula bound is not superpolynomial.",
+    "DAG unfolding may be exponential even on parity.",
+    "Depth lower bound remains logarithmic.",
+    "Each outside restriction is block-specific, not one simultaneous assignment."
+  ],
+  "scope": "Disjoint guarded pin selector blocks, explicit width-three mux tree encoding, formula trees with constants and repeated variable leaves.",
+  "cost": "Superlinear formula lower bound; S*R+1 and logarithmic depth lower bounds for general circuits",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of arbitrary residuals, formula lower bound and DAG transfer"
+    },
+    {
+      "key": "attempt_reuse_bound",
+      "label": "Direct reuse-sensitive circuit bound without exponential unfolding"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS mux CNF, partial pins, formula restriction, block partition and parity diamond enumeration; not execution of Python.",
+  "expected": {
+    "blocks": [
+      [
+        6,
+        2,
+        1,
+        2,
+        2,
+        4,
+        2
+      ],
+      [
+        12,
+        4,
+        2,
+        4,
+        12,
+        48,
+        24
+      ],
+      [
+        24,
+        8,
+        3,
+        8,
+        56,
+        336,
+        168
+      ],
+      [
+        48,
+        16,
+        4,
+        16,
+        480,
+        3840,
+        2400
+      ],
+      [
+        96,
+        32,
+        5,
+        32,
+        2976,
+        29760,
+        26784
+      ]
+    ],
+    "mux": [
+      [
+        1,
+        4,
+        4,
+        8,
+        16,
+        4,
+        4,
+        16
+      ],
+      [
+        2,
+        7,
+        16,
+        64,
+        512,
+        32,
+        32,
+        256
+      ],
+      [
+        3,
+        12,
+        256,
+        2048,
+        262144,
+        1024,
+        1024,
+        16384
+      ]
+    ],
+    "formulas": [
+      4096,
+      28672,
+      77824,
+      46320,
+      4
+    ],
+    "sharing": [
+      [
+        1,
+        3,
+        4,
+        2,
+        4
+      ],
+      [
+        2,
+        6,
+        10,
+        4,
+        8
+      ],
+      [
+        4,
+        12,
+        46,
+        16,
+        32
+      ],
+      [
+        8,
+        24,
+        766,
+        256,
+        512
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_selector_restriction_formulas.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-SELECTOR-RESTRICTION-FORMULAS.md"
+  ],
+  "next": "Investigate direct DAG restriction charging or reuse-sensitive measures without exponential unfolding.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can many disjoint selector restrictions accumulate beyond the linear degree bound, and what sharing cost governs transfer to general circuits?",
+      "strategy": "Realize arbitrary address truth tables on disjoint guarded pin blocks, then apply a formula restriction count.",
+      "alternative": "Derive general DAG unfolding size-depth tradeoff and test exponential reuse on parity.",
+      "stop_rule": "Do not turn a superlinear formula or logarithmic depth bound into an unrestricted superpolynomial circuit lower bound.",
+      "literature_leads": [
+        "Classical Nechiporuk method: Savage Models of Computation section 9.4 https://cs.brown.edu/people/jsavage/book/pdfs/ModelsOfComputation_Chapter9.pdf",
+        "Buss course notes https://mathweb.ucsd.edu/~sbuss/CourseWeb/Math262A_2013F/Scribe04.pdf"
+      ]
+    },
+    "construct": {
+      "claim": "The fixed universal 3CNF selector function has formula leaf complexity Omega(N^(4/3)/log N) over arbitrary binary gates.",
+      "scope": "Disjoint guarded pin selector blocks, explicit width-three mux tree encoding, formula trees with constants and repeated variable leaves.",
+      "derivation": "Each block realizes 2^m subfunctions; fixed retained formula skeleton has at most 4^(2ell-1) subfunctions; sum leaf costs.",
+      "unresolved_steps": [
+        "Superpolynomial general circuit lower bound; control of shared DAG reuse."
+      ],
+      "candidate_tests": [
+        "Exhaust every small address table and partial selector pattern; validate disjoint blocks and formula restrictions."
+      ]
+    },
+    "alternative": {
+      "claim": "General fan-in-two circuits satisfy S*R+1 >= formula bound and depth >= log2 formula bound; linear-size parity DAGs can have exponentially many unfolded copies.",
+      "scope": "One output, binary gate DAG, path multiplicity R on internal gates, all binary Boolean functions.",
+      "derivation": "Unfold per predecessor use, count directed paths by reverse propagation; diamond recurrence exhibits exponential overhead.",
+      "unresolved_steps": [
+        "Noncircular bound on physical circuit size independent of reuse."
+      ],
+      "candidate_tests": [
+        "Build parity diamonds and check actual gate semantics, path counts and unfolded leaves."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Superlinear formula bound is not superpolynomial.",
+        "DAG unfolding may be exponential even on parity.",
+        "Depth lower bound remains logarithmic.",
+        "Each outside restriction is block-specific, not one simultaneous assignment."
+      ],
+      "counterexample_candidates": [
+        "Parity diamonds with 3k gates and 3*2^k-2 unfolded leaves."
+      ],
+      "equivalence_audit": "Exact block residuals and disjointness; charge each formula leaf once; explicitly count DAG path reuse.",
+      "barrier_audit": "No unrestricted SAT runtime lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit width-three pool, binary formula trees and arbitrary binary gate DAGs.",
+      "cost_ledger": {
+        "encoding": "Polynomial-size selector pool, guarded pin blocks and m-1 auxiliary mux variables",
+        "preprocessing": "Generate an outside restriction in polynomial time given its explicit m-bit table",
+        "inference": "Fixed skeleton restriction count and disjoint block sum",
+        "repetitions": "Exponential finite table enumeration only; no enumeration in asymptotic proof",
+        "arithmetic_bits": "Explicit variable indices and exact integer path counts",
+        "memory": "Polynomial gadget representation; unfolded DAG may have exponential size",
+        "reconstruction": "Unique mux auxiliary extension, pin compatibility, exact reverse DAG path propagation",
+        "overall": "Superlinear formula lower bound; S*R+1 and logarithmic depth lower bounds for general circuits"
+      },
+      "missing_bounds": [
+        "Unrestricted circuit-size lower bound independent of sharing",
+        "Noncircular direct DAG charging theorem"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Arbitrary residual truth table construction",
+        "Disjoint blocks and formula skeleton count",
+        "DAG unfolding tradeoff and depth transfer",
+        "Parity diamond counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general gate elimination or unrestricted lower-bound solver implemented."
+      ],
+      "proof_obligations": [
+        "Replay exact mux clauses and pool membership",
+        "Check all small formula restrictions and block counts",
+        "Evaluate parity DAG and count paths"
+      ],
+      "formalization_plan": "Formalize mux semantics, selector-block disjointness, formula skeleton and DAG path recurrence separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Exceed the linear degree ceiling for formula trees and derive explicit depth and sharing tradeoffs for general binary circuits, without overclaiming circuit-size transfer.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Reuse-sensitive direct circuit bound",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate direct DAG restriction charging or reuse-sensitive measures without exponential unfolding.",
+      "human_review_requests": [
+        "Review block restriction quantifiers, formula skeleton count, asymptotic conversion and DAG path multiplicity."
+      ]
+    }
+  }
+}
