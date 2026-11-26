@@ -1,0 +1,213 @@
+{
+  "attempt_id": "F038-MRAX-CIRCUIT-RANGE-AVOIDANCE",
+  "base_commit": "484ad5de440942822a29ce65818925521c90206f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45725982733",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can proof-system-independent circuit range avoidance deliver a single hard language within NP at an honestly charged cost?",
+  "route": "negative",
+  "topology": "Exact prefix projections of circuit output ranges and quantifier dependencies; not a SAT homology invariant.",
+  "adversarial": [
+    "For every k there exists a language is not one language defeating every k.",
+    "Quantified completion is not a free polynomial oracle.",
+    "Uniform lower bounds need not transfer to nonuniform circuits.",
+    "Reduction length and circuit-size exponents must be charged."
+  ],
+  "scope": "All circuits with at most s ordered fan-in-two binary gates, free constants, n inputs.",
+  "cost": "Fixed k P^Sigma2P; growing k charged quasipolynomial input size and doubly exponential-in-log-squared deterministic time bound",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of circuit counting, class placement and transfer quantifiers"
+    },
+    {
+      "key": "attempt_np_membership",
+      "label": "One superpolynomial-hard language with NP membership or sufficient fixed SAT transfer"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive ordered circuit sequences with scalar gate evaluation; not execution of submitted Python.",
+  "expected": {
+    "ranges": [
+      [
+        2,
+        0,
+        4,
+        1,
+        4,
+        4,
+        1
+      ],
+      [
+        2,
+        1,
+        4,
+        257,
+        1284,
+        16,
+        -1
+      ],
+      [
+        3,
+        1,
+        8,
+        401,
+        2405,
+        38,
+        1
+      ],
+      [
+        3,
+        2,
+        8,
+        230801,
+        1615205,
+        152,
+        22
+      ],
+      [
+        4,
+        1,
+        16,
+        577,
+        4038,
+        70,
+        1
+      ],
+      [
+        4,
+        2,
+        10,
+        452161,
+        3616710,
+        238,
+        1
+      ],
+      [
+        3,
+        2,
+        5,
+        230801,
+        1615205,
+        32,
+        -1
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_circuit_range_avoidance.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-CIRCUIT-RANGE-AVOIDANCE.md"
+  ],
+  "next": "Investigate existential polynomial verification of a specific avoidance construction or identify its universal-certification bottleneck.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can proof-system-independent circuit range avoidance deliver a single hard language within NP at an honestly charged cost?",
+      "strategy": "Construct least absent sparse truth-table prefixes for all bounded fan-in-two circuits.",
+      "alternative": "Audit superpolynomial budgets and compare uniform bounded program diagonalization.",
+      "stop_rule": "Reject fixed-exponent quantifier swaps and uncharged quantified oracles; no P versus NP promotion.",
+      "literature_leads": [
+        "Shannon circuit counting, Williams lecture https://people.csail.mit.edu/rrw/cs294-2018/hardest-fns.pdf",
+        "Kannan fixed-polynomial lower bounds https://dspace.mit.edu/entities/publication/ad059c80-ec46-408e-918a-3f5cee2242d1"
+      ]
+    },
+    "construct": {
+      "claim": "Sparse-prefix range avoidance yields fixed-exponent hard languages in P^Sigma2P with explicit bit cost and exact circuit size lower bounds.",
+      "scope": "All circuits with at most s ordered fan-in-two binary gates, free constants, n inputs.",
+      "derivation": "Count syntactic circuits; choose an absent prefix; use existential-word universal-circuit prefix completion and greedy search.",
+      "unresolved_steps": [
+        "Place a single superpolynomial-hard language in NP or obtain a fixed NP-complete transfer."
+      ],
+      "candidate_tests": [
+        "Compare ordered circuit enumeration with bit-parallel available-wire sets; exact least missing words."
+      ]
+    },
+    "alternative": {
+      "claim": "A growing circuit budget gives one language outside P/poly at charged superpolynomial construction cost, while uniform machine diagonalization gives a quasipolynomial-time language outside P.",
+      "scope": "s=n^ceil(log2 n), explicit unary budgets, standard universal machine overhead.",
+      "derivation": "Apply prefix avoidance at growing budget; separately complement bounded acceptance on padded self-codes.",
+      "unresolved_steps": [
+        "NP membership of either constructed language; unrestricted SAT lower bound."
+      ],
+      "candidate_tests": [
+        "Check exact counting inequality at small and larger symbolic budgets and prefix completion."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "For every k there exists a language is not one language defeating every k.",
+        "Quantified completion is not a free polynomial oracle.",
+        "Uniform lower bounds need not transfer to nonuniform circuits.",
+        "Reduction length and circuit-size exponents must be charged."
+      ],
+      "counterexample_candidates": [
+        "Under P=NP each fixed-exponent hard language may be in P with a larger exponent; growing budget remains quasipolynomial even under oracle collapse."
+      ],
+      "equivalence_audit": "Exact prefix range and least absent word, explicit fixed-length reduction exponent condition.",
+      "barrier_audit": "No NP membership or unrestricted SAT lower bound established.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean gate encodings and deterministic bit operations.",
+      "cost_ledger": {
+        "encoding": "Unary n,s,m and explicit prefix word; ordered gate references",
+        "preprocessing": "Polynomial counting bound and gate input prefix masks",
+        "inference": "Exhaustive range or Sigma2P prefix-completion predicate",
+        "repetitions": "m oracle decisions or exponential circuit/word enumeration",
+        "arithmetic_bits": "Exact integer counting and bit masks; charge full lengths",
+        "memory": "Exponential range storage or polynomial in explicit m+s+n by repeated enumeration",
+        "reconstruction": "Least absent word, zero extension and checked prefix restriction",
+        "overall": "Fixed k P^Sigma2P; growing k charged quasipolynomial input size and doubly exponential-in-log-squared deterministic time bound"
+      },
+      "missing_bounds": [
+        "NP membership of a single hard language",
+        "Noncircular polynomial transfer to SAT",
+        "Unrestricted deterministic SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Counting inequality",
+        "Exact greedy prefix avoidance and resource bounds",
+        "Uniform/nonuniform quantifier and reduction transfer audit"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No live quantified oracle or universal interpreter implemented."
+      ],
+      "proof_obligations": [
+        "Check finite exact ranges by separate enumeration methods",
+        "Check missing word and prefix extension",
+        "Check cost and noncircular transfer scope"
+      ],
+      "formalization_plan": "Formalize circuit semantics and counting, prefix range completeness, then independently review complexity quantifiers.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Shift negative route to proof-system-independent hard function construction and expose resource and quantifier barriers.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "NP membership or fixed NP-complete transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate existential polynomial verification of a specific avoidance construction or identify its universal-certification bottleneck.",
+      "human_review_requests": [
+        "Review counting bound, class placements, uniform diagonal and reduction exponent quantifiers."
+      ]
+    }
+  }
+}
