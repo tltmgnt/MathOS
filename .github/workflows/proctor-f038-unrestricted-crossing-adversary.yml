@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted crossing adversary
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-crossing-adversary']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_crossing_adversary.py
+          python -m mathos.research.f038_unrestricted_prefix_adversary | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_PREFIX_OK {"blind":[[8,10,1,0,0,0,1,1],[12,12,2,0,0,0,1,1],[16,13,3,0,0,0,1,1],[24,15,5,0,0,0,1,1],[8,20,1,5832,5832,1620,2,-1],[12,21,2,5832,5832,1980,2,1]],"controls":4,"embedding":[256,16384,512,95,5120,32],"geometry":[[8,1,576,585,553,545,10,1,0],[12,2,2048,2061,1901,1889,12,2,0],[16,3,4992,5009,4561,4545,13,1,0],[24,5,17344,17369,15609,15585,15,2,0],[32,7,41728,41761,37281,37249,16,1,0],[64,15,341504,341569,301889,301825,19,1,0],[128,31,2763776,2763905,2430593,2430465,22,1,1]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_crossing_adversary | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_CROSSING_OK {"controls":4,"geometry":[[1,32,1,41761,25537,10193,17,-1,0],[2,64,8,341569,203137,87361,20,2,0],[4,128,64,2763905,1620737,722593,23,8,0],[8,256,512,22239489,12948993,5876417,26,14,0],[16,512,4096,178434561,103525377,47395713,29,19,0],[32,1024,32768,1429562369,827938817,380706561,32,25,1],[64,2048,262144,11444865025,6622457857,3051822593,35,31,1],[128,4096,2097152,91592429569,52975460353,24439274497,38,37,1],[256,8192,16777216,732873564161,423786889217,195612997633,41,42,1],[512,16384,134217728,5863525203969,3390227972097,1565299240961,44,48,1]],"onehot":[[1,1,2,1,1],[2,5,8,2,2],[3,10,32,3,3],[4,16,128,4,4],[5,23,512,5,5],[6,31,2048,6,6]],"sets":[8,65536,58975,131072,6561],"splice":[[1,5832,69984,45576,91152,91152,50490,324],[4,5832,69984,30837,61674,61674,34356,330],[8,5832,69984,29457,58914,58914,32852,330]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_CROSSING_GATE_OK status=OPEN')
+          PY

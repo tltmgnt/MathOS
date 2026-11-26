@@ -1,0 +1,343 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-CROSSING-ADVERSARY",
+  "base_commit": "fdc8a45a4ee97c5629c237b1cc06e3f5d8d89989",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45734377327",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Defeat every full-input program of the same U at a stronger stage by an exact simultaneous crossing-transcript adversary.",
+  "route": "negative",
+  "topology": "Separated disjointness selector regions, simultaneous crossing sequences, rejection-preserving splice and exact weighted stage.",
+  "adversarial": [
+    "Splicing must preserve actual clock, not just crossing states.",
+    "Output may straddle the cut; invalidity must be preserved by a common selected-clause or blank-offset certificate.",
+    "Need count all long programs simultaneously.",
+    "Near-quadratic is not quadratic; family is polynomial-time solvable."
+  ],
+  "scope": "Same explicit selector order, same U, length-weighted clocks and general one-tape interpreter; all descriptions at the chosen stage.",
+  "cost": "Existence at weighted budget Theta(L^2/log^2 L); pin construction polynomial in L+2^s, collision discovery exponential in M; no free simulation or record verification.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of full-input crossing transcript adversary"
+    },
+    {
+      "key": "attempt_all_exponents",
+      "label": "Bad witnesses at integer exponent two and all larger exponents or uniform polynomial cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS geometry, onehot CNF, forbidden sets and exhaustive compact tape splice checks; not execution of Python.",
+  "expected": {
+    "geometry": [
+      [
+        1,
+        32,
+        1,
+        41761,
+        25537,
+        10193,
+        17,
+        -1,
+        0
+      ],
+      [
+        2,
+        64,
+        8,
+        341569,
+        203137,
+        87361,
+        20,
+        2,
+        0
+      ],
+      [
+        4,
+        128,
+        64,
+        2763905,
+        1620737,
+        722593,
+        23,
+        8,
+        0
+      ],
+      [
+        8,
+        256,
+        512,
+        22239489,
+        12948993,
+        5876417,
+        26,
+        14,
+        0
+      ],
+      [
+        16,
+        512,
+        4096,
+        178434561,
+        103525377,
+        47395713,
+        29,
+        19,
+        0
+      ],
+      [
+        32,
+        1024,
+        32768,
+        1429562369,
+        827938817,
+        380706561,
+        32,
+        25,
+        1
+      ],
+      [
+        64,
+        2048,
+        262144,
+        11444865025,
+        6622457857,
+        3051822593,
+        35,
+        31,
+        1
+      ],
+      [
+        128,
+        4096,
+        2097152,
+        91592429569,
+        52975460353,
+        24439274497,
+        38,
+        37,
+        1
+      ],
+      [
+        256,
+        8192,
+        16777216,
+        732873564161,
+        423786889217,
+        195612997633,
+        41,
+        42,
+        1
+      ],
+      [
+        512,
+        16384,
+        134217728,
+        5863525203969,
+        3390227972097,
+        1565299240961,
+        44,
+        48,
+        1
+      ]
+    ],
+    "onehot": [
+      [
+        1,
+        1,
+        2,
+        1,
+        1
+      ],
+      [
+        2,
+        5,
+        8,
+        2,
+        2
+      ],
+      [
+        3,
+        10,
+        32,
+        3,
+        3
+      ],
+      [
+        4,
+        16,
+        128,
+        4,
+        4
+      ],
+      [
+        5,
+        23,
+        512,
+        5,
+        5
+      ],
+      [
+        6,
+        31,
+        2048,
+        6,
+        6
+      ]
+    ],
+    "sets": [
+      8,
+      65536,
+      58975,
+      131072,
+      6561
+    ],
+    "splice": [
+      [
+        1,
+        5832,
+        69984,
+        45576,
+        91152,
+        91152,
+        50490,
+        324
+      ],
+      [
+        4,
+        5832,
+        69984,
+        30837,
+        61674,
+        61674,
+        34356,
+        330
+      ],
+      [
+        8,
+        5832,
+        69984,
+        29457,
+        58914,
+        58914,
+        32852,
+        330
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_crossing_adversary.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-CROSSING-ADVERSARY.md"
+  ],
+  "next": "Attack integer exponent two and the all-exponent H family with a computational obstruction beyond physical tape communication, or prove a uniform polynomial cutoff.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Defeat every full-input program of the same U at a stronger stage by an exact simultaneous crossing-transcript adversary.",
+      "strategy": "Separated disjointness selector encoding, eliminate prefix-blind descriptions, splice full-input runs using bounded combined records.",
+      "alternative": "Audit polynomial solvability of the encoded family and the exact remaining exponent gap.",
+      "stop_rule": "Do not claim integer exponent two, superpolynomial lower bounds, or transfer of the one-tape clock bound to all SAT algorithms.",
+      "literature_leads": [
+        "Classical crossing sequences and deterministic disjointness fooling-set argument; prior exact U and prefix adversary. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For n=32m and all sufficiently large m there is a bad satisfiable input at weighted stage 2^s=Theta(L^2/log^2 L), against all descriptions in the same U.",
+      "scope": "Same explicit selector order, same U, length-weighted clocks and general one-tape interpreter; all descriptions at the chosen stage.",
+      "derivation": "Encode complementary forbidden sets in separated ternary regions. Record crossings, local time, head and rejected-output certificate for every long program. Count collision of short combined records and splice a satisfiable cross.",
+      "unresolved_steps": [
+        "Prove bad witness existence at integer exponent two and every larger exponent."
+      ],
+      "candidate_tests": [
+        "Actual selector geometry, onehot encoding, all small forbidden sets, exhaustive compact machine splice and rejection tests."
+      ]
+    },
+    "alternative": {
+      "claim": "The disjointness/pin family has a fixed polynomial witness finder and cannot witness every polynomial exponent; the near-quadratic budget misses the integer-two target.",
+      "scope": "Same explicit selector order, same U, length-weighted clocks and general one-tape interpreter; all descriptions at the chosen stage.",
+      "derivation": "Scan the forbidden selectors and pick a surviving index, then reconstruct fixed onehot/copy/pin values. U eventually includes this fixed solver at a polynomial cutoff.",
+      "unresolved_steps": [
+        "A noncircular computational obstruction beyond tape crossing or a universal polynomial cutoff."
+      ],
+      "candidate_tests": [
+        "Check concrete witness reconstruction, boundary cases, and exact clock formulas."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Splicing must preserve actual clock, not just crossing states.",
+        "Output may straddle the cut; invalidity must be preserved by a common selected-clause or blank-offset certificate.",
+        "Need count all long programs simultaneously.",
+        "Near-quadratic is not quadratic; family is polynomial-time solvable."
+      ],
+      "counterexample_candidates": [
+        "A splice without timing information can halt after an originally timed-out run; empty disjointness encoding has an explicit polynomial solver."
+      ],
+      "equivalence_audit": "Same U and stage, exact separated clause encoding, local time and output certificate preservation, combined record bound, no all-exponent claim.",
+      "barrier_audit": "Unrestricted all-exponent lower bound remains open.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual same-U binary descriptions and three-symbol deterministic tape clocks; exact explicit CNF selectors.",
+      "cost_ledger": {
+        "encoding": "Polynomial unary-n universal pool, disjointness blocks, OR/equality/pin clauses",
+        "preprocessing": "Common-prefix simulation and missing-pattern selection polynomial in L+2^s",
+        "inference": "Clock-preserving crossing splice and simultaneous transcript collision counting",
+        "repetitions": "D surviving programs, g cuts; explicit collision search exponential in M",
+        "arithmetic_bits": "Fixed-width timing/head/certificate fields and charged state sequence bits",
+        "memory": "Explicit signatures, simulation tapes and collision search storage charged",
+        "reconstruction": "Crossed formula witness via a surviving index and fixed pin/auxiliary assignment",
+        "overall": "Existence at weighted budget Theta(L^2/log^2 L); pin construction polynomial in L+2^s, collision discovery exponential in M; no free simulation or record verification."
+      },
+      "missing_bounds": [
+        "Integer exponent two and all higher exponents",
+        "Efficient adversarial collision discovery",
+        "Unrestricted deterministic SAT runtime lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Separated actual selector ordering",
+        "Exact disjointness encoding",
+        "Clock and rejection-preserving splice lemma",
+        "All-program combined record counting and near-quadratic stage existence"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "Asymptotic collision not executed; finite splice tapes are compact regression fixtures."
+      ],
+      "proof_obligations": [
+        "Replay actual pool geometry and witness construction",
+        "Exhaust small tape splice/rejection cases",
+        "Verify metadata and stage bound; maintain same U"
+      ],
+      "formalization_plan": "Formalize deterministic local trace splicing including timeout and output verifier, then combined record counting.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Extend actual same-U failure from linear to near-quadratic stages and handle full-input programs without restricting their algorithms.",
+      "remaining_gaps": [
+        "All-exponent counterexample existence",
+        "Unrestricted SAT complexity",
+        "Independent review"
+      ],
+      "next_question": "Attack integer exponent two and the all-exponent H family with a computational obstruction beyond physical tape communication, or prove a uniform polynomial cutoff.",
+      "human_review_requests": [
+        "Review selector cut geometry, local timing and rejection certificates, record length counting, and exact stage cutoff."
+      ]
+    }
+  }
+}
