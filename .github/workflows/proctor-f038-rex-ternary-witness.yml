@@ -1,0 +1,72 @@
+name: Proctor F038 RE-X ternary witness
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-witness']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_witness
+          node --check "$p.js"
+          for suite in small three backtrack controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/witness-$suite.txt"
+          done
+          for mode in sat unsat; do
+            node "${p}_replay.js" "$mode" > "/tmp/witness-replay-$mode.txt"
+          done
+          node "$p.js" --descriptor > /tmp/witness.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const [a,b,c,d]=['small','three','backtrack','controls'].map(x=>read('/tmp/witness-'+x+'.txt','F038_REX_TERNARY_WITNESS_OK'));
+          assert.ok([a,b,c,d].every(s=>s.q===278200&&s.descriptorBits===19474004));
+          const rows=[...a.rows,...b.rows,...c.rows];
+          assert.equal(rows.length,7);
+          assert.deepEqual(rows.map(r=>r.status),['SAT','SAT','SAT','UNSAT','UNSAT','SAT','SAT']);
+          assert.deepEqual(rows.map(r=>r.t),[44654867,44654867,46090469,112649341,54399245,522655657,58391750]);
+          assert.equal(rows.reduce((s,r)=>s+r.t,0),883496196);
+          assert.equal(rows.reduce((s,r)=>s+r.L,0),389335);
+          assert.equal(rows.reduce((s,r)=>s+r.N,0),3050);
+          assert.equal(rows.reduce((s,r)=>s+(r.witness?.length||0),0),174);
+          assert.equal(rows.filter(r=>r.verified).length,5);
+          assert.deepEqual(rows[5].ranks,[0,1,2,0,2,1,2,0,1]);
+          assert.equal(rows[6].certificate,'0101010101011');
+          assert.equal(d.controls.length,11);assert.equal(d.rejects.length,5);assert.equal(d.exactBudget,44654867);
+          const sat=read('/tmp/witness-replay-sat.txt','F038_REX_TERNARY_WITNESS_REPLAY_OK');
+          const unsat=read('/tmp/witness-replay-unsat.txt','F038_REX_TERNARY_WITNESS_REPLAY_OK');
+          assert.equal(sat.transitions,44654867);assert.equal(sat.integer,'268348074');assert.equal(sat.valid,true);
+          assert.equal(unsat.transitions,54399245);assert.equal(unsat.integer,null);assert.equal(unsat.valid,false);
+          assert.ok(sat.oneStepShort&&unsat.oneStepShort);
+          JS
+          python -m mathos.research.f038_rex_ternary_witness_codec /tmp/witness.desc > /tmp/codec.json
+          python -m mathos.research.tga_f038_rex_022b6 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/codec.json') as f:
+              c=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert c['original_valid'] and c['witness']==268348074
+          assert c['sat_clock']==44654867 and c['unsat_clock']==54399245
+          assert c['one_step_short'] and c['blank_unsat'] and c['original_n1_refused']
+          assert c['per_description_stage']==19474030 and not c['stage_enumerated']
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B6_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
