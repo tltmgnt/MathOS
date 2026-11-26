@@ -1,0 +1,42 @@
+name: MRA-X compact persistent memory
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-dense.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_dense_audit.py --directory dense-audit
+      - run: python3 tools/mra_x_dense_audit.py --directory dense-replay
+      - name: Verify deterministic mathematical evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              for key in ('timings','geomean','worst','decision'): r.pop(key)
+              # Allocated pages and compressed lengths can vary by SQLite/zlib build.
+              return r
+          r=stable('dense-audit/evidence.json')
+          assert r==stable('dense-replay/evidence.json')
+          assert len(r['rows'])==6 and r['controls']==17
+          for method in ('routed','cas','dense','compressed'):
+              rows=[x for y in r['rows'] for x in y[method]['rows']]
+              assert len(rows)==108 and sum(x['optimum'] is not None for x in rows)==100
+              assert tuple(sum(x[k] for x in rows) for k in ('actual','full','fresh','hits'))==(11596,41334,11161,2818)
+          PY
