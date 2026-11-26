@@ -1,0 +1,46 @@
+name: MRA-X owned mathematical state
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-owned.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_owned_audit.py --directory owned-audit
+      - name: Replay correctness and ownership controls
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import mra_x_owned_audit as v
+          import mra_x_archive as a
+          root=Path('owned-replay')
+          root.mkdir()
+          rows=[]
+          methods={'full':v.s.Store,'routed':v.r.Store,'fork':v.f.Store,'owned':v.o.Store}
+          for name,d,edits in v.corpus():
+              results={label:v.run(cls,root/f'{name}-{label}.sqlite',d,edits,True)[0] for label,cls in methods.items()}
+              rows.append(dict(name=name,**results))
+          controls=v.controls(root)
+          first=json.load(open('owned-audit/evidence.json'))
+          h=first.pop('evidence_sha256')
+          assert a.digest(first)==h
+          assert rows==first['rows'] and controls==first['controls']==17
+          for method in methods:
+              rr=[x for y in rows for x in y[method]['rows']]
+              assert len(rr)==96 and sum(x['optimum'] is not None for x in rr)==90
+              expected=(11731,44400,44400,0) if method=='full' else (11731,44400,11281,3317)
+              assert tuple(sum(x[k] for x in rr) for k in ('actual','full','fresh','hits'))==expected
+          PY
