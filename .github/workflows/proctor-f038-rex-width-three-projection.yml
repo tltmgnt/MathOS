@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X width-three projection
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-projection']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_projection
+          node --check "$p.js"
+          for suite in small seeded; do
+            node --max-old-space-size=4096 "${p}_audit.js" "$suite" > "/tmp/w3proj-$suite.txt"
+          done
+          node --max-old-space-size=4096 "${p}_replay.js" > /tmp/w3proj-replay.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_PROJECTION_OK '){const a=fs.readFileSync('/tmp/w3proj-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const a=read('small'),b=read('seeded'),r=read('replay','F038_REX_WIDTH_THREE_PROJECTION_REPLAY_OK ');
+          for(const x of [a,b]){
+            assert.deepEqual(x.ir,{raw:2963,reachable:2618,compact:928,rounds:24,checked:2618});
+            assert.equal(x.q,1063432);assert.equal(x.logical,12320);
+            assert.equal(x.bits,80820836);assert.equal(x.width,5);
+          }
+          assert.equal(a.rows.length,9);assert.equal(b.rows.length,29);
+          assert.equal(new Set(b.rows.map(x=>x.pm)).size,29);
+          assert.deepEqual(a.rows.map(x=>x.t),[32603,329555,1233129,2064611,53750915,26031235,8635461,120535241,172207797]);
+          assert.equal(a.transitions,384820547);assert.equal(b.transitions,937611521);
+          assert.equal(a.primitives,87197);assert.equal(b.primitives,282368);
+          assert.deepEqual(a.cutoffs,[0,1,100,53750914]);assert.equal(a.rejects.length,10);
+          assert.equal(a.rows[7].output,'');assert.equal(a.rows[6].output,'00,1;');
+          assert.equal(r.q,1063432);assert.equal(r.bits,80820836);assert.equal(r.transitionEntries,3190296);
+          assert.equal(r.transitions,62386376);
+          assert.equal(r.rows[0].output,'0,1,0,1;1,1,1,0;');
+          assert.equal(r.rows[1].output,'00,1;');
+          JS
+          python -m mathos.research.tga_f038_rex_024d1b > /tmp/w3proj-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3proj-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D1B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
