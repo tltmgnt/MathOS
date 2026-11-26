@@ -260,6 +260,15 @@ function audit(){
   check(k,P,C);
   check(k,[["0","0","0",1]],[["00","0","0",1],["0","00","0",1]]);
  }
+ // Equal and unequal joint relations have identical unary marginals.
+ for(let k=0;k<3;k++){
+  let [x,y]=pairs[k],p=(a,b,v)=>{let row=["101","101","101",v];row[x]=a;row[y]=b;return row;};
+  let P=[p("0","0",1),p("1","1",1)],C=[["0","1","11",1],["1","0","10",1]];
+  ok(oracle(k,P,C).out==="0000","joint obstruction");check(k,P,C);
+  // Duplicate parent identity is significant; disabled duplicate never becomes true.
+  // Two child supports differ in their fresh value; first input support is retained.
+  check(k,[p("10","101",0),p("10","101",1),p("10","101",1)],[["10","101","1",0],["10","101","11",1],["10","101","0",1]]);
+ }
  let seed=0x52455818;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
  for(let i=0;i<36;i++){
   let k=i%3,rows=n=>Array.from({length:n},()=>[...Array.from({length:3},()=>labels[(rand()>>>16)%4]),rand()>>>31]),P=rows(1+i%3),C=rows(1+(i>>2)%3);
