@@ -4,7 +4,7 @@ function audit(){
  function* tup(m,k){for(let i=0;i<m**k;i++)yield Array.from({length:k},(_,j)=>Math.floor(i/m**(k-j-1))%m);}
  function* perm(a){if(!a.length){yield [];return;}for(let i=0;i<a.length;i++)for(let p of perm(a.filter((_,j)=>i!==j)))yield [a[i],...p];}
  const A=[0,1,2,3],V=[4,5,6,7,8];
- const n={fixtures:0,plans:0,eliminations:0,bagRows:0,conditionings:0,messageChecks:0,keyChecks:0,fullTuples:0,models:0,reconstruction:0,componentWitnesses:0};
+ const n={fixtures:0,plans:0,eliminations:0,bagRows:0,conditionings:0,messageChecks:0,keyChecks:0,fullTuples:0,models:0,reconstruction:0,componentWitnesses:0,streamBatches:0,streamJoinChecks:0,splitGroups:0,streamOutputs:0};
  let seed=0x53455001;function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed;}
  function make(m,h,bad){return {h,S:new Set([...tup(m,h.length)].filter(z=>!bad(z)).map(key))};}
  const pass=(f,z)=>f.S.has(key(f.h.map(g=>z[g])));
@@ -47,7 +47,26 @@ function audit(){
    for(let q of tup(m,h.length))for(let a=0;a<m;a++){
     let z=[];z[v]=a;h.forEach((g,i)=>z[g]=q[i]);n.bagRows++;if(touched.every(f=>pass(f,z)))T.add(key(q));
    }
-   hist.push({v,touched});F=F.filter(f=>!f.h.includes(v));F.push({h,S:T});n.eliminations++;
+   // Independently stream candidate bags in deliberately small chunks.
+   // Sequential merge membership on projected factor keys; OR across chunk boundaries.
+   let batch=[],cap=Math.max(1,m*m-1),last=null,hit=false,stream=new Set();
+   const cmp=(a,b)=>a<b?-1:a>b?1:0;
+   function flush(){
+    if(!batch.length)return;
+    n.streamBatches++;
+    if(last!==null&&last===key(batch[0].q))n.splitGroups++;
+    for(let f of touched){
+     let list=[...f.S].sort(cmp);
+     let projected=batch.map((r,i)=>({i,k:key(f.h.map(g=>g===v?r.a:r.q[h.indexOf(g)]))})).sort((a,b)=>cmp(a.k,b.k));
+     let j=0;for(let r of projected){while(j<list.length&&list[j]<r.k)j++;batch[r.i].ok &&= j<list.length&&list[j]===r.k;n.streamJoinChecks++;}
+    }
+    for(let r of batch){let k=key(r.q);if(last!==null&&last!==k){if(hit)stream.add(last);hit=false;}last=k;hit ||= r.ok;}
+    batch=[];
+   }
+   for(let q of tup(m,h.length))for(let a=0;a<m;a++){batch.push({q,a,ok:true});if(batch.length===cap)flush();}
+   flush();if(last!==null&&hit)stream.add(last);
+   ok(stream.size===T.size&&[...T].every(k=>stream.has(k)),"streamed bag OR");n.streamOutputs+=stream.size;
+   hist.push({v,touched});F=F.filter(f=>!f.h.includes(v));F.push({h,S:stream});n.eliminations++;
   }return {F,hist};
  }
  function message(m,comp){
