@@ -82,62 +82,66 @@ def check(archive,expected=None):
         require(type(i) is int and 0<=i<len(objects)); used.add(i); return objects[i][1]
     receipts={}; results=[]; cumulative=0
     for state in states:
-        fields(state,'domains factors proofs result problem_sha256'); d=state['domains']
-        require(type(d) is dict and len(d)<=128 and all(type(v) is str and 0<len(v)<=128 and type(n) is int and 1<=n<=4 for v,n in d.items()))
-        ids=state['factors']; proofs=state['proofs']; require(type(ids) is list and len(ids)<=1024 and type(proofs) is list and len(proofs)==len(d))
-        fs=[get(i) for i in ids]; problem=dict(domains=d,factors=fs); require(digest(problem)==state['problem_sha256'])
-        original=[factor(d,f) for f in fs]; active=list(original); r=state['result']; fields(r,'order optimum witness induced_width assignments_evaluated')
-        order=r['order']; require(type(order) is list and all(type(v) is str for v in order) and len(order)==len(d) and set(order)==set(d))
-        visits=fresh=lookups=width=hits=0; back=[]; staged={}
-        def cost(fs,a):
-            nonlocal lookups
-            total=0
-            for s,tab in fs:
-                lookups+=1; require(lookups<=MAX_LOOKUPS)
-                c=tab.get(tuple(a[u] for u in s))
-                if c is None: return None
-                total+=c
-            return total
-        for v,pid in zip(order,proofs):
-            bucket=[f for f in active if v in f[0]]; active=[f for f in active if v not in f[0]]
-            s=tuple(sorted({u for scope,_ in bucket for u in scope}-{v})); width=max(width,len(s))
-            n=d[v]*math.prod(d[u] for u in s); visits+=n; cumulative+=n
-            require(visits<=MAX_VISITS and cumulative<=MAX_ARCHIVE_VISITS)
-            proof=get(pid); require(type(proof) is list and len(proof)==2); message,rec=proof
-            ms,tab=factor(d,message); require(ms==s)
-            require(type(rec) is list and len(rec)==3 and rec[:2]==[v,list(s)] and type(rec[2]) is list)
-            args={}
-            for row in rec[2]:
-                require(type(row) is list and len(row)==2); a,x=row
-                require(type(a) is list and len(a)==len(s) and all(type(y) is int and 0<=y<d[u] for u,y in zip(s,a)) and type(x) is int and 0<=x<d[v])
-                key=tuple(a); require(key not in args); args[key]=x
-            require(set(args)==set(tab))
-            # Exact, immutable equality; object hashes alone never authorize reuse.
-            key=(tuple((u,d[u]) for u in (v,)+s),tuple(sorted((scope,tuple(sorted(table.items()))) for scope,table in bucket)),tuple(sorted(tab.items())),tuple(sorted(args.items())))
-            if receipts.get(v)==key: hits+=1
-            else:
-                fresh+=n
-                for row in itertools.product(*(range(d[u]) for u in s)):
-                    a=dict(zip(s,row)); claim=tab.get(row); attained=False
-                    for x in range(d[v]):
-                        a[v]=x; c=cost(bucket,a)
-                        if c is None: continue
-                        require(claim is not None and (c,x)>=(claim,args[row]))
-                        if (c,x)==(claim,args[row]): attained=True
-                    require(attained==(claim is not None))
-            staged[v]=key; active.append((s,tab)); back.append((v,s,args))
-        optimum=cost(active,{})
-        require(r['optimum'] is None if optimum is None else integer(r['optimum']) and r['optimum']==optimum)
-        require(type(r['induced_width']) is int and r['induced_width']==width and type(r['assignments_evaluated']) is int and r['assignments_evaluated']==visits)
-        if optimum is None: require(r['witness'] is None)
-        else:
-            a={}
-            for v,s,args in reversed(back): a[v]=args[tuple(a[u] for u in s)]
-            require(type(r['witness']) is dict and all(type(x) is int for x in r['witness'].values()) and a==r['witness'] and cost(original,a)==optimum)
-        receipts=staged
-        results.append(dict(problem_sha256=state['problem_sha256'],optimum=optimum,variables=len(d),visits=visits,fresh=fresh,lookups=lookups,hits=hits))
+        result,receipts=verify_state(state,get,receipts,MAX_ARCHIVE_VISITS-cumulative)
+        cumulative+=result['visits']; results.append(result)
     require(len(used)==len(objects))
     return dict(archive_sha256=identity,states=results)
+
+
+def verify_state(state,get,receipts,remaining):
+    fields(state,'domains factors proofs result problem_sha256'); d=state['domains']
+    require(type(d) is dict and len(d)<=128 and all(type(v) is str and 0<len(v)<=128 and type(n) is int and 1<=n<=4 for v,n in d.items()))
+    ids=state['factors']; proofs=state['proofs']; require(type(ids) is list and len(ids)<=1024 and type(proofs) is list and len(proofs)==len(d))
+    fs=[get(i) for i in ids]; problem=dict(domains=d,factors=fs); require(digest(problem)==state['problem_sha256'])
+    original=[factor(d,f) for f in fs]; active=list(original); r=state['result']; fields(r,'order optimum witness induced_width assignments_evaluated')
+    order=r['order']; require(type(order) is list and all(type(v) is str for v in order) and len(order)==len(d) and set(order)==set(d))
+    visits=fresh=lookups=width=hits=0; back=[]; staged={}
+    def cost(fs,a):
+        nonlocal lookups
+        total=0
+        for s,tab in fs:
+            lookups+=1; require(lookups<=MAX_LOOKUPS)
+            c=tab.get(tuple(a[u] for u in s))
+            if c is None: return None
+            total+=c
+        return total
+    for v,pid in zip(order,proofs):
+        bucket=[f for f in active if v in f[0]]; active=[f for f in active if v not in f[0]]
+        s=tuple(sorted({u for scope,_ in bucket for u in scope}-{v})); width=max(width,len(s))
+        n=d[v]*math.prod(d[u] for u in s); visits+=n
+        require(visits<=MAX_VISITS and visits<=remaining)
+        proof=get(pid); require(type(proof) is list and len(proof)==2); message,rec=proof
+        ms,tab=factor(d,message); require(ms==s)
+        require(type(rec) is list and len(rec)==3 and rec[:2]==[v,list(s)] and type(rec[2]) is list)
+        args={}
+        for row in rec[2]:
+            require(type(row) is list and len(row)==2); a,x=row
+            require(type(a) is list and len(a)==len(s) and all(type(y) is int and 0<=y<d[u] for u,y in zip(s,a)) and type(x) is int and 0<=x<d[v])
+            key=tuple(a); require(key not in args); args[key]=x
+        require(set(args)==set(tab))
+        # Exact, immutable equality; object hashes alone never authorize reuse.
+        key=(tuple((u,d[u]) for u in (v,)+s),tuple(sorted((scope,tuple(sorted(table.items()))) for scope,table in bucket)),tuple(sorted(tab.items())),tuple(sorted(args.items())))
+        if receipts.get(v)==key: hits+=1
+        else:
+            fresh+=n
+            for row in itertools.product(*(range(d[u]) for u in s)):
+                a=dict(zip(s,row)); claim=tab.get(row); attained=False
+                for x in range(d[v]):
+                    a[v]=x; c=cost(bucket,a)
+                    if c is None: continue
+                    require(claim is not None and (c,x)>=(claim,args[row]))
+                    if (c,x)==(claim,args[row]): attained=True
+                require(attained==(claim is not None))
+        staged[v]=key; active.append((s,tab)); back.append((v,s,args))
+    optimum=cost(active,{})
+    require(r['optimum'] is None if optimum is None else integer(r['optimum']) and r['optimum']==optimum)
+    require(type(r['induced_width']) is int and r['induced_width']==width and type(r['assignments_evaluated']) is int and r['assignments_evaluated']==visits)
+    if optimum is None: require(r['witness'] is None)
+    else:
+        a={}
+        for v,s,args in reversed(back): a[v]=args[tuple(a[u] for u in s)]
+        require(type(r['witness']) is dict and all(type(x) is int for x in r['witness'].values()) and a==r['witness'] and cost(original,a)==optimum)
+    return dict(problem_sha256=state['problem_sha256'],optimum=optimum,variables=len(d),visits=visits,fresh=fresh,lookups=lookups,hits=hits),staged
 
 
 if __name__=='__main__':
