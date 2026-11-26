@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X retained join
+on:
+  push:
+    branches: ['research/pnp-f038-rex-retained-join']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_retained_join.js
+          node mathos/research/f038_rex_retained_join.js | tee /tmp/join-audit.txt
+          grep -Fx 'F038_REX_RETAINED_JOIN_OK {"alphabet":29,"logicalStates":182,"logicalRules":4278,"width":5,"states":15686,"bits":862734,"counts":{"cases":102,"records":281,"factors":135,"queries":146,"positive":58,"rawBits":4094,"transitions":39141486,"logical":2829346,"passes":228,"sortBoundaryChecks":101,"joinLogical":60412,"joinPhysical":781104,"comparedSymbols":168,"cutoffs":6,"malformed":13,"malformedTransitions":97628},"scaling":[[4,2,56,488817,16530,628,[19659,449151,20007]],[8,3,144,4490751,100070,1596,[126579,4236717,127455]],[16,4,352,34600341,586746,3884,[748707,33100803,750831]]],"grammar":{"cases":511,"valid":8,"rejected":503,"transitions":343290},"U":{"selectorInputs":260,"noCandidate":260}}' /tmp/join-audit.txt
+          node mathos/research/f038_rex_retained_join.js --description > /tmp/join.txt
+          python -m mathos.research.f038_rex_retained_join_replay /tmp/join.txt
+          python -m mathos.research.tga_f038_rex_005 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_RETAINED_JOIN_ELIMINATION_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_RETAINED_JOIN_GATE_OK status=OPEN promotion=NONE')
+          PY
