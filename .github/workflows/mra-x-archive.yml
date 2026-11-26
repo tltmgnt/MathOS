@@ -1,0 +1,40 @@
+name: MRA-X proof archives
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-archive.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-archive.yml'
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_archive_audit.py --directory archive-audit
+      - run: python3 tools/mra_x_archive_audit.py --directory archive-replay
+      - name: Check deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              for k in ('timings','geomean_ratio','worst_ratio'): r.pop(k)
+              return r
+          r=stable('archive-audit/evidence.json')
+          assert r==stable('archive-replay/evidence.json')
+          assert len(r['rows'])==12 and r['controls']==20
+          expected={'states':96,'feasible':84,'buckets':5568,'hits':4137,'full_visits':55478,'fresh_visits':12978,'full_lookups':116609,'archive_lookups':30461,'objects':1891,'references':12076,'raw_bytes':476579,'full_bytes':1293522}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          PY
