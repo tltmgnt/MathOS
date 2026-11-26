@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted dyadic residual cover
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-dyadic-residual-cover']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_dyadic_residual_cover.js
+          node mathos/research/f038_unrestricted_dyadic_residual_cover.js | tee /tmp/current.txt
+          grep -Fx 'F038_DYADIC_RESIDUAL_COVER_OK {"fixtures":14,"stats":[911,897,35322,93184,36736,141365,18548,17728,483904,419840,3591,4506,4506],"controls":[[4,16,16,1,73,5],[8,320,68,1.0625,585,21],[16,1280,272,1.0625,4681,85],[32,21504,1092,1.06640625,37449,341],[64,86016,4368,1.06640625,299593,1365]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_DYADIC_RESIDUAL_COVER_GATE_OK status=OPEN promotion=NONE')
+          PY
