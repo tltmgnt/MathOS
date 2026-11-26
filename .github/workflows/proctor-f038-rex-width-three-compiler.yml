@@ -1,0 +1,54 @@
+name: Proctor F038 RE-X width-three compiler
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-compiler']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_compiler
+          node --check "$p.js"
+          for suite in small seeded; do
+            node --max-old-space-size=4096 "${p}_audit.js" "$suite" > "/tmp/w3compiler-$suite.txt"
+          done
+          node --max-old-space-size=4096 "${p}_replay.js" > /tmp/w3compiler-replay.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_COMPILER_OK '){const a=fs.readFileSync('/tmp/w3compiler-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const a=read('small'),b=read('seeded'),r=read('replay','F038_REX_WIDTH_THREE_COMPILER_REPLAY_OK ');
+          for(const v of [a,b]){
+            assert.equal(v.instructions,2295);assert.equal(v.logical,28971);assert.equal(v.q,2285124);
+            assert.equal(v.rules,6855372);assert.equal(v.bits,180524800);assert.equal(v.width,5);
+          }
+          assert.equal(a.rows.length,8);assert.equal(b.rows.length,24);
+          assert.deepEqual(a.rows.map(x=>x.t),[12517,65121,216411,5554143,1632869,892055,7288731,10706517]);
+          assert.equal(a.transitions,26368364);assert.equal(b.transitions,139639756);
+          assert.equal(a.primitives,19711);assert.equal(b.primitives,96039);
+          assert.equal(r.q,2285124);assert.equal(r.bits,180524800);assert.equal(r.transitionEntries,6855372);
+          assert.equal(r.transitions,12842874);assert.equal(r.rows[0].output,'00:01;01:10;01:11;');assert.equal(r.rows[1].output,'');
+          JS
+          python -m mathos.research.tga_f038_rex_024d1a > /tmp/w3compiler-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3compiler-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D1A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
