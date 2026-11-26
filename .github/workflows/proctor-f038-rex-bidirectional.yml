@@ -1,0 +1,49 @@
+name: Proctor F038 RE-X bidirectional
+on:
+  push:
+    branches: ['research/pnp-f038-rex-bidirectional']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_physical_codec.js
+          node mathos/research/f038_rex_physical_codec.js | tee /tmp/codec.txt
+          grep -Fx 'F038_REX_PHYSICAL_CODEC_OK {"machines":[[18,508],[18,508],[36,1120]],"exhaustive":1022,"transitions":346600,"roundtrips":511,"composedTransitions":346600,"composedCutoffs":9,"cutoffs":18,"malformed":1016,"malformedTransitions":14090,"scaling":[[16,1491,1443,83,83],[32,5539,5443,163,163],[64,21315,21123,323,323],[128,83587,83203,643,643],[256,331011,330243,1283,1283]]}' /tmp/codec.txt
+          node mathos/research/f038_rex_physical_codec.js --expand-description > /tmp/expand.txt
+          node mathos/research/f038_rex_physical_codec.js --pack-description > /tmp/pack.txt
+          node mathos/research/f038_rex_physical_codec.js --roundtrip-description > /tmp/roundtrip.txt
+          python -m mathos.research.f038_rex_codec_replay /tmp/expand.txt /tmp/pack.txt /tmp/roundtrip.txt
+          python -m mathos.proof_analysis.rex
+          python -m mathos.research.tga_f038_rex_001 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['self_test']=={'graphs':80,'hypothetical_assignments':2560,'rejected_graphs':4,'governance_checks':8}
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_GATE_OK status=OPEN promotion=NONE')
+          PY
