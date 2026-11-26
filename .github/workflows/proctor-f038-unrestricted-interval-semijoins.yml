@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted interval semijoins
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-interval-semijoins']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_interval_semijoins.js
+          node mathos/research/f038_unrestricted_interval_semijoins.js | tee /tmp/current.txt
+          grep -Fx 'F038_INTERVAL_SEMIJOINS_OK {"n":{"fixtures":8,"passes":24,"filters":25368,"extensionChecks":46392,"monotone":8422,"rootMass":1690,"rootBuild":1690,"childBuild":73728,"member":198016,"weights":75418,"volume":116224,"full":766628,"models":132024,"overflowModels":76776,"dominance":58112,"recovery":105912},"cases":[[2,0,"dense",8,4,0,0],[2,0,"run",8,4,8,4],[2,0,"dag",8,4,0,0],[2,1,"dense",16,16,0,0],[2,1,"run",16,16,16,12],[2,1,"dag",16,16,0,0],[2,2,"dense",8,8,0,0],[2,2,"run",8,8,8,4],[2,2,"dag",8,8,0,0],[2,3,"dense",16,8,0,0],[2,3,"run",16,8,16,4],[2,3,"dag",16,8,0,0],[3,0,"dense",108,72,0,0],[3,0,"run",108,72,108,72],[3,0,"dag",108,72,0,0],[3,1,"dense",162,126,0,0],[3,1,"run",162,126,162,90],[3,1,"dag",162,126,0,0],[3,2,"dense",108,84,0,0],[3,2,"run",108,84,108,52],[3,2,"dag",108,84,0,0],[3,3,"dense",162,54,0,0],[3,3,"run",162,54,162,36],[3,3,"dag",162,54,0,0]],"controls":[[16,4,240,8,120,512,2949120,811008,8,1584],[32,8,992,16,496,2048,195035136,48365568,38,23616],[64,16,4032,32,2016,8192,12683575296,3158310912,147,385536]],"overflowControls":[[2,1344,1008,2048,1024,32,16,13056],[4,1344,1344,2048,1024,32,16,13056]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_INTERVAL_SEMIJOINS_GATE_OK status=OPEN promotion=NONE')
+          PY
