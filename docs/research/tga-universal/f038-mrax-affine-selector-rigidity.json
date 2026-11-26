@@ -1,0 +1,246 @@
+{
+  "attempt_id": "F038-MRAX-AFFINE-SELECTOR-RIGIDITY",
+  "base_commit": "56d99b5a376fb6e227bd90371c9768cda282ca98",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45730723629",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can exact semantic affine restrictions compress the universal selector's satisfiable region, and do their lower bounds transfer to arbitrary nonlinear circuits?",
+  "route": "negative",
+  "topology": "Downward selector complex, rigid maximal assignment code, affine pieces and semantic certificates.",
+  "adversarial": [
+    "Cover size does not measure physical circuit size.",
+    "Affine partition simulation may branch exponentially.",
+    "Local certificate equality does not give efficient certificate discovery.",
+    "Full-pool rigidity is not valid for arbitrary clause subpools."
+  ],
+  "scope": "Full normalized nonempty width-at-most-three signed clause pool, GF(2) affine flats contained in SAT.",
+  "cost": "Exact affine cover 2^n; optimal local affine certificates equal coordinate certificates; no general gate-size transfer",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of affine selector rigidity, exact cover and local certificate theorem"
+    },
+    {
+      "key": "attempt_general_charge",
+      "label": "Gate-sensitive affine-AND elimination theorem with reuse charged"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive coset extension, pair/triple volume and all monotone three-input certificate checks; not execution of Python.",
+  "expected": {
+    "flats": [
+      [
+        1,
+        2,
+        1,
+        3,
+        6,
+        [
+          3,
+          3
+        ],
+        [
+          0,
+          1
+        ],
+        0,
+        2
+      ],
+      [
+        2,
+        8,
+        5,
+        95,
+        23024,
+        [
+          95,
+          4465,
+          13941,
+          4235,
+          284,
+          4
+        ],
+        [
+          0,
+          6,
+          78,
+          38,
+          4,
+          0
+        ],
+        0,
+        4
+      ]
+    ],
+    "volumes": [
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        0,
+        "3",
+        "1",
+        2
+      ],
+      [
+        2,
+        8,
+        5,
+        2,
+        6,
+        4,
+        "95",
+        "40",
+        3
+      ],
+      [
+        3,
+        26,
+        19,
+        4,
+        28,
+        56,
+        "3741839",
+        "507904",
+        8
+      ],
+      [
+        4,
+        64,
+        50,
+        7,
+        120,
+        560,
+        "17708796636724409",
+        "312811058102272",
+        16
+      ]
+    ],
+    "local": [
+      3,
+      51,
+      20,
+      160,
+      1280,
+      8160,
+      192
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_affine_selector_rigidity.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-AFFINE-SELECTOR-RIGIDITY.md"
+  ],
+  "next": "Investigate resource-charged multi-output affine-AND normal form or a structural reuse measure; do not assume cover complexity transfers to gate count.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can exact semantic affine restrictions compress the universal selector's satisfiable region, and do their lower bounds transfer to arbitrary nonlinear circuits?",
+      "strategy": "Prove affine dimension rigidity, exact pair deficit and exact affine cover number from maximal selector code.",
+      "alternative": "Characterize local affine certificates for all monotone functions and audit the AND-gate decision-tree simulation.",
+      "stop_rule": "Do not infer superpolynomial gate complexity from exponential affine cover complexity.",
+      "literature_leads": [
+        "Prior MathOS selector-degree and direct DAG restriction; elementary binary affine linear algebra and inclusion-exclusion. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The satisfiable selector region has exact affine cover number 2^n, dimension-q rigidity for n>=2 and exact pair-containing dimension q-D(x,y)+1.",
+      "scope": "Full normalized nonempty width-at-most-three signed clause pool, GF(2) affine flats contained in SAT.",
+      "derivation": "Information sets bound weight; triple XOR violates a binary clause; graph of a linear map gives pair deficit; volume and small-n arguments give exact cover.",
+      "unresolved_steps": [
+        "A noncircular gate-size transfer from semantic affine structure."
+      ],
+      "candidate_tests": [
+        "Enumerate all small satisfiable flats, exact pair maxima, triple obstructions and union cardinalities."
+      ]
+    },
+    "alternative": {
+      "claim": "For every monotone Boolean function local affine certificate codimension equals ordinary coordinate certificate size; exponential affine covers can coexist with linear circuits.",
+      "scope": "Exact monochromatic affine flats through an input; XOR-AND circuits with affine operations free; unit-only SAT control.",
+      "derivation": "Intersect a constant flat with fixed zero coordinates and select information-set zeros; simulate AND gates by adaptive affine queries; unit-only volume gives exponential cover.",
+      "unresolved_steps": [
+        "Resource-sensitive circuit elimination stronger than degree or cover counting."
+      ],
+      "candidate_tests": [
+        "All monotone three-input functions and all affine flats; unit-only cover and gate semantics."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Cover size does not measure physical circuit size.",
+        "Affine partition simulation may branch exponentially.",
+        "Local certificate equality does not give efficient certificate discovery.",
+        "Full-pool rigidity is not valid for arbitrary clause subpools."
+      ],
+      "counterexample_candidates": [
+        "Signed unit-only SAT has exponential affine cover lower bound and linear conflict circuit."
+      ],
+      "equivalence_audit": "Exact pair deficit and attaining flat, exact cover including n=1,2,3 exceptions, semantic certificate equality.",
+      "barrier_audit": "No unrestricted SAT runtime lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean selector cube and GF(2) affine flats; exact binary gate circuits.",
+      "cost_ledger": {
+        "encoding": "Polynomial signed clause pool, explicit maximal selector vectors",
+        "preprocessing": "Construct assignment cube and pair differences in polynomial time per assignment",
+        "inference": "Information-set projection, affine weight inequalities and union-volume bound",
+        "repetitions": "Exponential flat and assignment-subset enumeration only for bounded regression",
+        "arithmetic_bits": "Exact bitsets, rank/dimension and integer volume",
+        "memory": "Explicit cover 2^n pieces; finite enumeration may be exponential in N",
+        "reconstruction": "Explicit optimal pair flat and witness-coordinate certificates",
+        "overall": "Exact affine cover 2^n; optimal local affine certificates equal coordinate certificates; no general gate-size transfer"
+      },
+      "missing_bounds": [
+        "Noncircular general gate-charge theorem",
+        "Unrestricted deterministic SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Dimension and maximal-point rigidity",
+        "Pair deficit and attainment",
+        "Exact affine cover and large-n optimal-cover rigidity",
+        "Local affine certificate equality and gate simulation counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general circuit minimizer or unrestricted affine-cell compiler."
+      ],
+      "proof_obligations": [
+        "Replay every small SAT affine flat",
+        "Check explicit pair flats, triple XOR and union volumes",
+        "Check local certificates and unit-only controls"
+      ],
+      "formalization_plan": "Formalize information sets, linear graph weight inequalities, maximal-code triple obstruction and affine cover volumes separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Prove exact semantic affine compression limits for universal SAT and distinguish them from physical gate complexity.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Gate-sensitive reuse or elimination theorem",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate resource-charged multi-output affine-AND normal form or a structural reuse measure; do not assume cover complexity transfers to gate count.",
+      "human_review_requests": [
+        "Review small-n cover cases, exact dimension deficit, monotone certificate proof and gate simulation limits."
+      ]
+    }
+  }
+}
