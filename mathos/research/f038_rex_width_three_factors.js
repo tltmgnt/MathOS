@@ -419,7 +419,7 @@ function decode(desc){
  for(let i=0;i<T.length;i++){let s=parseInt(desc.slice(p,p+b),2),w=parseInt(desc.slice(p+b,p+b+2),2),d=parseInt(desc.slice(p+b+2,p+b+4),2);p+=b+4;if(s>q||w>2||d>2)throw Error("descriptor field");T[i]=(s<<4)|(w<<2)|d;}
  return{q,T};
 }
-function run(M,raw,limit=Infinity,observe=null){
+function run(M,raw,limit=Infinity,observe=null,snapshot=false){
  if(!/^[01]*$/.test(raw))throw Error("binary raw required");
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
  const origin=3*raw.length+1024,tape=new Uint8Array(origin+raw.length+2048);tape.fill(2);
@@ -454,7 +454,7 @@ function run(M,raw,limit=Infinity,observe=null){
  const accepted=frames[0].status===1;
  if(accepted?(frames.length!==10||frames[9].active!=="000000000"):frames.length!==1)throw Error("terminal stack");
  const graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
- return{status:accepted?"WIDTH_THREE_FACTORS":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,pushes,pops,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
+ return{status:accepted?"WIDTH_THREE_FACTORS":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,pushes,pops,snapshot:snapshot?Array.from(tape.subarray(lo,hi+1),(v,i)=>lo+i===head?"H":v===2?"_":String(v)).join(""):null,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
 
 }
 
