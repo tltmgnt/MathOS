@@ -52,7 +52,6 @@ function audit(P,E,suite="small"){
  const clauses=(m,H)=>H.map(h=>h.map(g=>-(g*m+1)));
  const clique=vs=>edges.filter(e=>e.every(v=>vs.includes(v)));
  const bip=(a,b)=>a.flatMap(x=>b.map(y=>[x,y]));
- let forced;
  if(suite==="small"){
   const fixtures=[
    ["empty",[],true],["outside-edge",[[0,8]],true],["outside-triple",[[0,4,8]],true],
@@ -64,11 +63,11 @@ function audit(P,E,suite="small"){
    ["subdivided-K4",[[0,4],[4,1],[0,5],[5,2],[0,6],[6,3],[1,7],[7,2],[1,8],[8,3],[2,3]],false],
    ["complete",edges,false],
   ];
-  for(let i=0;i<fixtures.length;i++){let [name,H,want]=fixtures[i],v=check(name,2,[i&1,(i>>1)&1],clauses(2,H),want);if(name==="outside-triple")forced=v;}
+  for(let i=0;i<fixtures.length;i++){let [name,H,want]=fixtures[i],v=check(name,2,[i&1,(i>>1)&1],clauses(2,H),want);if(name==="outside-edge"||name==="outside-triple"||name==="K4"||name==="complete")ok(E.valid(v.raw,E.witness(2,[i&1,(i>>1)&1],Array(9).fill(1))),"explicit SAT despite structural category");}
   // All ranks selected on a single pair must still deposit only one graph edge.
   check("duplicate-support",2,[1,1],[...E.tup(2,2)].map(z=>[-(z[0]+1),-(16+z[1]+1)]),true);
   // Contradictory unary clauses do not add an edge, and do not turn planning into SAT.
-  check("unary-unsat",2,[0,0],[[-1],[-2]],true);
+  const u=check("unary-unsat",2,[0,0],[[-1],[-2]],true);ok([...E.tup(2,9)].every(z=>!E.valid(u.raw,E.witness(2,[0,0],z))),"unary UNSAT despite complete plan");
  }else if(suite==="larger"){
   check("m3-mixed-scopes",3,[1,0,1],clauses(3,[[0,8,4],[0,8],[1,8,4],[1,4],[2,6],[2,5,6],[3,7]]),true);
   check("m3-K4",3,[0,1,1],clauses(3,clique([0,3,6,8])),false);
