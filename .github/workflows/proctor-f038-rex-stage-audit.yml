@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X stage audit
+on:
+  push:
+    branches: ['research/pnp-f038-rex-stage-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_stage_audit.js
+          node --check "$p"
+          for suite in small three four-bounded; do
+            node "$p" "$suite" > "/tmp/stage-$suite.txt"
+          done
+          node "$p" --descriptor > /tmp/quotient.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const a=fs.readFileSync('/tmp/stage-'+s+'.txt','utf8').trim(),tag='F038_REX_STAGE_AUDIT_OK ';assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','three','four-bounded'].map(read);
+          for(const r of [a,b,c])assert.deepEqual(r.stats,{originalStates:278200,reachableStates:278199,unreachableStates:1,quotientStates:103393,initialBlocks:70,splits:103324,processed:310182,transitionChecks:834597,originalBits:19474004,quotientBits:6617156});
+          assert.equal(a.quotientControls,2);assert.equal(b.quotientControls,2);
+          const rows=[...a.rows,...b.rows];
+          assert.deepEqual(rows.map(r=>r.t),[44654867,46090469,54399245,7687297,522655657]);
+          assert.deepEqual(rows.map(r=>r.status),['WITNESS','WITNESS','BLANK','BLANK','WITNESS']);
+          assert.equal(rows.reduce((s,r)=>s+r.t,0),675487535);
+          assert.ok(rows.every(r=>!r.reduced.admitted3&&r.exhaustive.budgetEligible3));
+          assert.equal(rows[0].reduced.minStage,6617182);assert.equal(rows[4].reduced.minStage,6617185);
+          assert.equal(c.status,'TIMEOUT');assert.equal(c.t,300000000);
+          JS
+          python -m mathos.research.f038_rex_stage_native /tmp/quotient.desc > /tmp/stage-native.json
+          python -m mathos.research.tga_f038_rex_023a > /tmp/stage-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/stage-native.json') as f:
+              r=json.load(f)
+          with open('/tmp/stage-gates.json') as f:
+              g=json.load(f)
+          assert r['small']['stage_tests']==1792 and r['small']['descriptions']==63232
+          assert r['small']['controls']==5 and len(r['family'])==99
+          assert r['quotient']['original_valid'] and r['quotient']['one_step_short']
+          assert r['quotient']['min_slot']==6617182 and not r['quotient']['full_stage_enumerated']
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
