@@ -1,0 +1,50 @@
+name: Proctor F038 unrestricted difference class covers
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-difference-class-covers']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_difference_class_covers.js
+          node mathos/research/f038_unrestricted_difference_class_covers.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_DIFFERENCE_CLASS_COVERS_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":12,"passes":24,"candidates":144,"tailChecks":881,"capChecks":11562,"classChecks":6252,"zeroPairs":1456,"dominance":144,"full":242340,"success":125874,"heavy":0,"wide":26464,"narrow":1522,"local":1826316,"membership":2214144,"relabels":399744,"children":1820160,"models":30026,"roots":6156,"greedy":582}
+          assert r['selected'] == {"1,1,class":24}
+          assert r['product'] == [64,48,0,4,4,16]
+          assert r['heavy'] == [512,168,344,536,344]
+          assert r['controls'] == [[16,8,16,8,176,120],[32,16,32,16,736,496],[64,32,64,32,3008,2016]]
+          assert r['exponents'] == [[64,42,57,54.5],[128,85,115,110.25],[256,170,230,220.5],[512,341,460,442.25]]
+          assert r['zeroControl'] == [512,0]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_DIFFERENCE_CLASS_COVERS_GATE_OK status=OPEN promotion=NONE')
+          PY
