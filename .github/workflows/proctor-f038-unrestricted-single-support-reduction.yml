@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted single support reduction
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-single-support-reduction']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_single_support_reduction.py
+          python -m mathos.research.f038_unrestricted_quadratic_family_cutoff | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_QUADRATIC_FAMILY_CUTOFF_OK {"controls":4,"rows":[[3,33,45860,27,24,12,12,201,96,336,117,1099824],[4,44,109869,64,24,12,12,483,207,795,273,2635776],[5,55,215986,125,24,12,12,948,390,1554,525,5182320]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_single_support_reduction | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_SINGLE_SUPPORT_OK {"controls":4,"gadget":[35,21,[0]],"rows":[[1,10,1160,1024,2,4,3,8,4,160,4],[2,13,2626,8192,4,256,95,1024,128,12032,256],[3,16,4992,65536,8,130,73,1040,142,6978,130],[4,19,8474,524288,16,130,16,2080,37,8937,130]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_SINGLE_SUPPORT_GATE_OK status=OPEN')
+          PY

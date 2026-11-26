@@ -1,0 +1,209 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-SINGLE-SUPPORT-REDUCTION",
+  "base_commit": "71a680abb12e5bc3fe59574d5524661476c5adc4",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45743031920",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can arbitrary SAT be embedded parsimoniously into the exact U counterexample region satisfying both previous structural filters, with linear source-variable blowup?",
+  "route": "negative",
+  "topology": "Cyclic forcing gadget, parsimonious single-support selector embedding, disjoint irreducible core and quantified same-U residual transfer.",
+  "adversarial": [
+    "Model count must include all auxiliary variables.",
+    "Every translated support must be distinct even across original sign variants.",
+    "The explicit complete target selector must be charged.",
+    "Stage transfer is only from stronger source failure to weaker target failure, not reversible."
+  ],
+  "scope": "Identical U, exact selector input and clocks; injective parsimonious linear-variable reduction of arbitrary source selectors to width-three single-support selectors.",
+  "cost": "O(L polylog L) sequential multitape translation, polynomial fixed one-tape simulation; exact same-U transfer for each k to some K>=k, no same-exponent transfer.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of single-support reduction and residual transfer"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS full clause-pool mapping, exhaustive fixed gadget and base model enumeration, and source/target assignment tests; not execution of Python.",
+  "expected": {
+    "controls": 4,
+    "gadget": [
+      35,
+      21,
+      [
+        0
+      ]
+    ],
+    "rows": [
+      [
+        1,
+        10,
+        1160,
+        1024,
+        2,
+        4,
+        3,
+        8,
+        4,
+        160,
+        4
+      ],
+      [
+        2,
+        13,
+        2626,
+        8192,
+        4,
+        256,
+        95,
+        1024,
+        128,
+        12032,
+        256
+      ],
+      [
+        3,
+        16,
+        4992,
+        65536,
+        8,
+        130,
+        73,
+        1040,
+        142,
+        6978,
+        130
+      ],
+      [
+        4,
+        19,
+        8474,
+        524288,
+        16,
+        130,
+        16,
+        2080,
+        37,
+        8937,
+        130
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_single_support_reduction.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-SINGLE-SUPPORT-REDUCTION.md"
+  ],
+  "next": "Seek a resource-sensitive existence proof for unbounded cubic failures in the exact single-support normal form or a universal polynomial cutoff; do not reverse the stage transfer.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can arbitrary SAT be embedded parsimoniously into the exact U counterexample region satisfying both previous structural filters, with linear source-variable blowup?",
+      "strategy": "Use a seven-variable uniquely-zero cyclic gadget, two polarity copies and one fixed dummy per variable; prove exact model correspondence and stage transfer.",
+      "alternative": "Test the joint value of the previous structural filters by the explicit embedding.",
+      "stop_rule": "No claim of same-exponent transfer or unbounded cubic failure without a higher-stage source theorem.",
+      "literature_leads": [
+        "Prior exact residual equivalence, complete-support and bijunctive-core results; elementary explicit clause gadgets and fixed tape simulation. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Every original selector on n variables injectively maps to a complete selector on 3n+7 variables with exactly the same model count and at most one selected clause per support.",
+      "scope": "Identical U, exact selector input and clocks; injective parsimonious linear-variable reduction of arbitrary source selectors to width-three single-support selectors.",
+      "derivation": "Cyclic zero gadget, equality copies, forced dummy bits, polarity-dependent literal mapping and zero-guard padding; disjoint supports and unique extensions.",
+      "unresolved_steps": [
+        "Actual unbounded cubic failure or universal cutoff."
+      ],
+      "candidate_tests": [
+        "Exhaust gadget and fixed assignments, verify source/target model sets and inverse selector mapping."
+      ]
+    },
+    "alternative": {
+      "claim": "For each fixed k some K>=k gives |B_k(3n+7) intersect C_(3n+7)|>=|B_K(n)| for every n, making the all-exponent failure target exactly equivalent on the normal form.",
+      "scope": "Identical U, exact selector input and clocks; injective parsimonious linear-variable reduction of arbitrary source selectors to width-three single-support selectors.",
+      "derivation": "Construct image, run actual target stage, project witness; charge polynomial source algorithm and absorb its fixed description/time into K; contrapositive and injection.",
+      "unresolved_steps": [
+        "Numerical K, same-exponent transfer, unconditional unbounded cubic failure."
+      ],
+      "candidate_tests": [
+        "Check disjoint dummy supports and single-clause local irreducibility, actual selector order and output verification."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Model count must include all auxiliary variables.",
+        "Every translated support must be distinct even across original sign variants.",
+        "The explicit complete target selector must be charged.",
+        "Stage transfer is only from stronger source failure to weaker target failure, not reversible."
+      ],
+      "counterexample_candidates": [
+        "Easy formulas also pass both filters after translation.",
+        "Finite cubic source failures cannot imply unbounded target failures."
+      ],
+      "equivalence_audit": "Same U and exact full selector, explicit unique extensions, injective encoding and actual projected verified witness; K not assumed equal to k.",
+      "barrier_audit": "No new SAT lower-bound exponent or resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual U tape syntax and weighted clock, fixed sequential multitape transformation and ordinary polynomial-overhead simulation.",
+      "cost_ledger": {
+        "encoding": "Full original and target normalized selector tapes, h=3n+7",
+        "preprocessing": "Constant gadget, mapped literal records, sequential merge sorting and target enumeration",
+        "inference": "Run actual target U stage and project verified model",
+        "repetitions": "One transformation and one stage-k call",
+        "arithmetic_bits": "Binary clause indices and counters, polynomial-log translation overhead",
+        "memory": "Explicit O(L polylog L) records plus charged stage simulation",
+        "reconstruction": "Unique extension; project copies and verify",
+        "overall": "O(L polylog L) sequential multitape translation, polynomial fixed one-tape simulation; exact same-U transfer for each k to some K>=k, no same-exponent transfer."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic and all-exponent lower bound",
+        "Numerical transfer exponent and implemented generic tape compiler"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Cyclic gadget unique zero proof",
+        "Support disjointness, exact model correspondence and injection",
+        "Necessary filters jointly preserved",
+        "Exact quantified same-U residual transfer"
+      ],
+      "unsupported_steps": [
+        "No same-exponent transfer or actual unbounded cubic counterexample.",
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Replay fixed-model and selector checks",
+        "Review cycle orbit coverage, unique extension and stage direction",
+        "Audit explicit output length and simulation costs"
+      ],
+      "formalization_plan": "Formalize constant gadget and parsimonious reduction, injectivity, structural criteria and fixed stage transfer.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Replace the unrestricted all-exponent target by an exact equivalent single-support normal form and show both prior structural filters do not eliminate arbitrary SAT hardness.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Seek a resource-sensitive existence proof for unbounded cubic failures in the exact single-support normal form or a universal polynomial cutoff; do not reverse the stage transfer.",
+      "human_review_requests": [
+        "Review gadget orbit proof, exact support injection, model correspondence and transfer quantifiers."
+      ]
+    }
+  }
+}
