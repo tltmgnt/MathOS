@@ -31,6 +31,9 @@ function audit(V,P,H,A,E,R,suite="small"){
   check("empty-bag",2,[1,1],[[-1],[-2]],"UNSAT");
   let C=[[-2],[-17]];for(let g=0;g<8;g++)C.push([-(2*g+1),-(2*(g+1)+2)],[-(2*g+2),-(2*(g+1)+1)]);
   check("nonempty-inconsistent",2,[0,0],C,"UNSAT");
+ }else if(suite==="backtrack"){
+  let C=[[-17]];for(let g=0;g<8;g++){C.push([-(2*g+1),-(2*(g+1)+2)],[-(2*g+2),-(2*(g+1)+1)]);}
+  let v=check("nonfirst-root",2,[1,1],C,"SAT");ok(rows[0].certificate.startsWith("01")&&rows[0].ranks.every(x=>x===1),"nonfirst root selection");
  }else if(suite==="three"){
   check("mixed-ranks",3,[1,0,1],force(3,[0,1,2,0,2,1,2,0,1]),"SAT");
  }else if(suite==="controls"){
