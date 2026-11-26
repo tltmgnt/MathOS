@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X factor membership
+on:
+  push:
+    branches: ['research/pnp-f038-rex-factor-membership']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_factor_membership.js
+          node mathos/research/f038_rex_factor_membership.js | tee /tmp/membership-audit.txt
+          grep -Fx 'F038_REX_FACTOR_MEMBERSHIP_OK {"alphabet":36,"logicalStates":60,"logicalRules":2160,"width":6,"states":9252,"bits":508864,"counts":{"cases":133,"queries":1802,"positive":902,"transitions":32623007,"logical":1174721,"cutoffs":5,"malformed":10,"malformedTransitions":2802},"scaling":[[4,98,286675,9833,698,[68897,156853,60925]],[8,242,1663843,55553,1714,[414065,887693,362085]],[16,578,9272387,305273,4082,[2348417,4881613,2042357]]],"grammar":{"cases":127,"valid":10,"rejected":117,"transitions":60996},"U":{"selectorInputs":260,"noCandidate":260},"unsortedCounterexample":true,"unsortedQueryCounterexample":true}' /tmp/membership-audit.txt
+          node mathos/research/f038_rex_factor_membership.js --description > /tmp/membership.txt
+          python -m mathos.research.f038_rex_membership_replay /tmp/membership.txt
+          python -m mathos.research.tga_f038_rex_003 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_SORTED_MEMBERSHIP_INTEGRATION_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_MEMBERSHIP_GATE_OK status=OPEN promotion=NONE')
+          PY
