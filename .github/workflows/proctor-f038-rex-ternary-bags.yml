@@ -1,0 +1,61 @@
+name: Proctor F038 RE-X ternary bags
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-bags']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_bags
+          node --check "$p.js"
+          for suite in small three four five controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/bags-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/bags-replay.txt
+          node "$p.js" --descriptor > /tmp/bags.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const suites=['small','three','four','five','controls'].map(x=>read('/tmp/bags-'+x+'.txt','F038_REX_TERNARY_BAGS_OK'));
+          assert.ok(suites.every(s=>s.q===127040&&s.descriptorBits===8130564));
+          const [a,b,c,d,e]=suites,rows=[...a.rows,...b.rows,...c.rows];
+          assert.equal(rows.length,7);
+          assert.deepEqual(rows.map(r=>r.t),[61579486,41229674,35356646,38398540,855731937,535507485,3556516463]);
+          assert.deepEqual(rows.map(r=>r.N),[1421,245,77,77,6314,143,737]);
+          assert.equal(rows.reduce((s,r)=>s+r.t,0),5124320231);
+          assert.equal(rows.reduce((s,r)=>s+r.serializationTransitions,0),4735853821);
+          assert.deepEqual(a.worker,[{status:'SAT',transitions:1591842,witnessVerified:true},{status:'UNSAT',transitions:78018,witnessVerified:false}]);
+          assert.equal(d.status,'TIMEOUT');assert.equal(d.limit,900000000);
+          assert.equal(e.controls.length,8);assert.equal(e.cutoffs,7);assert.equal(e.exactBudget,61579486);
+          assert.deepEqual(read('/tmp/bags-replay.txt','F038_REX_TERNARY_BAGS_REPLAY_OK'),{replays:1,transitions:41229674,preparedBits:245,maskBits:182});
+          JS
+          python -m mathos.research.f038_rex_ternary_bags_codec /tmp/bags.desc > /tmp/codec.json
+          python -m mathos.research.tga_f038_rex_022b4 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/codec.json') as f:
+              c=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert c['original_witness_refused'] and c['transitions']==41229674
+          assert c['prepared_bits']==245
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B4_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
