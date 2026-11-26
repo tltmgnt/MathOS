@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted residual width six
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-residual-width-six']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_residual_width_six.js
+          node mathos/research/f038_unrestricted_residual_width_six.js | tee /tmp/current.txt
+          grep -Fx 'F038_RESIDUAL_WIDTH_SIX_OK {"fixtures":14,"totals":[181,48259,141365,3984,33216,4551,4306,245,78001,11186,10688,254976,10688],"certChecks":2323,"absorbed":499,"removed":323,"rejected":2,"contextBuilds":63,"capChecks":11186,"fields":[[4,4,24,12,73],[8,16,224,56,585],[16,64,1920,240,4681],[32,256,15872,992,37449]],"scaleChecks":100}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RESIDUAL_WIDTH_SIX_GATE_OK status=OPEN promotion=NONE')
+          PY
