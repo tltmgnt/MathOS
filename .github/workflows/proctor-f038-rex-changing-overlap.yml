@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X changing overlap
+on:
+  push:
+    branches: ['research/pnp-f038-rex-changing-overlap']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_changing_overlap.js
+          node mathos/research/f038_rex_changing_overlap.js | tee /tmp/overlap.txt
+          grep -Fx 'F038_REX_CHANGING_OVERLAP_OK {"alphabet":39,"width":6,"logicalStates":733,"rules":22781,"states":141457,"bits":9477623,"counts":{"logicalCases":1074,"physicalCases":28,"sat":1064,"unsat":10,"physicalSat":22,"physicalUnsat":6,"bags":2037,"physical":2877589,"logical":60582,"checkpoints":50,"messageEntries":600,"malformed":11,"malformedTransitions":60319,"cutoffs":2},"scaling":[[2,48,51054,1196,344,[16947,19086,15021]],[4,96,178156,3396,682,[66147,54206,57803]],[8,192,631032,8948,1358,[261315,142878,226839]],[16,384,2331472,24660,2710,[1038723,393950,898799]]],"digest":3514280781,"physicalDigest":2515706306}' /tmp/overlap.txt
+          sed -n 's/^F038_REX_CHANGING_OVERLAP_OK //p' /tmp/overlap.txt > /tmp/overlap.json
+          python -m mathos.research.validate_f038_rex_changing_overlap /tmp/overlap.json
+          python -m mathos.research.tga_f038_rex_017 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_BOOLEAN_CHANGING_OVERLAP_VARIABLE_DOMAIN_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_CHANGING_OVERLAP_GATE_OK status=OPEN promotion=NONE')
+          PY
