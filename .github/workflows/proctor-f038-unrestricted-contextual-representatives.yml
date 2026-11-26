@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted contextual representatives
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-contextual-representatives']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_contextual_representatives.js
+          node mathos/research/f038_unrestricted_contextual_representatives.js | tee /tmp/current.txt
+          grep -Fx 'F038_CONTEXTUAL_REPRESENTATIVES_OK {"fixtures":12,"totals":[38,22,38082,12845,3,38079,0,121170,0,0,0,0],"forced":[30,470,38082,12841,1529,36553,2,121170,86,10,5295,1524],"controls":[[4,3,27,3,2,3],[8,7,343,14,12,14],[16,15,3375,60,56,60],[32,31,29791,248,240,248]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_CONTEXTUAL_REPRESENTATIVES_GATE_OK status=OPEN promotion=NONE')
+          PY
