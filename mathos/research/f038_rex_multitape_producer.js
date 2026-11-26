@@ -156,7 +156,7 @@ function audit(produce){
   }o+="110";}return o+"010".repeat(7);
  }
  let results=[],seed=0x52455822,rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
- for(let m of [2,3,4])for(let mode=0;mode<3;mode++){
+ for(let m of [2,3,4,5])for(let mode=0;mode<3;mode++){
   let B=[],pins=Array.from({length:m},(_,i)=>(i+mode)%2);
   if(mode===1)for(let g=0;g<9;g++)for(let a=0;a<m-1;a++)B.push([-(g*m+a+1)]);
   if(mode===2){for(let j=0;j<7;j++)for(let a=0;a<m;a++)for(let b=0;b<m;b++)for(let c=0;c<m;c++)if((rand()>>>24)<70)B.push([-(j*m+a+1),-((j+1)*m+b+1),-((j+2)*m+c+1)]);
@@ -172,7 +172,16 @@ function audit(produce){
  let controls=0;
  for(let p of [...required.slice(0,5),...required.slice(-5),...optional.slice(0,5)]){let bad=good.slice(0,p)+(good[p]==="1"?"0":"1")+good.slice(p+1);ok(produce(bad).status==="OUTSIDE_NORMALIZED","bad clause");controls++;}
  for(let bad of ["",good.slice(1),good+"0",good.slice(0,-1),good.slice(0,-1)+"2"]){ok(produce(bad).status==="OUTSIDE_NORMALIZED","bad length");controls++;}
- ok(produce(fixture(2,[0,1],[[-1,-17]])).status==="OUTSIDE_FIXED_PATH","outside path");ok(produce(good,100).status==="TIMEOUT","timeout");
+ let pinPositions=[],idx=n+1;
+ for(let c of pool(n)){if(c.length===3&&Math.abs(c[0])===n-3&&Math.abs(c[1])===n-1&&Math.abs(c[2])===n)pinPositions.push(idx);idx++;}
+ ok(pinPositions.length===8,"pin fixture");
+ const flip=(s,i)=>s.slice(0,i)+(s[i]==="1"?"0":"1")+s.slice(i+1);
+ for(let p of pinPositions){ok(produce(flip(good,p)).status==="OUTSIDE_NORMALIZED","pin lift mutation");controls++;}
+ let both=good;for(let p of pinPositions)if(both[p]==="0")both=flip(both,p);
+ ok(produce(both).status==="OUTSIDE_NORMALIZED","both pin signs");controls++;
+ let unsupported=fixture(2,[0,1],[[-1,-17]]);
+ ok(produce(unsupported).status==="OUTSIDE_FIXED_PATH","outside path");ok(produce(flip(unsupported,optional[0])).status==="OUTSIDE_NORMALIZED","malformed priority");controls++;
+ ok(produce(good,100).status==="TIMEOUT","timeout");
  return {results,controls,unsupported:1,timeout:1,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,preparedBits:a.preparedBits+r.N,steps:a.steps+r.steps}),{rawBits:0,preparedBits:0,steps:0})};
 }
 function integration(P,E,A){
