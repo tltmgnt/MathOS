@@ -1,0 +1,33 @@
+name: Proctor F038 unrestricted recursive separators
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-recursive-separators']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_recursive_separators.py
+          python -m mathos.research.f038_unrestricted_recursive_separators --repo | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_RECURSIVE_SEPARATORS_OK {"dense":[[3,32,333,999,54,1],[4,32,333,1332,108,2],[5,32,333,1665,180,3],[8,32,333,2664,504,6]],"exponents":["12","10","28/3","9","44/5"],"fixtures":18,"sums":[2572,34111,1197,2060,2010,1886432,42648,4781,2354]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_RECURSIVE_SEPARATORS_GATE_OK status=OPEN promotion=NONE')
+          PY
