@@ -1,0 +1,67 @@
+name: Proctor F038 RE-X width-three compact compiler
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-compact-compiler']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quotient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          set -euo pipefail
+          node --max-old-space-size=6144 mathos/research/f038_rex_width_three_compact_audit.js smoke > /tmp/w3compact.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),tag='F038_REX_WIDTH_THREE_COMPACT_OK ';
+          const s=fs.readFileSync('/tmp/w3compact.txt','utf8').trim();assert.ok(s.startsWith(tag));
+          const r=JSON.parse(s.slice(tag.length));
+          assert.deepEqual(r.stats,{originalStates:10028156,reachableStates:10028156,unreachableStates:0,quotientStates:4446657,initialBlocks:27,splits:4446631,processed:13339974,predecessors:171525532,transitionChecks:30084468,originalBits:852393264,quotientBits:364625878,reachedHalt:true});
+          assert.equal(r.t,672898103);assert.equal(r.span,10190);assert.equal(r.scopeBits,504);
+          JS
+  loader:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node mathos/research/f038_rex_width_three_mask_loader_audit.js > /tmp/w3loader.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),tag='F038_REX_WIDTH_THREE_MASK_LOADER_OK ';
+          const s=fs.readFileSync('/tmp/w3loader.txt','utf8').trim();assert.ok(s.startsWith(tag));
+          const r=JSON.parse(s.slice(tag.length));
+          assert.deepEqual(r.ir,{raw:1709,reachable:1535,compact:916,rounds:516,checked:1535});
+          assert.deepEqual(r.rows,[
+            {m:2,producer:26892421,steps:157620,input:39769,bound:'1',pins:'10',maskBits:834,maskStream:963},
+            {m:3,producer:273369923,steps:664005,input:165473,bound:'01',pins:'101',maskBits:2619,maskStream:2748}
+          ]);
+          const L=require('./mathos/research/f038_rex_width_three_mask_loader.js'),P=require('./mathos/research/f038_rex_width_three_projection.js'),K=require('./mathos/research/f038_rex_width_three_compiler.js'),Q=require('./mathos/research/f038_rex_width_two_quotient.js');
+          const M=K.compile(P.compact(L.machine())),C=Q.refine(M);
+          assert.equal(M.q,832012);assert.equal(C.q,377707);assert.equal(C.stats.transitionChecks,2496036);assert.equal(C.stats.quotientBits,26439494);
+          JS
+          python -m mathos.research.tga_f038_rex_024d2b > /tmp/w3compact-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3compact-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D2B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
