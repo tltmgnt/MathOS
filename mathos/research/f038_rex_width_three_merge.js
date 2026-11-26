@@ -1,17 +1,17 @@
 // F038-REX-024C2: charged fixed-seven-tape stable sort, key deduplication and semijoin.
-function kernel(parent,child,limit=Infinity){
+function kernel(parent,child,limit=Infinity,projection=null){
  // Input records: binary key ':' binary payload ';'. Empty fields allowed.
  // Seven fixed tapes. JS controller uses only finite flags and symbols;
  // steps, ledger, maximum head positions are observational counters.
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("budget");
- let steps=0,phase="init",ledger={init:0,parentSort:0,childSort:0,dedup:0,join:0},passes={parentSort:0,childSort:0};
+ let steps=0,phase="init",ledger={init:0,projection:0,parentSort:0,childSort:0,dedup:0,join:0},passes={parentSort:0,childSort:0};
  const tick=()=>{if(steps>=limit)throw "TIMEOUT";steps++;ledger[phase]++;};
  class Tape{
   constructor(input=""){this.cells=["L",...input];this.h=0;this.max=0;}
   read(){tick();return this.cells[this.h]??null;}
   put(v){tick();this.cells[this.h]=v;}
   move(d){if(d!==1&&d!==-1)throw Error("unit move");tick();this.h+=d;if(this.h<0)throw Error("left boundary");if(this.h>this.max)this.max=this.h;}
-  observe(){return this.cells.slice(1).filter(v=>v!==null).join("");}
+  observe(){let end=1;while(this.cells[end]!=null)end++;if(this.cells.slice(end).some(v=>v!=null))throw Error("noncontiguous observed tape");return this.cells.slice(1,end).join("");}
  }
  const P=new Tape(parent),C=new Tape(child),A=new Tape(),B=new Tape(),S=new Tape(),K=new Tape(),O=new Tape(),all=[P,C,A,B,S,K,O];
  const bit=v=>v==="0"||v==="1";
@@ -33,6 +33,29 @@ function kernel(parent,child,limit=Infinity){
    if(x===":")break;if(!bit(x))throw Error("key invariant");a.move(1);b.move(1);
   }
   backRecord(a);backRecord(b);return result;
+ }
+ // Optional physical projection from tuple-only streams. Each input row
+ // has 1..4 nonempty binary fields separated by commas and ended by ';'.
+ // A selected field is encoded 00/01 per digit and 10 at its end,
+ // so even variable-length fields and empty separators are unambiguous.
+ // The entire tuple is retained as an identically encoded payload.
+ function project(W,arity,mask){
+  start(W);clear(A);
+  while(W.read()!==null){
+   for(let j=0;j<arity;j++){
+    if(!bit(W.read()))fail();
+    while(bit(W.read())){let v=W.read();if(mask&(1<<j)){append(A,"0");append(A,v);}W.move(1);}
+    if(W.read()!==(j===arity-1?";":","))fail();
+    if(mask&(1<<j)){append(A,"1");append(A,"0");}
+    if(j<arity-1)W.move(1);
+   }
+   append(A,":");backRecord(W);
+   while(true){let v=W.read();if(bit(v)){append(A,"0");append(A,v);}
+    else if(v===","||v===";"){append(A,"1");append(A,"0");}else throw Error("validated tuple");
+    W.move(1);if(v===";"){append(A,";");break;}
+   }
+  }
+  clear(W);start(A);while(A.read()!==null){append(W,A.read());A.move(1);}
  }
  // Convert the raw input stream to singleton runs on scratch A,
  // validating it sequentially. Copy back to input tape; no array access.
@@ -78,6 +101,13 @@ function kernel(parent,child,limit=Infinity){
   return{status,steps,ledger,passes,tapes:all.length,span:all.reduce((s,t)=>s+t.max+1,0),support:status==="COMPLETE"?S.observe():null,filtered:status==="COMPLETE"?O.observe():null};
  }
  try{
+  if(projection!==null){
+   const {parentArity:pa,childArity:ca,parentMask:pm,childMask:cm}=projection;
+   const valid=(r,m)=>Number.isInteger(r)&&r>=1&&r<=4&&Number.isInteger(m)&&m>=0&&m<(1<<r);
+   const count=m=>[0,1,2,3].filter(i=>m&(1<<i)).length;
+   if(!valid(pa,pm)||!valid(ca,cm)||count(pm)!==count(cm)||count(pm)>3)throw Error("projection config");
+   phase="projection";project(P,pa,pm);project(C,ca,cm);
+  }
   phase="parentSort";sort(P);phase="childSort";sort(C);
   phase="dedup";start(C);start(S);let previous=false;
   while(atRecord(C)){
