@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted balanced entropy
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-balanced-entropy']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_balanced_entropy.py
+          python -m mathos.research.f038_unrestricted_few_model_isolation | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_FEW_MODEL_ISOLATION_OK {"controls":3,"encoding":[[1,1,4,64,4,16,32,8,8,0,128,96],[2,2,10,1160,16,256,1024,132,102,15,5120,8192],[3,4,23,15226,8,128,1024,72,24,18,6304,20480]],"fields":[[1,2,4,1],[2,7,16,18],[3,11,64,196],[4,19,256,1800],[5,37,1024,15376],[6,67,4096,127008]],"rows":[[1,1,2,4,2,16,8,0,8,4,4],[2,2,7,16,10,256,96,16,144,56,52],[3,4,19,256,92,65536,13568,1216,50752,3312,2928],[4,5,37,130,10,133120,27993,479,104648,1095,852]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_balanced_entropy | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_BALANCED_ENTROPY_OK {"controls":4,"rows":[[1,1,4,6,40,4,16,32,8,24,3,18,256],[2,2,16,9,288,33,128,528,66,330,15,135,8192],[3,3,8,28,536,26,32768,204800,12800,115200,7,196,0]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_BALANCED_ENTROPY_GATE_OK status=OPEN')
+          PY

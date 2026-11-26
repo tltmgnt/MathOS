@@ -1,0 +1,196 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-BALANCED-ENTROPY",
+  "base_commit": "5557f63edecf1029c111844cd73dba35e16de4e3",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45750875877",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Does high model entropy combined with balanced variables, essential bits and syntactic connectivity force tractability, or can arbitrary original SAT residuals transfer into that class?",
+  "route": "negative",
+  "topology": "Complement-symmetric NAE encoding, equality copies, constrained entropy reservoir, injective exact residual transfer.",
+  "adversarial": [
+    "Model multiplicity must include auxiliary and reservoir bits.",
+    "Balance does not mean independence, and high entropy rate does not mean inverse-polynomial density.",
+    "Copies and redundant syntactic links do not imply a computationally irreducible core.",
+    "K may exceed k; conditional hardness does not prove P!=NP."
+  ],
+  "scope": "Original full normalized selectors, exact same U, fixed rational epsilon>0 and fixed k, eventual residual injection from some K>=k; entropy rate not inverse-polynomial density.",
+  "cost": "h=2(n+1+8 binom(n,3))+1+(n+2)^a for fixed a epsilon>3; polynomial full selector generation, exact fixed target stage and projection; fixed source exponent absorbed into K.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of high-entropy embedding and transfer"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS actual clause pools and all small base/reservoir model tests; not new Python execution.",
+  "expected": {
+    "controls": 4,
+    "rows": [
+      [
+        1,
+        1,
+        4,
+        6,
+        40,
+        4,
+        16,
+        32,
+        8,
+        24,
+        3,
+        18,
+        256
+      ],
+      [
+        2,
+        2,
+        16,
+        9,
+        288,
+        33,
+        128,
+        528,
+        66,
+        330,
+        15,
+        135,
+        8192
+      ],
+      [
+        3,
+        3,
+        8,
+        28,
+        536,
+        26,
+        32768,
+        204800,
+        12800,
+        115200,
+        7,
+        196,
+        0
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-BALANCED-ENTROPY.md",
+    "mathos/research/f038_unrestricted_balanced_entropy.py",
+    "mathos/research/f038_unrestricted_few_model_isolation.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Seek an obstruction sensitive to computational search rather than model count or local balance, or an actual uniform SAT cutoff. Do not infer an unbounded cubic result from conditional transfers.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Does high model entropy combined with balanced variables, essential bits and syntactic connectivity force tractability, or can arbitrary original SAT residuals transfer into that class?",
+      "strategy": "Encode arbitrary source SAT with globally complement-symmetric NAE constraints, enforce essential copy pairs, attach a high-entropy constrained reservoir and charge original stage transfer.",
+      "alternative": "Derive conditional unrestricted equivalence within the high-entropy class and explicitly distinguish density, marginal balance and syntactic connectivity.",
+      "stop_rule": "No unconditional hardness claim, no inverse-polynomial density guarantee, no same-exponent transfer.",
+      "literature_leads": [
+        "Elementary NAE split gadget, complement symmetry and padding; prior F038 few-model isolation and exact U residual transfer. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For any fixed rational epsilon>0, a polynomial injection maps all satisfiable original selectors eventually to complement-symmetric connected targets with at least 2^(h-h^epsilon) models and every variable semantically essential.",
+      "scope": "Original full normalized selectors, exact same U, fixed rational epsilon>0 and fixed k, eventual residual injection from some K>=k; entropy rate not inverse-polynomial density.",
+      "derivation": "Reference-bit interpretation, NAE split, dedicated auxiliaries, copy equality and redundant syntactic links, exact reservoir size and model count; injective clause markers.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failure or uniform SAT cutoff."
+      ],
+      "candidate_tests": [
+        "Exhaust small source/base/reservoir assignments, actual selector marker recovery, complement balance and essential flips."
+      ]
+    },
+    "alternative": {
+      "claim": "For each k,epsilon some K>=k transfers B_K(n) into high-entropy B_k(h) for all sufficiently large n; all-exponent hardness on that class is equivalent to P!=NP.",
+      "scope": "Original full normalized selectors, exact same U, fixed rational epsilon>0 and fixed k, eventual residual injection from some K>=k; entropy rate not inverse-polynomial density.",
+      "derivation": "Fixed polynomial constructor plus actual target stage and verified projection; absorb description and time in K, apply prior unrestricted equivalence.",
+      "unresolved_steps": [
+        "Numerical K and unconditional unbounded source hardness.",
+        "No inverse polynomial assignment density theorem."
+      ],
+      "candidate_tests": [
+        "Check exact model-count factor and target length, full original verifier and graph connectivity."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Model multiplicity must include auxiliary and reservoir bits.",
+        "Balance does not mean independence, and high entropy rate does not mean inverse-polynomial density.",
+        "Copies and redundant syntactic links do not imply a computationally irreducible core.",
+        "K may exceed k; conditional hardness does not prove P!=NP."
+      ],
+      "counterexample_candidates": [
+        "The reservoir is easy to fill and hardness lives in source projection.",
+        "Unsatisfiable targets have no balanced model distribution; the balance property is asserted only for SAT."
+      ],
+      "equivalence_audit": "Actual original width-at-most-three selector, original U and weighted stage, exact projection and injection; no free target solver or unproved same exponent.",
+      "barrier_audit": "No unrestricted lower-bound exponent or resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Fixed deterministic bit algorithm, original U stages and polynomial-overhead one-tape simulation.",
+      "cost_ledger": {
+        "encoding": "Full normalized h-variable target, not compact selected clause list",
+        "preprocessing": "Enumerate source clause groups, fixed equality/connection clauses and reservoir, sort/merge target records",
+        "inference": "Run actual fixed target stage and verify projected source model",
+        "repetitions": "One target per source, one fixed stage call",
+        "arithmetic_bits": "Binary counters and literal indices, all record and output length charged",
+        "memory": "Polynomial explicit selector and stage simulation",
+        "reconstruction": "Original bits y_i XOR z; verify and position output",
+        "overall": "h=2(n+1+8 binom(n,3))+1+(n+2)^a for fixed a epsilon>3; polynomial full selector generation, exact fixed target stage and projection; fixed source exponent absorbed into K."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic and all-exponent lower bound",
+        "Concrete compiled machine and numerical transfer exponent"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact NAE split and source projection",
+        "Model-count factor, complement balance, essential bits and marker injection",
+        "Polynomial target and exact stage transfer"
+      ],
+      "unsupported_steps": [
+        "No independent mathematical review or Lean formalization.",
+        "New exact-head CI pending."
+      ],
+      "proof_obligations": [
+        "Audit all clause positions and model projections",
+        "Review entropy and connectivity distinctions",
+        "Check stage transfer quantifiers and polynomial output size"
+      ],
+      "formalization_plan": "Formalize NAE projection, exact reservoir count and complement involution, essential-variable witnesses and stage transfer.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Show unrestricted all-exponent hardness is equivalent even on an explicit near-full-entropy balanced connected family with no inessential variables; identify a limitation of multiplicity-based tractability arguments.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review and Lean formalization"
+      ],
+      "next_question": "Seek an obstruction sensitive to computational search rather than model count or local balance, or an actual uniform SAT cutoff. Do not infer an unbounded cubic result from conditional transfers.",
+      "human_review_requests": [
+        "Review clause marker injection, essential-bit definition, entropy inequality and stage quantifiers."
+      ]
+    }
+  }
+}
