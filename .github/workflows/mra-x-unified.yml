@@ -1,0 +1,47 @@
+name: MRA-X unified solver
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-unified.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-unified.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 -m venv .venv
+      - run: .venv/bin/python -m pip install numpy==2.3.5 scipy==1.17.0
+      - run: .venv/bin/python tools/mra_x_unified.py --output unified-evidence.json
+      - name: Verify full report
+        run: |
+          PYTHONPATH=tools .venv/bin/python - <<'PY'
+          import json
+          import mra_x_unified as u
+          import mra_x_gap_agent as g
+          with open('unified-evidence.json') as f:
+              r=json.load(f)
+          h=r.pop('evidence_sha256')
+          assert h==g.digest(r)
+          assert len(r['rows'])==len(r['packets'])==24
+          assert sum(x['certified_order'] for x in r['rows'])==20
+          assert sum(x['inequalities'] for x in r['rows'])==19200
+          assert sum(x['tape_runs'] for x in r['rows'])==100
+          assert sum(x['tape_transitions'] for x in r['rows'])==859987
+          assert sum(x['visits'] for x in r['rows'])==9917
+          assert sum(x['baseline_visits'] for x in r['rows'])==10168
+          assert r['controls']==6
+          for p in r['packets']:
+              d=p['instance']['domains']
+              f=[(tuple(s),{tuple(a):c for a,c in rows}) for s,rows in p['instance']['factors']]
+              assert u.verify(d,f,p['report'])
+          PY
