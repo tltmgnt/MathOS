@@ -1,0 +1,51 @@
+name: MRA-X bounded evolution
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-evolution.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-evolution.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          python3 tools/mra_x_evolution.py --seed 401 --ledger evolution.sqlite --output campaign_401.json
+          python3 tools/mra_x_evolution.py --seed 402 --ledger evolution.sqlite --output campaign_402.json
+      - name: Verify evidence, replay and gates
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json, copy, sqlite3
+          from unittest.mock import patch
+          import mra_x_evolution as e
+          import mra_x_gap_agent as g
+          r=[json.load(open(f'campaign_{s}.json')) for s in (401,402)]
+          for x in r:
+              assert g.digest(x['report'])==x['evidence_sha256']
+          a,b=[x['report'] for x in r]
+          assert a==e.campaign(401,[]) and b==e.campaign(402,[a])
+          assert b['prior_runs']==1 and len(b['training'])==3
+          h=copy.deepcopy(b['heldout']); assert e.arbitrate(h)=='REVIEW_CANDIDATE'
+          h['rows'][0]['ok']=False; assert e.arbitrate(h)=='REJECTED'
+          h=copy.deepcopy(b['heldout']); h['candidate']-=1; assert e.arbitrate(h)=='REJECTED'
+          h=copy.deepcopy(b['heldout']); h['candidate']=h['baseline']
+          for row in h['rows']: row['candidate']=row['baseline']
+          assert e.arbitrate(h)=='NO_GAIN'
+          with patch.object(e.subprocess,'run',side_effect=e.subprocess.TimeoutExpired('test',1)):
+              assert e.arbitrate(e.isolated(1,401,'holdout'))=='REJECTED'
+          try: e.isolated(99,401,'holdout')
+          except ValueError: pass
+          else: raise AssertionError('invalid policy accepted')
+          with sqlite3.connect('evolution.sqlite') as db:
+              assert db.execute('select count(*) from evolution').fetchone()[0]==2
+          PY

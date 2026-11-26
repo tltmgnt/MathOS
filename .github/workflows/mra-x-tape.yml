@@ -1,0 +1,54 @@
+name: MRA-X tape reference
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_tape.py'
+      - 'tools/mra_x_topology.py'
+      - 'formal/MraXTapeProjection.lean'
+      - '.github/workflows/mra-x-tape.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_tape.py'
+      - 'tools/mra_x_topology.py'
+      - 'formal/MraXTapeProjection.lean'
+      - '.github/workflows/mra-x-tape.yml'
+permissions:
+  contents: read
+jobs:
+  tape-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_tape.py --output tape-evidence.json
+      - name: Verify deterministic replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_tape as t
+          with open('tape-evidence.json') as f:
+              r=json.load(f)
+          assert r==t.audit()
+          assert r['totals']['cases']==313 and r['resume_checks']==13
+          PY
+  candidate-projection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lean
+        run: |
+          curl --fail --show-error --silent --location --retry 2 https://github.com/leanprover/lean4/releases/download/v4.14.0/lean-4.14.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.14.0-linux/bin" >> "$GITHUB_PATH"
+      - name: Check scoped candidate only
+        run: |
+          set -o pipefail
+          lean --version
+          lean formal/MraXTapeProjection.lean 2>&1 | tee proof.log
+          if grep -q sorryAx proof.log; then exit 1; fi

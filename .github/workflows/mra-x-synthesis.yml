@@ -1,0 +1,47 @@
+name: MRA-X synthesis
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-synthesis.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-synthesis.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_synthesis.py --output synthesis-evidence.json
+      - name: Verify evidence and non-timing replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_synthesis as s
+          import mra_x_gap_agent as g
+          r=json.load(open('synthesis-evidence.json'))
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert r['exhaustive_graph_domain_checks']==1024
+          assert r['permutation_checks']==24576
+          assert r['patch']['decision']=='NO_GAIN'
+          assert not r['patch']['authorizes_merge']
+          assert all(x['failures']==0 for x in r['training']+r['heldout'])
+          assert s.exact_order({},[])==([],0,1,0)
+          assert s.exact_order({str(i):2 for i in range(10)},[])[1:]==(20,1024,5120)
+          try: s.exact_order({str(i):2 for i in range(11)},[])
+          except ValueError: pass
+          else: raise AssertionError('limit not enforced')
+          def stable(x):
+              if isinstance(x,dict): return {k:stable(v) for k,v in x.items() if k not in ('candidate_ns','baseline_ns','evidence_sha256')}
+              if isinstance(x,list): return [stable(v) for v in x]
+              return x
+          assert stable(r)==stable(s.audit())
+          PY

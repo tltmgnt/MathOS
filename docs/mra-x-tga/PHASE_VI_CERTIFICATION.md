@@ -1,0 +1,13 @@
+# Phase VI — checkable certificates
+
+Run `python tools/mra_x_certify.py --output certification-evidence.json` with Python 3.11+. Each generated instance is exported with the full ordering certificate and solution trace. The order verifier replays clique fill directly instead of invoking the Phase V reachability DP. It checks all subset-transition inequalities, a zero terminal potential, and the cost of the explicit permutation.
+
+## Soundness argument (informal)
+For eliminated subset E and next variable v, let c(E,v) be the candidate enumeration count. If p(V)=0 and p(E)<=c(E,v)+p(E union {v}) for every transition, summation along any complete order gives p(empty)<=its cost. A proposed order with cost p(empty) attains the lower bound. This relies on the standard fill invariant: the remaining adjacency depends on the eliminated set, since remaining vertices become adjacent exactly when joined by a path with eliminated internal vertices. The certificate is checkable, but the invariant and checker have not been mechanized in Lean.
+
+For solution traces the verifier independently recomputes the feasible local minima, checks every backpointer including tie-breaking, reconstructs the witness, and checks the terminal constant sum and enumeration counters. It repeats significant mathematical computation; it is not a succinct proof or independently maintained verification library.
+
+## Local audit
+60 generated networks (5–9 variables), 53 distinct structural feature signatures, 48 feasible and 12 infeasible. Feature signatures combine vertex/edge counts, components, cycle rank, maximum arity and sorted degrees; they are not graph isomorphism classes or new mathematical discoveries. All 60 ordering and solution certificates accepted; both candidate and baseline solutions matched exhaustive enumeration (120 solution checks). 49,216 subset inequalities checked and eight tampered-certificate controls rejected. Exact ordering: 15,999 logical enumerations versus 16,051 for Phase V's beam/predictor baseline (52 saved, one strictly improved instance, 59 ties). Two runs reproduced all non-timing evidence and verified their report digests. Candidate generation and solve took roughly 336–470 ms in aggregate; separate verification 205–310 ms; baseline planning and solve 205–288 ms. Sequential exploratory measurements only, no controlled runtime or memory superiority claim.
+
+The original curriculum gates and trusted policy are unchanged. Lean kernel proof, original RE-X integration, independent replication and external matched runtime/memory tests remain open. No arbitrary source-code execution or automatic deployment.

@@ -1,0 +1,41 @@
+name: MRA-X performance-aware reasoning
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-meta.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-meta.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_meta.py --output meta-evidence.json
+      - name: Validate deterministic evidence, report timing without asserting a speedup
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_meta as m
+          import mra_x_gap_agent as g
+          r=json.load(open('meta-evidence.json'))
+          assert len(r['rows'])==120 and r['controls']==6
+          assert sum(x['plan_hit'] for x in r['rows'])==48
+          assert sum(x['bucket_hits'] for x in r['rows'])==2312
+          expected={'meta':13971,'adaptive':12541,'fixed_min_fill':18275,'fixed_hierarchy':13453,'fresh_min_fill':35320}
+          assert all(sum(x['visits'][k] for x in r['rows'])==v for k,v in expected.items())
+          def stable(x):
+              h=x.pop('evidence_sha256')
+              assert g.digest(x)==h
+              for k in ('performance','geomean_time_ratio','worst_time_ratio','decision'): x.pop(k)
+              return x
+          assert stable(r)==stable(m.audit())
+          PY

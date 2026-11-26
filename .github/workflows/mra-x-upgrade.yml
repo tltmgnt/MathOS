@@ -1,0 +1,35 @@
+name: MRA-X upgrade
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-upgrade.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-upgrade.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_upgrade.py --output upgrade-evidence.json
+      - name: Check replay and acceptance metrics
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_upgrade as a
+          with open('upgrade-evidence.json') as f:
+              r=json.load(f)
+          assert r==a.audit()
+          assert r['predictive']['candidate_checks']==468
+          assert r['predictive']['selected']<=r['predictive']['min_fill']
+          assert r['incremental']['updates']==1056
+          assert r['incremental']['incremental_visits']<r['incremental']['full_visits']
+          PY
