@@ -161,14 +161,14 @@ function logicalRun(J,raw,limit=1000000){
 }
 
 function physicalRun(M,raw,limit=50000000){
- let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,joinPhysical=0,inJoin=false,boundary=null;
+ let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,joinPhysical=0,inJoin=false,boundary=null,checkpoints=[];
  while(state!==M.q&&t<limit){
-  let name=M.names[state];if(name==="read:joinLeft:"){inJoin=true;boundary={head,words:[...tape.entries()].sort((a,b)=>a[0]-b[0])};}if(inJoin&&name[0]!=="s")joinPhysical++;ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  let name=M.names[state];if(/^read:(r[12]Left|a[12]Left):$/.test(name))checkpoints.push({name,head,words:[...tape.entries()].sort((a,b)=>a[0]-b[0])});if(name==="read:joinLeft:"){inJoin=true;boundary={head,words:[...tape.entries()].sort((a,b)=>a[0]-b[0])};}if(inJoin&&name[0]!=="s")joinPhysical++;ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
   if(name.startsWith("read:")&&name.endsWith(":"))logical++;
   let [s,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
   head+=d;state=s;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
  }
- return {tape,head,state,t,span:hi-lo+1,ph,logical,joinPhysical,boundary};
+ return {tape,head,state,t,span:hi-lo+1,ph,logical,joinPhysical,boundary,checkpoints};
 }
 
 function joinedWorker(){
@@ -284,16 +284,16 @@ function eliminationWorker(){
     add("PairP",a=>a==="P0"?r("BitA",a):bad());
     add("BitA",a=>a==="A0"?r("BitP",a):bad());
     add("BitP",a=>P(a)?z("TakeKey","U"+a[1]):bad());
-    find("TakeKey",V,a=>z("TakePayload"+a[1],a));
+    find("TakeKey",a=>a==="V0"||a==="V1",a=>z("TakePayload"+a[1],a));
     for(let b of [0,1]){
-     find("TakePayload"+b,U,a=>z("WriteKey"+a[1],"U"+b));
-     find("WriteKey"+b,V,a=>r("NextKeyA","K"+b));
+     find("TakePayload"+b,a=>a==="U0"||a==="U1",a=>z("WriteKey"+a[1],"U"+b));
+     find("WriteKey"+b,a=>a==="V0"||a==="V1",a=>r("NextKeyA","K"+b));
     }
     add("NextKeyA",a=>a==="A0"?r("NextKey",a):a==="A1"?r("KeyEnd",a):bad());
     add("NextKey",a=>K(a)?z("NextPayload","V"+a[1]):bad());
     add("KeyEnd",a=>a==="D"?z("EndPayload",a):bad());
-    find("NextPayload",U,a=>r("PairA","P"+a[1]));
-    find("EndPayload",U,a=>r("EndA","P"+a[1]));
+    find("NextPayload",a=>a==="U0"||a==="U1",a=>r("PairA","P"+a[1]));
+    find("EndPayload",a=>a==="U0"||a==="U1",a=>r("EndA","P"+a[1]));
     add("EndA",a=>a==="A0"?r("EndP",a):bad());
     add("EndP",a=>a==="P1"?r("EndA2",a):bad());
     add("EndA2",a=>a==="A0"?r("EndP2",a):bad());
@@ -363,17 +363,18 @@ function eliminationWorker(){
 }
 function field(s){return [...s].map(b=>"0"+b).join("")+"11";}
 function makeRecord(key,role,candidate,group,id,flags="000"){return [key+role,flags+field(candidate)+field(group)+id];}
-function refEliminate(rows){
+function refEliminate(rows,trace=null){
  const sort=xs=>xs.slice().sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);
  const F=new Set(rows.filter(([k])=>k.endsWith("0")).map(([k])=>k.slice(0,-1)));
  let r=sort(rows).map(([k,p])=>[k,k.endsWith("1")?(F.has(k.slice(0,-1))?"1":"0")+p.slice(1):p]);
+ if(trace)trace.push(encode(r));
  function swap([k,p],slot){
   let start=3+slot*(2*k.length+2),key="";
   for(let i=0;i<k.length;i++)key+=p[start+2*i+1];
   return [key,p.slice(0,start)+field(k)+p.slice(start+2*k.length+2)];
  }
  for(let stage of [1,2]){
-  r=sort(r.map(x=>swap(x,stage-1)));
+  r=sort(r.map(x=>swap(x,stage-1)));if(trace)trace.push(encode(r));
   for(let i=0;i<r.length;){
    let j=i+1;while(j<r.length&&r[j][0]===r[i][0])j++;
    if(r[i][0].startsWith("1")){
@@ -383,6 +384,7 @@ function refEliminate(rows){
    }
    i=j;
   }
+  if(trace&&stage===1)trace.push(encode(r));
  }
  return r;
 }
