@@ -116,7 +116,7 @@ function worker(){
  parse.Mask={"100":["T00","Rows"],"101":["T11","Rows"]};
  for(let [name,table] of Object.entries(parse))for(let n=0;n<3;n++)for(let i=0;i<2**n;i++){
   let b=n?i.toString(2).padStart(n,"0"):"";
-  add("parse"+name+b,a=>{if(!raw(a))return bad();let v=b+a[0];if(n<2)return r("parse"+name+v,"Z");let t=table[v];return t?r(["rootCode","childCode","closeSeek"].includes(t[1])?t[1]:"parse"+t[1],t[0]):bad();});
+  add("parse"+name+b,a=>{if(!raw(a))return bad();let v=b+a[0];if(n<2)return r("parse"+name+v,"Z");let t=table[v];return t?t[1]==="closeSeek"?l("closeSeek","X"):r(["rootCode","childCode"].includes(t[1])?t[1]:"parse"+t[1],t[0]):bad();});
  }
  for(let m of ["root","child"]){
   add(m+"Code",a=>raw(a)?r(m+"Code"+a[0],a):bad());
