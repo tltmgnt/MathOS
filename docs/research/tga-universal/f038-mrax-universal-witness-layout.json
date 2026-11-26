@@ -1,0 +1,246 @@
+{
+  "attempt_id": "F038-MRAX-UNIVERSAL-WITNESS-LAYOUT",
+  "base_commit": "17d71bab8a974d1ef01e758a4f41699e2e195366",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45727430589",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can a fixed input-dependent two-order verifier family repair the previous nonuniform transfer quantifier, and can any occurrence layout make its frontier small?",
+  "route": "negative",
+  "topology": "Connected variable occurrence paths, pair-clause crossing injection and residual-function distinguishability.",
+  "adversarial": [
+    "Index-domain cardinality does not lower-bound sparse table size or actual runtime.",
+    "A different verifier or input-dependent preprocessing may change the graph.",
+    "Units-first residual width is order-specific.",
+    "Uniform and nonuniform equivalences are different claims."
+  ],
+  "scope": "Full normalized nonempty width-three pool; within-variable second-pass order follows first-pass order; multiedges counted.",
+  "cost": "Uniform family exact; explicit layout-based bound exponential; ordered residual width >=2^n",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of fixed-family reduction, cut bound and ordered residual proof"
+    },
+    {
+      "key": "attempt_compression_transfer",
+      "label": "Boundary-function compression or lower-bound transfer covering unrestricted computation"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS direct source/witness enumeration, subset cutwidth DP and residual signature comparison; not execution of Python.",
+  "expected": {
+    "pools": [
+      [
+        1,
+        2,
+        2,
+        4,
+        8,
+        16,
+        3,
+        1,
+        4,
+        4
+      ],
+      [
+        2,
+        8,
+        12,
+        256,
+        1024,
+        1048576,
+        95,
+        161,
+        128,
+        128
+      ],
+      [
+        3,
+        5,
+        8,
+        32,
+        256,
+        8192,
+        32,
+        0,
+        92,
+        92
+      ],
+      [
+        3,
+        3,
+        6,
+        8,
+        64,
+        512,
+        8,
+        0,
+        45,
+        45
+      ]
+    ],
+    "layouts": [
+      [
+        2,
+        2,
+        3,
+        4,
+        3,
+        3
+      ],
+      [
+        3,
+        6,
+        11,
+        64,
+        4,
+        5
+      ],
+      [
+        4,
+        12,
+        23,
+        4096,
+        7,
+        7
+      ]
+    ],
+    "residuals": [
+      [
+        2,
+        4,
+        4,
+        16,
+        6
+      ],
+      [
+        3,
+        12,
+        8,
+        96,
+        28
+      ],
+      [
+        4,
+        24,
+        16,
+        384,
+        120
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_universal_witness_layout.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-UNIVERSAL-WITNESS-LAYOUT.md"
+  ],
+  "next": "Investigate boundary-function compression or adaptive selector models rather than optimizing the same occurrence layout.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can a fixed input-dependent two-order verifier family repair the previous nonuniform transfer quantifier, and can any occurrence layout make its frontier small?",
+      "strategy": "Construct one universal clause-pool program and prove a layout-independent frontier lower bound.",
+      "alternative": "Count distinct deterministic residual functions in a units-first selector order.",
+      "stop_rule": "Do not equate an exponential explicit state domain or ordered branching program bound with general circuit hardness.",
+      "literature_leads": [
+        "Prior MathOS witness-pass frontier and bounded reflection clause pools; standard cutwidth subset DP and residual-function counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The fixed selector-dependent width-three two-pass family computes 3SAT, with minimum occurrence frontier Theta(n) over every layout.",
+      "scope": "Full normalized nonempty width-three pool; within-variable second-pass order follows first-pass order; multiedges counted.",
+      "derivation": "Clause selectors gate local checks, repeated occurrences enforce equality; cut before last variable group is touched has n-1 distinct crossings.",
+      "unresolved_steps": [
+        "Polynomial deterministic circuits for the universal family or a lower bound covering general circuits."
+      ],
+      "candidate_tests": [
+        "Compile fixed pools once for all selectors; compare exact source and occurrence witnesses; compute small optimal layouts."
+      ]
+    },
+    "alternative": {
+      "claim": "Every deterministic ordered read-once selector program with units first requires at least 2^n states after the unit block.",
+      "scope": "Full selector pool, n>=2, fixed units-first order.",
+      "derivation": "Unit prefixes force distinct assignments; a remaining binary clause distinguishes any pair of residual functions.",
+      "unresolved_steps": [
+        "Arbitrary orders, adaptive repeated queries and general circuits."
+      ],
+      "candidate_tests": [
+        "Enumerate all signed binary residual signatures and pairwise distinctions."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Index-domain cardinality does not lower-bound sparse table size or actual runtime.",
+        "A different verifier or input-dependent preprocessing may change the graph.",
+        "Units-first residual width is order-specific.",
+        "Uniform and nonuniform equivalences are different claims."
+      ],
+      "counterexample_candidates": [
+        "Pair-only pool has the frontier obstruction even without the general SAT difficulty."
+      ],
+      "equivalence_audit": "Fixed input-dependent function, exact witness mapping, uniform P=NP and nonuniform NP subset P/poly transfer conditions.",
+      "barrier_audit": "No unrestricted deterministic lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit clause pool, multi-input Boolean circuit DAG, graph multiedges and unary dimensions.",
+      "cost_ledger": {
+        "encoding": "O(n^3) selector bits and witness occurrences",
+        "preprocessing": "Build fixed program and graph polynomially",
+        "inference": "Frontier contraction over shared states and ordinary-input predicates",
+        "repetitions": "Exact subset DP exponential in occurrence count for finite audit; layout-independent frontier at least n-1",
+        "arithmetic_bits": "Polynomial indices and exact bit encodings",
+        "memory": "Full-domain size at worst cut >=3^(n-1), sparse representation not bounded",
+        "reconstruction": "Explicit occurrence witnesses decode to source assignments",
+        "overall": "Uniform family exact; explicit layout-based bound exponential; ordered residual width >=2^n"
+      },
+      "missing_bounds": [
+        "General boundary-function compression or unrestricted model lower bound",
+        "Polynomial deterministic circuit transfer or actual circuit lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Fixed family semantics and complexity equivalences",
+        "Layout lower and upper bounds",
+        "Residual distinction proof",
+        "Exact subset recurrence"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general machine-to-verifier compiler implemented."
+      ],
+      "proof_obligations": [
+        "Compile each fixed fixture on all selector inputs",
+        "Check source model correspondence and optimal layouts",
+        "Replay residual signatures and malformed layout controls"
+      ],
+      "formalization_plan": "Formalize occurrence paths, critical-cut injection, subset recurrence and residual distinction separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Repair input-dependent transfer quantifier and prove layout-independent obstruction plus order-specific computational lower bound.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Unrestricted deterministic circuit complexity of SAT",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate boundary-function compression or adaptive selector models rather than optimizing the same occurrence layout.",
+      "human_review_requests": [
+        "Review quantifiers, exact pool normalization, critical-cut counting and branching program scope."
+      ]
+    }
+  }
+}
