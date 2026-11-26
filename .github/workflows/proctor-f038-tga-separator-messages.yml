@@ -1,0 +1,44 @@
+name: Proctor F038 TGA separator messages
+on:
+  push:
+    branches: ['research/pnp-f038-tga-separator-messages']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_tga_separator_messages.js
+          node mathos/research/f038_tga_separator_messages.js | tee /tmp/sep.txt
+          grep -Fx 'F038_TGA_SEPARATOR_MESSAGES_OK {"n":{"fixtures":10,"plans":2478,"eliminations":1280,"bagRows":110505,"conditionings":29,"messageChecks":135,"keyChecks":388,"fullTuples":80780,"models":18809,"reconstruction":249,"componentWitnesses":379,"streamBatches":10053,"streamJoinChecks":321117,"splitGroups":6153,"streamOutputs":25595},"cases":[[2,0,[[3,2,0,2],[2,2,0,2]],14],[2,1,[[5,3,1,3]],16],[2,2,[[5,3,0,3]],10],[2,3,"ineligible"],[2,4,[[3,3,0,3],[1,0,0,0],[1,0,0,0]],2],[3,0,[[3,2,0,2],[2,2,0,2]],72],[3,1,[[5,3,1,3]],63],[3,2,[[5,3,0,3]],54],[3,3,"ineligible"],[3,4,[[3,3,0,3],[1,0,0,0],[1,0,0,0]],18]],"clique":[[4,[4],3,2,256,128],[8,[4],3,2,4096,1024]],"boundary":[[2,8,8,16,2048,4096],[3,27,27,81,177147,531441],[4,64,64,256,4194304,16777216],[5,125,125,625,48828125,244140625]]}' /tmp/sep.txt
+          python -m mathos.research.tga_f038_sep_001 > /tmp/sep.json
+          python -m mathos.research.tga_f038_cpr_001 > /tmp/cpr.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/sep.json') as f:
+              sep=json.load(f)
+          with open('/tmp/cpr.json') as f:
+              cpr=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert sep['PNP_RESOLUTION_STATUS']==cpr['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert sep['PROMOTION']=='NONE'
+          assert sep['decision']=='PRESERVE_EXACT_SEPARATOR_ROUTE_REVIEW_BEFORE_EXTENSION'
+          assert all(sep[k]['status']==cpr[k]['status']=='BLOCKED' for k in ('restricted_evidence','uniform_recovery'))
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_TGA_SEP_GATE_OK status=OPEN promotion=NONE')
+          PY
