@@ -1,0 +1,56 @@
+name: Proctor F038 RE-X width-two plan
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-plan']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_plan
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/plan-$suite.txt"
+          done
+          node mathos/research/f038_rex_width_two_plan_replay.js > /tmp/plan-replay.txt
+          node "$p.js" --descriptor > /tmp/plan.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_PLAN_OK '){const a=fs.readFileSync('/tmp/plan-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(s=>read(s));
+          for(const x of [a,b,c]){assert.equal(x.q,113660);assert.equal(x.descriptorBits,7274244);}
+          assert.deepEqual(a.totals,{rawBits:492882,transitions:104884995,edges:104,records:94,accepted:9,refused:4});
+          assert.deepEqual(b.totals,{rawBits:752446,transitions:169846407,edges:23,records:23,accepted:2,refused:1});
+          assert.equal(c.controls.length,7);assert.equal(c.cutoffs,4);assert.equal(c.exactBudget,8039006);
+          const r=read('replay','F038_REX_WIDTH_TWO_REPLAY_OK ');
+          assert.equal(r.transitions,16122793);assert.equal(r.rows.length,2);
+          assert.deepEqual(r.rows.map(x=>x.status),['WIDTH_TWO_PLAN','OUTSIDE_WIDTH_TWO']);
+          JS
+          python -m mathos.research.f038_rex_width_two_plan_codec /tmp/plan.desc > /tmp/plan-codec.json
+          python -m mathos.research.tga_f038_rex_023b > /tmp/plan-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/plan-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/plan-gates.json') as f:
+              g=json.load(f)
+          assert r['transitions']==8080323 and r['plan_records']==9 and r['not_a_witness']
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
