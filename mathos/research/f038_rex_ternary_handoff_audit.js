@@ -7,6 +7,7 @@ function audit(H,P,A,E,R,suite="small"){
   const N=ref.prepared.length,origin=r.entry.head+(M.shiftCount+1)*N+3;
   ok(r.entry.prepared===ref.prepared&&r.entry.workerInput===ref.prepared&&r.entry.isolated&&r.workerOrigin===origin,"isolated entry");
   ok(r.protectedUnchanged&&r.workerMin>r.entry.head,"protected data");
+  const K=M.shiftCount;ok(r.handoffTransitions===2*(K+1)*N*N+(2*K+9)*N+6,"exact isolation clock");
   ok(r.workerMin>=origin-(W.width+2)*(N+2),"worker span bound");
   const iso=A.physical(W,ref.prepared,120000000);
   ok(iso.state===W.q&&iso.t===r.workerTransitions&&iso.head===r.head-origin,"worker clock/head");
