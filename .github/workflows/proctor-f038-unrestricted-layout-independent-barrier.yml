@@ -1,0 +1,32 @@
+name: Proctor F038 unrestricted layout independent barrier
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-layout-independent-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.f038_unrestricted_layout_independent_barrier | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_LAYOUT_INDEPENDENT_BARRIER_OK [[2,8,80,1552,128,34],[3,8,968,5488,128,54],[4,8,5456,12960,128,64],[6,8,62208,43776,128,70]]' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_LAYOUT_INDEPENDENT_BARRIER_GATE_OK status=OPEN promotion=NONE')
+          PY
