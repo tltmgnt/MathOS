@@ -239,9 +239,20 @@ function audit(){
   else {let want=encode(rows.slice().sort((a,b)=>cmp(a[0],b[0])));ok(r.tape.size===want.length&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b),"grammar output");grammar.valid++;}
  }
  let pos=3;while(M.desc[pos]==="1")pos++;
- ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
- for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length,decoded=[];
+ for(let [s,w,d] of M.T){let row=[parseInt(M.desc.slice(pos,pos+b),2),parseInt(M.desc.slice(pos+b,pos+b+2),2),parseInt(M.desc.slice(pos+b+2,pos+b+4),2)-1];ok(row[0]===s&&row[1]===w&&row[2]===d,"descriptor");decoded.push(row);pos+=b+4;}
  ok(pos===M.desc.length,"length");
- return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,grammar};
+ // Original small selector format is not the record-sort format.
+ // Replay using the emitted description's decoded transition entries.
+ let U={selectorInputs:0,noCandidate:0};
+ for(let n of [1,2])for(let p=0;p<2**(n===1?2:8);p++){
+  let raw="1".repeat(n)+"0"+Array.from({length:n===1?2:8},(_,i)=>(p>>i)&1).join("");
+  let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0;
+  for(let t=0;t<10000&&state!==M.q;t++){
+   let [a,w,d]=decoded[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);head+=d;state=a;
+  }
+  ok(state===M.q&&!tape.has(head),"selector non-solver control");U.selectorInputs++;U.noCandidate++;
+ }
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,grammar,U};
 }
 if(process.argv.includes('--description')){let j=sortWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_STABLE_RECORD_SORT_OK '+JSON.stringify(audit()));
