@@ -120,7 +120,11 @@ function audit(E,A){
  ok(E.solveRaw(raw).status==="SAT"&&!produce(E.decode(raw),E),"coverage obstruction");
  let good=E.encode(2,[0,1],[]),j=good.indexOf("0")+2;
  for(let bad of [good.slice(1),good+"0",good.slice(0,-1),good.slice(0,-1)+"2",good.slice(0,j)+"1"+good.slice(j+1),""]){ok(E.decode(bad)===null,"malformed");counts.malformed++;}
- return {graphs,counts,results,descriptorBits:M.desc.length};
+ let forced=[];for(let g=0;g<9;g++)forced.push([-(g*2+1)]);
+ let input=E.encode(2,[0,1],forced),api=[solveRaw(input,E,A),solveRaw(input,E,A,{mode:"physical",limit:100}),solveRaw(E.encode(2,[0,1],forced.concat([[-18]])),E,A),solveRaw("100",E,A),solveRaw(raw,E,A)];
+ let apiStatuses=api.map(r=>r.status);
+ ok(apiStatuses.join(",")==="SAT,TIMEOUT,UNSAT,OUTSIDE_NORMALIZED,OUTSIDE_WIDTH_TWO","API statuses");
+ return {graphs,counts,results,descriptorBits:M.desc.length,apiStatuses};
 }
 function solveRaw(raw,E,A,{mode="logical",limit=30000000}={}){
  if(mode!=="logical"&&mode!=="physical")throw Error("mode");
