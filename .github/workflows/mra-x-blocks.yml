@@ -1,0 +1,43 @@
+name: MRA-X compressed proof blocks
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-blocks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-blocks.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_blocks_audit.py --directory blocks-audit
+      - run: python3 tools/mra_x_blocks_audit.py --directory blocks-replay
+      - name: Verify deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              r.pop('timings')
+              return r
+          r=stable('blocks-audit/evidence.json')
+          assert r==stable('blocks-replay/evidence.json')
+          assert len(r['rows'])==6 and r['controls']==14
+          assert [x['chosen'] for x in r['rows']]==[8,2,8,2,8,2]
+          assert sum(x['states'] for x in r['rows'])==72
+          assert sum(x['feasible'] for x in r['rows'])==66
+          assert sum(x['metrics']['adaptive']['fresh'] for x in r['rows'])==28029
+          assert sum(x['metrics']['fixed8']['fresh'] for x in r['rows'])==38557
+          PY
