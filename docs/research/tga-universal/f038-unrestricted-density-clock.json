@@ -1,0 +1,557 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-DENSITY-CLOCK",
+  "base_commit": "df28a4dd3f084942b48ed32a0e703da84dfd4ed6",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45751269793",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can arbitrary sufficiently dense selectors be solved by a fixed general program inside the unchanged exact cubic and higher-stage clocks?",
+  "route": "negative",
+  "topology": "Disjoint clause packing, capped branch enumeration, sequential implication closure and explicit exact-stage slack.",
+  "adversarial": [
+    "Disjoint selected clauses only, no independence assumption for other clauses.",
+    "Maximal matching must hit every ternary clause.",
+    "Cap miss is not UNSAT.",
+    "No random access or free verifier; charge complete selector and original table description.",
+    "Fixed k and eventual n0; no explicit clock threshold or new lower bound."
+  ],
+  "scope": "All original selectors, fixed integer k>=3, eventual exact-stage success when M(p)/2^n>=n^(-(k-2)/10); not an unconditional lower bound.",
+  "cost": "Greedy capped disjoint ternary matching, 7^b branch 2-CNF closure, O_k(L polylog L 7^b) multitape bit steps; quadratic simulation O_k(L^(k-(k-2)/60) polylog L).",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of density and original-clock upper bound"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS normalized pool, exhaustive assignments, brute branch reference and integer inequalities; not Python execution.",
+  "expected": {
+    "caps": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        1,
+        2,
+        6
+      ],
+      [
+        4,
+        1,
+        2,
+        3,
+        8
+      ],
+      [
+        14,
+        1,
+        3,
+        5,
+        15
+      ],
+      [
+        15,
+        2,
+        4,
+        6,
+        16
+      ],
+      [
+        16,
+        2,
+        4,
+        6,
+        16
+      ],
+      [
+        100,
+        3,
+        6,
+        10,
+        27
+      ],
+      [
+        1000,
+        5,
+        10,
+        15,
+        41
+      ],
+      [
+        1000000,
+        10,
+        20,
+        31,
+        82
+      ]
+    ],
+    "controls": 4,
+    "rows": [
+      [
+        1,
+        3,
+        0,
+        4,
+        0,
+        3,
+        4,
+        1,
+        0,
+        4,
+        3,
+        4,
+        4,
+        1
+      ],
+      [
+        1,
+        4,
+        0,
+        4,
+        0,
+        3,
+        4,
+        1,
+        0,
+        4,
+        3,
+        4,
+        4,
+        1
+      ],
+      [
+        1,
+        5,
+        0,
+        4,
+        0,
+        3,
+        4,
+        1,
+        0,
+        4,
+        3,
+        4,
+        4,
+        1
+      ],
+      [
+        2,
+        3,
+        0,
+        256,
+        0,
+        95,
+        128,
+        1,
+        0,
+        256,
+        95,
+        256,
+        256,
+        161
+      ],
+      [
+        2,
+        4,
+        1,
+        256,
+        0,
+        95,
+        128,
+        1,
+        0,
+        256,
+        95,
+        256,
+        256,
+        161
+      ],
+      [
+        2,
+        5,
+        1,
+        256,
+        0,
+        95,
+        128,
+        1,
+        0,
+        256,
+        95,
+        256,
+        256,
+        161
+      ],
+      [
+        3,
+        3,
+        0,
+        384,
+        372,
+        352,
+        1251,
+        1,
+        372,
+        12,
+        10,
+        12,
+        12,
+        2
+      ],
+      [
+        3,
+        4,
+        1,
+        384,
+        372,
+        352,
+        1251,
+        9,
+        0,
+        384,
+        352,
+        974,
+        2616,
+        32
+      ],
+      [
+        3,
+        5,
+        2,
+        384,
+        372,
+        352,
+        1251,
+        39,
+        0,
+        384,
+        352,
+        974,
+        2616,
+        32
+      ],
+      [
+        4,
+        3,
+        1,
+        128,
+        128,
+        72,
+        116,
+        0,
+        0,
+        128,
+        72,
+        682,
+        896,
+        56
+      ],
+      [
+        4,
+        4,
+        2,
+        128,
+        128,
+        72,
+        116,
+        0,
+        0,
+        128,
+        72,
+        682,
+        896,
+        56
+      ],
+      [
+        4,
+        5,
+        3,
+        128,
+        128,
+        72,
+        116,
+        0,
+        0,
+        128,
+        72,
+        682,
+        896,
+        56
+      ],
+      [
+        5,
+        3,
+        1,
+        128,
+        128,
+        65,
+        75,
+        0,
+        0,
+        128,
+        65,
+        737,
+        896,
+        63
+      ],
+      [
+        5,
+        4,
+        2,
+        128,
+        128,
+        65,
+        75,
+        0,
+        0,
+        128,
+        65,
+        737,
+        896,
+        63
+      ],
+      [
+        5,
+        5,
+        3,
+        128,
+        128,
+        65,
+        75,
+        0,
+        0,
+        128,
+        65,
+        737,
+        896,
+        63
+      ],
+      [
+        6,
+        3,
+        1,
+        128,
+        242,
+        64,
+        68,
+        0,
+        114,
+        14,
+        8,
+        76,
+        98,
+        6
+      ],
+      [
+        6,
+        4,
+        2,
+        128,
+        242,
+        64,
+        68,
+        0,
+        0,
+        128,
+        64,
+        4554,
+        5684,
+        64
+      ],
+      [
+        6,
+        5,
+        4,
+        128,
+        242,
+        64,
+        68,
+        0,
+        0,
+        128,
+        64,
+        4554,
+        5684,
+        64
+      ],
+      [
+        9,
+        3,
+        1,
+        8,
+        11,
+        7,
+        2766,
+        2,
+        3,
+        5,
+        4,
+        12,
+        29,
+        1
+      ],
+      [
+        9,
+        4,
+        3,
+        8,
+        11,
+        7,
+        2766,
+        7,
+        0,
+        8,
+        7,
+        15,
+        470,
+        1
+      ],
+      [
+        9,
+        5,
+        4,
+        8,
+        11,
+        7,
+        2766,
+        7,
+        0,
+        8,
+        7,
+        15,
+        470,
+        1
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-DENSITY-CLOCK.md",
+    "mathos/research/f038_unrestricted_density_clock.py",
+    "mathos/research/f038_unrestricted_bijunctive_core.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Seek unconditional unbounded B_3 existence or an actual general polynomial SAT cutoff. The density bound excludes dense residuals but does not decide intermediate or sparse multiplicity.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can arbitrary sufficiently dense selectors be solved by a fixed general program inside the unchanged exact cubic and higher-stage clocks?",
+      "strategy": "Use a maximal disjoint ternary matching to bound assignment density, enumerate seven local satisfying choices and solve exact binary residuals.",
+      "alternative": "Charge sequential fixed-tape merge sort and matrix transitive closure, then absorb explicit exponent slack in the original weighted clock.",
+      "stop_rule": "No claim that dense-SAT search is novel, no general SAT cutoff or lower-bound exponent.",
+      "literature_leads": [
+        "Hirsch, A Fast Deterministic Algorithm for Formulas That Have Many Satisfying Assignments (1998), https://academic.oup.com/jigpal/article-abstract/6/1/59/732679",
+        "Prior F038 bijunctive-core fixed tape closure."
+      ]
+    },
+    "construct": {
+      "claim": "For every fixed k>=3 eventual B_k(n) contains only selectors of density strictly below n^(-(k-2)/10).",
+      "scope": "All original selectors, fixed integer k>=3, eventual exact-stage success when M(p)/2^n>=n^(-(k-2)/10); not an unconditional lower bound.",
+      "derivation": "Disjoint matching yields density <=(7/8)^m, cap implies m<=b for dense inputs, 7^b branches hit every triple, exact 2-CNF witness solver; sequential cost and fixed description absorbed with slack.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic-stage failure or uniform SAT cutoff.",
+        "Concrete table and numerical threshold."
+      ],
+      "candidate_tests": [
+        "Exact integer density/packing/cap checks, brute branch reference and original 2-CNF solver."
+      ]
+    },
+    "alternative": {
+      "claim": "Every fixed inverse-polynomial assignment-density promise has a polynomial-time deterministic search algorithm in the unchanged original model; exact stage bound with integer k>=max(3,10d+2).",
+      "scope": "All original selectors, fixed integer k>=3, eventual exact-stage success when M(p)/2^n>=n^(-(k-2)/10); not an unconditional lower bound.",
+      "derivation": "Choose k from fixed density exponent, hardcode finite exceptions for promise algorithm; distinguish polynomial density from previous near-full entropy.",
+      "unresolved_steps": [
+        "Unrestricted sparse model search and intermediate multiplicities."
+      ],
+      "candidate_tests": [
+        "Dense promise integer comparisons and maximum branch count controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Disjoint selected clauses only, no independence assumption for other clauses.",
+        "Maximal matching must hit every ternary clause.",
+        "Cap miss is not UNSAT.",
+        "No random access or free verifier; charge complete selector and original table description.",
+        "Fixed k and eventual n0; no explicit clock threshold or new lower bound."
+      ],
+      "counterexample_candidates": [
+        "Low-density formulas can exceed the cap.",
+        "Previous high-entropy reservoir guarantee need not be inverse polynomial.",
+        "The finite interval does not prove asymptotic failure."
+      ],
+      "equivalence_audit": "Same normalized full selector and original U weighted clocks, fixed program and verified output, no changed model.",
+      "barrier_audit": "Density-region upper bound only, no unrestricted resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Fixed multitape bit algorithm simulated by original general three-symbol one-tape program.",
+      "cost_ledger": {
+        "encoding": "Complete original normalized unary/selector input",
+        "preprocessing": "Sequential greedy matching and integer cap; O(log^2 L) marked-variable list",
+        "inference": "7^b residual branches, merge-sorted implication edges and sequential Warshall closure",
+        "repetitions": "At most 7^b branches; no further SAT oracle",
+        "arithmetic_bits": "O_k(log L) counters, exact cap inequality; sequential bit comparisons",
+        "memory": "Polynomial selector/edge records and matrix; fixed number of tapes",
+        "reconstruction": "Compare paired closure rows, output n bits; optional sorted-join verification",
+        "overall": "Greedy capped disjoint ternary matching, 7^b branch 2-CNF closure, O_k(L polylog L 7^b) multitape bit steps; quadratic simulation O_k(L^(k-(k-2)/60) polylog L)."
+      },
+      "missing_bounds": [
+        "Numerical compiled table length and n0",
+        "Unconditional unbounded cubic and all-exponent lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact disjoint clause packing and cap",
+        "Complete branch simplification and implication witness",
+        "Sequential cost and strict stage exponent slack",
+        "Independent finite reference"
+      ],
+      "unsupported_steps": [
+        "New exact-head CI pending; no independently reviewed proof or Lean formalization.",
+        "No concrete compiled machine or measured original runtime."
+      ],
+      "proof_obligations": [
+        "Review fixed-tape sort and closure costs",
+        "Check integer slack and stage absorption",
+        "Replay finite semantics"
+      ],
+      "formalization_plan": "Formalize greedy matching density bound, exact branch solver, sequential machine cost and original weighted clock inclusion.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Provide an explicit asymptotic necessary density bound for actual unrestricted residuals at every fixed stage k>=3; distinguish dense SAT from high entropy rate.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review and Lean formalization"
+      ],
+      "next_question": "Seek unconditional unbounded B_3 existence or an actual general polynomial SAT cutoff. The density bound excludes dense residuals but does not decide intermediate or sparse multiplicity.",
+      "human_review_requests": [
+        "Review matching cap, closure semantics, bit-cost accounting and weighted-clock quantifiers."
+      ]
+    }
+  }
+}
