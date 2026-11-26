@@ -1,10 +1,10 @@
 // SEP-003 raw normalized selector host solver; not compiled U transitions.
-function engine(){
+function engine(useSmallBatches=false){
  const ok=(v,s)=>{if(!v)throw Error(s)},key=z=>z.join(",");
  function* tup(m,k){for(let i=0;i<m**k;i++)yield Array.from({length:k},(_,j)=>Math.floor(i/m**(k-j-1))%m);}
  function* perm(a){if(!a.length){yield [];return;}for(let i=0;i<a.length;i++)for(let p of perm(a.filter((_,j)=>i!==j)))yield [a[i],...p];}
  let A=[0,1,2,3],V=[4,5,6,7,8];
- const n={fixtures:0,plans:0,eliminations:0,bagRows:0,conditionings:0,messageChecks:0,keyChecks:0,fullTuples:0,models:0,reconstruction:0,componentWitnesses:0,streamBatches:0,streamJoinChecks:0,splitGroups:0,streamOutputs:0};
+ const n={fixtures:0,plans:0,eliminations:0,bagRows:0,conditionings:0,messageChecks:0,keyChecks:0,fullTuples:0,models:0,reconstruction:0,componentWitnesses:0,streamBatches:0,streamJoinChecks:0,splitGroups:0,streamOutputs:0,peakBagBatch:0};
  let seed=0x53455001;function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed;}
  function make(m,h,bad){return {h,S:new Set([...tup(m,h.length)].filter(z=>!bad(z)).map(key))};}
  const pass=(f,z)=>f.S.has(key(f.h.map(g=>z[g])));
@@ -45,11 +45,11 @@ function engine(){
    let touched=F.filter(f=>f.h.includes(v)),h=[...new Set(touched.flatMap(f=>f.h))].filter(g=>g!==v).sort((a,b)=>a-b);
    ok(h.length<=3,"width");// Stream candidate bags in deliberately small chunks.
    // Sequential merge membership on projected factor keys; OR across chunk boundaries.
-   let batch=[],cap=Math.max(1,m*m-1),last=null,hit=false,stream=new Set();
+   let batch=[],cap=useSmallBatches?Math.max(1,m*m-1):m**3,last=null,hit=false,stream=new Set();
    const cmp=(a,b)=>a<b?-1:a>b?1:0;
    function flush(){
     if(!batch.length)return;
-    n.streamBatches++;
+    n.streamBatches++;n.peakBagBatch=Math.max(n.peakBagBatch,batch.length);
     if(last!==null&&last===key(batch[0].q))n.splitGroups++;
     for(let f of touched){
      let list=[...f.S].sort(cmp);
@@ -210,7 +210,7 @@ function engine(){
  return {pool,length,fixed,encode,decode,witness,valid,solveRaw,tup,subsets,n};
 }
 function audit(includeFixtures=false){
- const E=engine(),ok=(v,s)=>{if(!v)throw Error(s)},fixtures=[],rows=[];
+ const E=engine(true),P=engine(),ok=(v,s)=>{if(!v)throw Error(s)},fixtures=[],rows=[];
  let counts={rawBits:0,selectedClauses:0,referenceTuples:0,feasibleKeys:0,validWitnesses:0,unsat:0,ineligible:0,malformed:0,keyJoins:0,peakBatch:0};
  let seed=0x4e4f524d;function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed;}
  for(let m of [2,3,4])for(let mode=0;mode<4;mode++){
@@ -220,7 +220,7 @@ function audit(includeFixtures=false){
   if(mode===1)for(let a=0;a<m;a++)B.push([-(4*m+a+1)]);
   if(mode===2)for(let a=0;a<m-1;a++)B.push([-(a+1)]);
   let pins=Array.from({length:m},(_,i)=>(i+mode)%2),raw=E.encode(m,pins,B),D=E.decode(raw);ok(D&&D.pins.join()===pins.join(),"pin decode");
-  let r=E.solveRaw(raw);counts.rawBits+=raw.length;counts.selectedClauses+=D.selected;
+  let r=E.solveRaw(raw);ok(JSON.stringify(r)===JSON.stringify(P.solveRaw(raw)),"production cap equivalence");counts.rawBits+=raw.length;counts.selectedClauses+=D.selected;
   if(mode===3){ok(r.status==="INELIGIBLE"&&E.valid(raw,E.witness(m,pins,Array(9).fill(1))),"ineligible SAT");counts.ineligible++;}
   else{
    let keys=new Set();
@@ -237,7 +237,7 @@ function audit(includeFixtures=false){
   let B=[],H=mode===0?[]:mode===1?[[0,4],[1,4],[2,4],[3,4],[0,5],[5,6],[6,7],[7,8],[5,8]]:[[0,4],[1,5],[2,6],[4,5,6],[5,6,7],[6,7,8]];
   for(let h of H)B.push(h.map(g=>-(g*m+m)));
   let pins=Array.from({length:m},(_,i)=>+(i%2===0)),raw=E.encode(m,pins,B),r=E.solveRaw(raw),K=new Set();
-  ok(r.status==="SAT","integration SAT");
+  ok(JSON.stringify(r)===JSON.stringify(P.solveRaw(raw)),"production cap equivalence supplemental");ok(r.status==="SAT","integration SAT");
   for(let z of E.tup(m,9)){counts.referenceTuples++;if(B.every(c=>!c.every(x=>z[Math.floor((-x-1)/m)]===(-x-1)%m)))K.add(r.A.map(g=>z[g]).join(","));}
   ok(r.count===K.size&&E.valid(raw,r.bits),"integration exact keys");
   ok(mode===1?r.Q.length===1:r.Q.length===0,"static or mixed route");
@@ -263,7 +263,7 @@ function audit(includeFixtures=false){
  ok(E.solveRaw("100").status==="OUTSIDE_NORMALIZED","outside normalized dimension");counts.malformed++;
 
  for(let bad of [raw.slice(1),raw+"0",raw.slice(0,-1),raw.slice(0,-1)+"2","", "10"]){ok(E.solveRaw(bad).status==="OUTSIDE_NORMALIZED","malformed status");counts.malformed++;}
- return includeFixtures?fixtures:{counts,rows,integration,machineHostCounters:E.n};
+ return includeFixtures?fixtures:{counts,rows,integration,machineHostCounters:E.n,productionHostCounters:P.n};
 }
 
 if(process.argv.includes('--solve')) console.log(JSON.stringify(engine().solveRaw(require('fs').readFileSync(0,'utf8'))));
