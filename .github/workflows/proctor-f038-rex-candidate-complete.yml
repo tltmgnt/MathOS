@@ -1,0 +1,48 @@
+name: Proctor F038 RE-X candidate complete
+on:
+  push:
+    branches: ['research/pnp-f038-rex-candidate-complete']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_batched_elimination.js
+          node --check mathos/research/f038_tga_normalized_integration.js
+          node --check mathos/research/f038_rex_candidate_complete.js
+          node mathos/research/f038_rex_candidate_complete.js | tee /tmp/candidate.txt
+          grep -Fx 'F038_REX_CANDIDATE_COMPLETE_OK {"direct":{"cases":79,"candidateAssignments":2956,"positiveGroups":831,"emptyFactorCases":2,"splitCases":32},"normalized":{"cases":12,"sat":6,"unsat":3,"ineligible":3,"rawBits":2514036,"exactKeys":697,"verifiedWitnesses":6,"referenceTuples":847017,"ineligibleSatControls":3,"malformedControls":5},"details":[[2,0,"SAT",14,[]],[2,1,"UNSAT",0,[]],[2,2,"SAT",16,[0]],[2,3,"INELIGIBLE",null,null],[3,0,"SAT",78,[]],[3,1,"UNSAT",0,[]],[3,2,"SAT",81,[0]],[3,3,"INELIGIBLE",null,null],[4,0,"SAT",252,[]],[4,1,"UNSAT",0,[]],[4,2,"SAT",256,[0]],[4,3,"INELIGIBLE",null,null]],"host":{"bags":158,"batches":342,"candidates":6126,"requests":16269,"factorCopies":11156,"positiveCandidateOccurrences":4902,"positiveGroupOccurrences":1774,"crossBatchGroups":98,"peakCandidates":64,"peakBits":34788,"totalBits":2827390,"physicalTransitions":0,"logicalTransitions":0,"physicalBatches":0,"logicalBatches":0,"unsafeRepresentative":649},"logical":{"bags":2,"batches":4,"candidates":6,"requests":10,"factorCopies":8,"positiveCandidateOccurrences":3,"positiveGroupOccurrences":3,"crossBatchGroups":2,"peakCandidates":3,"peakBits":534,"totalBits":980,"physicalTransitions":0,"logicalTransitions":23203676,"physicalBatches":0,"logicalBatches":4,"unsafeRepresentative":0},"physical":{"bags":3,"batches":4,"candidates":6,"requests":8,"factorCopies":5,"positiveCandidateOccurrences":2,"positiveGroupOccurrences":2,"crossBatchGroups":1,"peakCandidates":2,"peakBits":296,"totalBits":562,"physicalTransitions":64529232,"logicalTransitions":4858872,"physicalBatches":4,"logicalBatches":0,"unsafeRepresentative":1}}' /tmp/candidate.txt
+          node mathos/research/f038_rex_batched_elimination.js | grep '^F038_REX_BATCHED_ELIMINATION_OK '
+          node mathos/research/f038_tga_normalized_integration.js | grep '^F038_TGA_NORMALIZED_INTEGRATION_OK '
+          python -m mathos.research.tga_f038_rex_007 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_CANDIDATE_COMPLETE_BRIDGE_PHYSICAL_LIFECYCLE_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_CANDIDATE_COMPLETE_GATE_OK status=OPEN promotion=NONE')
+          PY
