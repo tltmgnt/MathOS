@@ -1,0 +1,51 @@
+name: Proctor F038 unrestricted mixed rate recovery
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-mixed-rate-recovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_mixed_rate_recovery.js
+          node mathos/research/f038_unrestricted_mixed_rate_recovery.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_MIXED_RATE_RECOVERY_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['fixtures'] == 18
+          assert r['totals'] == [501,62,0,116,71498,36659,68518,2980,0,0,181755,0]
+          assert r['forced'] == [1746,352,5040,2424,425528,204717,387876,9665,17298,10689,1081314,28908]
+          assert r['comparisons'] == 11070
+          assert r['greedyChecks'] == 32346
+          assert r['thresholds'] == 90
+          assert r['rateChecks'] == 4088
+          assert r['strictFixtures'] == 2
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MIXED_RATE_RECOVERY_GATE_OK status=OPEN promotion=NONE')
+          PY
