@@ -122,5 +122,25 @@ function audit(E,A){
  for(let bad of [good.slice(1),good+"0",good.slice(0,-1),good.slice(0,-1)+"2",good.slice(0,j)+"1"+good.slice(j+1),""]){ok(E.decode(bad)===null,"malformed");counts.malformed++;}
  return {graphs,counts,results,descriptorBits:M.desc.length};
 }
-module.exports={plan,produce,decodeCertificate,audit};
-if(require.main===module){const E=require('./f038_tga_normalized_integration.js').engine();const A=require('./f038_rex_nested_variable_overlap.js');console.log('F038_REX_NORMALIZED_PRODUCER_OK '+JSON.stringify(audit(E,A)));}
+function solveRaw(raw,E,A,{mode="logical",limit=30000000}={}){
+ if(mode!=="logical"&&mode!=="physical")throw Error("mode");
+ let D=E.decode(raw);if(!D)return {status:"OUTSIDE_NORMALIZED"};
+ let p=produce(D,E);if(!p)return {status:"OUTSIDE_WIDTH_TWO"};
+ let N=A.encode(p.root),J=A.worker(),r,output,steps;
+ if(mode==="logical"){
+  r=A.logical(J,N,limit);steps=r.t;
+  if(r.state==="reject")return {status:"UNSAT",preparedBits:N.length,steps,mode};
+  if(r.state!=="ready")return {status:"TIMEOUT",preparedBits:N.length,steps,mode};
+  output=r.out;
+ }else{
+  let M=A.compile(J.rules,J.symbols,J.projection);r=A.physical(M,N,limit);steps=r.t;
+  if(r.state!==M.q)return {status:"TIMEOUT",preparedBits:N.length,steps,mode};
+  if(!r.tape.has(r.head))return {status:"UNSAT",preparedBits:N.length,steps,mode};
+  output=Array.from({length:p.rows},(_,i)=>r.tape.get(r.head+i)).join("");
+ }
+ let z=decodeCertificate(p,output,D.m),bits=E.witness(D.m,D.pins,z);
+ if(!E.valid(raw,bits))throw Error("original clause verification");
+ return {status:"SAT",preparedBits:N.length,steps,mode,z,bits};
+}
+module.exports={plan,produce,decodeCertificate,solveRaw,audit};
+if(require.main===module){const E=require('./f038_tga_normalized_integration.js').engine();const A=require('./f038_rex_nested_variable_overlap.js');if(process.argv.includes('--solve'))console.log(JSON.stringify(solveRaw(require('fs').readFileSync(0,'utf8'),E,A,{mode:process.argv.includes('--physical')?'physical':'logical'})));else console.log('F038_REX_NORMALIZED_PRODUCER_OK '+JSON.stringify(audit(E,A)));}
