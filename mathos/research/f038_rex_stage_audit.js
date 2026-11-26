@@ -50,10 +50,17 @@ function audit(Q,P,V,H,A,E,suite="small"){
  }else if(suite==="four"){
   let z=[0,1,2,3,0,3,2,1,0];check("four-mixed-ranks",4,[1,0,1,1],force(4,z),z);
  }else throw Error("unknown suite");
+ // Small quotient controls: collapse identical reachable behavior, retain
+ // halt as a distinct observable class, discard unreachable states.
+ const tiny=(rows,q)=>"111"+"1".repeat(q)+"0"+rows.map(([a,w,d])=>a.toString(2).padStart(q.toString(2).length,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
+ const a=Q.quotient(P,tiny([[1,0,0],[0,0,0],[0,0,0],[0,0,0],[1,0,0],[1,0,0],[3,2,0],[3,2,0],[3,2,0]],3));
+ ok(a.q===1&&a.stats.unreachableStates===1&&a.map[0]===a.map[1]&&a.map[2]===-1&&a.map[3]===1,"tiny merging/unused/halting");
+ const b=Q.quotient(P,tiny([[1,0,0],[0,0,0],[0,0,0],[2,0,0],[1,0,0],[1,0,0]],2));
+ ok(b.q===2&&b.map[0]!==b.map[1],"halt-distinguishing split");
  // Minimum raw descriptor length q=1: 20 bits. No generic description is
  // eligible in the original n=2 stage 0..6 fixture.
  ok(3+1+1+3*(1+4)===20,"minimum description");
- return{suite,stats:C.stats,rows,transitions:rows.reduce((a,r)=>a+r.t,0)};
+ return{suite,stats:C.stats,quotientControls:2,rows,transitions:rows.reduce((a,r)=>a+r.t,0)};
 }
 module.exports={simulate,slot,audit};
 if(require.main===module){const Q=require('./f038_rex_stage_quotient.js'),P=require('./f038_rex_ternary_bags.js'),V=require('./f038_rex_ternary_witness.js'),H=require('./f038_rex_ternary_handoff.js'),A=require('./f038_rex_nested_variable_overlap.js'),E=require('./f038_tga_normalized_integration.js').engine();if(process.argv.includes('--descriptor'))process.stdout.write(Q.quotient(P,V.compile(P,H,A).desc).desc);else console.log('F038_REX_STAGE_AUDIT_OK '+JSON.stringify(audit(Q,P,V,H,A,E,process.argv[2]||'small')));}
