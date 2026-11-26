@@ -1,6 +1,6 @@
 // Independent original-factor oracle plus observation of every candidate's mask-head invariant.
 function audit(A,P,K,L,E,suite="physical"){
- const J0=A.machine(),J=P.compact(J0),M=suite==="physical"?K.compile(J):null,ok=(v,s)=>{if(!v)throw Error(s)},V=[0,1,2,3,4,5,6,7,8],scopes=[1,2,3].flatMap(k=>[...E.subsets(V,k)]),rows=[];
+ const J0=A.machine(),J=P.compact(J0),M=suite==="physical"||suite==="physical3"?K.compile(J):null,ok=(v,s)=>{if(!v)throw Error(s)},V=[0,1,2,3,4,5,6,7,8],scopes=[1,2,3].flatMap(k=>[...E.subsets(V,k)]),rows=[];
  function reference(J,inputs,watch){
   const T=inputs.map(s=>["L",...s,"_"]),h=inputs.map(()=>0);let pc=J.entry,steps=0;
   while(true){if(watch&&pc===J.tupleEntry)watch(T,h);
@@ -56,6 +56,8 @@ function audit(A,P,K,L,E,suite="physical"){
   runs.push(actual("four-bag-triples",2,[1,0],B,true));
   const H=[[0,1],[0,2],[0,6],[1,3],[1,8],[2,5],[2,7],[3,6],[3,7],[3,8],[4,6],[5,8],[6,7],[7,8]];
   runs.push(actual("greedy-trap",2,[0,1],H.map(h=>h.map(v=>-(2*v+1))),true));
+ }else if(suite==="physical3"){
+  runs.push(actual("m3-mixed",3,[1,0,1],[[-1,-4,-7],[-2,-6,-10],[-3,-8,-11],[-4,-7,-10],[-1],[-5,-9]],true));
  }else if(suite==="larger"){
   runs.push(actual("m3-mixed",3,[1,0,1],[[-1,-4,-7],[-2,-6,-10],[-3,-8,-11],[-4,-7,-10],[-1],[-5,-9]],false));
   // Every owner position and arity, domains 2,3,4,5, with nontrivial masks.
