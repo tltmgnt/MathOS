@@ -22,7 +22,7 @@ function plan(n,scopes){
 }
 function produce(D,E){
  let p=plan(9,D.F.map(f=>f.h));if(!p)return null;
- for(let f of D.F){let b=p.bags.find(b=>f.h.every(g=>b.scope.includes(g)));if(!b)throw Error("uncovered factor");b.factors.push(f);}
+ for(let f of D.F){let bs=p.bags.filter(b=>f.h.every(g=>b.scope.includes(g)));if(!bs.length)throw Error("uncovered factor");for(let b of bs)b.factors.push(f);}
  let w=Math.ceil(Math.log2(D.m)),candidates=0,checks=0,rows=0;
  for(let b of p.bags){
   b.rows=[];
@@ -101,7 +101,7 @@ function audit(E,A){
   let z=null;if(sat){z=decodeCertificate(p,r.out,m);ok(E.valid(raw,E.witness(m,D.pins,z)),"original witness");}
   let steps=null;
   if(physical){
-   let q=A.physical(M,N,120000000);ok(q.state===M.q&&q.logical===r.t,"physical clock "+name);
+   let q=A.physical(M,N,120000000);ok(q.state===M.q&&q.logical===r.t,"physical clock "+m+":"+name+":"+JSON.stringify({steps:q.t,state:q.state,logical:q.logical,expected:r.t}));
    if(sat){let out=Array.from({length:p.rows},(_,i)=>q.tape.get(q.head+i)).join("");ok(q.tape.size===p.rows&&out===r.out&&E.valid(raw,E.witness(m,D.pins,decodeCertificate(p,out,m))),"physical witness");}
    else ok(!q.tape.has(q.head),"physical rejection");
    counts.physicalCases++;counts.physicalSteps+=q.t;counts[sat?"physicalSat":"physicalUnsat"]++;steps=q.t;
