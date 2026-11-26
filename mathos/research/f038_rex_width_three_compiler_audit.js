@@ -1,4 +1,18 @@
 // Independent host stable-sort/set oracle for standalone ternary merge machine.
+function reference(J,inputs){
+ let T=inputs.map(s=>["L",...s,"_"]),h=inputs.map(()=>0),pc=J.entry,steps=0;
+ for(;;){
+  let I=J.ins[pc],k=I.t,a=T[k][h[k]]??"_";
+  if(I.op==="halt"||I.op==="reject")return{status:I.op==="halt"?"COMPLETE":"REJECT",steps,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};
+  if(I.op==="jump"){pc=I.next;continue;}
+  steps++;
+  if(I.op==="read"){pc=I.next[J.alphabet.indexOf(a)];continue;}
+  if(I.op==="write"){if(a==="L"||I.next.v==="L")throw Error("sentinel write");T[k][h[k]]=I.next.v;}
+  else if(I.op==="move"){h[k]+=I.next.dir;if(h[k]<0)throw Error("left");if(h[k]===T[k].length)T[k].push("_");}
+  else throw Error("opcode");
+  pc=I.next.d;
+ }
+}
 function audit(K,suite="small"){
  const J=K.machine(),M=K.compile(J),ok=(v,s)=>{if(!v)throw Error(s)},rows=[];
  const rec=([k,v])=>k+":"+v+";";
@@ -7,7 +21,9 @@ function audit(K,suite="small"){
   let keys=[...new Set(C.map(x=>x[0]))].sort(),wanted=P.slice().sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).filter(x=>keys.includes(x[0])).map(rec).join("");
   ok(r.status==="COMPLETE"&&r.head===0&&r.tapes.length===7&&r.tapes[4]===keys.map(k=>k+":;").join("")&&r.tapes[6]===wanted,"semijoin "+name+" "+JSON.stringify(r));
   ok(r.tapes[0]===P.slice().sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).map(rec).join("")+(P.length?"|":"")&&r.tapes[1]===C.slice().sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).map(rec).join("")+(C.length?"|":""),"stable sort");
-  rows.push({name,parent:P.length,child:C.length,inputBits:raw.length,t:r.t,span:r.span,output:wanted,support:r.tapes[4]});return{raw,r};
+  const v=reference(J,[p,c,"","","","",""]);
+  ok(v.status===r.status&&v.tapes.join("\n")===r.tapes.join("\n")&&v.heads.join()===r.heads.join(),"all virtual tapes and heads "+name);
+  rows.push({primitives:v.steps,name,parent:P.length,child:C.length,inputBits:raw.length,t:r.t,span:r.span,output:wanted,support:r.tapes[4]});return{raw,r};
  }
  if(suite==="small"){
   check("empty",[],[]);check("empty-parent",[],[["1",""]]);check("empty-child",[["","1"],["1","0"]],[]);
@@ -25,7 +41,7 @@ function audit(K,suite="small"){
   let seed=0x52455824;const rand=n=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)>>>8)%n,word=n=>Array.from({length:n},()=>rand(2)).join("");
   for(let i=0;i<24;i++){let p=Array.from({length:rand(7)},()=>[word(rand(4)),word(rand(4))]),c=Array.from({length:rand(7)},()=>[word(rand(4)),word(rand(4))]);check("seed-"+i,p,c);}
  }else throw Error("suite");
- return{suite,instructions:J.ins.length,logical:M.logicalStates,q:M.q,rules:3*M.q,bits:4+M.q+3*M.q*(M.q.toString(2).length+4),width:M.w,rows,transitions:rows.reduce((a,r)=>a+r.t,0)};
+ return{suite,instructions:J.ins.length,logical:M.logicalStates,q:M.q,rules:3*M.q,bits:4+M.q+3*M.q*(M.q.toString(2).length+4),width:M.w,rows,transitions:rows.reduce((a,r)=>a+r.t,0),primitives:rows.reduce((a,r)=>a+r.primitives,0)};
 }
 module.exports={audit};
 if(require.main===module)console.log('F038_REX_WIDTH_THREE_COMPILER_OK '+JSON.stringify(audit(require('./f038_rex_width_three_compiler.js'),process.argv[2]||'small')));
