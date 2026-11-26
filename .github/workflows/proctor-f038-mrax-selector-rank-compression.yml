@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X selector rank compression
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-selector-rank-compression']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_selector_rank_compression.py
+          python -m mathos.research.f038_universal_witness_layout | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_UNIVERSAL_LAYOUT_OK {"controls":4,"layouts":[[2,2,3,4,3,3],[3,6,11,64,4,5],[4,12,23,4096,7,7]],"pools":[[1,2,2,4,8,16,3,1,4,4],[2,8,12,256,1024,1048576,95,161,128,128],[3,5,8,32,256,8192,32,0,92,92],[3,3,6,8,64,512,8,0,45,45]],"residuals":[[2,4,4,16,6],[3,12,8,96,28],[4,24,16,384,120]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_selector_rank_compression | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_MRAX_SELECTOR_RANK_OK {"controls":4,"matrix":[[2,9,81,324,49,9,9,4],[3,27,729,5832,343,27,27,8],[4,81,6561,104976,2401,81,81,16],[5,243,59049,1889568,16807,243,243,32]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_SELECTOR_RANK_GATE_OK status=OPEN')
+          PY

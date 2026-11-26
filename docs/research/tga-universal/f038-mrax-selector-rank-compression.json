@@ -1,0 +1,189 @@
+{
+  "attempt_id": "F038-MRAX-SELECTOR-RANK-COMPRESSION",
+  "base_commit": "4f90c7792d2d962ba38d744c55b49fb33877654a",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45727878840",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "What exact boundary compression and adaptive communication lower bounds hold for the fixed universal selector function?",
+  "route": "negative",
+  "topology": "Fixed constraint-region partition, shared witness rectangles and tensor product compatibility.",
+  "adversarial": [
+    "Fixed partition rank is not general circuit complexity.",
+    "Communication lower bound is only linear in n and does not charge local computation.",
+    "State crossing transfer requires explicit bounded continuation and locally determined access.",
+    "Compact K circuit defeats rank-to-circuit inference."
+  ],
+  "scope": "Full normalized clause pool, n>=2, fixed partition; arithmetic separated sums.",
+  "cost": "Field rank 3^n; Boolean rank 2^n; deterministic communication >=ceil(n log2 3); not a general runtime bound",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of forcing gadget, ranks and communication conventions"
+    },
+    {
+      "key": "attempt_general_transfer",
+      "label": "Noncircular transfer from general circuits or deterministic computation to a lower-bound model"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS direct source assignment enumeration and GF2 matrix rank; not execution of Python.",
+  "expected": {
+    "matrix": [
+      [
+        2,
+        9,
+        81,
+        324,
+        49,
+        9,
+        9,
+        4
+      ],
+      [
+        3,
+        27,
+        729,
+        5832,
+        343,
+        27,
+        27,
+        8
+      ],
+      [
+        4,
+        81,
+        6561,
+        104976,
+        2401,
+        81,
+        81,
+        16
+      ],
+      [
+        5,
+        243,
+        59049,
+        1889568,
+        16807,
+        243,
+        243,
+        32
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_selector_rank_compression.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-SELECTOR-RANK-COMPRESSION.md"
+  ],
+  "next": "Investigate a stronger model or a noncircular structural transfer from general circuits to a lower-bound measure; stop fixed-partition rank-only optimization.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "What exact boundary compression and adaptive communication lower bounds hold for the fixed universal selector function?",
+      "strategy": "Embed a tensor compatibility matrix using nonunit forcing gadgets; derive field rank and semantic row count.",
+      "alternative": "Derive exact Boolean rectangle cover and adaptive deterministic communication bound; exhibit compact circuit counterexample to transfer.",
+      "stop_rule": "Do not infer general circuit or runtime hardness from fixed partition rank.",
+      "literature_leads": [
+        "Prior MathOS universal witness layout; classical communication rank and rectangle arguments, derived explicitly here. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The universal selector matrix across units/nonunits has rank exactly 3^n over every field and 3^n+1 distinct rows.",
+      "scope": "Full normalized clause pool, n>=2, fixed partition; arithmetic separated sums.",
+      "derivation": "Encode partial assignments on Bob's side with two nonunit clauses per pinned literal; tensor of invertible 3x3 compatibility matrix.",
+      "unresolved_steps": [
+        "Unrestricted circuit lower bound or a noncircular transfer to general computation."
+      ],
+      "candidate_tests": [
+        "Actual gadget model sets, matrix rank over two fields, exact row partition."
+      ]
+    },
+    "alternative": {
+      "claim": "Boolean rectangle rank is exactly 2^n and deterministic common-output communication is at least ceil(n log2 3) bits even with adaptive interaction.",
+      "scope": "Fixed unit/nonunit partition, deterministic bit protocols and Boolean OR-of-AND factorization.",
+      "derivation": "Assignment rectangles cover, identity submatrix forces all terms, deterministic transcript leaves give a rank decomposition; compact coordinatewise circuit shows limits.",
+      "unresolved_steps": [
+        "Unrestricted state-transfer theorem and general circuit lower bound."
+      ],
+      "candidate_tests": [
+        "Identity restriction, witness rectangle coverage, compact compatibility circuit semantics."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Fixed partition rank is not general circuit complexity.",
+        "Communication lower bound is only linear in n and does not charge local computation.",
+        "State crossing transfer requires explicit bounded continuation and locally determined access.",
+        "Compact K circuit defeats rank-to-circuit inference."
+      ],
+      "counterexample_candidates": [
+        "Tensor compatibility submatrix has exponential field and Boolean ranks but O(n) gates."
+      ],
+      "equivalence_audit": "Exact field rank, Boolean cover and one-way row count; separate deterministic common-output protocol scope.",
+      "barrier_audit": "No unrestricted lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean selector vectors, field arithmetic and fixed partition bit protocols.",
+      "cost_ledger": {
+        "encoding": "Polynomial universal clause pool and partial assignment gadget encoding",
+        "preprocessing": "Construct each forcing gadget and normalize duplicates polynomially",
+        "inference": "Tensor rank and rectangle arguments; compact coordinatewise circuit",
+        "repetitions": "Exponential matrices only for finite audit",
+        "arithmetic_bits": "Exact GF2 and GF3 elimination and Boolean bitsets",
+        "memory": "Exponential separated rank; compact coordinatewise circuit polynomial",
+        "reconstruction": "Witness rectangles correspond to satisfying assignments; raw unit selection canonicalization",
+        "overall": "Field rank 3^n; Boolean rank 2^n; deterministic communication >=ceil(n log2 3); not a general runtime bound"
+      },
+      "missing_bounds": [
+        "Unrestricted deterministic circuit lower bound",
+        "Resource-preserving general circuit simulation by a bounded factorization model"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Nonunit literal forcing and exact tensor restriction",
+        "Rank and rectangle lower/upper bounds",
+        "Adaptive protocol rank bound and row count",
+        "Compact compatibility counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No full protocol optimizer or unrestricted circuit lower-bound solver."
+      ],
+      "proof_obligations": [
+        "Replay actual source gadget models and exact ranks",
+        "Check identity and witness rectangles",
+        "Check raw unit rows and malformed inputs"
+      ],
+      "formalization_plan": "Formalize forcing gadget, tensor invertibility and rectangle rank; review exact protocol conventions separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Establish exact semantic compression limits for separated representations and adaptive communication across the fixed universal selector partition, with explicit counterexample to general circuit transfer.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "General circuit transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate a stronger model or a noncircular structural transfer from general circuits to a lower-bound measure; stop fixed-partition rank-only optimization.",
+      "human_review_requests": [
+        "Review tensor rank over arbitrary fields, rectangle cover, deterministic protocol conventions and state-transfer premise."
+      ]
+    }
+  }
+}
