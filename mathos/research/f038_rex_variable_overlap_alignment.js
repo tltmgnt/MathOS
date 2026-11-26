@@ -187,3 +187,96 @@ function logical(J,raw,limit=3000000){
  while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a);trace.push([state,head,a]);if(trace.length>12)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
  return {state,head,t,moves,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=30000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(name==="read:selectParent:"&&!forward)forward=snap();if(name==="read:readyAt:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function oracle(k,P,C){
+ const [a,b]=[[0,1],[0,2],[1,2]][k];
+ let supports=P.map(p=>p[3]?C.findIndex(c=>c[3]&&p[a]===c[0]&&p[b]===c[1]):-1);
+ let i=supports.findIndex(x=>x>=0),j=i<0?-1:supports[i];
+ return {flags:supports.map(x=>+(x>=0)),chosen:j,out:supports.map(x=>+(x>=0)).join("")+C.map((_,x)=>+(x===j)).join("")};
+}
+function audit(){
+ const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a])),pairs=[[0,1],[0,2],[1,2]];
+ let counts={logicalCases:0,physicalCases:0,positiveCases:0,negativeCases:0,physicalPositive:0,physicalNegative:0,parentRows:0,childRows:0,physical:0,logical:0,checkpoints:0,physicalParentFlags:0,physicalChildFlags:0,malformed:0,malformedTransitions:0,cutoffs:0},digest=2166136261,physicalDigest=2166136261;
+ function check(k,P,C,mode=true,record=true){
+  let raw=encode(k,P,C),N=raw.length,w=M.width,want=oracle(k,P,C),ref=logical(J,raw,10000000);
+  ok(ref.state==="ready"&&ref.out===want.out,"logical "+JSON.stringify({k,P,C,want,ref}));
+  let r=null;
+  if(mode){
+   r=physical(M,raw);ok(r.state===M.q&&r.logical===ref.t,"physical halt");
+   let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+   ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clock");
+   let start=-w*N-1;
+   function unpack(cp,left){ok(cp&&cp.tape.length===w*(N+1+left)&&cp.tape.every(([p],i)=>p===start-left*w+i),"checkpoint layout");let b=cp.tape.map(x=>x[1]).join(""),v=Array.from({length:N+1+left},(_,i)=>dec.get(b.slice(i*w,(i+1)*w)));ok(!left||v[0]==="L","sentinel");return v.slice(left);}
+   let expected=[...raw.slice(0,2)].map(x=>x+"_"),positions=[],childMaskPositions=[];
+   const token=a=>{expected.push("Z","Z",a);return expected.length-1;};
+   for(let side of ["p","c"]){
+    if(side==="c")token("D");
+    for(let [i,row] of (side==="p"?P:C).entries()){
+     token(side==="p"?"P":"H");
+     for(let j=0;j<3;j++){
+      let a=side==="p"?(j===pairs[k][0]?"A":j===pairs[k][1]?"B":"X"):["C","E","X"][j];
+      for(let bit of row[j])token(a+bit);token("J");
+     }
+     let p=token(side==="p"?"T"+row[3]+want.flags[i]:"N"+row[3]);positions.push(p);if(side==="c")childMaskPositions.push(p);
+    }
+   }expected.push("R");
+   ok(JSON.stringify(unpack(r.forward,1))===JSON.stringify(expected),"forward tape");
+   let back=expected.slice();if(want.chosen>=0)back[childMaskPositions[want.chosen]]="O1";
+   ok(JSON.stringify(unpack(r.backward,0))===JSON.stringify(back),"backward tape");
+   let H=want.out.length;ok(r.tape.size===H&&[...want.out].every((v,i)=>r.tape.get(r.head+i)===+v),"physical output");
+   let body=0,c=0,p=new Set(positions);
+   for(let i=N-1;i>=0;i--){let e=+p.has(i);body+=2*w*(i+1)+2*c+2*e+4;c+=e;}
+   ok(r.ph[2]===2*w*N+2*w+2+body+H+3&&r.head===-w*N-H-2,"serializer "+JSON.stringify({H,ph:r.ph,head:r.head,expected:-w*N-H-2}));
+  }
+  if(record){
+   let pos=want.chosen>=0;counts.logicalCases++;counts.positiveCases+=+pos;counts.negativeCases+=+!pos;counts.parentRows+=P.length;counts.childRows+=C.length;
+   for(let ch of raw+":"+ref.out+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   if(mode){counts.physicalCases++;counts.physicalPositive+=+pos;counts.physicalNegative+=+!pos;counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=2;counts.physicalParentFlags+=P.length;counts.physicalChildFlags+=C.length;
+    let out=Array.from({length:want.out.length},(_,i)=>r.tape.get(r.head+i)).join("");for(let ch of raw+":"+out+";")physicalDigest=Math.imul(physicalDigest^ch.charCodeAt(0),16777619)>>>0;}
+  }return r;
+ }
+ const labels=["0","1","10","101"];
+ for(let k=0;k<3;k++){
+  check(k,[],[]);check(k,[["0","1","10",1]],[]);check(k,[],[["0","1","10",1]]);
+  // Exhaust all binary parent/child tuple pairs and mask combinations.
+  for(let p=0;p<8;p++)for(let c=0;c<8;c++)for(let m=0;m<4;m++){
+   let P=[[...p.toString(2).padStart(3,"0"),m&1]],C=[[...c.toString(2).padStart(3,"0"),m>>1]];
+   check(k,P,C,(p===5&&c%3===0&&m===3)||(p===0&&c===0&&m!==3));
+  }
+  // Equality of lengths matters: a prefix does not match a longer rank.
+  let P=[["0","10","101",1],["1","10","101",1],["0","10","101",0],["101","1","0",1]];
+  let [x,y]=pairs[k],C=[[P[0][x]+"1",P[0][y],"0",1],[P[0][x],P[0][y],"111",0],[P[1][x],P[1][y],"10",1],[P[0][x],P[0][y],"1",1],[P[0][x],P[0][y],"0",1]];
+  check(k,P,C);
+  check(k,[["0","0","0",1]],[["00","0","0",1],["0","00","0",1]]);
+ }
+ let seed=0x52455818;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let i=0;i<36;i++){
+  let k=i%3,rows=n=>Array.from({length:n},()=>[...Array.from({length:3},()=>labels[(rand()>>>16)%4]),rand()>>>31]),P=rows(1+i%3),C=rows(1+(i>>2)%3);
+  if(i%2){let [x,y]=pairs[k];P[0][3]=1;C[0]=[P[0][x],P[0][y],C[0][2],1];}
+  check(k,P,C,i<6);
+ }
+ let good=encode(0,[["0","1","10",1]],[["0","1","1",1]]),malformed=["","0","11","00111","00011","00110"+"011010","00110"+"110",good.slice(0,-1),good.slice(0,-3),good+"0",good+"110",encode(0,[["","0","1",1]],[]),encode(2,[],[["0","","1",1]])];
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let w of [1,2,4,8,16]){
+  let x="1".repeat(w),y="0".repeat(w-1)+"1",P=[[x,"0",y,1]],C=[[x,y+"0","0",1],[x,y,"1",1]],raw=encode(1,P,C),r=check(1,P,C,true,false);
+  if(w<=2){ok(physical(M,raw,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+  scaling.push([w,raw.length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest,physicalDigest};
+}
+if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_VARIABLE_OVERLAP_ALIGNMENT_OK '+JSON.stringify(audit()));
