@@ -1,0 +1,57 @@
+name: Proctor F038 RE-X ternary address cursor
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-address']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_address.js
+          node --check "$p"
+          node "$p" > /tmp/address.txt
+          node "$p" --checkpoint > /tmp/checkpoint.txt
+          node "$p" --descriptor > /tmp/address.desc
+          node "$p" --descriptor --checkpoint > /tmp/checkpoint.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const a=read('/tmp/address.txt','F038_REX_TERNARY_ADDRESS_OK');
+          const b=read('/tmp/checkpoint.txt','F038_REX_TERNARY_CHECKPOINT_OK');
+          assert.equal(a.q,11499);assert.equal(a.descriptorBits,632449);
+          assert.equal(b.q,11609);assert.equal(b.descriptorBits,638499);
+          assert.deepEqual(a.totals,{rawBits:628509,addresses:628356,transitions:83858223});
+          assert.deepEqual(b.totals,{rawBits:628509,selectorBits:628356,transitions:83858142});
+          assert.equal(a.controls.length,6);assert.equal(b.controls.length,4);
+          assert.equal(a.cutoffs,5);assert.equal(b.cutoffs,1);
+          assert.equal(a.exactBudget,3938318);assert.equal(b.exactBudget,3938295);
+          assert.equal(a.normalizationCounterexample.status,'POOL_SHAPE_OK');assert.equal(b.shapeOnlyControl,true);
+          JS
+          python -m mathos.research.f038_rex_ternary_address_replay /tmp/address.desc /tmp/checkpoint.desc > /tmp/replay.json
+          python -m mathos.research.tga_f038_rex_022b1 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/replay.json') as f:
+              r=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert r['decoder_roundtrips']==r['exact_replays']==r['one_step_short']==r['witness_refusals']==2
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
