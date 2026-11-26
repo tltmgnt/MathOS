@@ -1,0 +1,33 @@
+name: Proctor F038 unrestricted explicit table barrier
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-explicit-table-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_explicit_table_barrier.py
+          python -m mathos.research.f038_unrestricted_explicit_table_barrier | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_EXPLICIT_TABLE_BARRIER_OK {"arithmetic":[99,12,127],"replay":[[1,5832,139968,16832,1950,8196,6160,18438],[2,256,6144,794,128,277,333,1086],[3,256,6144,880,194,290,439,1490]],"tables":[[2,256,16384,4096,255],[3,32,23328,1728,31]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_EXPLICIT_TABLE_BARRIER_GATE_OK status=OPEN promotion=NONE')
+          PY
