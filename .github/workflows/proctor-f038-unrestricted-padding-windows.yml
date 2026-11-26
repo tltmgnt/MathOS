@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted padding windows
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-padding-windows']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_padding_windows.py
+          python -m mathos.research.f038_unrestricted_single_support_reduction | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_SINGLE_SUPPORT_OK {"controls":4,"gadget":[35,21,[0]],"rows":[[1,10,1160,1024,2,4,3,8,4,160,4],[2,13,2626,8192,4,256,95,1024,128,12032,256],[3,16,4992,65536,8,130,73,1040,142,6978,130],[4,19,8474,524288,16,130,16,2080,37,8937,130]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_padding_windows | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_PADDING_WINDOWS_OK {"controls":4,"rows":[[1,14,4,14,56,112,42,56,2464,224,24,4,14],[1,15,4,15,60,120,45,60,2700,300,24,4,14],[1,16,4,16,64,128,48,64,2944,384,24,4,14],[2,18,16,18,288,1152,270,594,14400,2970,96,18,72],[2,19,16,19,304,1216,285,627,15504,3762,96,18,72],[2,20,16,20,320,1280,300,660,16640,4620,96,18,72]],"wrapper":[[0,4,180,0,4],[1,4,92,2,2],[2,4,92,2,2]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_PADDING_WINDOWS_GATE_OK status=OPEN')
+          PY

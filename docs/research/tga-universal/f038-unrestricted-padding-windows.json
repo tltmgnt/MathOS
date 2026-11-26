@@ -1,0 +1,264 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-PADDING-WINDOWS",
+  "base_commit": "8059232a68660d3f147355b34b3cb05a040087da",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45743460207",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can one strong residual failure force polynomially many actual stage-k failures at every size throughout an entire polynomial length window, including single-support normal form?",
+  "route": "negative",
+  "topology": "Seeded parsimonious padding, simultaneous size/seed window search, injective residual census and conditional size-density criterion.",
+  "adversarial": [
+    "Every target h and seed must be included in the same fixed polynomial source algorithm.",
+    "Padding must preserve all model counts and distinct selector supports.",
+    "K depends on k,a,d and cannot be set equal to k without a proof.",
+    "Upper density of lengths does not imply density of SAT selector strings or natural density."
+  ],
+  "scope": "Identical U, actual complete selector and weighted stages; arbitrary original p, seeded parsimonious padding into single-support ternary normal form at all target sizes in a polynomial window.",
+  "cost": "For fixed k,a,d, polynomial full target length, polynomial number of sizes and seeds and exact stage calls; absorb fixed source tape implementation into some K>=k.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of simultaneous window transfer and density quantifiers"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS explicit clause mapping, padding support and model checks, small built-in outcomes and finite window count; not execution of Python.",
+  "expected": {
+    "controls": 4,
+    "rows": [
+      [
+        1,
+        14,
+        4,
+        14,
+        56,
+        112,
+        42,
+        56,
+        2464,
+        224,
+        24,
+        4,
+        14
+      ],
+      [
+        1,
+        15,
+        4,
+        15,
+        60,
+        120,
+        45,
+        60,
+        2700,
+        300,
+        24,
+        4,
+        14
+      ],
+      [
+        1,
+        16,
+        4,
+        16,
+        64,
+        128,
+        48,
+        64,
+        2944,
+        384,
+        24,
+        4,
+        14
+      ],
+      [
+        2,
+        18,
+        16,
+        18,
+        288,
+        1152,
+        270,
+        594,
+        14400,
+        2970,
+        96,
+        18,
+        72
+      ],
+      [
+        2,
+        19,
+        16,
+        19,
+        304,
+        1216,
+        285,
+        627,
+        15504,
+        3762,
+        96,
+        18,
+        72
+      ],
+      [
+        2,
+        20,
+        16,
+        20,
+        320,
+        1280,
+        300,
+        660,
+        16640,
+        4620,
+        96,
+        18,
+        72
+      ]
+    ],
+    "wrapper": [
+      [
+        0,
+        4,
+        180,
+        0,
+        4
+      ],
+      [
+        1,
+        4,
+        92,
+        2,
+        2
+      ],
+      [
+        2,
+        4,
+        92,
+        2,
+        2
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_padding_windows.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-PADDING-WINDOWS.md"
+  ],
+  "next": "Attack unconditional unbounded B_3 existence or a uniform polynomial cutoff; do not confuse conditional density of sizes with unconditional failure or reverse K-to-k transfer.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can one strong residual failure force polynomially many actual stage-k failures at every size throughout an entire polynomial length window, including single-support normal form?",
+      "strategy": "Extend prior parsimonious reduction with independent forced padding bits, enumerate all target lengths and polynomially many seeds in one fixed source witness algorithm.",
+      "alternative": "Derive the conditional upper density of hard sizes and exact polynomial-gap sparse-residual characterization of P=NP.",
+      "stop_rule": "No unconditional unbounded cubic claim, no numerical K or same-exponent transfer.",
+      "literature_leads": [
+        "Prior F038 exact residual census and single-support normal form; elementary padding and fixed polynomial-time stage simulation. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For each fixed k,a,d some K>=k and n0 give |B_k(h) intersect D_h|>=h^d |B_K(n)| simultaneously for all n>=n0 and h in [4n+7,(4n+7)^a].",
+      "scope": "Identical U, actual complete selector and weighted stages; arbitrary original p, seeded parsimonious padding into single-support ternary normal form at all target sizes in a polynomial window.",
+      "derivation": "Pin extra variables using the two fixed zero gadget bits; exact injection and model count; uniform source search over all target sizes/seeds, charged polynomial time and original stage absorption; any target success contradicts source B_K membership.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic-stage failure or uniform SAT cutoff.",
+        "Concrete compiled program and numerical K."
+      ],
+      "candidate_tests": [
+        "Actual padding support positions, seed inversion and exact model tests; finite actual stage window search."
+      ]
+    },
+    "alternative": {
+      "claim": "Under P!=NP, the sizes h with at least h^d single-support stage-k failures have upper asymptotic density one. Existence of polynomially bounded residual sizes meeting every polynomial window for some fixed k implies P=NP.",
+      "scope": "Conditional hard-window and exact equivalent sparse-size criterion; size density not selector density.",
+      "derivation": "Use arbitrary unbounded source B_K failures in simultaneous transfer, select quadratic windows and compare their lengths to endpoints; contradict sparse threshold with d=b+1.",
+      "unresolved_steps": [
+        "No lower density theorem or unconditional existence; no efficient discovery of hard windows."
+      ],
+      "candidate_tests": [
+        "Check finite interval and exact seed cap boundaries, actual original stage calls and projection."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Every target h and seed must be included in the same fixed polynomial source algorithm.",
+        "Padding must preserve all model counts and distinct selector supports.",
+        "K depends on k,a,d and cannot be set equal to k without a proof.",
+        "Upper density of lengths does not imply density of SAT selector strings or natural density."
+      ],
+      "counterexample_candidates": [
+        "Finite source failures do not imply unbounded target failures.",
+        "Infinitely many easy lengths with unbounded polynomial gaps are not excluded."
+      ],
+      "equivalence_audit": "Identical U and exact stage clocks, complete selector length and all repetitions charged, exact unique extension and injection, correct K-to-k implication.",
+      "barrier_audit": "No unconditional unbounded cubic or all-exponent lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original general three-symbol one-tape syntax and weighted stages; fixed polynomial-overhead compilation of uniform window search.",
+      "cost_ledger": {
+        "encoding": "Full normalized original and target selector; h at most polynomial in n; explicit forced padding signs",
+        "preprocessing": "Construct prior normal form and every allowed target/seed using exact full pool order",
+        "inference": "Actual stage-k search per target and verified projection",
+        "repetitions": "O((4n+7)^(a(d+1))) size-seed pairs for fixed a,d",
+        "arithmetic_bits": "Charge h^d seed counter, complete clause indices and clock arithmetic",
+        "memory": "Polynomial target representation, stage simulation and fixed tape overhead",
+        "reconstruction": "Project u_i bits, verify and position output; exact padded model bijection",
+        "overall": "For fixed k,a,d, polynomial full target length, polynomial number of sizes and seeds and exact stage calls; absorb fixed source tape implementation into some K>=k."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic and all-exponent lower bound",
+        "Numerical transfer K and concrete generic compilation"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact seeded model correspondence and injection",
+        "Uniform simultaneous window transfer",
+        "Conditional size upper density and polynomial-window criterion",
+        "Independent finite reference and original stage regression"
+      ],
+      "unsupported_steps": [
+        "No unconditional hard window existence or actual large stage run.",
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Replay padding encode/decode and actual small-stage wrapper",
+        "Review polynomial enumeration and exponent absorption",
+        "Audit density limsup and sparse-window quantifiers"
+      ],
+      "formalization_plan": "Formalize seeded padding bijection, uniform wrapper clock absorption, simultaneous residual transfer and conditional interval counting.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Strengthen exact unrestricted residual transfer to all sizes in a polynomial window and characterize the allowable gaps between low-residual sizes.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Attack unconditional unbounded B_3 existence or a uniform polynomial cutoff; do not confuse conditional density of sizes with unconditional failure or reverse K-to-k transfer.",
+      "human_review_requests": [
+        "Review seed capacity, injection, fixed polynomial wrapper, and conditional interval quantifiers."
+      ]
+    }
+  }
+}
