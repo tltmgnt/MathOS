@@ -1,0 +1,52 @@
+name: Proctor F038 RE-X width-three controller
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-controller']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_controller
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/w3c-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_CONTROLLER_OK ',a=fs.readFileSync('/tmp/w3c-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(read);
+          assert.deepEqual(a.totals,{rawBits:303312,producer:217741388,steps:3940612,edges:20,candidates:294,localRows:201,liveRows:191});
+          assert.deepEqual(b.totals,{rawBits:323702,producer:546163848,steps:12225803,edges:11,candidates:588,localRows:425,liveRows:425});
+          const rows=[...a.rows,...b.rows];
+          assert.deepEqual(rows.map(r=>r.models),[512,160,52,0,128,0,0,96,6816,1]);
+          assert.deepEqual(rows.map(r=>r.steps),[397047,505292,1163866,438932,460805,460769,397011,116890,10156937,2068866]);
+          assert.deepEqual(rows.map(r=>r.status),['COMPLETE','COMPLETE','COMPLETE','COMPLETE','COMPLETE','COMPLETE','COMPLETE','STRUCTURAL_REFUSAL','COMPLETE','COMPLETE']);
+          assert.deepEqual(rows.filter(r=>r.status==='COMPLETE').map(r=>r.decision),['1','1','1','0','1','0','0','1','1']);
+          assert.deepEqual(c.cutoffs,[0,1,100,395659,395660,460804]);
+          assert.equal(c.malformed,4);assert.equal(c.exactBudget,460805);
+          JS
+          python -m mathos.research.tga_f038_rex_024c3 > /tmp/w3c-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3c-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024C3_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
