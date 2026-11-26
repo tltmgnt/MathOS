@@ -1,0 +1,64 @@
+name: Proctor F038 RE-X ternary normalization
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-normalization']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_normalization.js
+          node --check "$p"
+          node "$p" > /tmp/normalization.txt
+          node "$p" --independent > /tmp/independent.txt
+          node "$p" --descriptor > /tmp/normalization.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const a=read('/tmp/normalization.txt','F038_REX_TERNARY_NORMALIZATION_OK');
+          const b=read('/tmp/independent.txt','F038_REX_TERNARY_NORMALIZATION_INDEPENDENT_OK');
+          assert.equal(a.q,40333);assert.equal(a.descriptorBits,2460317);
+          assert.deepEqual(a.totals,{rawBits:1521974,addresses:1521732,transitions:230622178});
+          assert.equal(a.results.length,4);assert.equal(a.payloads.length,4);
+          assert.deepEqual(a.payloads.map(r=>r.pins),['00','10','01','11']);
+          assert.equal(a.payloads.filter(r=>r.knownUnsat).length,2);
+          const all=a.results.concat(a.payloads);
+          assert.ok(all.every(r=>r.status==='NORMALIZED_FIXED_PATH'));
+          assert.equal(all.reduce((x,r)=>x+r.t,0),251181234);
+          const counts={required:0,optional:0,forbidden:0,pin:0};
+          for(const r of all)for(const k of Object.keys(counts))counts[k]+=r.classified[k];
+          assert.deepEqual(counts,{required:682,optional:24222,forbidden:1648180,pin:176});
+          assert.equal(a.controls.length,15);assert.equal(a.mutationCases,70);
+          assert.equal(a.mutationTransitions,123822076);assert.equal(a.cutoffs,4);
+          assert.equal(a.exactBudget,5139764);
+          assert.deepEqual(b,{replays:2,oneStepShort:1,transitions:10317439});
+          JS
+          python -m mathos.research.f038_rex_ternary_normalization_replay /tmp/normalization.desc > /tmp/replay.json
+          python -m mathos.research.tga_f038_rex_022b2 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/replay.json') as f:
+              r=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert r['decoder_roundtrips']==r['one_step_short']==1
+          assert r['exact_replays']==r['witness_refusals']==3
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
