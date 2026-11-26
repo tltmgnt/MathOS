@@ -1,0 +1,39 @@
+name: MRA-X recursive separator
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-separator.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-separator.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 -m venv .venv
+      - run: .venv/bin/python -m pip install numpy==2.3.5 scipy==1.17.0
+      - run: .venv/bin/python tools/mra_x_separator.py --output separator-evidence.json
+      - name: Check evidence and exact replay
+        run: |
+          PYTHONPATH=tools .venv/bin/python - <<'PY'
+          import json
+          import mra_x_separator as s
+          import mra_x_gap_agent as g
+          with open('separator-evidence.json') as f:
+              r=json.load(f)
+          assert r==s.audit()
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert len(r['rows'])==12 and r['controls']==6
+          expected={'updates':60,'visits':5472,'min_fill':3462,'actual':1502,'full':27360,'hits':120,'flat_same_order':1394,'flat_min_fill':4864}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          PY
