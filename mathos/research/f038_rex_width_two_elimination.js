@@ -692,14 +692,15 @@ function run(M,raw,limit=Infinity,observe=null){
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
  const origin=3*raw.length+1024;let tape=new Uint8Array(origin+raw.length+1024);tape.fill(2);
  for(let i=0;i<raw.length;i++)tape[origin+i]=raw.charCodeAt(i)-48;
- let state=0,head=origin,t=0,lo=head,hi=head;const {q,T}=M;
+ let state=0,head=origin,t=0,lo=head,hi=head,workerAt=null;const {q,T}=M;
  const event=observe?new Int32Array(q):null;if(event)for(let i=0;i<M.events.length;i++)event[M.events[i].state]=i+1;
  while(state!==q&&t<limit){
+  if(state===M.workerEntry&&workerAt===null)workerAt=t;
   if(event&&event[state])observe(M.events[event[state]-1],tape,head,origin);
   let v=T[3*state+tape[head]];tape[head]=(v>>2)&3;head+=(v&3)-1;state=v>>>4;t++;
   if(head<0)throw Error("left simulation buffer");if(head>=tape.length){let grown=new Uint8Array(tape.length*2);grown.fill(2);grown.set(tape);tape=grown;}if(head<lo)lo=head;if(head>hi)hi=head;
  }
- if(state!==q)return{status:"TIMEOUT",t,span:hi-lo+1};
+ if(state!==q)return{status:"TIMEOUT",t,span:hi-lo+1,workerAt};
  let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
  if(tape[head]<2){if(nonblank!==1)throw Error("noncanonical rejection head="+(head-origin)+" nonblank="+nonblank+" at "+t);return{status:tape[head]?"OUTSIDE_FIXED_PATH":"OUTSIDE_NORMALIZED",t,span:hi-lo+1};}
  let p=head-16,vals=[0,0,0,0,0],scale=1;
@@ -716,9 +717,9 @@ function run(M,raw,limit=Infinity,observe=null){
  let plan=[];for(let i=45;i<planEnd-1;i+=12)plan.push([0,4,8].map(j=>parseInt(word.slice(i+j,i+j+4),2)));
  let graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
  let groups=[];for(let i=0;i<3;i++){let g=0;for(let j=0;j<5;j++)g=2*g+tape[head-15+5*i+j];groups.push(g);}
- return{status:accepted?(word.endsWith("1")?"FOREST_SAT":"FOREST_UNSAT"):"OUTSIDE_WIDTH_TWO",t,span:hi-lo+1,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),relations:accepted?word.slice(202,-1):null,decision:accepted?+word.at(-1):null,parents:accepted?Array.from({length:9},(_,i)=>parseInt(word.slice(154+4*i,158+4*i),2)):[],residual:word.slice(0,36),active:word.slice(36,45),plan,word,leftBoundary:at-origin}};
+ return{status:accepted?(word.endsWith("1")?"FOREST_SAT":"FOREST_UNSAT"):"OUTSIDE_WIDTH_TWO",t,span:hi-lo+1,workerAt,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),relations:accepted?word.slice(202,-1):null,decision:accepted?+word.at(-1):null,parents:accepted?Array.from({length:9},(_,i)=>parseInt(word.slice(154+4*i,158+4*i),2)):[],residual:word.slice(0,36),active:word.slice(36,45),plan,word,leftBoundary:at-origin}};
 }
 
 
 module.exports={compile,decode,run};
-if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run(decode(C.desc),require('fs').readFileSync(0,'utf8'))));}
+if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),workerEntry:C.workerEntry},require('fs').readFileSync(0,'utf8'))));}
