@@ -13,9 +13,9 @@ Use the inherited normalized nine latent groups, real digits [0,m), n=19m-7 Bool
 
 Let F_C be the conjunction of original supports meeting C, and define the Boolean message on B_C:
 
-    M_C(b) = exists c in [0,m]^C : F_C(b,c)
+    M_C(b) = exists c in {0,...,m-1}^C : F_C(b,c)
 
-where the domain notation means the m real digits, not an inclusive upper endpoint. The exact feasible-key relation is
+The exact feasible-key relation is
 
     W(z) = F_A(z) AND product_C M_C(z restricted to B_C).
 
@@ -75,7 +75,7 @@ Separate admission negative control: a K5 private clique with a key adjacent to 
 
 ## 7. MathOS executed evidence and limitations
 
-The standalone JS audit uses actual allowed-factor sets and enumerated bag rows, not physical bit-sweep simulation. Ten fixtures m=2,3, five patterns each: eight eligible, two rejected scope patterns. Compare exact component messages against independent existential enumeration, all four-key projections against direct full nine-coordinate enumeration, reconstruct an original model for EVERY feasible key in each eligible fixture. Separate K5 controls m=4,8, actual digit tables; separate modular boundary q=2,3,4,5 controls using residue enumeration and exact multiplicities. Counts include forward elimination and witness reconstruction where applicable:
+The standalone JS audit uses actual allowed-factor sets and enumerated bag rows, not physical bit-sweep simulation. The revised regression also performs independent chunked sorted membership joins at every elimination, carrying an outgoing-tuple OR across chunk boundaries; its output is compared with direct bag enumeration and used in subsequent elimination and reconstruction. Ten fixtures m=2,3, five patterns each: eight eligible, two rejected scope patterns. Compare exact component messages against independent existential enumeration, all four-key projections against direct full nine-coordinate enumeration, reconstruct an original model for EVERY feasible key in each eligible fixture. Separate K5 controls m=4,8, actual digit tables; separate modular boundary q=2,3,4,5 controls using residue enumeration and exact multiplicities. Counts include forward elimination and witness reconstruction where applicable:
 
     2478 candidate elimination plans
     1280 elimination steps
@@ -87,6 +87,10 @@ The standalone JS audit uses actual allowed-factor sets and enumerated bag rows,
     18809 original model occurrences
     249 reconstructed key witnesses
     379 component witness reconstructions (including K5 controls).
+    10053 streamed batches
+    321117 sorted-merge candidate membership comparisons
+    6153 outgoing-tuple groups spanning a batch boundary
+    25595 streamed outgoing allowed tuple occurrences.
 
 K5 results [m,cutset,width,message cardinality,parity-key count,exact-key count]:
     [4,[4],3,2,256,128]
@@ -98,7 +102,7 @@ Boundary controls [q,m,allowed residue tuples,ternary closure residue tuples,lif
     [4,64,64,256,4194304,16777216]
     [5,125,125,625,48828125,244140625].
 
-All assertions passed. The audit uses dense enumeration of individual small bags; it does NOT verify the streamed implementation, all 126 key choices, actual raw normalized encoding/decoding, physical transitions, arbitrary m, or all input support patterns. Full nine-coordinate model counts refer only to eligible random fixtures, not the large clique or boundary examples. No independent mathematical review, Lean, integrated original-U solver or CI confirmation. Supplied prototype certification scores unchanged.
+All assertions passed. The reference uses dense enumeration of individual small bags; the revised algorithm independently evaluates streamed chunks with capacity m^2-1 (deliberately smaller than the production m^3 cap to force split groups), exact sort/merge membership and cross-chunk OR. It verifies the semantics of that batched algorithm, not its sequential bit complexity, actual tape sorting/movement, all 126 key choices, raw normalized encoding/decoding, physical transitions, arbitrary m, or all input support patterns. Full nine-coordinate model counts refer only to eligible random fixtures, not the large clique or boundary examples. No independent mathematical review, Lean, integrated original-U solver or CI confirmation. Supplied prototype certification scores unchanged.
 
 ## 8. Research Energy Optimization and evidence gates
 
