@@ -1,0 +1,44 @@
+name: Proctor F038 RE-X batched elimination
+on:
+  push:
+    branches: ['research/pnp-f038-rex-batched-elimination']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_batched_elimination.js
+          node mathos/research/f038_rex_batched_elimination.js | tee /tmp/elim-audit.txt
+          grep -Fx 'F038_REX_BATCHED_ELIMINATION_OK {"alphabet":29,"logicalStates":664,"logicalRules":16256,"width":5,"states":55538,"bits":3387822,"counts":{"physicalCases":8,"logicalOnly":17,"records":18,"requests":12,"positiveMembership":7,"candidateGroups":8,"feasibleCandidates":4,"outgoingGroups":7,"positiveOutgoing":4,"physicalTransitions":79234013,"logicalTransitions":5972245,"radixPasses":45,"boundaryChecks":28,"cutoffs":2,"malformed":7,"malformedTransitions":264585},"fixtures":[[0,11,1,5,[1,9,1]],[28,190974,13892,320,[5127,180540,5307]],[28,192380,14002,320,[5127,181946,5307]],[56,720480,52382,628,[19659,680814,20007]],[200,24765181,1867611,2212,[243003,24277963,244215]],[192,22820763,1720945,2124,[224067,22371465,225231]],[96,5790285,436667,1068,[56739,5676219,57327]],[200,24753939,1866745,2212,[243003,24266721,244215]]],"adversarial":{"splitBatchFlags":[1,0],"incorrectOR":1,"wholeCandidate":0,"missingRequestNotDetected":true}}' /tmp/elim-audit.txt
+          python -m mathos.research.tga_f038_rex_006 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_BATCH_ELIMINATION_REQUIRE_CANDIDATE_COMPLETENESS'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_BATCH_ELIMINATION_GATE_OK status=OPEN promotion=NONE')
+          PY
