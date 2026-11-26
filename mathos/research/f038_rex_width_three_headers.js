@@ -27,8 +27,7 @@ function machine(){
    return rd(B,x=>bit(x)?mv(B,1,f(p+x)):reject);
   }return start(B,f(""));
  }
- // Reuse the same scope decoder across seven slots, using a slot return
- // marker encoded on W's head? Instead compile each fixed continuation.
+ // A fixed slot-dispatch tape shares one canonical scope decoder.
  const slotFields=[[],[1],[2],[3],[1,2],[1,3],[2,3]];
  function owned(slot,dest,decode){
   let d=decode;
@@ -57,7 +56,7 @@ function machine(){
  const emitParent=seek(W,16,copy(W,R,4,routeBody));
  const emitOwner=start(W,copy(W,R,4,emitParent));
  bind(route,test(H,x=>x==="_",halt,start(W,copy(H,W,45,emitOwner))));
- const routeStart=start(H,route);
+ const routeStart=start(H,start(R,start(F,route)));
  // Parse one frame into H: owner, three neighbors, parent, seven slots,
  // bag bitmap and separator bitmap. T is indexed by owner ID (9 bits each).
  const nextFrame=label();
