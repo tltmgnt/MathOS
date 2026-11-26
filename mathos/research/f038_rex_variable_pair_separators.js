@@ -264,7 +264,7 @@ function oracle(initial,stages){
 }
 function audit(){
  const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
- let counts={logicalCases:0,physicalCases:0,sat:0,unsat:0,physicalSat:0,physicalUnsat:0,candidates:0,physical:0,logical:0,checkpoints:0,entries:0,predecessors:0,malformed:0,malformedTransitions:0,cutoffs:0},digest=2166136261;
+ let counts={logicalCases:0,physicalCases:0,sat:0,unsat:0,physicalSat:0,physicalUnsat:0,candidates:0,physical:0,logical:0,checkpoints:0,entries:0,predecessors:0,malformed:0,malformedTransitions:0,cutoffs:0},digest=2166136261,physicalDigest=2166136261;
  function check(initial,stages,mode=true,record=true){
   let raw=encode(initial,stages),N=raw.length,w=M.width,a=oracle(initial,stages),want=a?initial.map((col,b)=>col.map((_,j)=>+(b===a[1]&&j===a[0])).join("")).join("")+stages.map((s,i)=>s.map((_,j)=>+(j===a[i+2])).join("")).join(""):null;
   let ref=logical(J,raw,20000000);ok(ref.state===(a?"ready":"reject")&&(!a||ref.out===want),"logical "+JSON.stringify({initial,stages,want,ref:{state:ref.state,out:ref.out,trace:ref.trace}}));
@@ -303,7 +303,9 @@ function audit(){
   if(record){
    counts.logicalCases++;counts.sat+=+(!!a);counts.unsat+=+(!a);counts.candidates+=stages.reduce((x,s)=>x+s.reduce((y,g)=>y+g.reduce((z,c)=>z+c.length,0),0),0);
    if(mode){counts.physicalCases++;counts.physicalSat+=+(!!a);counts.physicalUnsat+=+(!a);counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(!!a);counts.entries+=entries;counts.predecessors+=preds;}
-   for(let ch of raw+":"+(want??"-")+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   let actual=a?ref.out:"-";
+   for(let ch of raw+":"+actual+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   if(mode){let out=a?Array.from({length:want.length},(_,i)=>r.tape.get(r.head+i)).join(""):"-";for(let ch of raw+":"+out+";")physicalDigest=Math.imul(physicalDigest^ch.charCodeAt(0),16777619)>>>0;}
   }return r;
  }
  const bits=(x,n)=>Array.from({length:n},(_,j)=>(x>>j)&1);
@@ -322,8 +324,11 @@ function audit(){
   if(i%2){let a=d.map(m=>(rand()>>>16)%m);initial[a[1]][a[0]]=1;for(let j=0;j<g;j++)stages[j][a[j+2]][a[j+1]][a[j]]=[1,1];}
   check(initial,stages,i<12);
  }
+ // Unequal cardinalities, three overlapping stages, and a unique high-rank witness.
+ let dims=[2,3,1,4,2],forced=[1,2,0,3,1],initial=Array.from({length:dims[1]},(_,b)=>Array.from({length:dims[0]},(_,a)=>+(a===forced[0]&&b===forced[1]))),stages=Array.from({length:3},(_,j)=>Array.from({length:dims[j+2]},(_,c)=>Array.from({length:dims[j+1]},(_,b)=>Array.from({length:dims[j]},(_,a)=>{let x=+(a===forced[j]&&b===forced[j+1]&&c===forced[j+2]);return [x,x]}))));
+ check(initial,stages);
  let malformed=["","0","010","010110",encode([[1],[1,0]],[]),encode([[1,1],[1]],[]),encode([[1,1]],[[[[[1,1]]]]]),encode([[1]],[[[[[1,1],[1,1]]]]]),encode([[1],[1]],[[[[[1,1]]]]]),encode([[1]],[[[[[1,1]],[[1,1]]]]]),encode([[0]],[[[[[0,0],[0,0]]]]])];
- let good=encode([[1]],[[[[[1,1]]]]]);malformed.push(good.slice(0,-1),good.slice(0,-3),good+"0",good+"110");
+ let good=encode([[1]],[[[[[1,1]]]]]);malformed.push(good.slice(0,-1),good.slice(0,-3),good+"0",good+"110",encode([[1,1],[1,1]],[[[[[1,1],[1,1]],[[1,1],[1,1]]],[[[1,1],[1,1]]]]]),encode([[1]],[[[[[1,1]]]],[[[[1,1],[1,1]]]] ]));
  for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
  let scaling=[];
  for(let m of [1,2,3,4]){
@@ -334,6 +339,6 @@ function audit(){
  let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"descriptor length");
- return {alphabet:J.symbols.length,width:M.width,states:M.q,bits:M.desc.length,rules:J.rules.length,counts,scaling,digest};
+ return {alphabet:J.symbols.length,width:M.width,states:M.q,bits:M.desc.length,rules:J.rules.length,counts,scaling,digest,physicalDigest};
 }
 if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_VARIABLE_PAIR_OK '+JSON.stringify(audit()));
