@@ -1,0 +1,52 @@
+name: Proctor F038 RE-X width-three headers
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-headers']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_headers
+          node --check "$p.js"
+          for suite in ir physical; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3headers-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_HEADERS_OK ',a=fs.readFileSync('/tmp/w3headers-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const a=read('physical'),b=read('ir');
+          for(const x of [a,b])assert.deepEqual(x.ir,{raw:11234,reachable:10870,compact:4912,rounds:178,checked:10870});
+          assert.equal(a.q,10028156);assert.equal(a.logical,94071);assert.equal(a.bits,852393264);
+          assert.deepEqual(a.totals,{producer:81613586,primitives:52269,transitions:1686203591,owned:53,edges:8});
+          assert.deepEqual(b.totals,{producer:354833409,primitives:78903,transitions:0,owned:80,edges:15});
+          assert.deepEqual(a.rows.map(r=>r.t),[1010897771,672898103,2407717]);
+          assert.deepEqual(a.rows.map(r=>r.span),[10415,10190,2710]);
+          assert.deepEqual(a.rows.map(r=>r.status),['COMPLETE','COMPLETE','REJECT']);
+          assert.deepEqual(b.rows.map(r=>r.status),['COMPLETE','COMPLETE','COMPLETE','REJECT']);
+          assert.deepEqual(a.cutoffs,[0,1,100,500000000]);assert.deepEqual(b.malformed,[19,19,295,565,567]);
+          JS
+          python -m mathos.research.tga_f038_rex_024d2a > /tmp/w3headers-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3headers-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D2A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
