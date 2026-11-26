@@ -1,0 +1,42 @@
+name: Proctor F038 RE-X normalized producer
+on:
+  push:
+    branches: ['research/pnp-f038-rex-normalized-producer']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_normalized_producer.js
+          node mathos/research/f038_rex_normalized_producer.js | tee /tmp/producer.txt
+          grep -Fx 'F038_REX_NORMALIZED_PRODUCER_OK {"graphs":{"tested":32768,"admitted":21544,"rejected":11224,"seededNine":256,"admittedNine":101},"counts":{"normalized":27,"admitted":18,"rejected":9,"sat":15,"unsat":3,"rejectedSat":9,"rejectedUnsat":0,"rawBits":5656581,"preparedBits":88425,"candidates":4158,"checks":7128,"rows":2694,"referenceAssignments":2541051,"logicalCases":10,"logical":2959063,"hostOnly":8,"physicalCases":6,"physicalSteps":8865660,"physicalSat":3,"physicalUnsat":3,"malformed":6},"results":[{"m":2,"name":"path","status":"SAT","models":274,"L":37914,"N":1253,"rows":49,"logical":837337,"physical":null,"z":[0,0,0,0,0,0,0,0,0]},{"m":2,"name":"star","status":"SAT","models":385,"L":37914,"N":1253,"rows":49,"logical":561061,"physical":null,"z":[0,0,0,0,0,0,0,0,0]},{"m":2,"name":"cycle","status":"SAT","models":76,"L":37914,"N":1037,"rows":40,"logical":590563,"physical":null,"z":[0,0,0,0,0,0,0,0,0]},{"m":2,"name":"empty","status":"SAT","models":512,"L":37914,"N":1421,"rows":56,"logical":709393,"physical":null,"z":[0,0,0,0,0,0,0,0,0]},{"m":2,"name":"K4","status":"OUTSIDE_WIDTH_TWO","models":160,"L":37914},{"m":2,"name":"K9","status":"OUTSIDE_WIDTH_TWO","models":10,"L":37914},{"m":2,"name":"forced","status":"SAT","models":1,"L":37914,"N":245,"rows":7,"logical":50089,"physical":1591842,"z":[1,1,1,1,1,1,1,1,1]},{"m":2,"name":"forced-unsat","status":"UNSAT","models":0,"L":37914,"N":221,"rows":6,"logical":13422,"physical":559914,"z":null},{"m":2,"name":"wide-forced","status":"OUTSIDE_WIDTH_TWO","models":1,"L":37914},{"m":3,"name":"path","status":"HOST_PRODUCER_ONLY","models":16128,"L":161851,"N":6083,"rows":182,"verified":19683},{"m":3,"name":"star","status":"HOST_PRODUCER_ONLY","models":17624,"L":161851,"N":6083,"rows":182,"verified":19683},{"m":3,"name":"cycle","status":"HOST_PRODUCER_ONLY","models":8480,"L":161851,"N":5489,"rows":164,"verified":19683},{"m":3,"name":"empty","status":"HOST_PRODUCER_ONLY","models":19683,"L":161851,"N":6314,"rows":189,"verified":19683},{"m":3,"name":"K4","status":"OUTSIDE_WIDTH_TWO","models":11664,"L":161851},{"m":3,"name":"K9","status":"OUTSIDE_WIDTH_TWO","models":2816,"L":161851},{"m":3,"name":"forced","status":"SAT","models":1,"L":161851,"N":308,"rows":7,"logical":78625,"physical":2503920,"z":[2,2,2,2,2,2,2,2,2]},{"m":3,"name":"forced-unsat","status":"UNSAT","models":0,"L":161851,"N":275,"rows":6,"logical":19974,"physical":853032,"z":null},{"m":3,"name":"wide-forced","status":"OUTSIDE_WIDTH_TWO","models":1,"L":161851},{"m":4,"name":"path","status":"HOST_PRODUCER_ONLY","models":239868,"L":428744,"N":14630,"rows":441,"verified":262144},{"m":4,"name":"star","status":"HOST_PRODUCER_ONLY","models":247947,"L":428744,"N":14630,"rows":441,"verified":262144},{"m":4,"name":"cycle","status":"HOST_PRODUCER_ONLY","models":161838,"L":428744,"N":13739,"rows":414,"verified":262144},{"m":4,"name":"empty","status":"HOST_PRODUCER_ONLY","models":262144,"L":428744,"N":14861,"rows":448,"verified":262144},{"m":4,"name":"K4","status":"OUTSIDE_WIDTH_TWO","models":193536,"L":428744},{"m":4,"name":"K9","status":"OUTSIDE_WIDTH_TWO","models":78732,"L":428744},{"m":4,"name":"forced","status":"SAT","models":1,"L":428744,"N":308,"rows":7,"logical":78625,"physical":2503920,"z":[3,3,3,3,3,3,3,3,3]},{"m":4,"name":"forced-unsat","status":"UNSAT","models":0,"L":428744,"N":275,"rows":6,"logical":19974,"physical":853032,"z":null},{"m":4,"name":"wide-forced","status":"OUTSIDE_WIDTH_TWO","models":1,"L":428744}],"descriptorBits":8127684,"apiStatuses":["SAT","TIMEOUT","UNSAT","OUTSIDE_NORMALIZED","OUTSIDE_WIDTH_TWO"]}' /tmp/producer.txt
+          python -m mathos.research.tga_f038_rex_021 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_WIDTH_TWO_HOST_BRIDGE_PHYSICAL_PRODUCER_OPEN'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_NORMALIZED_PRODUCER_GATE_OK status=OPEN promotion=NONE')
+          PY
