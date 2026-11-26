@@ -1,5 +1,5 @@
 // SEP-003 raw normalized selector host solver; not compiled U transitions.
-function engine(useSmallBatches=false){
+function engine(useSmallBatches=false,bagAdapter=null){
  const ok=(v,s)=>{if(!v)throw Error(s)},key=z=>z.join(",");
  function* tup(m,k){for(let i=0;i<m**k;i++)yield Array.from({length:k},(_,j)=>Math.floor(i/m**(k-j-1))%m);}
  function* perm(a){if(!a.length){yield [];return;}for(let i=0;i<a.length;i++)for(let p of perm(a.filter((_,j)=>i!==j)))yield [a[i],...p];}
@@ -43,7 +43,9 @@ function engine(useSmallBatches=false){
   let hist=[];
   for(let v of order){
    let touched=F.filter(f=>f.h.includes(v)),h=[...new Set(touched.flatMap(f=>f.h))].filter(g=>g!==v).sort((a,b)=>a-b);
-   ok(h.length<=3,"width");// Stream candidate bags in deliberately small chunks.
+   ok(h.length<=3,"width");
+   if(bagAdapter){let stream=bagAdapter(m,touched,v,h,useSmallBatches?Math.max(1,m*m-1):m**3);hist.push({v,touched});F=F.filter(f=>!f.h.includes(v));F.push({h,S:stream});n.eliminations++;continue;}
+   // Stream candidate bags in deliberately small chunks.
    // Sequential merge membership on projected factor keys; OR across chunk boundaries.
    let batch=[],cap=useSmallBatches?Math.max(1,m*m-1):m**3,last=null,hit=false,stream=new Set();
    const cmp=(a,b)=>a<b?-1:a>b?1:0;
@@ -266,5 +268,8 @@ function audit(includeFixtures=false){
  return includeFixtures?fixtures:{counts,rows,integration,machineHostCounters:E.n,productionHostCounters:P.n};
 }
 
-if(process.argv.includes('--solve')) console.log(JSON.stringify(engine().solveRaw(require('fs').readFileSync(0,'utf8'))));
+module.exports={engine,audit};
+if(require.main===module) { if(process.argv.includes('--solve')) console.log(JSON.stringify(engine().solveRaw(require('fs').readFileSync(0,'utf8'))));
 else console.log(process.argv.includes('--fixtures')?JSON.stringify(audit(true)):'F038_TGA_NORMALIZED_INTEGRATION_OK '+JSON.stringify(audit()));
+
+}
