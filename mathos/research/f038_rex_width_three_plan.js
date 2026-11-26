@@ -354,7 +354,7 @@ function compile(){
  const q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
  const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
  const events=[];for(let i=0;i<q;i++){let [name,flag]=names[i];if(expected.has(name))events.push({state:i,flag,...expected.get(name)});}
- return{q,desc,events,plannerEntry:ids.get("search0_0|0")};
+ return{q,desc,events,plannerEntry:ids.get("search0_0|0"),pushEntry:ids.get("push|0"),popEntry:ids.get("pop|0")};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
@@ -369,15 +369,16 @@ function run(M,raw,limit=Infinity,observe=null){
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
  const origin=3*raw.length+512,tape=new Uint8Array(origin+raw.length+1024);tape.fill(2);
  for(let i=0;i<raw.length;i++)tape[origin+i]=raw.charCodeAt(i)-48;
- let state=0,head=origin,t=0,lo=head,hi=head,plannerAt=null;const {q,T}=M;
+ let state=0,head=origin,t=0,lo=head,hi=head,plannerAt=null,pushes=0,pops=0;const {q,T}=M;
  const event=observe?new Int32Array(q):null;if(event)for(let i=0;i<M.events.length;i++)event[M.events[i].state]=i+1;
  while(state!==q&&t<limit){
   if(state===M.plannerEntry&&plannerAt===null)plannerAt=t;
+  if(state===M.pushEntry)pushes++;if(state===M.popEntry)pops++;
   if(event&&event[state])observe(M.events[event[state]-1],tape,head,origin);
   let v=T[3*state+tape[head]];tape[head]=(v>>2)&3;head+=(v&3)-1;state=v>>>4;t++;
   if(head<0||head>=tape.length)throw Error("simulation buffer");if(head<lo)lo=head;if(head>hi)hi=head;
  }
- if(state!==q)return{status:"TIMEOUT",t,head:head-origin,span:hi-lo+1,plannerAt};
+ if(state!==q)return{status:"TIMEOUT",t,head:head-origin,span:hi-lo+1,plannerAt,pushes,pops};
  let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
  if(tape[head]<2){if(nonblank!==1)throw Error("noncanonical rejection head="+(head-origin)+" nonblank="+nonblank+" at "+t);return{status:tape[head]?"OUTSIDE_FIXED_PATH":"OUTSIDE_NORMALIZED",t,span:hi-lo+1};}
  let p=head-16,vals=[0,0,0,0,0],scale=1;
@@ -398,10 +399,10 @@ function run(M,raw,limit=Infinity,observe=null){
  const accepted=frames[0].status===1;
  if(accepted?(frames.length!==10||frames[9].active!=="000000000"):frames.length!==1)throw Error("terminal stack");
  const graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
- return{status:accepted?"WIDTH_THREE_PLAN":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
+ return{status:accepted?"WIDTH_THREE_PLAN":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,pushes,pops,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
 
 }
 
 
 module.exports={compile,decode,run};
-if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),plannerEntry:C.plannerEntry},require('fs').readFileSync(0,'utf8'))));}
+if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),plannerEntry:C.plannerEntry,pushEntry:C.pushEntry,popEntry:C.popEntry},require('fs').readFileSync(0,'utf8'))));}
