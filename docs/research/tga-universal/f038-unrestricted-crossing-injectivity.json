@@ -1,0 +1,216 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-CROSSING-INJECTIVITY",
+  "base_commit": "c69de5bb32543fe9a6a0ad214607830700bd967a",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45752460238",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the complete crossing-record collision method extend unchanged to the exact cubic stage, or does one fixed eligible machine force injectivity?",
+  "route": "negative",
+  "topology": "Raw aligned block conversion, two exterior copies, deterministic local replay and injectivity of full crossing transcripts.",
+  "adversarial": [
+    "Must use exact original three-symbol table and charge all conversion steps.",
+    "Copies must be entirely outside every original interior cut.",
+    "Equal crossing sequences must splice entire terminal half-tapes.",
+    "The copying machine is always rejecting and can be omitted by a semantic certificate."
+  ],
+  "scope": "Actual original three-symbol tape and exact stage k>=3 at sufficiently large n; complete crossing-state records at every interior cut, not semantic quotients.",
+  "cost": "Concrete fixed 1046-state, 48120-bit description; original O(L^2) transitions, eventually included by cubic clock.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of concrete compiler, runtime and terminal tape splicing"
+    },
+    {
+      "key": "attempt_semantic_pruning",
+      "label": "Sound semantic reduction of complete crossing records or alternative obstruction"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or cutoff"
+    }
+  ],
+  "independent_reference": "Independent JS high-level logical replay and original raw-table generator, exhaustive 510 strings and 3586 cut records; not Python execution.",
+  "expected": {
+    "controls": 3,
+    "ell": 48120,
+    "q": 1046,
+    "rows": [
+      [
+        1,
+        2,
+        492,
+        246,
+        2,
+        0
+      ],
+      [
+        2,
+        4,
+        2232,
+        558,
+        8,
+        0
+      ],
+      [
+        3,
+        8,
+        8064,
+        1008,
+        24,
+        0
+      ],
+      [
+        4,
+        16,
+        25536,
+        1596,
+        64,
+        0
+      ],
+      [
+        5,
+        32,
+        74304,
+        2322,
+        160,
+        0
+      ],
+      [
+        6,
+        64,
+        203904,
+        3186,
+        384,
+        0
+      ],
+      [
+        7,
+        128,
+        536064,
+        4188,
+        896,
+        0
+      ],
+      [
+        8,
+        256,
+        1363968,
+        5328,
+        2048,
+        0
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-CROSSING-INJECTIVITY.md",
+    "mathos/research/f038_unrestricted_crossing_injectivity.py",
+    "mathos/research/f038_unrestricted_quadratic_stage.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Investigate sound semantic pruning or a different unrestricted lower-bound mechanism; do not attempt complete-record collisions with every eligible program.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the complete crossing-record collision method extend unchanged to the exact cubic stage, or does one fixed eligible machine force injectivity?",
+      "strategy": "Build an explicit three-symbol quadratic-time copier and prove injectivity of its crossing sequences by splicing terminal half-tapes.",
+      "alternative": "Distinguish full transcripts from sound semantic pruning; use the always-rejecting copier as a concrete barrier to the unchanged method.",
+      "stop_rule": "No impossibility claim for reduced records or arbitrary lower bounds; no unbounded cubic failure claim.",
+      "literature_leads": [
+        "Prior F038 same-U crossing and exact quadratic-stage notes; deterministic local replay. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "One fixed original program eventually scheduled at the exact cubic stage has an injective crossing-state transcript on every equal-length binary input at every interior cut.",
+      "scope": "Actual original three-symbol tape and exact stage k>=3 at sufficiently large n; complete crossing-state records at every interior cut, not semantic quotients.",
+      "derivation": "Expand raw bits to aligned blocks, duplicate input on both exterior sides, halt malformed; equal transcripts splice final halves, whose two copies must agree on mixed input.",
+      "unresolved_steps": [
+        "A genuinely new asymptotic obstruction or uniform SAT cutoff."
+      ],
+      "candidate_tests": [
+        "Compile actual table, exhaustive binary inputs lengths 1..8, exact copies and physical transcript uniqueness."
+      ]
+    },
+    "alternative": {
+      "claim": "The combined full record of every long eligible cubic-stage program cannot collide on distinct inputs; semantic pruning is not ruled out.",
+      "scope": "Actual original three-symbol tape and exact stage k>=3 at sufficiently large n; complete crossing-state records at every interior cut, not semantic quotients.",
+      "derivation": "Full record reconstructs the copier's sequence; its code length is constant and quadratic transition count fits cubic eventually; always-rejecting program can be omitted only with a justified change of record.",
+      "unresolved_steps": [
+        "Find a sound reduced record with enough collision mass, or a different mechanism."
+      ],
+      "candidate_tests": [
+        "Check actual decoder, original interpreter on normalized selectors and full clock inclusion."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Must use exact original three-symbol table and charge all conversion steps.",
+        "Copies must be entirely outside every original interior cut.",
+        "Equal crossing sequences must splice entire terminal half-tapes.",
+        "The copying machine is always rejecting and can be omitted by a semantic certificate."
+      ],
+      "counterexample_candidates": [
+        "Removing the always-rejecting copying program avoids this particular obstruction.",
+        "A finite compiler regression cannot by itself prove the asymptotic invariant."
+      ],
+      "equivalence_audit": "Same actual original input, table syntax and clocks; no change to verifier or stage; only complete record approach obstructed.",
+      "barrier_audit": "Specific method barrier, not P vs NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original deterministic three-symbol single tape, explicit fixed transition compiler.",
+      "cost_ledger": {
+        "encoding": "Raw contiguous binary input, explicit physical 3-cell blocks at 1+3i",
+        "preprocessing": "Right-to-left expansion by two-cell shifts, O(L^2)",
+        "inference": "Two exterior copies by bounded scans, constant-cost logical steps",
+        "repetitions": "One fixed run per input, O(L) append iterations",
+        "arithmetic_bits": "Fixed finite-state bit storage; no counters or random access assumed",
+        "memory": "O(L) physical cells",
+        "reconstruction": "Both terminal copies, halt on physical blank; no SAT witness emitted",
+        "overall": "Concrete fixed 1046-state, 48120-bit description; original O(L^2) transitions, eventually included by cubic clock."
+      },
+      "missing_bounds": [
+        "General cubic-stage counterexample lower bound",
+        "Independent proof review and Lean formalization"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Concrete original table and runtime invariant",
+        "Deterministic terminal half-tape splicing and injectivity",
+        "Independent finite raw and logical replay"
+      ],
+      "unsupported_steps": [
+        "New exact-head CI pending.",
+        "No asymptotic general lower bound or impossibility for semantic records."
+      ],
+      "proof_obligations": [
+        "Audit raw shift invariant and compiled macro moves",
+        "Review terminal splicing on equal sequences",
+        "Replay exact counts using original decoder"
+      ],
+      "formalization_plan": "Formalize concrete tape conversion, copy invariant, runtime and crossing transcript injectivity.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Establish a concrete reason the unchanged successful quadratic proof strategy cannot advance to cubic through sharper complete-record counts alone.",
+      "remaining_gaps": [
+        "Unbounded cubic failures",
+        "Sound semantic pruning or new obstruction",
+        "Independent review"
+      ],
+      "next_question": "Investigate sound semantic pruning or a different unrestricted lower-bound mechanism; do not attempt complete-record collisions with every eligible program.",
+      "human_review_requests": [
+        "Review full transcript injectivity, clock inclusion, and exact scope of the barrier."
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted crossing injectivity
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-crossing-injectivity']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_crossing_injectivity.py
+          python -m mathos.research.f038_unrestricted_unique_quadratic | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_UNIQUE_QUADRATIC_OK {"controls":3,"layout":[[2,23,8,38,8,128],[3,33,27,60,27,1458]],"rectangles":[[0,4,4,1,1],[1,16,12,2,7],[2,256,72,4,86],[3,65536,1400,8,3058]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_crossing_injectivity | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_CROSSING_INJECTIVITY_OK {"controls":3,"ell":48120,"q":1046,"rows":[[1,2,492,246,2,0],[2,4,2232,558,8,0],[3,8,8064,1008,24,0],[4,16,25536,1596,64,0],[5,32,74304,2322,160,0],[6,64,203904,3186,384,0],[7,128,536064,4188,896,0],[8,256,1363968,5328,2048,0]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_CROSSING_INJECTIVITY_GATE_OK status=OPEN')
+          PY
