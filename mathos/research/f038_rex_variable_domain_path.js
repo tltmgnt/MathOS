@@ -173,7 +173,117 @@ function encode(U,E){
  const b=v=>"0"+v;return U[0].map(b).join("")+"11"+E.map((e,i)=>U[i+1].map((u,c)=>b(u)+e.map(row=>b(row[c])).join("")+"10").join("")+"11").join("");
 }
 function logical(J,raw,limit=2000000){
- const rules=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((v,i)=>[i,v+"_"]));let state="init",head=0,t=0,trace=[];
- while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a);trace.push([state,head,a]);if(trace.length>12)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;state=s;t++;}
- return {state,head,t,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
+ const rules=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((v,i)=>[i,v+"_"]));let state="init",head=0,t=0,moves=0,trace=[];
+ while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a);trace.push([state,head,a]);if(trace.length>12)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
+ return {state,head,t,moves,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=20000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(name==="read:lastBoundary:")forward=snap();if(name==="read:readyAt:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];
+  if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }
+ return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function oracle(U,E){
+ let best=null,a=[];
+ function visit(i){
+  if(i===U.length){if(!best||a.slice().reverse().some((v,j)=>v!==best[best.length-1-j]&&a.slice(a.length-j).every((x,k)=>x===best[best.length-j+k])&&v<best[best.length-1-j]))best=a.slice();return;}
+  for(let b=0;b<U[i].length;b++)if(U[i][b]&&(i===0||E[i-1][a[i-1]][b])){a.push(b);visit(i+1);a.pop();}
+ }
+ // Enumerate in reverse coordinate order, using a separate full-predicate test.
+ let z=Array(U.length).fill(0);
+ function reverse(i){
+  if(i<0){return U.every((u,j)=>u[z[j]])&&E.every((e,j)=>e[z[j]][z[j+1]])?z.slice():null;}
+  for(let b=0;b<U[i].length;b++){z[i]=b;let r=reverse(i-1);if(r)return r;}return null;
+ }
+ return reverse(U.length-1);
+}
+function audit(){
+ const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
+ const counts={valid:0,sat:0,unsat:0,vertices:0,domainValues:0,edgeEntries:0,physical:0,logical:0,checkpoints:0,historyEntries:0,malformed:0,malformedTransitions:0,cutoffs:0};
+ let digest=2166136261;
+ function check(U,E,record=true){
+  let raw=encode(U,E),N=raw.length,w=M.width,a=oracle(U,E),want=a?U.map((u,i)=>u.map((_,j)=>+(j===a[i])).join("")).join(""):null,H=U.reduce((x,u)=>x+u.length,0);
+  let ref=logical(J,raw,20000000),r=physical(M,raw,30000000);
+  ok(r.state===M.q&&ref.state===(a?"ready":"reject")&&r.logical===ref.t,"termination/reference "+JSON.stringify({U,E,ref,physical:r.t}));
+  let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+  ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clock");
+  let start=-w*N-1;
+  function unpack(cp,left){
+   ok(cp&&cp.tape.length===w*(N+1+left),"checkpoint size");
+   let bits=cp.tape.map(x=>x[1]).join(""),symbols=Array.from({length:N+1+left},(_,i)=>dec.get(bits.slice(i*w,(i+1)*w)));
+   ok(cp.tape.every(([pos],i)=>pos===start-left*w+i)&&symbols.at(-1)==="R"&&(!left||symbols[0]==="L"),"checkpoint layout");
+   return symbols.slice(left);
+  }
+  let f=unpack(r.forward,1),expected=[],positions=[],msg=U[0].slice(),preds=0;
+  function cell(v){expected.push("Z",v);}
+  for(let b of U[0]){positions.push(expected.length+1);cell("T"+b+b);}cell(E.length?"S":"A");
+  for(let i=0;i<E.length;i++){
+   let next=[];
+   for(let j=0;j<U[i+1].length;j++){
+    let u=U[i+1][j],p=msg.findIndex((v,k)=>v&&u&&E[i][k][j]);next.push(+(p>=0));positions.push(expected.length+1);cell("T"+u+ +(p>=0));
+    for(let k=0;k<msg.length;k++)cell(k===p?"P":"E"+E[i][k][j]);
+    cell("D");preds+=+(p>=0);
+   }
+   msg=next;cell(i===E.length-1?"A":"S");
+  }
+  expected.push("R");ok(JSON.stringify(f)===JSON.stringify(expected),"forward tape");
+  if(a){
+   ok(r.tape.size===H&&[...want].every((v,i)=>r.tape.get(r.head+i)===+v)&&ref.out===want,"output");
+   let b=unpack(r.backward,0),expectedBack=expected.slice();
+   for(let i=0;i<N;i++)if(expectedBack[i]==="A")expectedBack[i]="S";
+   if(E.length===0)expectedBack[expectedBack.length-2]="A";
+   let offset=0;for(let i=0;i<U.length;i++){expectedBack[positions[offset+a[i]]]="W";offset+=U[i].length;}
+   ok(JSON.stringify(b)===JSON.stringify(expectedBack),"backward tape "+JSON.stringify([b,expectedBack]));
+   let body=0,c=0;
+   for(let i=N-1;i>=0;i--){let emit=+positions.includes(i);body+=2*w*(i+1)+2*c+2*emit+4;c+=emit;}
+   let serial=2*w*N+2*w+2+body+H+3;
+   ok(r.ph[2]===serial&&r.head===-w*N-H-2,"output clock");
+  }else ok(!r.tape.has(r.head)&&r.ph[2]===0&&!r.backward,"unsat");
+  if(record){
+   let out=a?Array.from({length:H},(_,i)=>r.tape.get(r.head+i)).join(""):"-";
+   for(let ch of raw+":"+out+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   counts.valid++;counts.sat+=+(!!a);counts.unsat+=+(!a);counts.vertices+=U.length;counts.domainValues+=H;counts.edgeEntries+=E.reduce((x,e)=>x+e.length*e[0].length,0);counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(!!a);counts.historyEntries+=preds;
+  }
+  return r;
+ }
+ function bits(x,n){return Array.from({length:n},(_,i)=>(x>>i)&1);}
+ for(let m=1;m<=5;m++)for(let x=0;x<2**m;x++)check([bits(x,m)],[]);
+ for(let [m,n] of [[1,1],[1,2],[2,1],[2,2],[1,3],[3,1]])for(let x=0;x<2**(m+n+m*n);x++){
+  let b=bits(x,m+n+m*n);check([b.slice(0,m),b.slice(m,m+n)],[Array.from({length:m},(_,i)=>b.slice(m+n+i*n,m+n+(i+1)*n))]);
+ }
+ let seed=0x52455811;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed;};
+ for(let i=0;i<40;i++){
+  let n=3+i%3,sizes=Array.from({length:n},()=>1+(rand()>>>28)%4),U=sizes.map(m=>Array.from({length:m},()=>rand()>>>31)),E=sizes.slice(1).map((m,j)=>Array.from({length:sizes[j]},()=>Array.from({length:m},()=>rand()>>>31)));
+  if(i%2){let a=sizes.map(m=>(rand()>>>16)%m);for(let j=0;j<n;j++)U[j][a[j]]=1;for(let j=0;j<n-1;j++)E[j][a[j]][a[j+1]]=1;}
+  check(U,E);
+ }
+ check([[1,1],[1,1],[1,1]],[[[1,0],[0,0]],[[0,0],[0,1]]]);
+ check([[0,1,0],[1,1,1,1],[1,1]],[[[0,0,0,0],[0,0,0,1],[0,0,0,0]],[[0,0],[0,0],[0,0],[0,1]]]);
+ let malformed=[];
+ for(let n=0;n<=5;n++)for(let x=0;x<2**n;x++){
+  let raw=n?x.toString(2).padStart(n,"0"):"";
+  if(raw!=="0011"&&raw!=="0111")malformed.push(raw);
+ }
+ // First domain has size 2, subsequent columns supply too few or too many rows.
+ malformed.push("010111"+"01011011","010111"+"010101011011","011111","010111010110","0101110111");
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let m of [2,3,4,8,16]){
+  let U=[Array(m).fill(1),Array(m).fill(1)],E=[Array.from({length:m},(_,i)=>Array.from({length:m},(_,j)=>+(i===m-1&&j===m-1)))],r=check(U,E,false);
+  if(m<=8){ok(physical(M,encode(U,E),r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+  scaling.push([m,encode(U,E).length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"length");
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest};
+}
+if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_VARIABLE_DOMAIN_PATH_OK '+JSON.stringify(audit()));
