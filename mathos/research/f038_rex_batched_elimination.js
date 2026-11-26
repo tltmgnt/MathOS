@@ -463,4 +463,7 @@ function audit(){
  ok(pos===M.desc.length,"descriptor length");
  return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,fixtures,adversarial};
 }
-if(process.argv.includes('--description')){let j=eliminationWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BATCHED_ELIMINATION_OK '+JSON.stringify(audit()));
+module.exports={compile,eliminationWorker,encode,makeRecord,field,refEliminate,logicalRun,physicalRun,audit};
+if(require.main===module) { if(process.argv.includes('--description')){let j=eliminationWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BATCHED_ELIMINATION_OK '+JSON.stringify(audit()));
+
+}
