@@ -248,7 +248,7 @@ function compile(){
  add("doneRaw",a=>a===2?l("SUCCESS",a):l("clean0",a));
  add("SUCCESS",a=>a===2?z("graphCopy0",2):bad());
  // Physical workspace to the right of the separator:
- // 60-bit blank-separated DFS frames (graph, active, tried, choice, root, status).
+ // 84-bit blank-separated DFS frames: original 60-bit search state plus 24-bit bag metadata.
  // Original edge blocks and pin data are preserved to the left.
  function emit(name,word,dest){
   add(name,a=>a===2?r(name+"Seek",a):bad());
@@ -278,7 +278,7 @@ function compile(){
  }
  const bin=x=>x.toString(2).padStart(4,"0");
 
- // All DFS frames have 60 bits; adjacent frame separators differ by 61.
+ // All DFS frames have 84 bits; adjacent frame separators differ by 85.
  // The machine head is on the separator immediately left of the current frame.
  const F=84,D=F+1;
  function cross(n,d,k,dest){
@@ -302,7 +302,7 @@ function compile(){
   readAt("tried"+v,45+v,next(v),degree(v,0,0));
   for(let found of [0,1])readAt("search"+v+"_"+found,36+v,"tried"+v,v===8?(found?"exhausted":"succeeded"):"search"+(v+1)+"_"+found);
  }
- // Push: initialize an empty child frame then copy the original graph
+ // Push: initialize an empty 84-bit child frame then copy the original graph
  // and active mask from the parent. Only fixed-length physical walks.
  move("push",1,D,"initChild");emit("initChild","0".repeat(54)+"1001"+"00"+"0".repeat(24),"returnParent");
  move("returnParent",-1,D,"copy0");
