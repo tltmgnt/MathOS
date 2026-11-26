@@ -150,10 +150,11 @@ function audit(E){
  for(let [name,bad] of [["empty",""],["shortHeader","1110"],["wrongDimension","1".repeat(32)+"0"],["truncated",raw.slice(0,-1)],["extra",raw+"1"],["noTerminator","1".repeat(31)]]){
   let r=run(M,bad,300000000);ok(r.status==="OUTSIDE_POOL_SHAPE","malformed "+name+" "+JSON.stringify(r));controls.push({name,...r});
  }
- for(let limit of [0,1,100,10000]){let r=run(M,raw,limit);ok(r.status==="TIMEOUT"&&r.t===limit,"cutoff");}
+ for(let limit of [0,1,100,10000,results[0].t-1]){let r=run(M,raw,limit);ok(r.status==="TIMEOUT"&&r.t===limit,"cutoff");}
+ ok(run(M,raw,results[0].t).status==="POOL_SHAPE_OK","exact halt budget");
  let invalid=raw.slice(0,n+1)+"0".repeat(raw.length-n-1),r=run(M,invalid,300000000);
  ok(E.decode(invalid)===null&&r.status==="POOL_SHAPE_OK","scope boundary");
- return {q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,normalizationCounterexample:{L:invalid.length,...r},totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
+ return {q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:5,exactBudget:results[0].t,normalizationCounterexample:{L:invalid.length,...r},totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
 }
 function checkpointAudit(E){
  const C=compile({checkpoint:true}),M={...decode(C.desc),checkpoint:true},ok=(v,s)=>{if(!v)throw Error(s)},results=[];
@@ -170,7 +171,9 @@ function checkpointAudit(E){
  for(let [name,bad] of [["empty",""],["wrongDimension","1".repeat(32)+"0"],["truncated",raw.slice(0,-1)],["extra",raw+"1"]]){
   let r=run(M,bad,300000000);ok(r.status==="OUTSIDE_POOL_SHAPE"&&!r.checkpoint,"checkpoint malformed "+name);controls.push({name,t:r.t});
  }
- return {q:C.q,descriptorBits:C.desc.length,results,controls,shapeOnlyControl:true,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,selectorBits:a.selectorBits+r.selectorBits,transitions:a.transitions+r.t}),{rawBits:0,selectorBits:0,transitions:0})};
+ let short=run(M,raw,results[0].t-1);ok(short.status==='TIMEOUT'&&short.t===results[0].t-1,'checkpoint one-step-short');
+ ok(run(M,raw,results[0].t).status==='POOL_CHECKPOINT','checkpoint exact budget');
+ return {q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:1,exactBudget:results[0].t,shapeOnlyControl:true,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,selectorBits:a.selectorBits+r.selectorBits,transitions:a.transitions+r.t}),{rawBits:0,selectorBits:0,transitions:0})};
 }
 module.exports={compile,decode,run,audit,checkpointAudit};
 if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile({checkpoint:process.argv.includes('--checkpoint')}).desc);else if(process.argv.includes('--shape')){const C=compile();console.log(JSON.stringify(run(decode(C.desc),require('fs').readFileSync(0,'utf8'))));}else if(process.argv.includes('--checkpoint'))console.log('F038_REX_TERNARY_CHECKPOINT_OK '+JSON.stringify(checkpointAudit(require('./f038_tga_normalized_integration.js').engine())));else console.log('F038_REX_TERNARY_ADDRESS_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
