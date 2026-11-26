@@ -25,7 +25,7 @@ function audit(){
   function make(policy){
    let maps=new Map(),cap=0,loss=0;
    for(let c of tup(m,3)){
-    let C=Array.from({length:m},(_,a)=>a).filter(a=>policy===0||policy===1&&Math.floor(a/2)===Math.floor(c[0]/2)||policy===2&&a===(c.reduce((s,x)=>s+x,0)+1)%m);
+    let C=Array.from({length:m},(_,a)=>a).filter(a=>policy===0||policy===1&&Math.floor((a+1)/2)===Math.floor((c[0]+1)/2)||policy===2&&a===(c.reduce((s,x)=>s+x,0)+1)%m);
     let D=Array.from({length:m},(_,a)=>Array.from({length:m},(_,b)=>narrow.reduce((v,s)=>v+s.lost(a,b,c).length*m**(2-s.O.length),0)+ell.reduce((v,E)=>v+E[a][b],0)));
     if(policy===0){
      let used=[],res=Array(m).fill(37*m*m),best=null;
