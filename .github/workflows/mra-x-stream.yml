@@ -1,0 +1,43 @@
+name: MRA-X streaming proof verification
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-stream.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-stream.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_stream_audit.py --directory stream-audit
+      - run: python3 tools/mra_x_stream_audit.py --directory stream-replay
+      - name: Check reproducible mathematical evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          from pathlib import Path
+          def stable(p):
+              r=json.load(open(p))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              r.pop('timings')
+              return r
+          r=stable('stream-audit/evidence.json')
+          assert r==stable('stream-replay/evidence.json')
+          assert len(r['rows'])==6 and r['controls']==12
+          expected={'states':96,'checkpoints':24,'feasible':84,'full_visits':17516,'fresh_visits':3671,'hits':1472,'buckets':1920}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          for p in Path('stream-audit').glob('*.ndjson'):
+              assert p.read_bytes()==(Path('stream-replay')/p.name).read_bytes()
+          PY
