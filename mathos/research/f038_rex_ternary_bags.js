@@ -274,13 +274,9 @@ function compile(){
  function rankEmit(name,lane,dest){
   add(name,a=>a===2?l(name+"Find",a):bad());
   add(name+"Find",a=>a===2?r(name+"MSB",a):l(name+"Find",a));
-  const choose=walk(name+"Choose",1,lane,name+"Digit");
   const skip=walk(name+"Skip",1,5+lane-1,name+"Digit");
-  add(name+"MSB",a=>a===2?bad():a===1?r(lane===1?name+"Digit":walkOnce(),a):r(skip,a));
-  function walkOnce(){return choose;} // replaced below by exact fixed-distance lane move
-  // The MSB state has already moved one cell right; choose must take lane-1 steps.
   const first=walk(name+"First",1,lane-1,name+"Digit");
-  defs.set(name+"MSB",a=>a===2?bad():r(a?first:skip,a));
+  add(name+"MSB",a=>a===2?bad():r(a?first:skip,a));
   // After restoring a digit, check whether its column is the final one by
   // looking exactly G+W-lane cells to the right, then return the same distance.
   const distance=G+W-lane;
@@ -363,7 +359,7 @@ function compile(){
  const q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
  const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
  const events=[];for(let i=0;i<q;i++){let [name,flag]=names[i];if(expected.has(name))events.push({state:i,flag,...expected.get(name)});}
- return{q,desc,events};
+ return{q,desc,events,serializationEntry:ids.get("bag0Start|0")};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
@@ -376,14 +372,15 @@ function decode(desc){
 function run(M,raw,limit=Infinity,observe=null){
  if(!/^[01]*$/.test(raw))throw Error("binary raw required");
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
- const origin=3*raw.length+512,tape=new Uint8Array(origin+5*raw.length+512);tape.fill(2);
+ const origin=3*raw.length+512;let tape=new Uint8Array(origin+raw.length+512);tape.fill(2);
  for(let i=0;i<raw.length;i++)tape[origin+i]=raw.charCodeAt(i)-48;
- let state=0,head=origin,t=0,lo=head,hi=head;const {q,T}=M;
+ let state=0,head=origin,t=0,lo=head,hi=head,serializationAt=null;const {q,T}=M;
  const event=observe?new Int32Array(q):null;if(event)for(let i=0;i<M.events.length;i++)event[M.events[i].state]=i+1;
  while(state!==q&&t<limit){
+  if(state===M.serializationEntry&&serializationAt===null)serializationAt=t;
   if(event&&event[state])observe(M.events[event[state]-1],tape,head,origin);
   let v=T[3*state+tape[head]];tape[head]=(v>>2)&3;head+=(v&3)-1;state=v>>>4;t++;
-  if(head<0||head>=tape.length)throw Error("simulation buffer");if(head<lo)lo=head;if(head>hi)hi=head;
+  if(head<0)throw Error("left simulation buffer");if(head>=tape.length){let grown=new Uint8Array(tape.length*2);grown.fill(2);grown.set(tape);tape=grown;}if(head<lo)lo=head;if(head>hi)hi=head;
  }
  if(state!==q)return{status:"TIMEOUT",t,span:hi-lo+1};
  let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
@@ -398,8 +395,10 @@ function run(M,raw,limit=Infinity,observe=null){
  let e=head+1;while(tape[e]!==2){if(e>=tape.length)throw Error("output buffer");e++;}const prepared=Array.from(tape.subarray(head+1,e)).join("");
  if(nonblank!==selector.length+workBits+maskBits+prepared.length)throw Error("checkpoint garbage");
  let groups=[];for(let i=0;i<3;i++){let g=0;for(let j=0;j<5;j++)g=2*g+tape[head-15+5*i+j];groups.push(g);}
- return{status:"BAGS_PREPARED",t,span:hi-lo+1,prepared,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin,masks:blocks.slice(0,49),pins:blocks[49],maskBits:maskBits-blocks[49].length,leftBoundary:at-origin}};
+ return{status:"BAGS_PREPARED",t,serializationAt,serializationTransitions:serializationAt===null?null:t-serializationAt,span:hi-lo+1,prepared,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin,masks:blocks.slice(0,49),pins:blocks[49],maskBits:maskBits-blocks[49].length,leftBoundary:at-origin}};
 }
 
 
 module.exports={compile,decode,run};
+
+if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),serializationEntry:C.serializationEntry},require('fs').readFileSync(0,'utf8'))));}
