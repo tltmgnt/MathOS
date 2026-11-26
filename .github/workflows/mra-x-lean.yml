@@ -1,0 +1,41 @@
+name: MRA-X scoped verification
+on:
+  pull_request:
+    paths:
+      - 'formal/MraXTgaProjection.lean'
+      - 'docs/research/MRA_X_LEAN_CLAIMS.v1.json'
+      - 'mathos/research/lean_first.py'
+      - 'tools/mra_x*.py'
+      - '.github/workflows/mra-x-lean.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'formal/MraXTgaProjection.lean'
+      - 'docs/research/MRA_X_LEAN_CLAIMS.v1.json'
+      - 'mathos/research/lean_first.py'
+      - 'tools/mra_x*.py'
+      - '.github/workflows/mra-x-lean.yml'
+permissions:
+  contents: read
+jobs:
+  scoped-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Offline advisory policy and ledger regressions
+        run: |
+          python3 tools/mra_x_tga.py --self-test
+          python3 tools/mra_x_runtime.py --self-test
+      - name: Install version-pinned Lean distribution
+        run: |
+          curl --fail --show-error --silent --location --retry 2 https://github.com/leanprover/lean4/releases/download/v4.14.0/lean-4.14.0-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.14.0-linux/bin" >> "$GITHUB_PATH"
+      - name: Verify registered scoped propositions and transitive axioms
+        run: |
+          python3 -m mathos.research.lean_first verify --registry docs/research/MRA_X_LEAN_CLAIMS.v1.json
+      - name: Report bounded benchmark (modeled stages, not proof)
+        run: python3 tools/mra_x_runtime.py --benchmark

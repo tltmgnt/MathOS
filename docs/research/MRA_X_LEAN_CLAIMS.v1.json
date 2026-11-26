@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "lean_version": "4.14.0",
+  "policy": {
+    "allowed_axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "automatic_claim_promotion": false,
+    "informal_statement_fidelity": "REQUIRES_INDEPENDENT_REVIEW"
+  },
+  "claims": [
+    {
+      "claim_id": "MRA_X_SOUND",
+      "source": "formal/MraXTgaProjection.lean",
+      "theorem": "MraXTga.feasible_in_relaxation",
+      "expected_type": "∀ {I V : Type} (F : (I → V) → Prop) (scopes : (I → Prop) → Prop) (x : I → V), F x → MraXTga.Relaxation F scopes x",
+      "research_claim": "Every feasible configuration belongs to its exact scope projection relaxation.",
+      "scope": "Arbitrary index and value types, exact feasible witnesses and arbitrary scope family.",
+      "limitations": "Does not establish computation of projections, practical filter soundness, F038, SAT recovery or any open problem.",
+      "statement_review": "PENDING",
+      "external_review": "PENDING",
+      "proves_open_problem": false
+    },
+    {
+      "claim_id": "MRA_X_SCOPE_MONOTONE",
+      "source": "formal/MraXTgaProjection.lean",
+      "theorem": "MraXTga.scope_monotone",
+      "expected_type": "∀ {I V : Type} (F : (I → V) → Prop) (small large : (I → Prop) → Prop) (x : I → V), (∀ S : I → Prop, small S → large S) → MraXTga.Relaxation F large x → MraXTga.Relaxation F small x",
+      "research_claim": "Adding exact scope constraints cannot enlarge the corresponding relaxation.",
+      "scope": "Inclusion of families of coordinate scopes, not automatically the exact cardinality hierarchy.",
+      "limitations": "Does not prove strict shrinkage, computational efficiency, or a relationship between homology and infeasibility.",
+      "statement_review": "PENDING",
+      "external_review": "PENDING",
+      "proves_open_problem": false
+    },
+    {
+      "claim_id": "MRA_X_FULL_SCOPE",
+      "source": "formal/MraXTgaProjection.lean",
+      "theorem": "MraXTga.full_scope_exact",
+      "expected_type": "∀ {I V : Type} (F : (I → V) → Prop) (scopes : (I → Prop) → Prop) (x : I → V), scopes (fun _ : I => True) → MraXTga.Relaxation F scopes x → F x",
+      "research_claim": "A relaxation including the full coordinate scope is exactly feasible in conjunction with the soundness lemma.",
+      "scope": "Exact feasible-witness semantics over the full index type; uses functional extensionality.",
+      "limitations": "Does not establish a computational recovery mechanism, general SAT recovery, F038 or an open-problem result.",
+      "statement_review": "PENDING",
+      "external_review": "PENDING",
+      "proves_open_problem": false
+    }
+  ]
+}
