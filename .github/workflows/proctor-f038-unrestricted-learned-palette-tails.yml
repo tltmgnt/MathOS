@@ -1,0 +1,48 @@
+name: Proctor F038 unrestricted learned palette tails
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-learned-palette-tails']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_learned_palette_tails.js
+          node mathos/research/f038_unrestricted_learned_palette_tails.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_LEARNED_PALETTE_TAILS_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":16,"passes":32,"frequencyChecks":1376,"entropyChecks":608,"scoreChecks":80,"greedyChecks":776,"fullChecks":323120,"success":113767,"heavy":5290,"wide":3989,"narrow":0,"localChecks":323328,"positiveChecks":765456,"relabels":197664,"children":757248,"models":3989,"roots":8208}
+          assert r['chosen'] == {'1':32}
+          assert r['scoreControl'] == [[1,144,"3328"],[2,96,"2560"],[4,0,"1024"]]
+          assert r['clusters'] == [[16,4,210,4,12],[64,8,3906,8,56],[256,16,64770,16,240]]
+          assert r['narrowControl'] == 1
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LEARNED_PALETTE_TAILS_GATE_OK status=OPEN promotion=NONE')
+          PY
