@@ -1,0 +1,295 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-PREFIX-ADVERSARY",
+  "base_commit": "469e6afd52b9b31a6c38fff72272985fb9159a8c",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45733908389",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Construct actual bad witnesses for the same universal machine at the exact polynomial stage and isolate the surviving unrestricted competitors.",
+  "route": "negative",
+  "topology": "Common selector prefix, exact suffix clause lift, clock-sensitive adversarial avoidance and surviving full-input programs.",
+  "adversarial": [
+    "Single exponent does not prove P!=NP.",
+    "Suffix is readable by longer computations.",
+    "Sufficient counting condition can fail at small n.",
+    "Fixed-k reduction exponent depends on k."
+  ],
+  "scope": "Identical prior U, explicit unary selector encoding, three-symbol general tape interpreter and length-weighted clock; all programs quantified.",
+  "cost": "Polynomial construction for each fixed k, charged in L+2^s; actual bad witnesses at k=1; O(L^(k-1)) remaining description strings.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of prefix locality and exact lifted counterexample"
+    },
+    {
+      "key": "attempt_full_input",
+      "label": "All-exponent adversary for surviving unrestricted programs"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JavaScript suffix geometry, one-state tape enumeration, and lifted source truth checks; not execution of Python.",
+  "expected": {
+    "geometry": [
+      [
+        8,
+        1,
+        576,
+        585,
+        553,
+        545,
+        10,
+        1,
+        0
+      ],
+      [
+        12,
+        2,
+        2048,
+        2061,
+        1901,
+        1889,
+        12,
+        2,
+        0
+      ],
+      [
+        16,
+        3,
+        4992,
+        5009,
+        4561,
+        4545,
+        13,
+        1,
+        0
+      ],
+      [
+        24,
+        5,
+        17344,
+        17369,
+        15609,
+        15585,
+        15,
+        2,
+        0
+      ],
+      [
+        32,
+        7,
+        41728,
+        41761,
+        37281,
+        37249,
+        16,
+        1,
+        0
+      ],
+      [
+        64,
+        15,
+        341504,
+        341569,
+        301889,
+        301825,
+        19,
+        1,
+        0
+      ],
+      [
+        128,
+        31,
+        2763776,
+        2763905,
+        2430593,
+        2430465,
+        22,
+        1,
+        1
+      ]
+    ],
+    "blind": [
+      [
+        8,
+        10,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        12,
+        12,
+        2,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        16,
+        13,
+        3,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        24,
+        15,
+        5,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        8,
+        20,
+        1,
+        5832,
+        5832,
+        1620,
+        2,
+        -1
+      ],
+      [
+        12,
+        21,
+        2,
+        5832,
+        5832,
+        1980,
+        2,
+        1
+      ]
+    ],
+    "embedding": [
+      256,
+      16384,
+      512,
+      95,
+      5120,
+      32
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_prefix_adversary.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-PREFIX-ADVERSARY.md"
+  ],
+  "next": "Attack the full-input programs surviving the same stage, with a decision-preserving adversary and exact clock accounting; no restricted-model detour.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Construct actual bad witnesses for the same universal machine at the exact polynomial stage and isolate the surviving unrestricted competitors.",
+      "strategy": "Encode arbitrary SAT and independent pin pattern in a common input suffix; enumerate and avoid clock-limited outputs.",
+      "alternative": "Audit why full-input programs survive and exhibit a polynomial solver for empty-source pin family.",
+      "stop_rule": "Do not turn a fixed exponent lower bound into the all-exponent condition.",
+      "literature_leads": [
+        "Prior exact U equivalence; elementary tape locality and finite avoidance. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For every sufficiently large n divisible by four the exact H_(n,s_1(n)) is satisfiable. For fixed k a polynomial SAT-preserving embedding defeats all prefix-blind programs and leaves O(L^(k-1)) possible description strings.",
+      "scope": "Identical prior U, explicit unary selector encoding, three-symbol general tape interpreter and length-weighted clock; all programs quantified.",
+      "derivation": "Lift short clauses with two guard variables, choose a pin pattern missing from blind outputs; use exact head/output-read horizon and description lengths.",
+      "unresolved_steps": [
+        "Defeat the remaining unrestricted full-input programs at every k."
+      ],
+      "candidate_tests": [
+        "Actual pool suffix, one-state interpreter enumeration, all two-variable source formulas, concrete bad witness."
+      ]
+    },
+    "alternative": {
+      "claim": "The empty-source pin family admits a fixed polynomial witness finder after reading the suffix; prefix avoidance cannot force all-exponent hardness.",
+      "scope": "Ordinary explicit input, same U and stage clocks.",
+      "derivation": "Decode the selected lifted pins and emit their pattern; the prior universal simulation bound gives some fixed polynomial cutoff.",
+      "unresolved_steps": [
+        "A resource-preserving adversary for full-input computation."
+      ],
+      "candidate_tests": [
+        "Replay explicit lifted assignments and exhausted-pattern controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Single exponent does not prove P!=NP.",
+        "Suffix is readable by longer computations.",
+        "Sufficient counting condition can fail at small n.",
+        "Fixed-k reduction exponent depends on k."
+      ],
+      "counterexample_candidates": [
+        "Empty-source lifted pin family is easy to solve by reading the input."
+      ],
+      "equivalence_audit": "Same U, same input ordering and clock, exact lifted SAT equivalence, prefix output-read bound and residual program count.",
+      "barrier_audit": "No all-exponent lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual prior binary descriptions and deterministic tape interpreter with charged clocks.",
+      "cost_ledger": {
+        "encoding": "Polynomial explicit pool and suffix lift",
+        "preprocessing": "Enumerate valid descriptions and compute prefix geometry",
+        "inference": "Simulate blind programs on common prefix; choose missing pattern",
+        "repetitions": "At most 2^(s+1)-1 descriptions; each fixed k polynomial",
+        "arithmetic_bits": "Exact clocks, bit masks, tape simulation and projection",
+        "memory": "Polynomial in L+2^s including forbidden projections",
+        "reconstruction": "Explicit pin pattern and any source model extend to selector witness",
+        "overall": "Polynomial construction for each fixed k, charged in L+2^s; actual bad witnesses at k=1; O(L^(k-1)) remaining description strings."
+      },
+      "missing_bounds": [
+        "All-exponent adversarial existence",
+        "Defeat unrestricted full-input programs"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact suffix clause lift",
+        "Clock-locality including output read",
+        "Count of surviving descriptions",
+        "Actual k=1 bad witness construction"
+      ],
+      "unsupported_steps": [
+        "No independent mathematical review or Lean formalization.",
+        "No proof at arbitrary exponents."
+      ],
+      "proof_obligations": [
+        "Replay actual pool order and machine interpreter",
+        "Check lifted clauses and concrete stage failure",
+        "Audit the all-exponent gap"
+      ],
+      "formalization_plan": "Formalize tape locality, clause lift and missing-pattern counting against the same scheduler.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Prove the first exponent of the exact unrestricted bad-family predicate and isolate surviving full-input algorithms.",
+      "remaining_gaps": [
+        "Every exponent k>=2 or a uniform polynomial cutoff",
+        "Universal lower bound"
+      ],
+      "next_question": "Attack the full-input programs surviving the same stage, with a decision-preserving adversary and exact clock accounting; no restricted-model detour.",
+      "human_review_requests": [
+        "Review machine encoding, clock and output horizon, quantifiers and source SAT preservation."
+      ]
+    }
+  }
+}
