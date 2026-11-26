@@ -1,0 +1,394 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-PREFIX-PRUNED-CROSSING",
+  "base_commit": "e37fc29046649d29733a8d3c9c69c95e32930c18",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45747127711",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can rigorous common-prefix pruning and direction-specific Kraft counting close part of the finite cubic gap without classifying truncated executions as failures?",
+  "route": "negative",
+  "topology": "Common prefix partial table replay, directional prefix-free words and exact rational census.",
+  "adversarial": [
+    "Hash matches must be verified exactly.",
+    "Short horizon survival is unresolved, not failure.",
+    "All undefined transition completions must be counted.",
+    "Unary-side union bound must include every retained cut."
+  ],
+  "scope": "Original U, exact clocks, finite source sizes 186..190; only 189 and 190 proven by the new fraction bound.",
+  "cost": "Exact weighted first-use branching on a common 512-step prefix, all survivors charged at their actual clock by incoming-word counting; exact rational arithmetic.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of prefix pruning and one-sided Kraft bounds"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted SAT lower bound"
+    }
+  ],
+  "independent_reference": "Local C++ census, independent JS eight-step first-use replay without cycle detection, independent BigInt rational evaluation; integrated CI pending.",
+  "expected": {
+    "bounds": [
+      [
+        186,
+        93,
+        74,
+        7267633,
+        "33063423674",
+        null
+      ],
+      [
+        187,
+        94,
+        73,
+        7403793,
+        "10274128294",
+        null
+      ],
+      [
+        188,
+        95,
+        71,
+        7541433,
+        "3282392398",
+        null
+      ],
+      [
+        189,
+        95,
+        70,
+        7646337,
+        "991694590",
+        "6516738668618612649375491038576586784801086722652752347"
+      ],
+      [
+        190,
+        95,
+        69,
+        7751993,
+        "338182062",
+        "1038574631789309833482021344445833714781946850816954909894"
+      ]
+    ],
+    "census": [
+      [
+        186,
+        512,
+        0,
+        16358778,
+        2681883,
+        5436243,
+        39131,
+        25250646,
+        24476904
+      ],
+      [
+        186,
+        512,
+        1,
+        15915699,
+        2598840,
+        5962365,
+        35518,
+        28285081,
+        24476904
+      ],
+      [
+        186,
+        512,
+        2,
+        4111191,
+        548982,
+        1349703,
+        34908,
+        11236311,
+        6009876
+      ],
+      [
+        187,
+        512,
+        0,
+        16372746,
+        2683512,
+        5420646,
+        39004,
+        25203416,
+        24476904
+      ],
+      [
+        187,
+        512,
+        1,
+        15910848,
+        2599173,
+        5966883,
+        35370,
+        28245889,
+        24476904
+      ],
+      [
+        187,
+        512,
+        2,
+        4115862,
+        550008,
+        1344006,
+        34905,
+        11230703,
+        6009876
+      ],
+      [
+        188,
+        512,
+        0,
+        16359102,
+        2681901,
+        5435901,
+        39167,
+        25146943,
+        24476904
+      ],
+      [
+        188,
+        512,
+        1,
+        15915699,
+        2598840,
+        5962365,
+        35518,
+        28245005,
+        24476904
+      ],
+      [
+        188,
+        512,
+        2,
+        4111182,
+        548991,
+        1349703,
+        34907,
+        11212444,
+        6009876
+      ],
+      [
+        189,
+        512,
+        0,
+        16372962,
+        2683485,
+        5420457,
+        39028,
+        25099849,
+        24476904
+      ],
+      [
+        189,
+        512,
+        1,
+        15910848,
+        2599173,
+        5966883,
+        35370,
+        28206168,
+        24476904
+      ],
+      [
+        189,
+        512,
+        2,
+        4115835,
+        550026,
+        1344015,
+        34902,
+        11206725,
+        6009876
+      ],
+      [
+        190,
+        512,
+        0,
+        16358562,
+        2681910,
+        5436432,
+        39107,
+        25046864,
+        24476904
+      ],
+      [
+        190,
+        512,
+        1,
+        15915699,
+        2598840,
+        5962365,
+        35518,
+        28204929,
+        24476904
+      ],
+      [
+        190,
+        512,
+        2,
+        4111218,
+        548964,
+        1349694,
+        34911,
+        11188537,
+        6009876
+      ]
+    ],
+    "controls": 3,
+    "short": [
+      [
+        186,
+        8,
+        0,
+        9688563,
+        1650033,
+        13138308,
+        10321,
+        222685,
+        24476904
+      ],
+      [
+        186,
+        8,
+        1,
+        13790259,
+        1984653,
+        8701992,
+        22679,
+        439966,
+        24476904
+      ],
+      [
+        186,
+        8,
+        2,
+        2770335,
+        322929,
+        2916612,
+        13322,
+        214645,
+        6009876
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-PREFIX-PRUNED-CROSSING.md",
+    "mathos/research/f038_unrestricted_prefix_pruned_crossing.cpp",
+    "mathos/research/f038_unrestricted_prefix_pruned_crossing.py",
+    "mathos/research/f038_unrestricted_kraft_crossing.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Resolve the remaining mathematical obstruction to unbounded cubic-stage failure or a uniform cutoff; the finite gap is not the asymptotic target.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can rigorous common-prefix pruning and direction-specific Kraft counting close part of the finite cubic gap without classifying truncated executions as failures?",
+      "strategy": "Partition the high directional classes by prefix halts, exact cycles and horizon survivors, then exploit unary incoming directions separately.",
+      "alternative": "Keep the full original binary Kraft charge for both-direction binary tables and account conservatively for all pruned tables.",
+      "stop_rule": "No timeout-to-failure inference; no unbounded theorem or claim at 186..188.",
+      "literature_leads": [
+        "Prior exact incoming Kraft theorem, directional census, and first-use tape replay. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The exact cubic residual is nonempty at sizes 189 and 190 with explicit symbolic lower counts.",
+      "scope": "Original U, exact clocks, finite source sizes 186..190; only 189 and 190 proven by the new fraction bound.",
+      "derivation": "All early executions see a common prefix; partition high table classes using exact recurrence, then apply the mixed-direction Kraft bound to remaining full-clock competitors.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failure and finite sizes 186..188."
+      ],
+      "candidate_tests": [
+        "Exact C++ weighted census and independent short-horizon JS replay; rational bound at all five sizes."
+      ]
+    },
+    "alternative": {
+      "claim": "A unary final-side incoming alphabet allows at most one successful output per local input per cut; removing those successes permits a one-sided binary Kraft bound.",
+      "scope": "Original U, exact clocks, finite source sizes 186..190; only 189 and 190 proven by the new fraction bound.",
+      "derivation": "Prefix-free unary words are unique; union over retained cuts, then use only the binary side for all remaining successes.",
+      "unresolved_steps": [
+        "Asymptotically stronger obstruction."
+      ],
+      "candidate_tests": [
+        "Check parent directional counts and integer convexity bounds."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Hash matches must be verified exactly.",
+        "Short horizon survival is unresolved, not failure.",
+        "All undefined transition completions must be counted.",
+        "Unary-side union bound must include every retained cut."
+      ],
+      "counterexample_candidates": [
+        "Remaining high tables may halt later; they are charged at t=2^30.",
+        "Finite upper bound above one at 186..188 is inconclusive."
+      ],
+      "equivalence_audit": "Same original full input, decoder, clocks and unique pin family; prefix locality preserves actual output; every table is accounted for.",
+      "barrier_audit": "Finite existence only; no unrestricted exponent promotion.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original deterministic three-symbol tape programs; finite exact C++ partial-table simulation and mathematical crossing counts.",
+      "cost_ledger": {
+        "encoding": "Complete normalized selector; common unary and zero prefix",
+        "preprocessing": "Exact directional shape completion counts",
+        "inference": "Exact recurrence and one-sided Kraft inequality",
+        "repetitions": "First-use branching and full table weights, five sizes and three high classes",
+        "arithmetic_bits": "Exact integer weights, checked cell equality and rational bounds",
+        "memory": "Rollback tape and shape memo; bounded common-prefix access",
+        "reconstruction": "Unique pin assignment per member; no missed assignment found",
+        "overall": "Exact weighted first-use branching on a common 512-step prefix, all survivors charged at their actual clock by incoming-word counting; exact rational arithmetic."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bound",
+        "Independent proof review and formalization"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Common prefix locality and recurrence proof",
+        "Weighted partial table partition",
+        "One-sided incoming Kraft bound",
+        "Exact rational finite results and short reference replay"
+      ],
+      "unsupported_steps": [
+        "Integrated CI not yet verified.",
+        "No explicit missed selector or asymptotic lower bound."
+      ],
+      "proof_obligations": [
+        "Review recurrence and weight partition",
+        "Replay compiled audit and exact fractions",
+        "Check original full clocks"
+      ],
+      "formalization_plan": "Formalize finite prefix partition, recurrence certificates, mixed-direction counting and exact bound.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Close two of the five previously uncovered finite sizes and strengthen the exact counting bound.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Resolve the remaining mathematical obstruction to unbounded cubic-stage failure or a uniform cutoff; the finite gap is not the asymptotic target.",
+      "human_review_requests": [
+        "Review partial table completion weights, cycle comparison and unary-exception counting."
+      ]
+    }
+  }
+}
