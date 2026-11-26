@@ -1,0 +1,43 @@
+name: MRA-X curriculum agent
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-curriculum.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-curriculum.yml'
+permissions:
+  contents: read
+jobs:
+  curriculum:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_curriculum_agent.py --output curriculum-evidence.json --ledger curriculum.sqlite
+      - name: Verify replay, evidence, and prerequisite gates
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json, sqlite3
+          from unittest.mock import patch
+          import mra_x_curriculum_agent as a
+          with open('curriculum-evidence.json') as f:
+              r=json.load(f)
+          h=r.pop('evidence_sha256')
+          assert a.gap.digest(r)==h
+          r['evidence_sha256']=h
+          assert r==a.campaign()
+          assert r['summary']=={'LAB_PASS':18,'LAB_FAIL':0,'OPEN_RESEARCH':6,'BLOCKED':0}
+          with patch.object(a,'run_lab',side_effect=RuntimeError('injected')):
+              f=a.campaign()
+              assert f['modules']['MATH-101']['status']=='LAB_FAIL'
+              assert f['modules']['MATH-102']['status']=='BLOCKED'
+          a.persist('curriculum.sqlite',r)
+          with sqlite3.connect('curriculum.sqlite') as db:
+              assert db.execute('select count(*) from curriculum_runs').fetchone()[0]==1
+          PY
