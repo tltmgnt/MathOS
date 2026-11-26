@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted split tail unions
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-split-tail-unions']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_split_tail_unions.js
+          node mathos/research/f038_unrestricted_split_tail_unions.js | tee /tmp/current.txt
+          grep -Fx 'F038_SPLIT_TAIL_UNIONS_OK {"n":{"fixtures":16,"passes":48,"candidates":464,"dominance":3016,"keyChecks":11136,"unionBits":280488,"full":484680,"success":180477,"heavy":7975,"head":1004,"tail":10494,"narrow":1527,"branchModels":12017,"headModels":1034,"localChecks":7406,"children":1167872,"roots":40014,"greedyChecks":776},"selected":{"0,0":12,"0,40":9,"1,1":16,"0,1":1,"0,90":10},"controls":[[8,2,12,56,336,84,448,49],[16,4,48,240,2880,720,3840,225],[32,8,192,992,23808,5952,31744,961],[64,16,768,4032,193536,48384,258048,3969]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SPLIT_TAIL_UNIONS_GATE_OK status=OPEN promotion=NONE')
+          PY
