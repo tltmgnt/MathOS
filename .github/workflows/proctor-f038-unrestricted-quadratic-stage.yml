@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted quadratic stage
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-quadratic-stage']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_quadratic_stage.py
+          python -m mathos.research.f038_unrestricted_crossing_adversary | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_CROSSING_OK {"controls":4,"geometry":[[1,32,1,41761,25537,10193,17,-1,0],[2,64,8,341569,203137,87361,20,2,0],[4,128,64,2763905,1620737,722593,23,8,0],[8,256,512,22239489,12948993,5876417,26,14,0],[16,512,4096,178434561,103525377,47395713,29,19,0],[32,1024,32768,1429562369,827938817,380706561,32,25,1],[64,2048,262144,11444865025,6622457857,3051822593,35,31,1],[128,4096,2097152,91592429569,52975460353,24439274497,38,37,1],[256,8192,16777216,732873564161,423786889217,195612997633,41,42,1],[512,16384,134217728,5863525203969,3390227972097,1565299240961,44,48,1]],"onehot":[[1,1,2,1,1],[2,5,8,2,2],[3,10,32,3,3],[4,16,128,4,4],[5,23,512,5,5],[6,31,2048,6,6]],"sets":[8,65536,58975,131072,6561],"splice":[[1,5832,69984,45576,91152,91152,50490,324],[4,5832,69984,30837,61674,61674,34356,330],[8,5832,69984,29457,58914,58914,32852,330]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_quadratic_stage | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_QUADRATIC_OK {"controls":4,"counts":[[1,20,0,"5832"],[2,42,1,"387420489"],[3,61,2,"101559956668416"],[4,92,2,"68952523554931640625"],[5,114,3,"96806918768257718637133824"],[6,136,3,"244416145091043012544965789715329"],[7,158,3,"1009212044656507725162109374628859215872"]],"layout":[[3,33,27,15,405,216,15],[4,44,64,15,960,512,15]],"splice":[[1,5832,209952,105870,211740,16238,1692,0,117698],[2,256,9216,5289,10578,836,104,732,5933],[3,256,9216,5923,11846,931,109,1644,6668]],"subsequence":[[16,"3","33","27","45860","13347","21641",699768,277],[24,"21","231","9261","16329314","4156923","8097041",973302,281],[32,"134","1474","2406104","4265692619","1064731305","2128745441",993183,281],[40,"852","9372","618470208","1097402828061","273066213569","548188194081",998082,281],[48,"5413","59543","158603979997","281462105981970","70001852676347","140621244188241",999954,281],[56,"34370","378070","40601174453000","72053265056793791","17918838303592521","35999400878257601",999939,281],[64,"218240","2400640","10394486964224000","18446738006373508481","4587441105545661441","9216432724820147201",999999,281]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_QUADRATIC_GATE_OK status=OPEN')
+          PY

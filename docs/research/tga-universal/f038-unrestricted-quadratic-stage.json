@@ -1,0 +1,326 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-QUADRATIC-STAGE",
+  "base_commit": "1cb0ab6d73089d6e263b31c71df89e2c9b1fb0c6",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45735135619",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Establish exact integer exponent two of the existing unrestricted SAT counterexample family without changing U, its description encoding or clock.",
+  "route": "negative",
+  "topology": "Compressed clock-preserving crossing records, sparse program syntax, and separated selector geometry on exact length subsequence.",
+  "adversarial": [
+    "Use exact stage ceiling; subsequence is required.",
+    "One-state crossings still require count and terminal-halt metadata.",
+    "Bound valid descriptions rather than all strings; preserve all programs.",
+    "Polynomially solvable family cannot certify all exponents."
+  ],
+  "scope": "Same U, original selector encoding and binary description syntax; all programs at exact s_2 on an infinite length subsequence.",
+  "cost": "Exact sparse description weight bound, o(L) metadata, improved separation geometry, exponential collision discovery explicitly charged; no all-exponent theorem.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of integer-two weighted crossing proof"
+    },
+    {
+      "key": "attempt_all_exponents",
+      "label": "Same-U bad witnesses for every k>=3 or uniform polynomial cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS integer geometry, syntax counts, compressed crossing simulations and modular forbidden sets; not execution of Python.",
+  "expected": {
+    "counts": [
+      [
+        1,
+        20,
+        0,
+        "5832"
+      ],
+      [
+        2,
+        42,
+        1,
+        "387420489"
+      ],
+      [
+        3,
+        61,
+        2,
+        "101559956668416"
+      ],
+      [
+        4,
+        92,
+        2,
+        "68952523554931640625"
+      ],
+      [
+        5,
+        114,
+        3,
+        "96806918768257718637133824"
+      ],
+      [
+        6,
+        136,
+        3,
+        "244416145091043012544965789715329"
+      ],
+      [
+        7,
+        158,
+        3,
+        "1009212044656507725162109374628859215872"
+      ]
+    ],
+    "subsequence": [
+      [
+        16,
+        "3",
+        "33",
+        "27",
+        "45860",
+        "13347",
+        "21641",
+        699768,
+        277
+      ],
+      [
+        24,
+        "21",
+        "231",
+        "9261",
+        "16329314",
+        "4156923",
+        "8097041",
+        973302,
+        281
+      ],
+      [
+        32,
+        "134",
+        "1474",
+        "2406104",
+        "4265692619",
+        "1064731305",
+        "2128745441",
+        993183,
+        281
+      ],
+      [
+        40,
+        "852",
+        "9372",
+        "618470208",
+        "1097402828061",
+        "273066213569",
+        "548188194081",
+        998082,
+        281
+      ],
+      [
+        48,
+        "5413",
+        "59543",
+        "158603979997",
+        "281462105981970",
+        "70001852676347",
+        "140621244188241",
+        999954,
+        281
+      ],
+      [
+        56,
+        "34370",
+        "378070",
+        "40601174453000",
+        "72053265056793791",
+        "17918838303592521",
+        "35999400878257601",
+        999939,
+        281
+      ],
+      [
+        64,
+        "218240",
+        "2400640",
+        "10394486964224000",
+        "18446738006373508481",
+        "4587441105545661441",
+        "9216432724820147201",
+        999999,
+        281
+      ]
+    ],
+    "splice": [
+      [
+        1,
+        5832,
+        209952,
+        105870,
+        211740,
+        16238,
+        1692,
+        0,
+        117698
+      ],
+      [
+        2,
+        256,
+        9216,
+        5289,
+        10578,
+        836,
+        104,
+        732,
+        5933
+      ],
+      [
+        3,
+        256,
+        9216,
+        5923,
+        11846,
+        931,
+        109,
+        1644,
+        6668
+      ]
+    ],
+    "layout": [
+      [
+        3,
+        33,
+        27,
+        15,
+        405,
+        216,
+        15
+      ],
+      [
+        4,
+        44,
+        64,
+        15,
+        960,
+        512,
+        15
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_quadratic_stage.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-QUADRATIC-STAGE.md"
+  ],
+  "next": "Attack integer exponents k>=3 with a new same-U computational obstruction beyond the polynomially solvable disjointness family, or prove a universal polynomial cutoff.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Establish exact integer exponent two of the existing unrestricted SAT counterexample family without changing U, its description encoding or clock.",
+      "strategy": "Charge nonhalt crossing states by actual valid description weights, optimize selector geometry, and choose lengths near powers of two.",
+      "alternative": "Audit the limit of the same disjointness family beyond exponent two.",
+      "stop_rule": "No change to U or clocks, no claim at k>=3, no inference from finite fixtures alone.",
+      "literature_leads": [
+        "Prior crossing adversary; elementary valid-code weight sums and classical crossing-sequence counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "H_(n,2 ceil(log2 L(n))) is SAT for infinitely many n for the exact existing U.",
+      "scope": "Same U, original selector encoding and binary description syntax; all programs at exact s_2 on an infinite length subsequence.",
+      "derivation": "One-state running crossings need zero payload bits; exact weighted crossing bound <1/5000, metadata o(L); improved Mg/L^2>1/4000 and ceiling-controlled subsequence permit simultaneous record collision.",
+      "unresolved_steps": [
+        "Every integer exponent k>=3 or a universal polynomial success bound."
+      ],
+      "candidate_tests": [
+        "Exact rational series, actual pool geometry, BigInt length subsequences, compressed rejection-preserving splice."
+      ]
+    },
+    "alternative": {
+      "claim": "The fixed disjointness family is polynomial-time witness-solvable; the same positive weighted crossing bound grows too quickly for k>2.",
+      "scope": "Same U, original selector encoding and binary description syntax; all programs at exact s_2 on an infinite length subsequence.",
+      "derivation": "Scan explicit forbidden sets and pins to reconstruct surviving index; U includes this fixed algorithm at some polynomial cutoff.",
+      "unresolved_steps": [
+        "A fundamentally different same-U adversary for larger exponents."
+      ],
+      "candidate_tests": [
+        "Replay modular forbidden sets and witness construction."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Use exact stage ceiling; subsequence is required.",
+        "One-state crossings still require count and terminal-halt metadata.",
+        "Bound valid descriptions rather than all strings; preserve all programs.",
+        "Polynomially solvable family cannot certify all exponents."
+      ],
+      "counterexample_candidates": [
+        "Using a positive bit per one-state running crossing would invalidate the numerical budget; arbitrary lengths may incur a factor four from stage rounding."
+      ],
+      "equivalence_audit": "Same interpreter, clock and splice record; compressed sequence roundtrip; exact syntax counts and asymptotic subsequence.",
+      "barrier_audit": "No all-exponent lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual prior deterministic tape programs, exact binary descriptions and fixed verified witness scheduler.",
+      "cost_ledger": {
+        "encoding": "Same normalized universal clause pool; improved placement of onehot/copy/pin variables",
+        "preprocessing": "Polynomial prefix simulation in L+2^s; exact code-weight analysis",
+        "inference": "Compressed crossing records preserve times, halt and rejection certificate",
+        "repetitions": "All long programs and separating cuts in existence argument; exponential collision search if executed",
+        "arithmetic_bits": "Exact rational series and integer length selection; all explicit metadata accounted",
+        "memory": "Explicit record storage and collision search charged; asymptotic enumeration not executed",
+        "reconstruction": "Choose surviving index and extend with onehot/copy/OR/pin values",
+        "overall": "Exact sparse description weight bound, o(L) metadata, improved separation geometry, exponential collision discovery explicitly charged; no all-exponent theorem."
+      },
+      "missing_bounds": [
+        "All integer k>=3",
+        "Unrestricted deterministic SAT runtime lower bound",
+        "Efficient collision discovery"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact description weights and convergent tail",
+        "Metadata lower-order count",
+        "Improved selector geometry and near-power-of-two length subsequence",
+        "Clock- and rejection-preserving compressed record collision"
+      ],
+      "unsupported_steps": [
+        "No independent mathematical review or Lean formalization.",
+        "Asymptotic collision not executed; finite tapes are compact fixtures."
+      ],
+      "proof_obligations": [
+        "Replay exact rational constants and actual clause positions",
+        "Check compressed record roundtrip and both crossed executions",
+        "Preserve same U and exact exponent-two cutoff"
+      ],
+      "formalization_plan": "Formalize code syntax enumeration, rational bound, compressed crossing record refinement and subsequence counting.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Prove integer exponent two of the direct unrestricted counterexample family for infinitely many lengths, while maintaining the original universal scheduler.",
+      "remaining_gaps": [
+        "Integer exponents k>=3",
+        "Universal SAT lower bound",
+        "Independent review"
+      ],
+      "next_question": "Attack integer exponents k>=3 with a new same-U computational obstruction beyond the polynomially solvable disjointness family, or prove a universal polynomial cutoff.",
+      "human_review_requests": [
+        "Review sparse description weights, metadata asymptotics, exact ceiling and collision constants."
+      ]
+    }
+  }
+}
