@@ -192,11 +192,6 @@ function physical(M,raw,limit=20000000){
  return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
 }
 function oracle(U,E){
- let best=null,a=[];
- function visit(i){
-  if(i===U.length){if(!best||a.slice().reverse().some((v,j)=>v!==best[best.length-1-j]&&a.slice(a.length-j).every((x,k)=>x===best[best.length-j+k])&&v<best[best.length-1-j]))best=a.slice();return;}
-  for(let b=0;b<U[i].length;b++)if(U[i][b]&&(i===0||E[i-1][a[i-1]][b])){a.push(b);visit(i+1);a.pop();}
- }
  // Enumerate in reverse coordinate order, using a separate full-predicate test.
  let z=Array(U.length).fill(0);
  function reverse(i){
