@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted cubic crossing census
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-stage63-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_cubic_crossing_census.py
+          python -m mathos.research.f038_unrestricted_padding_windows | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_PADDING_WINDOWS_OK {"controls":4,"rows":[[1,14,4,14,56,112,42,56,2464,224,24,4,14],[1,15,4,15,60,120,45,60,2700,300,24,4,14],[1,16,4,16,64,128,48,64,2944,384,24,4,14],[2,18,16,18,288,1152,270,594,14400,2970,96,18,72],[2,19,16,19,304,1216,285,627,15504,3762,96,18,72],[2,20,16,20,320,1280,300,660,16640,4620,96,18,72]],"wrapper":[[0,4,180,0,4],[1,4,92,2,2],[2,4,92,2,2]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_cubic_crossing_census | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_CUBIC_CROSSING_CENSUS_OK {"controls":4,"geometry":{"boundSum":"1372090884","endpoints":[[93,47,1055520,63,50880,934080,883201,3,"542058"],[116,58,2054709,63,79469,1807861,1728393,1,"42"],[117,59,2108536,66,80856,1861688,1780833,9,"63402"],[147,74,4192686,66,128046,3695118,3567073,5,"1"],[148,74,4279125,69,129805,3760533,3630729,37,"830928636"],[185,93,8374396,69,203324,7369756,7166433,19,"1"],[186,93,8511299,72,205539,7473171,7267633,148,"13276668332841577085576814444703222597"]],"gSum":311575573,"lower93":"618634502047598618803566102","maxCeil":"830928636","maxN":148,"rSum":1284,"sizes":93,"stages":[[63,24],[66,31],[69,38]]},"pins":[[8,4,16,4096,16,512],[9,5,32,16384,32,1152],[10,5,64,65536,64,2560]],"traces":[[8,256,4096,1200,1352,1544,109,272,0,8992,2444],[16,256,4096,1120,1408,1568,111,288,0,9120,2488],[32,256,4096,1060,1452,1584,112,304,0,9200,2508]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_CUBIC_CROSSING_CENSUS_GATE_OK status=OPEN')
+          PY

@@ -15,8 +15,8 @@ void req(bool b,const char*s){if(!b)throw std::runtime_error(s);}
 struct Tr{int a,w,m;};
 Tr tr(int v){return{v/9,v/3%3,v%3-1};}
 std::vector<uint8_t> input(){
- std::vector<uint8_t>S(n,1);
- S.push_back(0);S.resize(n+1+2*n+2*n*(n-1),0);
+ std::vector<uint8_t>S(n+1+2*n+2*n*(n-1),0);
+ std::fill_n(S.begin(),n,1);S.reserve(L);
  for(int i=1;i<=n;i++)for(int j=i+1;j<=n;j++)for(int k=j+1;k<=n;k++)
   for(int b=0;b<8;b++)S.push_back(j==n-1&&k==n&&bool(b&4)==bool((pin>>(i-1))&1));
  req(S.size()==L&&std::count(S.begin()+n+1,S.end(),1)==364,"input geometry");

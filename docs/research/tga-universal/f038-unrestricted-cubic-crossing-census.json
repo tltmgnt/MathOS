@@ -1,0 +1,322 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-CUBIC-CROSSING-CENSUS",
+  "base_commit": "e70a6ed0e40a4fab632aa10164035d976981654b",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45745443011 (FAILED: compiler warning; six other parent workflows passed)",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can finite cubic-stage existence beyond n=92 be established by bounding successful two-state descriptions on independently pinned data blocks instead of completing the prior fixed-pattern simulation?",
+  "route": "negative",
+  "topology": "Separated independent pins, deterministic local crossing replay, parity-specific transcript census and exact finite stage union bound.",
+  "adversarial": [
+    "Crossing transcript must determine final local output even after writes.",
+    "Discard straddling output and halting crossing before using binary state transcripts.",
+    "Clock must bound all crossings, including repeated visits.",
+    "Exact integer union bound, not decimal rounding, proves nonempty.",
+    "Finite interval is not an unbounded lower bound."
+  ],
+  "scope": "Actual unchanged U and exact cubic stages, finite sizes 93..185; all programs covered by crossing counts or prefix invariance; no full-clock claim about previous fixed pattern.",
+  "cost": "Exact integer success union bound with all original transitions charged. The finite proof counts selectors symbolically, not by uncharged execution or enumeration.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of crossing census and finite interval"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or uniform cutoff"
+    },
+    {
+      "key": "attempt_stage63_two_state",
+      "label": "Original fixed-pattern full-clock replay, distinct from family existence"
+    }
+  ],
+  "independent_reference": "Independent JS exact BigInt arithmetic over all sizes, exhaustive small pin truth tables, and scalar separated-data crossing traces; new Python and repaired old CI pending.",
+  "expected": {
+    "controls": 4,
+    "geometry": {
+      "boundSum": "1372090884",
+      "endpoints": [
+        [
+          93,
+          47,
+          1055520,
+          63,
+          50880,
+          934080,
+          883201,
+          3,
+          "542058"
+        ],
+        [
+          116,
+          58,
+          2054709,
+          63,
+          79469,
+          1807861,
+          1728393,
+          1,
+          "42"
+        ],
+        [
+          117,
+          59,
+          2108536,
+          66,
+          80856,
+          1861688,
+          1780833,
+          9,
+          "63402"
+        ],
+        [
+          147,
+          74,
+          4192686,
+          66,
+          128046,
+          3695118,
+          3567073,
+          5,
+          "1"
+        ],
+        [
+          148,
+          74,
+          4279125,
+          69,
+          129805,
+          3760533,
+          3630729,
+          37,
+          "830928636"
+        ],
+        [
+          185,
+          93,
+          8374396,
+          69,
+          203324,
+          7369756,
+          7166433,
+          19,
+          "1"
+        ],
+        [
+          186,
+          93,
+          8511299,
+          72,
+          205539,
+          7473171,
+          7267633,
+          148,
+          "13276668332841577085576814444703222597"
+        ]
+      ],
+      "gSum": 311575573,
+      "lower93": "618634502047598618803566102",
+      "maxCeil": "830928636",
+      "maxN": 148,
+      "rSum": 1284,
+      "sizes": 93,
+      "stages": [
+        [
+          63,
+          24
+        ],
+        [
+          66,
+          31
+        ],
+        [
+          69,
+          38
+        ]
+      ]
+    },
+    "pins": [
+      [
+        8,
+        4,
+        16,
+        4096,
+        16,
+        512
+      ],
+      [
+        9,
+        5,
+        32,
+        16384,
+        32,
+        1152
+      ],
+      [
+        10,
+        5,
+        64,
+        65536,
+        64,
+        2560
+      ]
+    ],
+    "traces": [
+      [
+        8,
+        256,
+        4096,
+        1200,
+        1352,
+        1544,
+        109,
+        272,
+        0,
+        8992,
+        2444
+      ],
+      [
+        16,
+        256,
+        4096,
+        1120,
+        1408,
+        1568,
+        111,
+        288,
+        0,
+        9120,
+        2488
+      ],
+      [
+        32,
+        256,
+        4096,
+        1060,
+        1452,
+        1584,
+        112,
+        304,
+        0,
+        9200,
+        2508
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_cubic_crossing_census.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-CUBIC-CROSSING-CENSUS.md",
+    "mathos/research/f038_unrestricted_stage63_audit.cpp"
+  ],
+  "next": "Investigate unbounded cubic-stage failures or a uniform cutoff; do not extrapolate the finite interval or treat a missed pattern as explicitly discovered.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can finite cubic-stage existence beyond n=92 be established by bounding successful two-state descriptions on independently pinned data blocks instead of completing the prior fixed-pattern simulation?",
+      "strategy": "Encode independent pin blocks in separated selector regions, discard straddling and terminal-crossing cuts, double-count low-crossing successful executions.",
+      "alternative": "Repair preceding compiler diagnostic without claiming the prior partial audit passed; cover three- and one-state programs by exact prefix arguments.",
+      "stop_rule": "No asymptotic conclusion or explicit missed pattern without proof; no prior CI success claim.",
+      "literature_leads": [
+        "Prior same-U crossing-sequence argument and one-state prefix theorem; elementary crossing-sequence counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For every n=93..185 the exact cubic residual has at least 2^(n-7) uniquely satisfiable members.",
+      "scope": "Actual unchanged U and exact cubic stages, finite sizes 93..185; all programs covered by crossing counts or prefix invariance; no full-clock claim about previous fixed pattern.",
+      "derivation": "Unique pins in two separated data blocks, parity-specific crossing transcripts determine local final output, double-count good cuts under exact clock, union bound over every eligible table and built-in.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failure or uniform cutoff.",
+        "Explicit missed pin pairs and independent review."
+      ],
+      "candidate_tests": [
+        "Exact integer bounds at every size and actual small selector layout; independent trace consistency."
+      ]
+    },
+    "alternative": {
+      "claim": "The old fixed-pattern audit is not necessary for finite existence at size 93; its compiler failure can be repaired separately without assuming the old partial counts.",
+      "scope": "Prior partial execution versus new mathematical existence proof.",
+      "derivation": "At n=93 compute the exact lower count from the rational bound; prior code initializes the identical tape without vector push_back warning. Old full-clock obligation remains.",
+      "unresolved_steps": [
+        "Repaired old CI and full-clock exclusion for that fixed pattern."
+      ],
+      "candidate_tests": [
+        "Strict -Werror replay remains in old workflow; new counting workflow independent of old partial metrics."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Crossing transcript must determine final local output even after writes.",
+        "Discard straddling output and halting crossing before using binary state transcripts.",
+        "Clock must bound all crossings, including repeated visits.",
+        "Exact integer union bound, not decimal rounding, proves nonempty.",
+        "Finite interval is not an unbounded lower bound."
+      ],
+      "counterexample_candidates": [
+        "A successful computation may communicate through many crossings, which is charged by double counting.",
+        "At n=186 increased clock invalidates this numerical bound.",
+        "Prior fixed candidate may still succeed."
+      ],
+      "equivalence_audit": "Actual complete selector, unchanged decoder and clocks, all eligible programs included, exact model uniqueness and deterministic replay.",
+      "barrier_audit": "Finite existence only; no asymptotic promotion.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Unchanged deterministic three-symbol tape programs, external exact weighted stage clock, counting of actual successful executions.",
+      "cost_ledger": {
+        "encoding": "Full normalized selector with two independently pinned blocks and four fixed zero guards",
+        "preprocessing": "Exact support offsets and actual description lengths",
+        "inference": "Local crossing replay and incidence double count",
+        "repetitions": "Union bound over all eligible descriptions; finite arithmetic for 93 sizes",
+        "arithmetic_bits": "Exact integer or rational arithmetic, no rounded proof thresholds",
+        "memory": "Count transcripts by running state; no tape simulation assumed free",
+        "reconstruction": "Unique complete model determines both pin blocks; no efficient missed-pattern finder claimed",
+        "overall": "Exact integer success union bound with all original transitions charged. The finite proof counts selectors symbolically, not by uncharged execution or enumeration."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bounds",
+        "Explicit missed pairs and mathematical review"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Unique model family and tape separation",
+        "Crossing parity, local output determinism and double count",
+        "Exact interval inequality and other-program coverage",
+        "Independent finite reference"
+      ],
+      "unsupported_steps": [
+        "Repaired old CI not yet passed.",
+        "No full-clock old fixed-pattern result, independent mathematical review or Lean proof."
+      ],
+      "proof_obligations": [
+        "Review local replay including terminal head placement",
+        "Verify exact arithmetic at all sizes and original prefix theorem",
+        "Distinguish failed old CI from independent new theorem"
+      ],
+      "formalization_plan": "Formalize crossing traces and local side replay, good-cut incidence counting, exact selector geometry and finite union bound.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Establish unconditional finite cubic failure existence at 93 additional consecutive sizes while bypassing the old two-state simulation bottleneck.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review and Lean formalization"
+      ],
+      "next_question": "Investigate unbounded cubic-stage failures or a uniform cutoff; do not extrapolate the finite interval or treat a missed pattern as explicitly discovered.",
+      "human_review_requests": [
+        "Review crossing determinism, finite union bound, and all-clock one-state theorem dependency."
+      ]
+    }
+  }
+}
