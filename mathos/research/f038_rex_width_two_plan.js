@@ -91,7 +91,7 @@ function compile(){
   add(name+"Skip",a=>l(name+"Read",a));add(name+"Clear",a=>r(name+"Return",2));
   add(name+"Return",a=>a===2?z(dest,a):r(name+"Return",a));return name;
  }
- // 50 blank-separated blocks, right-to-left: 49 mask tapes followed by pins.
+ // 37 blank-separated blocks, right-to-left: 36 edge flags followed by pins.
  // Append at the left edge of the target, shifting the complete farther-left suffix.
  // The control counts separators; consecutive blanks are valid empty blocks.
  const BLOCKS=37,depCache=new Map();
@@ -137,7 +137,8 @@ function compile(){
   if(!scopes.has(name)){const ids=[];for(let i=0;i<k;i++)for(let j=i+1;j<k;j++)ids.push(edge(gs[i],gs[j]));scopes.set(name,{k,ids});}
   return name;
  }
- // Rejection removes all tape content and writes 0 (malformed) or 1 (outside fixed path).
+ // Inherited normalization rejection cleanup. Only malformed status 0 is reachable;
+ // the former fixed-path flag is never set by the new scope dispatch.
  for(let v of [0,1]){
   add("clean"+v,a=>a===2?r("tail"+v,a):bad());
   add("tail"+v,a=>a===2?l("eraseTail"+v,a):r("tail"+v,a));
@@ -342,10 +343,10 @@ function run(M,raw,limit=Infinity,observe=null){
  let selector=Array.from(tape.subarray(start,end)).join(""),workBits=head-end-1;
  const blocks=[];let at=start-1;
  for(let j=0;j<37;j++){if(tape[at]!==2)throw Error("block delimiter");at--;let bits=[];while(tape[at]!==2){bits.push(tape[at--]);if(at<0)throw Error("block buffer");}blocks.push(bits.join(""));}
- const maskBits=blocks.reduce((a,b)=>a+b.length,0);
+ const blockBits=blocks.reduce((a,b)=>a+b.length,0);
  let e=head+1;while(tape[e]!==2)e++;let word=Array.from(tape.subarray(head+1,e)).join("");
  if(word.length<46||(word.length-46)%12!==0)throw Error("plan grammar");
- if(nonblank!==selector.length+workBits+maskBits+word.length)throw Error("checkpoint garbage");
+ if(nonblank!==selector.length+workBits+blockBits+word.length)throw Error("checkpoint garbage");
  let plan=[];for(let i=45;i<word.length-1;i+=12)plan.push([0,4,8].map(j=>parseInt(word.slice(i+j,i+j+4),2)));
  let graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
  let groups=[];for(let i=0;i<3;i++){let g=0;for(let j=0;j<5;j++)g=2*g+tape[head-15+5*i+j];groups.push(g);}
