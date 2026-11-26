@@ -299,4 +299,5 @@ function audit(){
  for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor entry");pos+=b+4;}ok(pos===M.desc.length,"length");
  return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,stress,digest,physicalDigest};
 }
-if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_NESTED_VARIABLE_OVERLAP_OK '+JSON.stringify(audit()));
+module.exports={worker,compile,encode,logical,physical,audit};
+if(require.main===module) if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_NESTED_VARIABLE_OVERLAP_OK '+JSON.stringify(audit()));
