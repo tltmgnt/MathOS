@@ -1,0 +1,51 @@
+name: Proctor F038 unrestricted local correction quotients
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-local-correction-quotients']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_local_correction_quotients.js
+          node mathos/research/f038_unrestricted_local_correction_quotients.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_LOCAL_CORRECTION_QUOTIENTS_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":12,"passes":24,"rootBuilds":1756,"childBuilds":36480,"internChecks":4108,"zeroRows":8696,"mergedRows":16,"overflowRoots":8,"overflowChildren":16,"membership":179584,"positivity":38212,"fullChecks":484680,"successful":251748,"narrow":3044,"wide":23548,"correction":23548,"fullRoots":12312,"fullChildren":2132992,"models":33060,"abandonedModels":32256,"greedy":582,"overflowMassChecks":128512}
+          assert r['overflow'] == [8,512,8,512,363]
+          assert r['controls'] == [[16,4,2,336,2,20,448,1024],[32,8,2,1360,2,48,1920,4096],[64,16,4,5456,2,128,15360,16384]]
+          assert r['overflowModels'] == [[2,16128,16128],[4,16128,16128]]
+          assert r['mergeControl'] == [16,106,0]
+          assert r['capCases'] == [[1,85,512,"597"],[2,85,0,"696320"],[4,85,0,"5704253440"]]
+          assert r['portfolio'] == [4,"256"]
+          assert r['localRoute'] == [1,0,"256",100]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LOCAL_CORRECTION_QUOTIENTS_GATE_OK status=OPEN promotion=NONE')
+          PY
