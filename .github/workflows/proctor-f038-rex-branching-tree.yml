@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X branching tree
+on:
+  push:
+    branches: ['research/pnp-f038-rex-branching-tree']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_branching_tree.js
+          node mathos/research/f038_rex_branching_tree.js | tee /tmp/tree.txt
+          grep -Fx 'F038_REX_BRANCHING_TREE_OK {"alphabet":21,"width":5,"logicalStates":561,"rules":11781,"states":20033,"bits":1161918,"counts":{"valid":582,"sat":340,"unsat":242,"nodes":1638,"branches":312,"physical":18434723,"logical":376352,"checkpoints":922,"messageEntries":3276,"malformed":135,"malformedTransitions":77967,"cutoffs":6},"scaling":[["star",2,32,18475,467,199,[6627,6067,5781]],["chain",2,32,18475,467,199,[6627,6067,5781]],["star",4,64,63501,1235,392,[25539,16051,21911]],["chain",4,64,63489,1235,392,[25539,16051,21899]],["star",8,128,231505,3539,780,[100227,46003,85275]],["chain",8,128,231421,3539,780,[100227,46003,85191]],["star",16,256,879321,11219,1556,[397059,145843,336419]],["chain",16,256,878901,11219,1556,[397059,145843,335999]],["star",32,512,3422185,38867,3108,[1580547,505267,1336371]],["chain",32,512,3420325,38867,3108,[1580547,505267,1334511]]],"digest":3381327392}' /tmp/tree.txt
+          sed -n 's/^F038_REX_BRANCHING_TREE_OK //p' /tmp/tree.txt > /tmp/tree.json
+          python -m mathos.research.validate_f038_rex_branching_tree /tmp/tree.json
+          python -m mathos.research.tga_f038_rex_012 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_BOOLEAN_TREE_VARIABLE_DOMAIN_BRANCHING_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_BRANCHING_TREE_GATE_OK status=OPEN promotion=NONE')
+          PY
