@@ -1,0 +1,45 @@
+name: Proctor F038 TGA conditioned parity
+on:
+  push:
+    branches: ['research/pnp-f038-tga-conditioned-parity']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_tga_conditioned_parity.js
+          node mathos/research/f038_tga_conditioned_parity.js | tee /tmp/cpr.txt
+          grep -Fx 'F038_TGA_CONDITIONED_PARITY_OK {"n":{"hierarchy":632,"multiplicity":4328,"keys":291,"tuples":60585,"models":454,"rejected":227,"flags":124,"types":35,"treeNodes":483,"fullNodes":396291},"hierarchy":[[3,8,8,4],[4,16,16,16,8],[5,32,32,32,32,16],[6,64,64,64,64,64,32]],"hiddenClosure":[[3,32,4],[4,128,8],[5,512,16],[6,2048,32]],"random":[[2,0,4,2,4],[2,1,2,2,4],[2,2,4,4,8],[3,0,18,18,180],[3,1,18,15,132],[3,2,18,15,126]],"cycle":[[8,1,7,56,32,40,2,25088,3584,2048],[16,2,28,240,64,80,2,1720320,114688,57344],[32,4,112,992,128,160,2,113770496,3670016,1867776],[64,8,448,4032,256,320,2,7398752256,117440512,55312384]],"clique":[[4,256,128,20],[8,4096,1024,40],[16,65536,8192,80]],"colorChecks":256}' /tmp/cpr.txt
+          python -m mathos.research.tga_f038_cpr_001 > /tmp/cpr.json
+          python -m mathos.research.tga_f038_pcf_001 > /tmp/pcf.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/cpr.json') as f:
+              cpr=json.load(f)
+          with open('/tmp/pcf.json') as f:
+              pcf=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert cpr['PNP_RESOLUTION_STATUS']==pcf['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert cpr['PROMOTION']=='NONE'
+          assert cpr['decision']=='PRESERVE_RESTRICTED_PARITY_RETIRE_UNIFORM_REVIEW'
+          assert all(cpr[k]['status']=='BLOCKED' for k in ('restricted_evidence','uniform_recovery'))
+          assert all(pcf[k]['status']=='BLOCKED' for k in ('pcf_restricted_evidence','pcf_uniform_recovery'))
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_TGA_CPR_GATE_OK status=OPEN promotion=NONE')
+          PY
