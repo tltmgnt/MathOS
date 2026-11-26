@@ -359,7 +359,7 @@ function compile(){
  const q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
  const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
  const events=[];for(let i=0;i<q;i++){let [name,flag]=names[i];if(expected.has(name))events.push({state:i,flag,...expected.get(name)});}
- return{q,desc,events,serializationEntry:ids.get("bag0Start|0")};
+ return{q,desc,events,serializationEntry:ids.get("bag0Start|0"),successState:ids.get("serializedHalt|0")};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
