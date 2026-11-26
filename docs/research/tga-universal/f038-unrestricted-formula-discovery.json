@@ -1,0 +1,183 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-FORMULA-DISCOVERY",
+  "base_commit": "3b48c50cec7a6bea2677dacfc65b38d4909c9ae9",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45740509040",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Does omitting the witness permit an efficient uniform counterexample generator for actual binary-clocked polynomial algorithms, and what remains of the same-U uniform formula-only route?",
+  "route": "negative",
+  "topology": "Formula-only clocked discovery, exhaustive witness recovery, self-description with binary exponent and exact unary-family transfer.",
+  "adversarial": [
+    "Binary exponent is essential to the all-clock exponential bound.",
+    "A large runtime does not imply an equally large output formula.",
+    "All-clock generator existence is equivalent to P!=NP.",
+    "Linear-domain cubic cost is not a superpolynomial bound.",
+    "The generic compiler is mathematical, not implemented."
+  ],
+  "scope": "Same U and explicit selector input, original general descriptions and verifier; binary external clocks on individual programs only for discovery analysis.",
+  "cost": "Unconditional Omega(m^3) discovery lower bound on linear domain; conditional-on-existence 2^((3-o(1))m) lower bound on all binary polynomial clocks; fixed constructor unary search characterization.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of formula-only diagonal resource bounds"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS explicit-selector first-model and complete-model census; not execution of new Python.",
+  "expected": {
+    "controls": 4,
+    "recovery": [
+      [
+        1,
+        4,
+        3,
+        1,
+        6,
+        1,
+        6,
+        4
+      ],
+      [
+        2,
+        256,
+        95,
+        161,
+        858,
+        119,
+        380,
+        128
+      ],
+      [
+        3,
+        258,
+        16,
+        242,
+        2012,
+        60,
+        96,
+        25
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_formula_discovery.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-FORMULA-DISCOVERY.md"
+  ],
+  "next": "Attack unbounded B_3 by a same-clock existence argument or a uniform polynomial cutoff; do not mistake discovery complexity for SAT runtime or assume a hard unary search family.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Does omitting the witness permit an efficient uniform counterexample generator for actual binary-clocked polynomial algorithms, and what remains of the same-U uniform formula-only route?",
+      "strategy": "Remove the witness from the generator output, charge exhaustive recovery in the self-describing program and vary the binary exponent rather than only the coefficient.",
+      "alternative": "Characterize uniform polynomial formula-only families by their total unary witness search relation.",
+      "stop_rule": "No cubic-stage infinitude, P!=NP claim, or reinterpretation of discovery cost as SAT decision cost.",
+      "literature_leads": [
+        "Kleene recursion theorem and polynomial-overhead tape simulation (Sipser theorem 7.8); prior exact U diagonal discovery and quadratic-stage theorem. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "A total correct formula-only adversary for linear clocks necessarily takes Omega(m^3) time along a self-description family; on all binary polynomial clocks, if one exists, its runtime is at least 2^((3-o(1))m) along a family.",
+      "scope": "Same U and explicit selector input, original general descriptions and verifier; binary external clocks on individual programs only for discovery analysis.",
+      "derivation": "Run G on its own reconstructed description with coefficient or exponent 2^h, enumerate models of returned explicit p, and compare charged polynomial simulation times 2^(a n) to the actual clock. L>=n^3/2 and T>=L give the contradiction.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic-stage failures or a polynomial cutoff."
+      ],
+      "candidate_tests": [
+        "Explicit selector-only recovery, original writer and timeout checks, binary coefficient and exponent packing."
+      ]
+    },
+    "alternative": {
+      "claim": "For a fixed polynomial-time constructor of one satisfiable p_n per unary n, all-exponent residual infinitude along the family is equivalent to the absence of a polynomial-time unary witness finder.",
+      "scope": "Given total constructor, same U stages; no existence claim for a hard constructor.",
+      "derivation": "A finite exceptional set at one stage yields a polynomial unary solver; any unary polynomial solver embeds as one fixed description and succeeds by one uniform U stage.",
+      "unresolved_steps": [
+        "Construct a genuinely hard formula-only family or prove a uniform cutoff."
+      ],
+      "candidate_tests": [
+        "Small explicit formula-only selectors, exact exhaustive reconstruction and verification."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Binary exponent is essential to the all-clock exponential bound.",
+        "A large runtime does not imply an equally large output formula.",
+        "All-clock generator existence is equivalent to P!=NP.",
+        "Linear-domain cubic cost is not a superpolynomial bound.",
+        "The generic compiler is mathematical, not implemented."
+      ],
+      "counterexample_candidates": [
+        "A generator with a single fixed exponent need not face the binary-exponent adversary.",
+        "Separate fixed-k generators and existential lower bounds are not excluded."
+      ],
+      "equivalence_audit": "Same general interpreter and output convention, exact external clocks, explicit output and charged exhaustive model recovery, correct residual quantifiers.",
+      "barrier_audit": "No unbounded cubic or all-exponent SAT lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original general one-tape programs with external binary analysis clock; fixed source interpreter simulation.",
+      "cost_ledger": {
+        "encoding": "Binary tuple and complete unary-n selector output; L>=n^3/2",
+        "preprocessing": "Fixed source-as-data loader and self-description construction",
+        "inference": "Formula-only G followed by exhaustive model verification and output",
+        "repetitions": "At most 2^n model tests in self-program; finite regressions separate",
+        "arithmetic_bits": "Explicit binary clock with h+1 bits; all clause and output bits charged",
+        "memory": "Polynomial overhead in input and run time, no free compressed outputs",
+        "reconstruction": "Recover witness directly from formula, then write n consecutive bits",
+        "overall": "Unconditional Omega(m^3) discovery lower bound on linear domain; conditional-on-existence 2^((3-o(1))m) lower bound on all binary polynomial clocks; fixed constructor unary search characterization."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bound",
+        "Implemented and formally verified generic source-to-tape compiler",
+        "Hard total unary search constructor"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Formula-only versus witnessed computable equivalence",
+        "Exact diagonal resource inequality and both clock choices",
+        "Given-family unary search characterization",
+        "Finite actual interpreter and model recovery tests"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "Generic compiler is mathematical, not implemented; no actual self-referential G execution."
+      ],
+      "proof_obligations": [
+        "Review fixed polynomial simulation and explicit selector length",
+        "Audit binary exponent and coefficient asymptotics",
+        "Replay model recovery and actual witness output"
+      ],
+      "formalization_plan": "Formalize formula-only recovery, parameterized compiler, clock inequality and unary-family transfer.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Extend the discovery obstruction to formula-only output for arbitrary binary polynomial clocks and isolate the exact uniform family search obligation.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review and formal compiler"
+      ],
+      "next_question": "Attack unbounded B_3 by a same-clock existence argument or a uniform polynomial cutoff; do not mistake discovery complexity for SAT runtime or assume a hard unary search family.",
+      "human_review_requests": [
+        "Review exact encoding, quantitative diagonal inequalities and unary search quantifiers."
+      ]
+    }
+  }
+}

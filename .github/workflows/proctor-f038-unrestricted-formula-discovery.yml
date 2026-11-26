@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted formula discovery
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-formula-discovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_formula_discovery.py
+          python -m mathos.research.f038_unrestricted_diagonal_discovery | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_DIAGONAL_OK {"controls":4,"linear":[[1,5832,46656,19624,2453,44203,5832,3379],[2,5832,46656,19624,2453,44203,5832,3379],[4,5832,46656,19624,2453,44203,5832,3379]],"writers":[[1,2,4,12,1],[2,4,8,48,6],[3,8,16,144,28],[4,16,32,384,120],[5,32,64,960,496],[6,64,128,2304,2016]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_formula_discovery | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_FORMULA_DISCOVERY_OK {"controls":4,"recovery":[[1,4,3,1,6,1,6,4],[2,256,95,161,858,119,380,128],[3,258,16,242,2012,60,96,25]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_FORMULA_DISCOVERY_GATE_OK status=OPEN')
+          PY
