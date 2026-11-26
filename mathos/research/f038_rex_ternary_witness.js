@@ -101,7 +101,7 @@ function compile(P,H,A){
   left(n+"BackRank",dest);return n;
  }
  for(let g=0;g<9;g++){
-  const n="group"+g,read=n+"Read",loop=n+"Loop",next=g===8?"pinRead":"group"+(g+1)+"Read";
+  const n="group"+g,read=n+"Read",loop=n+"Loop",next=g===8?"pinInit":"group"+(g+1)+"Read";
   add(read,a=>a===2?r(n+"First",a):bad());
   for(let b of [0,1]){
    consume(n+"ConsumeFirst"+b,b,n+"Second"+b);
@@ -143,6 +143,8 @@ function compile(P,H,A){
    }
   }
  }
+ add("pinInit",a=>a===2?r("pinEndCheck",a):bad());
+ add("pinEndCheck",a=>a===2?l("pinRead",a):bad());
  pinAccess("pinRead",false,"pin0","pin1");emit("pin0","Y",0,"pinRotate");emit("pin1","Y",1,"pinRotate");
  pinAccess("pinRotate",true,"pinAdvance");eq("pinAdvance",3,0,"guard0","pinInc");inc("pinInc",3,"pinRead");
  emit("guard0","Y",0,"guard1");emit("guard1","Y",0,"joinStart");
@@ -181,7 +183,7 @@ function run(P,M,raw,limit=Infinity,observe=false){
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
  const {q,T}=P.decode(M.desc),origin=3*raw.length+512;let tape=new Uint8Array(origin+raw.length+512);tape.fill(2);
  for(let i=0;i<raw.length;i++)tape[origin+i]=+raw[i];
- let h=origin,state=0,t=0,lo=h,hi=h,bridgeAt=null,workerAt=null,markAt=null,rankAt=null,translateAt=null,joinAt=null,rankTokens=null,protectedBefore=null,separator=null,protectedLeft=null,protectedUnchanged=null,trace=[];
+ let h=origin,state=0,t=0,lo=h,hi=h,bridgeAt=null,workerAt=null,markAt=null,rankAt=null,translateAt=null,joinAt=null,rankTokens=null,protectedBefore=null,separator=null,protectedLeft=null,protectedUnchanged=null;
  while(state!==q&&t<limit){
   if(state===M.bridgeEntry&&bridgeAt===null){bridgeAt=t;if(observe){separator=h;protectedLeft=lo;protectedBefore=tape.slice(lo,h);}}
   if(state===M.workerEntry&&workerAt===null)workerAt=t;
@@ -189,13 +191,12 @@ function run(P,M,raw,limit=Infinity,observe=false){
   if(state===M.rankEntry&&rankAt===null){rankAt=t;if(observe){let e=h;while(tape[e]!==2)e++;rankTokens=Array.from(tape.subarray(h,e)).join("");protectedUnchanged=protectedBefore.every((a,i)=>tape[protectedLeft+i]===a)&&tape[separator]===2;}}
   if(state===M.translateEntry&&translateAt===null)translateAt=t;
   if(state===M.joinEntry&&joinAt===null)joinAt=t;
-  if(observe&&rankAt!==null&&t%1000===0)trace.push([t,state,h-origin]);
   let v=T[3*state+tape[h]];tape[h]=(v>>2)&3;h+=(v&3)-1;state=v>>>4;t++;
   if(h<0)throw Error("left buffer");if(h>=tape.length){let g=new Uint8Array(tape.length*2);g.fill(2);g.set(tape);tape=g;}if(h<lo)lo=h;if(h>hi)hi=h;
  }
- let status=state!==q?"TIMEOUT":tape[h]===2?(rankAt!==null?"RECOVERY_REJECT":workerAt!==null?"UNSAT":"OUTSIDE"):"SAT";
+ let status=state!==q?"TIMEOUT":tape[h]===2?(markAt!==null?"RECOVERY_REJECT":workerAt!==null?"UNSAT":"OUTSIDE"):"SAT";
  let bits=null;if(status==="SAT"){let e=h;while(tape[e]!==2)e++;bits=Array.from(tape.subarray(h,e)).join("");}
- return{status,t,head:h-origin,span:hi-lo+1,bits,bridgeAt,workerAt,markAt,rankAt,translateAt,joinAt,rankTokens,protectedUnchanged,...(status==="RECOVERY_REJECT"&&observe?{trace:trace.slice(-10)}:{})};
+ return{status,t,head:h-origin,span:hi-lo+1,bits,bridgeAt,workerAt,markAt,rankAt,translateAt,joinAt,rankTokens,protectedUnchanged};
 }
 module.exports={compile,run};
 if(require.main===module){const P=require('./f038_rex_ternary_bags.js'),H=require('./f038_rex_ternary_handoff.js'),A=require('./f038_rex_nested_variable_overlap.js'),M=compile(P,H,A);if(process.argv.includes('--descriptor'))process.stdout.write(M.desc);else console.log(JSON.stringify(run(P,M,require('fs').readFileSync(0,'utf8'))));}
