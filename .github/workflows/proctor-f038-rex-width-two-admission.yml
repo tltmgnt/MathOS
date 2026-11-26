@@ -1,0 +1,73 @@
+name: Proctor F038 RE-X width-two admission
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-admission']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_admission_audit.js
+          node --check "$p"
+          for suite in controls small larger ranktwo four-bounded; do
+            node "$p" "$suite" > "/tmp/admission-$suite.txt"
+          done
+          node "$p" --original-descriptor > /tmp/original.desc
+          node "$p" --descriptor > /tmp/quotient.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_ADMISSION_OK '){const a=fs.readFileSync('/tmp/admission-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          assert.deepEqual(read('controls','F038_REX_WIDTH_TWO_ADMISSION_CONTROLS '),{randomMachines:256,agreement:true});
+          const [a,b,c,d]=['small','larger','ranktwo','four-bounded'].map(s=>read(s));
+          for(const r of [a,b,c,d])assert.deepEqual(r.stats,{originalStates:809925,reachableStates:809925,unreachableStates:0,quotientStates:428414,initialBlocks:58,splits:428357,processed:1285245,predecessors:7902325,transitionChecks:2429775,originalBits:59124529,quotientBits:29988984,reachedHalt:true});
+          const rows=[...a.rows,...b.rows,...c.rows];
+          assert.deepEqual(rows.map(r=>r.t),[30003260,34911962,40288500,31626203,58956884,30968165,34465372,35143066,29496152,26655850,483345064,338108760]);
+          assert.equal(rows.reduce((s,r)=>s+r.t,0),1173969238);
+          assert.equal(rows.filter(r=>r.status==='WITNESS').length,7);
+          assert.equal(rows.filter(r=>r.meaning==='structural_refusal_no_witness').length,1);
+          assert.equal(rows.filter(r=>r.meaning==='unsat_halt_no_witness').length,4);
+          assert.ok(rows.every(r=>r.original.minStage-r.reduced.minStage===29135545&&!r.reduced.admitted3&&r.exhaustiveEligible3));
+          assert.equal(rows[1].reduced.minStage,29989010);assert.equal(rows[10].reduced.minStage,29989013);
+          assert.equal(a.cutoffs,4);assert.equal(a.refusalControls,9);
+          assert.equal(d.status,'TIMEOUT');assert.equal(d.t,300000000);assert.equal(d.L,428744);
+          assert.equal(d.head,100653);assert.equal(d.span,107722);
+          assert.equal(fs.statSync('/tmp/original.desc').size,59124529);
+          assert.equal(fs.statSync('/tmp/quotient.desc').size,29988984);
+          JS
+          python -m mathos.research.f038_rex_width_two_witness_codec /tmp/original.desc > /tmp/admission-original.json
+          python -m mathos.research.f038_rex_width_two_admission_codec /tmp/quotient.desc > /tmp/admission-quotient.json
+          python -m mathos.research.tga_f038_rex_024a > /tmp/admission-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/admission-original.json') as f:
+              a=json.load(f)
+          with open('/tmp/admission-quotient.json') as f:
+              b=json.load(f)
+          with open('/tmp/admission-gates.json') as f:
+              g=json.load(f)
+          assert a['states']==809925 and b['states']==428414
+          assert a['descriptor_bits']==59124529 and b['descriptor_bits']==29988984
+          for r in (a,b):
+              assert r['sat_clock']==34911962 and r['witness']==268260694
+              assert r['original_valid'] and r['one_step_short'] and r['blank_unsat'] and r['n1_refused']
+              assert r['unsat_clock']==34465372
+          assert a['per_description_slot']==59124555 and b['per_description_slot']==29989010
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
