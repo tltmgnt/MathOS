@@ -444,9 +444,23 @@ function audit(){
  for(let raw of ["0","11","0010",encode([["1",""]]),encode([["1","000"]]),encode([["0","000"+field("00")+field("0")]]),encode([["0","000"+field("0")+field("00")]])]){
   let r=physicalRun(M,raw,20000000);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;
  }
+ // TECT-X: independent per-batch OR is unsound if one candidate's
+ // factor requests are split across batches. Actual logical worker replay.
+ function outgoing(rows){
+  let r=logicalRun(J,encode(rows),15000000);ok(r.state==="ready","adversarial worker halt");
+  let expected=refEliminate(rows);ok(r.out===encode(expected),"adversarial worker output");
+  return expected.filter(([k])=>k.startsWith("1")).reduce((a,[,p])=>a|+p[2],0);
+ }
+ let left=[f("00"),q("00","100","110")],right=[f("00"),q("01","100","110")];
+ let full=[f("00"),q("00","100","110"),q("01","100","110")];
+ let split=[outgoing(left),outgoing(right)],whole=outgoing(full);
+ ok(split[0]===1&&split[1]===0&&whole===0,"candidate split counterexample");
+ // Duplicate requests/factors do not change the existential result.
+ check([f("00"),f("00","1"),q("00","100","110","0"),q("00","100","110","1")],false);
+ let adversarial={splitBatchFlags:split,incorrectOR:split[0]|split[1],wholeCandidate:whole,missingRequestNotDetected:true};
  let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"descriptor length");
- return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,fixtures};
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,fixtures,adversarial};
 }
 if(process.argv.includes('--description')){let j=eliminationWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BATCHED_ELIMINATION_OK '+JSON.stringify(audit()));
