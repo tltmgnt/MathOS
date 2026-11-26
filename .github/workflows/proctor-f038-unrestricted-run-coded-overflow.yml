@@ -1,0 +1,48 @@
+name: Proctor F038 unrestricted run coded overflow
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-run-coded-overflow']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_run_coded_overflow.js
+          node mathos/research/f038_unrestricted_run_coded_overflow.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_RUN_CODED_OVERFLOW_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":20,"roots":780,"children":29376,"rows":9100,"zeroRows":5871,"merges":80,"clipped":23584,"canonical":1509,"member":93784,"positive":28516,"overflow":1640,"volumes":57984,"full":3675136,"models":83768,"overflowModels":46712}
+          assert r['clips'] == 262144
+          assert r['overflow'] == [[2,1,386,386,386],[2,4,386,0,0],[4,1,386,386,386],[4,4,386,0,0]]
+          assert r['controls'] == [[32,8,16,2,96,8,3,192],[64,16,32,2,256,16,3,768],[128,32,32,2,1280,32,3,3072]]
+          assert r['asym'] == [[64,57,42,10,32],[128,115,85,11,74],[256,230,170,12,158],[512,460,341,14,327]]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_RUN_CODED_OVERFLOW_GATE_OK status=OPEN promotion=NONE')
+          PY
