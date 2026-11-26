@@ -1,0 +1,65 @@
+name: Proctor F038 RE-X width-three plan
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-plan']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_plan
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/width3-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/width3-replay.txt
+          node "$p.js" --descriptor > /tmp/width3.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_PLAN_OK '){const a=fs.readFileSync('/tmp/width3-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(s=>read(s));
+          for(const r of [a,b,c]){
+            assert.equal(r.q,124438);assert.equal(r.descriptorBits,7964036);
+            assert.equal(r.plannerEntry,78720);assert.equal(r.pushEntry,83659);assert.equal(r.popEntry,85358);
+          }
+          assert.deepEqual(a.totals,{rawBits:417054,transitions:91827253,planner:3094763,pushes:196,pops:133,accepted:7,refused:4});
+          assert.deepEqual(b.totals,{rawBits:752446,transitions:170414662,planner:1421816,pushes:87,pops:69,accepted:2,refused:1});
+          for(const r of [a.rows[5],b.rows[0]]){
+            assert.deepEqual(r.greedy,[0,4,5]);assert.deepEqual(r.order,[1,2,4,5,6,0,3,7,8]);
+            assert.equal(r.pushes,14);assert.equal(r.pops,5);assert.equal(r.planner,212468);
+          }
+          assert.deepEqual(c.cutoffs,[0,1,100,8065101,8065102,8277569]);assert.equal(c.rejects.length,8);assert.equal(c.exactBudget,8277570);
+          const r=read('replay','F038_REX_WIDTH_THREE_REPLAY_OK ');
+          assert.equal(r.transitions,17385410);assert.equal(r.q,124438);assert.equal(r.descriptorBits,7964036);
+          assert.deepEqual(r.rows.map(x=>x.status),['WIDTH_THREE_PLAN','OUTSIDE_WIDTH_THREE']);
+          JS
+          python -m mathos.research.f038_rex_width_three_plan_codec /tmp/width3.desc > /tmp/width3-codec.json
+          python -m mathos.research.tga_f038_rex_024b > /tmp/width3-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/width3-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/width3-gates.json') as f:
+              g=json.load(f)
+          assert r['states']==124438 and r['descriptor_bits']==7964036
+          assert r['transitions']==8277570 and r['frames']==10 and r['not_a_witness']
+          assert r['order']==[1,2,4,5,6,0,3,7,8]
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
