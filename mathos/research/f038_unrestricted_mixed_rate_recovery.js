@@ -5,7 +5,7 @@ function audit(){
  function* sub(k,i=0,p=[]){if(p.length===k){yield p;return;}for(let g=i;g<=9-k+p.length;g++)yield* sub(k,g+1,p.concat(g));}
  const H=[...sub(1),...sub(2),...sub(3)],proj=(z,h)=>h.map(g=>z[g]);
  let totals=Array(12).fill(0),forced=Array(12).fill(0),fixtures=0,comparisons=0,greedyChecks=0,rateChecks=0,thresholds=0,strictFixtures=0;
- for(let m of [2,3])for(let mode=0;mode<8;mode++){
+ for(let m of [2,3])for(let mode=0;mode<9;mode++){
   let R=H.map(h=>({h,F:new Set([...tup(m,h.length)].filter(z=>{
    if(mode===0)return false;
    if(mode===1)return h.length===1&&h[0]===8;
@@ -14,6 +14,7 @@ function audit(){
    if(mode===4)return key(h)==="0,1,4"&&z[0]===1&&z[1]===z[2];
    if(mode===5)return h.length===3&&(h.reduce((s,a)=>s+a,0)+z.reduce((s,a,i)=>s+(i+2)*a,0))%5===0;
    if(mode===6)return h.length===1&&z[0]!==h[0]%m;
+   if(mode===8)return key(h)==="0,4,5"&&z[1]===0&&(z[0]===2||z[0]===1&&z[2]===0);
    return key(h)==="0,4,5"&&z[1]===0&&z[0]!==z[2]||h.length===2&&h[0]===0&&z[0]===z[1];
   }).map(key))}));
   let S=R.filter(T=>T.h.includes(0)).map(T=>{
@@ -110,6 +111,7 @@ function audit(){
   let m=2**k,beta=1/Math.log2(k),deltaN=1/Math.log2(k),deltaW=1/m,weighted=deltaW*(1+k)**8;
   rateCases.push([k,beta,deltaN,deltaW,weighted]);
  }
+ ok(strictFixtures>0,"mixed heavy/light recovery exercised");
  return {fixtures,totals,forced,comparisons,greedyChecks,thresholds,rateChecks,strictFixtures,rateCases};
 }
 console.log('F038_MIXED_RATE_RECOVERY_OK '+JSON.stringify(audit()));
