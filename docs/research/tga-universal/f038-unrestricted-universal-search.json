@@ -1,0 +1,238 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-UNIVERSAL-SEARCH",
+  "base_commit": "731f4dfeb426fa1d41d21834b60f7aca54406ca1",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45733029874",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Reduce the unrestricted SAT lower bound against every polynomial-time deterministic algorithm to a fixed machine and an explicit adversarial formula family.",
+  "route": "negative",
+  "topology": "Universal verified search stages, bounded computation counterexample predicates and same-input clock preservation.",
+  "adversarial": [
+    "Universal search must include arbitrary machines, not just a finite portfolio.",
+    "Soundness on UNSAT comes from verification, not claimed rejection.",
+    "Polynomial bounds on the expanded failure formula do not fit the original clock automatically.",
+    "Finite nonempty or empty counterexample sets do not decide asymptotic existence."
+  ],
+  "scope": "Arbitrary encoded deterministic Turing algorithms, explicit normalized universal clause selector encoding, total bit-cost bound.",
+  "cost": "Exact unrestricted equivalence and polynomial-size H for fixed k; no proof of satisfiability for all k or global cutoff",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of unrestricted universal search equivalence and bounded encoding"
+    },
+    {
+      "key": "attempt_adversarial_family",
+      "label": "Prove bad witness existence for every exponent at unbounded lengths, or universal polynomial cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS bounded built-in schedule, witness validation and bad predicate/CNF-size counts; not execution of Python.",
+  "expected": {
+    "schedule": [
+      256,
+      95,
+      1792,
+      11008,
+      473,
+      192,
+      128
+    ],
+    "first": [
+      0,
+      32,
+      46,
+      0,
+      17,
+      0,
+      0
+    ],
+    "failures": [
+      [
+        0,
+        1,
+        0,
+        95,
+        128,
+        10,
+        8,
+        1024
+      ],
+      [
+        1,
+        3,
+        32,
+        63,
+        76,
+        234,
+        712,
+        1024
+      ],
+      [
+        2,
+        7,
+        78,
+        17,
+        17,
+        556,
+        1724,
+        1024
+      ],
+      [
+        3,
+        15,
+        78,
+        17,
+        17,
+        556,
+        1724,
+        1024
+      ],
+      [
+        4,
+        31,
+        95,
+        0,
+        0,
+        675,
+        2098,
+        1024
+      ],
+      [
+        5,
+        63,
+        95,
+        0,
+        0,
+        675,
+        2098,
+        1024
+      ],
+      [
+        6,
+        127,
+        95,
+        0,
+        0,
+        675,
+        2098,
+        1024
+      ]
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_universal_search.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-UNIVERSAL-SEARCH.md"
+  ],
+  "next": "Construct bad witnesses for the same H family at unbounded lengths for every k, or prove a uniform polynomial success cutoff; audit any self-reference for exact input and clock preservation.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Reduce the unrestricted SAT lower bound against every polynomial-time deterministic algorithm to a fixed machine and an explicit adversarial formula family.",
+      "strategy": "Construct a charged universal verified witness scheduler and derive a uniform bounded-failure CNF equivalence.",
+      "alternative": "Audit direct diagonalization against the same machine, input and clock; test bounded failure formulas.",
+      "stop_rule": "Do not claim counterexample existence from the encoding itself, or substitute a restricted-model lower bound.",
+      "literature_leads": [
+        "Classical universal search, SAT self-reducibility and bounded Turing computation encoding; no novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "P=NP iff one fixed universal verified SAT search U has polynomial success time on all satisfiable inputs; P!=NP iff for every k infinitely many n admit a bad witness at stage k ceil(log2 L).",
+      "scope": "Arbitrary encoded deterministic Turing algorithms, explicit normalized universal clause selector encoding, total bit-cost bound.",
+      "derivation": "Dovetail all binary descriptions with length-weighted clocks and check witnesses; self-reduction gives one competitor iff P=NP; bounded simulation gives exact counterexample CNFs.",
+      "unresolved_steps": [
+        "Prove or disprove existence of bad witnesses for every exponent at arbitrarily large lengths."
+      ],
+      "candidate_tests": [
+        "Enumerate bounded stages on all small selectors, verify actual general interpreter, and compile finite failure predicates."
+      ]
+    },
+    "alternative": {
+      "claim": "Bounded counterexample encoding alone cannot force a diagonal failure: solving H can refer to a different input length and clock; finite bad sets may be empty.",
+      "scope": "Same unrestricted witness machine, explicit CNF encoding, polynomially charged construction; no restricted oracle premise.",
+      "derivation": "Distinguish existential failure search at length L from the runtime on its larger encoding; give conditional computable hard sequence and charge its discovery.",
+      "unresolved_steps": [
+        "A resource-preserving adversarial formula construction or universal polynomial success bound."
+      ],
+      "candidate_tests": [
+        "Check exact bad-set counts, empty sets, invalid program outputs and hard clock cutoffs."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Universal search must include arbitrary machines, not just a finite portfolio.",
+        "Soundness on UNSAT comes from verification, not claimed rejection.",
+        "Polynomial bounds on the expanded failure formula do not fit the original clock automatically.",
+        "Finite nonempty or empty counterexample sets do not decide asymptotic existence."
+      ],
+      "counterexample_candidates": [
+        "The small fixture bad sets become empty at stage four.",
+        "A larger encoding of a bounded failure predicate does not create a fixed-length diagonal contradiction."
+      ],
+      "equivalence_audit": "Uniform encoding, length-weighted stage costs, verified success, two directions of P=NP equivalence and exact all-k infinitely-many-n negation.",
+      "barrier_audit": "Unrestricted lower bound is the primary unproved obligation; no resolution or restricted-model substitute.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Deterministic ordinary bit computation, explicit binary Turing descriptions, verified SAT witnesses and bounded CNF encoding.",
+      "cost_ledger": {
+        "encoding": "Unary source count and explicit normalized clause selectors; all descriptions and witness bits charged",
+        "preprocessing": "Polynomial normalization and parsing; no arbitrary SAT oracle",
+        "inference": "At most (s+1)2^s simulated steps at stage s with fixed polynomial interpreter and verification overhead",
+        "repetitions": "Restart all descriptions by stage; brute-force counterexample discovery exponential, bounded regression separate",
+        "arithmetic_bits": "Charge clocks, tape symbols, state indices, copies and verification in ordinary bit model",
+        "memory": "Polynomial in L+2^s for bounded simulator; explicit finite CNF expansion charged",
+        "reconstruction": "Recover verified p,x from counterexample CNF and convert selected source assignment to original formula witness",
+        "overall": "Exact unrestricted equivalence and polynomial-size H for fixed k; no proof of satisfiability for all k or global cutoff"
+      },
+      "missing_bounds": [
+        "All-exponent adversarial existence or uniform polynomial success bound",
+        "Resource-preserving diagonal construction"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Universal scheduler overhead and verification",
+        "SAT self-reducibility equivalence",
+        "Bounded counterexample predicate and uniform mathematical encoding",
+        "Exact asymptotic quantifiers and diagonal cost gap"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "General efficient bounded-machine CNF compiler not implemented; finite CNF fixture deliberately enumerates selectors."
+      ],
+      "proof_obligations": [
+        "Replay bounded schedule, generic tape interpreter and malformed inputs",
+        "Check every finite failure predicate assignment and actual width-three CNF gate equivalences",
+        "Keep same machine and clock in any future adversarial construction"
+      ],
+      "formalization_plan": "Formalize universal simulator contract and scheduler overhead, SAT witness reduction, bounded computation encoding and the all-exponent negation.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Directly address all deterministic polynomial-time algorithms through one fixed universal verified search machine and an exact family of counterexample predicates; no restricted-model detour.",
+      "remaining_gaps": [
+        "Satisfiability of bounded counterexample formulas for every exponent at unbounded lengths, or universal UNSAT cutoff",
+        "Independent mathematical review",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Construct bad witnesses for the same H family at unbounded lengths for every k, or prove a uniform polynomial success cutoff; audit any self-reference for exact input and clock preservation.",
+      "human_review_requests": [
+        "Review universal encoding, polynomial simulation overhead, quantifier absorption and bounded computation CNF construction."
+      ]
+    }
+  }
+}
