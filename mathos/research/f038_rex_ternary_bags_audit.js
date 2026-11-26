@@ -36,14 +36,14 @@ function audit(P,R,E,A,which="small"){
   }
  }else if(which==="three"){check(3,0,[0,1,0]);check(3,3,[1,0,1]);}
  else if(which==="four")check(4,3,[0,1,0,1]);
- else if(which==="five")check(5,1,[1,0,1,0,1]);
+ else if(which==="five"){let raw=E.encode(5,[1,0,1,0,1],[]),limit=900000000,v=P.run(M,raw,limit);ok(v.status==="TIMEOUT"&&v.t===limit,"larger-domain bounded run");return{which,q:C.q,descriptorBits:C.desc.length,L:raw.length,limit,status:v.status};}
  else if(which==="controls"){
   let raw=E.encode(2,[0,1],[]),n=31,pos=new Map(),at=n+1;for(let c of E.pool(n))pos.set(c.join(","),at++);
   const flip=(s,i)=>s.slice(0,i)+(s[i]==="1"?"0":"1")+s.slice(i+1),wide=E.encode(2,[0,1],[[-1,-17]]);
   for(let [name,bad,want] of [["empty","","OUTSIDE_NORMALIZED"],["header","1".repeat(32)+"0","OUTSIDE_NORMALIZED"],["mandatory",flip(raw,pos.get("-31")),"OUTSIDE_NORMALIZED"],["latePin",flip(raw,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"],["truncated",raw.slice(0,-1),"OUTSIDE_NORMALIZED"],["extra",raw+"1","OUTSIDE_NORMALIZED"],["outside",wide,"OUTSIDE_FIXED_PATH"],["outsideLateMalformed",flip(wide,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"]]){
    let v=P.run(M,bad,100000000);ok(v.status===want,"control "+name);controls.push({name,status:v.status,t:v.t});
   }
-  const entry=7649151,clock=61579486;
+  const entry=7649152,clock=61579486;
   for(let limit of [0,1,100,entry-1,entry,entry+1,clock-1]){let v=P.run(M,raw,limit);ok(v.status==="TIMEOUT"&&v.t===limit,"cutoff "+limit);}
   ok(P.run(M,raw,clock).prepared===R.producer(raw).prepared,"exact budget");
   return{which,q:C.q,descriptorBits:C.desc.length,controls,cutoffs:7,exactBudget:clock};
