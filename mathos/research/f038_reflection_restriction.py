@@ -84,7 +84,9 @@ def proof(k):
         cur=res(one,branches[1],b)
     res(cur,end,k+1)
     out=tuple(out)
-    require(len(out)==5+21*k and R.width(out)<=3 and R.verify(H,out),'bad reflection proof')
+    require(len(out)==7+21*k,'unexpected reflection proof line count')
+    require(R.width(out)<=3,'reflection proof width exceeded')
+    require(R.verify(H,out),'reflection proof replay failed')
     return out
 
 

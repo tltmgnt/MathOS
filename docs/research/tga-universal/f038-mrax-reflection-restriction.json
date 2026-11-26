@@ -34,7 +34,7 @@
       "label": "Unrestricted deterministic SAT runtime lower bound"
     }
   ],
-  "independent_reference": "Independent JS reachability, presence subset and source assignment enumeration; not Python execution.",
+  "independent_reference": "Independent JS reachability, presence subset and source assignment enumeration; not Python execution. Corrective independent JS replay checks every axiom and resolution pivot on k=1,2,3,8,16,32; 7+21k lines, width 3.",
   "expected": {
     "small": [
       [
@@ -45,7 +45,7 @@
         2,
         1024,
         272,
-        26
+        28
       ],
       [
         2,
@@ -55,7 +55,7 @@
         4,
         131072,
         18496,
-        47
+        49
       ],
       [
         3,
@@ -65,24 +65,24 @@
         8,
         0,
         0,
-        68
+        70
       ]
     ],
     "large": [
       [
         8,
         256,
-        173
+        175
       ],
       [
         16,
         65536,
-        341
+        343
       ],
       [
         32,
         4294967296,
-        677
+        679
       ]
     ],
     "controls": 3

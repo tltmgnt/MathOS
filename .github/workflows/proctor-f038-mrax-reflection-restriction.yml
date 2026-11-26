@@ -25,7 +25,7 @@ jobs:
           python -m mathos.research.f038_reflection_restriction | tee /tmp/current.txt
           grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
           grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,short_proofs,discovery,machine_cost status=OPEN' /tmp/current.txt
-          grep -Fx 'F038_MRAX_REFLECTION_RESTRICTION_OK {"controls":3,"large":[[8,256,173],[16,65536,341],[32,4294967296,677]],"small":[[1,64,7,57,2,1024,272,26],[2,1024,49,975,4,131072,18496,47],[3,16384,343,16041,8,0,0,68]]}' /tmp/current.txt
+          grep -Fx 'F038_MRAX_REFLECTION_RESTRICTION_OK {"controls":3,"large":[[8,256,175],[16,65536,343],[32,4294967296,679]],"small":[[1,64,7,57,2,1024,272,28],[2,1024,49,975,4,131072,18496,49],[3,16384,343,16041,8,0,0,70]]}' /tmp/current.txt
           grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
           grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
           python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
