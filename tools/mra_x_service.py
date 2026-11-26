@@ -71,3 +71,4 @@ class Store:
         a.require(1<=len(rows)<=MAX_HISTORY and all(y[0]==x[0]+1 for x,y in zip(rows,rows[1:])))
         docs=[read_row(row)[1] for row in rows]
         return [r[0] for r in rows],docs,[r[-1]+1 for r in rows]
+
