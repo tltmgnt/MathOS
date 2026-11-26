@@ -8,7 +8,7 @@ function compile(){
  const W=5,G=15;
  function walk(name,d,n,dest){if(!n)return dest;for(let i=n;i>0;i--)add(name+i,a=>a<2?(d===1?r:l)(i===1?dest:name+(i-1),a):bad());return name+n;}
  function back(name,dest){return add(name,a=>a===2?z(dest,a):r(name,a));}
- function fromSep(name,distance,dest){return add(name,a=>a===2?l(walk(name+"W",-1,distance-1,dest),a):bad());}
+ function fromSep(name,distance,dest){const st=walk(name+"W",-1,distance-1,dest);return add(name,a=>a===2?l(st,a):bad());}
  // Column transformations. Full column read uses at most 32 finite prefixes.
  function scan(name,init,fn,finish,{readonly=false,extend=false}={}){
   const seen=new Set(),returnState=new Map();
