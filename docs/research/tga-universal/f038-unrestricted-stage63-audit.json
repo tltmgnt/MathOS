@@ -1,0 +1,249 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-STAGE63-AUDIT",
+  "base_commit": "71b31ea140ef6801b80135981e38e888b175ab1d",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45743839023",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the first new cubic size n=93 be certified by exact partial-table replay and a reusable hierarchical tape accelerator?",
+  "route": "negative",
+  "topology": "Actual stage-63 pin fixture, untouched-bit and prefix exclusions, exact partial-table partition and persistent block acceleration.",
+  "adversarial": [
+    "Horizon exhaustion below the actual clock is unresolved.",
+    "Hash equality alone cannot prove cycles.",
+    "Translated drift requires a fresh blank half-line and exact inward band invariant.",
+    "Macros must preserve first undefined event and exact-clock halts."
+  ],
+  "scope": "Fixed actual n=93 selector at stage 63; all q=1,3 and built-ins excluded, q=2 partial, exact U unchanged.",
+  "cost": "Charge all original transitions, exact partial-table completions and cache operations; block acceleration changes replay cost only; full-clock replay not completed.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of exact scalar and block replay"
+    },
+    {
+      "key": "attempt_stage63_two_state",
+      "label": "Complete stage-63 two-state clock coverage"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    }
+  ],
+  "independent_reference": "Locally executed scalar C++ and separately structured block C++ at common 512-step horizon; scalar 4096 and compact one-state replays; full-clock attempt timed out. Integrated wrapper pending CI.",
+  "expected": {
+    "block512": [
+      [
+        124412539,
+        150486305,
+        50960646,
+        0,
+        61560999
+      ],
+      [
+        636809,
+        633199,
+        2175312,
+        0,
+        223593
+      ],
+      141112,
+      52114634,
+      5969469,
+      209106
+    ],
+    "geometry": [
+      93,
+      1055426,
+      1055520,
+      63,
+      364,
+      17392,
+      "352125158121583154906849008",
+      8796093022208,
+      2097152,
+      4,
+      101559956668416
+    ],
+    "one": [
+      [
+        2155,
+        2453,
+        396,
+        540,
+        288,
+        0,
+        0
+      ],
+      [
+        302,
+        175,
+        396,
+        13,
+        16,
+        0,
+        0
+      ],
+      53,
+      21860
+    ],
+    "scalar4096": [
+      [
+        124433815,
+        150511973,
+        9178911,
+        41843358,
+        35011467,
+        26440965,
+        0
+      ],
+      [
+        648387,
+        646803,
+        2159379,
+        64972,
+        92063,
+        130057,
+        0
+      ],
+      143910,
+      528913890
+    ],
+    "scalar512": [
+      [
+        124412539,
+        150486305,
+        9130221,
+        41830425,
+        34940403,
+        26620596,
+        0
+      ],
+      [
+        636809,
+        633199,
+        2110689,
+        64623,
+        90003,
+        133590,
+        0
+      ],
+      141112,
+      62269556
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_stage63_audit.cpp",
+    "mathos/research/f038_unrestricted_stage63_audit.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-STAGE63-AUDIT.md"
+  ],
+  "next": "Resolve the remaining two-state stage-63 paths using exact full-clock replay or additional sound certificates; continue to distinguish finite failure from unbounded cubic failure.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the first new cubic size n=93 be certified by exact partial-table replay and a reusable hierarchical tape accelerator?",
+      "strategy": "Use exact scalar partial-table partition, complete one-state prefix audit and three-state untouched-bit argument; build a second hierarchical tape simulator.",
+      "alternative": "Certify cycles and outward translated drift with exact inward-band comparison; memoize exact persistent block macros.",
+      "stop_rule": "Any truncated two-state path remains unresolved unless certified; no cubic counterexample or asymptotic claim from the partial audit.",
+      "literature_leads": [
+        "Prior exact U cubic fixture, all-clock one-state suffix theorem, ordinary persistent binary tape representation. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For the explicit n=93 candidate, all one- and three-state programs fail; exact scalar partial replay excludes 360979524 of 387420489 two-state descriptions.",
+      "scope": "Fixed actual n=93 selector at stage 63; all q=1,3 and built-ins excluded, q=2 partial, exact U unchanged.",
+      "derivation": "Actual pin fixture, short three-state clock and untouched output bit, complete one-state prefix replay, exact table partition and nonhalting certificates.",
+      "unresolved_steps": [
+        "26440965 two-state descriptions remain at truncated horizon.",
+        "Unconditional unbounded cubic failures."
+      ],
+      "candidate_tests": [
+        "Byte-for-byte input agreement, actual decoder and built-ins, weighted scalar counts."
+      ]
+    },
+    "alternative": {
+      "claim": "A canonical persistent block replay implements the same bounded partial-table semantics and agrees with the scalar halt census at 512 transitions.",
+      "scope": "Exact memoized local execution, original clock charged; no completed full-clock result.",
+      "derivation": "Recursive segment macros preserve tape edits and first halt/undefined/exit events; exact node identity and state/head recurrence prove loops.",
+      "unresolved_steps": [
+        "Full-clock block run did not finish; improve or verify acceleration."
+      ],
+      "candidate_tests": [
+        "Compare weighted malformed/wrong/accepted halt counts across engines."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Horizon exhaustion below the actual clock is unresolved.",
+        "Hash equality alone cannot prove cycles.",
+        "Translated drift requires a fresh blank half-line and exact inward band invariant.",
+        "Macros must preserve first undefined event and exact-clock halts."
+      ],
+      "counterexample_candidates": [
+        "A two-state table may halt after 4096 transitions and return a verified model.",
+        "A finite stage-63 failure would not prove unbounded cubic failure."
+      ],
+      "equivalence_audit": "Actual complete input and transition convention, original clock units, exhaustive disjoint partial-table completion weights, no approximate nonhalting claims.",
+      "barrier_audit": "Partial finite audit, no new unconditional cubic counterexample or resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual U three-symbol tape semantics, scalar and persistent-block exact replay.",
+      "cost_ledger": {
+        "encoding": "Complete 1055520-bit selector and exact 91-bit forced pattern",
+        "preprocessing": "Construct and compare actual encoder and decoded transition table syntax",
+        "inference": "Partial-table branching, exact recurrence, translated drift, persistent block macros",
+        "repetitions": "All eligible one- and three-state tables excluded; all two-state tables partitioned at partial horizon",
+        "arithmetic_bits": "Exact integer table counts, tape offsets and 128-bit witness mask; hash only proposes recurrence",
+        "memory": "Scalar rollback logs, exact interned block tree and bounded cache",
+        "reconstruction": "Explicit four model extensions; original output read at halt",
+        "overall": "Charge all original transitions, exact partial-table completions and cache operations; block acceleration changes replay cost only; full-clock replay not completed."
+      },
+      "missing_bounds": [
+        "Full two-state clock coverage",
+        "Unconditional unbounded cubic and all-exponent lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact fixture geometry and short three-state exclusion",
+        "Complete one-state prefix audit",
+        "Partial scalar and independent block halt census",
+        "Conservative horizon status"
+      ],
+      "unsupported_steps": [
+        "Full-clock block execution timed out.",
+        "Integrated new code CI, independent review and Lean formalization outstanding."
+      ],
+      "proof_obligations": [
+        "Review cycle and translated drift certificates",
+        "Review recursive macro first-event semantics and exact horizon",
+        "Replay counts with actual parent input"
+      ],
+      "formalization_plan": "Formalize partial-table partition, exact configuration recurrence, buffered translated drift and canonical block simulation.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Commit auditable partial stage-63 certificate and exact reusable replay acceleration without asserting completion.",
+      "remaining_gaps": [
+        "Remaining two-state paths",
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Resolve the remaining two-state stage-63 paths using exact full-clock replay or additional sound certificates; continue to distinguish finite failure from unbounded cubic failure.",
+      "human_review_requests": [
+        "Review nonhalting certificates, independent halt census and block macro semantics."
+      ]
+    }
+  }
+}

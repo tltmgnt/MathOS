@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted stage63 audit
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-stage63-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_stage63_audit.py
+          python -m mathos.research.f038_unrestricted_padding_windows | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_PADDING_WINDOWS_OK {"controls":4,"rows":[[1,14,4,14,56,112,42,56,2464,224,24,4,14],[1,15,4,15,60,120,45,60,2700,300,24,4,14],[1,16,4,16,64,128,48,64,2944,384,24,4,14],[2,18,16,18,288,1152,270,594,14400,2970,96,18,72],[2,19,16,19,304,1216,285,627,15504,3762,96,18,72],[2,20,16,20,320,1280,300,660,16640,4620,96,18,72]],"wrapper":[[0,4,180,0,4],[1,4,92,2,2],[2,4,92,2,2]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_stage63_audit | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_STAGE63_PARTIAL_OK {"block512":[[124412539,150486305,50960646,0,61560999],[636809,633199,2175312,0,223593],141112,52114634,5969469,209106],"geometry":[93,1055426,1055520,63,364,17392,"352125158121583154906849008",8796093022208,2097152,4,101559956668416],"one":[[2155,2453,396,540,288,0,0],[302,175,396,13,16,0,0],53,21860],"scalar4096":[[124433815,150511973,9178911,41843358,35011467,26440965,0],[648387,646803,2159379,64972,92063,130057,0],143910,528913890],"scalar512":[[124412539,150486305,9130221,41830425,34940403,26620596,0],[636809,633199,2110689,64623,90003,133590,0],141112,62269556]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_STAGE63_PARTIAL_GATE_OK status=OPEN')
+          PY
