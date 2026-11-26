@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted directed difference factors
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-directed-difference-factors']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_directed_difference_factors.js
+          node mathos/research/f038_unrestricted_directed_difference_factors.js | tee /tmp/current.txt
+          grep -Fx 'F038_DIRECTED_DIFFERENCE_FACTORS_OK {"fixtures":32,"stats":[323120,53360,97292,83120,97292,4126,3412,365568,8208,3276,3276],"rankChecks":46349,"encodingChecks":73177,"rebases":15000,"dictChecks":118939,"relabels":15000,"heavyModels":11736,"lightModels":3276,"heavyEntries":1628,"lightEntries":384,"maskChecks":12688,"recoveryChecks":105792,"types":[41560,41560],"controls":[[4,2,2,2,2,128],[16,4,4,4,4,4096],[64,8,8,8,8,131072],[256,16,16,16,16,320],[1024,32,16,16,32,640]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_DIRECTED_DIFFERENCE_FACTORS_GATE_OK status=OPEN promotion=NONE')
+          PY
