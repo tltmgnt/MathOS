@@ -1,0 +1,48 @@
+name: Proctor F038 unrestricted local exception pruning
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-local-exception-pruning']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_local_exception_pruning.js
+          node mathos/research/f038_unrestricted_local_exception_pruning.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_LOCAL_EXCEPTION_PRUNING_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['fixtures'] == 13
+          assert r['totals'] == [47,26222,19120,3079,677895,482241,195654,194336,3526208,194368,25]
+          assert r['scaleChecks'] == 4095
+          assert r['seriesChecks'] == 300
+          assert 0 < r['maxRatio'] < 10000
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LOCAL_EXCEPTION_PRUNING_GATE_OK status=OPEN promotion=NONE')
+          PY
