@@ -3,7 +3,7 @@ function audit(){
  const ok=(v,s)=>{if(!v)throw Error(s)},key=z=>z.join(",");
  function* tup(m,k){for(let i=0;i<m**k;i++)yield Array.from({length:k},(_,j)=>Math.floor(i/m**(k-j-1))%m);}
  const bits=[...tup(2,5)],n={hierarchy:0,multiplicity:0,keys:0,tuples:0,models:0,rejected:0,flags:0,types:0,treeNodes:0,fullNodes:0};
- let hierarchy=[];
+ let hierarchy=[],hiddenClosure=[];
  for(let d=3;d<=6;d++){
   let X=[...tup(2,d)],F=X.filter(z=>z.reduce((a,b)=>a^b,0)===0),C=[];
   for(let k=1;k<=d;k++){
@@ -13,6 +13,14 @@ function audit(){
    ok(R.length===(k<d?X.length:F.length),"hierarchy");C.push(R.length);n.hierarchy+=X.length;
   }
   for(let z of X)ok(F.some(a=>z.every((v,i)=>v===a[i]))===(z.reduce((a,b)=>a^b,0)===0),"hidden binary encoding");
+  // Exact pair-projection closure in the full augmented domain.
+  let H=F.map((z,i)=>[...z,i]),pairs=[];
+  for(let i=0;i<=d;i++)for(let j=i+1;j<=d;j++)pairs.push([i,j,new Set(H.map(z=>key([z[i],z[j]])))]);
+  let count=0,tests=0;for(let z of X)for(let a=0;a<F.length;a++){
+   let v=[...z,a],keep=pairs.every(([i,j,S])=>S.has(key([v[i],v[j]])));
+   ok(keep===z.every((b,i)=>b===F[a][i]),"augmented R2 exact");count+=+keep;tests++;
+  }
+  hiddenClosure.push([d,tests,count]);
   hierarchy.push([d,...C]);
  }
  for(let m=2;m<=4;m++)for(let mask=0;mask<1<<m;mask++)for(let p of tup(m,m)){
@@ -110,6 +118,6 @@ function audit(){
   let p=0;for(let x=0;x<4;x++)for(let y=0;y<4;y++)if(x!==y)p|=1<<((a>>x&1)^(b>>y&1));
   if(p!==3)ok((a===0||a===15)&&(b===0||b===15),"connected edge forces constants");colorChecks++;
  }
- return {n,hierarchy,random,cycle,clique,colorChecks};
+ return {n,hierarchy,hiddenClosure,random,cycle,clique,colorChecks};
 }
 console.log('F038_TGA_CONDITIONED_PARITY_OK '+JSON.stringify(audit()));
