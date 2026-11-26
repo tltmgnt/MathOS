@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X nested variable overlap
+on:
+  push:
+    branches: ['research/pnp-f038-rex-nested-variable-overlap']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_nested_variable_overlap.js
+          node mathos/research/f038_rex_nested_variable_overlap.js | tee /tmp/nested.txt
+          grep -Fx 'F038_REX_NESTED_VARIABLE_OVERLAP_OK {"alphabet":51,"width":6,"logicalStates":499,"rules":25449,"states":126995,"bits":8127684,"counts":{"logicalCases":833,"physicalCases":19,"sat":80,"unsat":753,"physicalSat":10,"physicalUnsat":9,"bags":1758,"rows":2108,"physical":23879834,"logical":533689,"checkpoints":29,"physicalRows":113,"malformed":14,"malformedTransitions":122910,"cutoffs":2},"scaling":[[1,85,169794,4538,603,[52023,72418,45353]],[2,126,372966,10107,890,[113277,161347,98342]],[4,208,981522,25673,1465,[306387,410053,265082]],[8,372,3007482,74517,2617,[975015,1190857,841610]]],"stress":[["wide",2,159,573992,14936,1121],["wide",4,307,2083614,52810,2161],["wide",8,603,7934474,198542,4241],["deep",4,191,917398,27234,1345],["deep",8,481,5856772,176830,3379]],"digest":1422736753,"physicalDigest":3143557437}' /tmp/nested.txt
+          sed -n 's/^F038_REX_NESTED_VARIABLE_OVERLAP_OK //p' /tmp/nested.txt > /tmp/nested.json
+          python -m mathos.research.validate_f038_rex_nested_variable_overlap /tmp/nested.json
+          python -m mathos.research.tga_f038_rex_020 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_NESTED_VARIABLE_LABEL_ORIGINAL_PRODUCER_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_NESTED_VARIABLE_OVERLAP_GATE_OK status=OPEN promotion=NONE')
+          PY
