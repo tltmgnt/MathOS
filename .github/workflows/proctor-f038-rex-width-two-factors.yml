@@ -1,0 +1,55 @@
+name: Proctor F038 RE-X width-two factors
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-factors']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_factors
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/factors-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/factors-replay.txt
+          node "$p.js" --descriptor > /tmp/factors.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_FACTORS_OK '){const a=fs.readFileSync('/tmp/factors-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(s=>read(s));
+          for(const r of [a,b,c]){assert.equal(r.q,421642);assert.equal(r.descriptorBits,29514944);}
+          assert.deepEqual(a.totals,{rawBits:303312,transitions:266205529,maskBits:6672,ones:862,parents:54,relations:54,candidates:196,accepted:6});
+          assert.deepEqual(b.totals,{rawBits:161851,transitions:282875190,maskBits:2619,ones:41,parents:9,relations:9,candidates:117,accepted:1});
+          assert.equal(c.controls.length,7);assert.equal(c.cutoffs,4);assert.equal(c.exactBudget,26693134);
+          assert.deepEqual(read('replay','F038_REX_WIDTH_TWO_FACTORS_REPLAY_OK '),{q:421642,descriptorBits:29514944,transitions:26693134,maskBlocks:129,maskBits:834,outputBits:190,parentRecords:9});
+          JS
+          python -m mathos.research.f038_rex_width_two_factors_codec /tmp/factors.desc > /tmp/factors-codec.json
+          python -m mathos.research.tga_f038_rex_023c1 > /tmp/factors-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/factors-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/factors-gates.json') as f:
+              g=json.load(f)
+          assert r['transitions']==26693134 and r['mask_blocks']==129 and r['mask_bits']==834
+          assert r['parent_records']==9 and r['output_bits']==190 and r['not_a_witness']
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023C1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
