@@ -175,7 +175,10 @@ function audit(){
  function check(raw,want,record=true){
   let r=run(M,J,raw),N=raw.length,w=M.width,n=1+(N-2)/6;
   ok(r.state===M.q,"halt");
-  if(want===null){ok(!r.tape.has(r.head),"reject "+raw);}
+  if(want===null){
+   ok(!r.tape.has(r.head)&&!r.forward&&!r.backward,"reject "+raw);
+   ok(r.logical===N+1&&r.ph[0]===(w+1)*N*(N+1)+(w+4)*N+3&&r.ph[1]===(3*w-2)*N+2*w-1&&r.ph[2]===0,"reject clock");
+  }
   else{
    ok(r.tape.size===n&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b),"witness "+raw);
    let start=-w*N-1;
@@ -207,6 +210,8 @@ function audit(){
    for(let i=N-1;i>=0;i--){let e=+positions.includes(i);body+=2*w*(i+1)+2*c+2*e+4;c+=e;}
    let serial=2*w*N+2*w+2+body+n+3,logical=2*N+1,mid=(3*w-2)*(logical-1)+(2*w-1);
    ok(r.logical===logical&&r.ph[0]===prep&&r.ph[1]===mid&&r.ph[2]===serial,"clock "+JSON.stringify({N,w,r:r.ph,expected:[prep,mid,serial],logical:r.logical}));
+   ok(r.head===-w*N-n-2&&r.span===w*N+n+Math.max(N,w-1)+4,"head/span");
+   ok(r.t===11*N*N+60*N+6*n*n-n+27,"closed form");
    if(record){counts.checkpoints+=2;counts.historyEntries+=2*(n-1);}
   }
   if(record){counts.valid++;counts.sat+=+(want!==null);counts.unsat+=+(want===null);counts.vertices+=n;counts.physical+=r.t;counts.logical+=r.logical;}
@@ -215,7 +220,24 @@ function audit(){
  for(let N of [2,8])for(let i=0;i<2**N;i++){let raw=i.toString(2).padStart(N,"0");check(raw,direct(raw));}
  let seed=0x52455810;
  for(let i=0;i<48;i++){let n=3+i%6,N=2+6*(n-1),raw="";for(let j=0;j<N;j++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;raw+=seed>>>31;}check(raw,direct(raw));}
- for(let raw of ["","0","000","0000","00000","000000","0000000","111111111","1111111111"]){
+ // Plant a witness in additional nontrivial random chains.
+ for(let i=0;i<32;i++){
+  let n=3+i%6,N=2+6*(n-1),a=[],raw=[];
+  for(let j=0;j<n;j++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;a.push(seed>>>31);}
+  for(let j=0;j<N;j++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;raw.push(String(seed>>>31));}
+  raw[a[0]]="1";
+  for(let j=1;j<n;j++){let p=2+6*(j-1);raw[p+2*a[j-1]+a[j]]="1";raw[p+4+a[j]]="1";}
+  raw=raw.join("");let want=direct(raw);ok(want!==null,"planted witness");check(raw,want);
+ }
+ let adversarial={individuallyNonemptyEdges:"11"+"100011"+"000111",forcedNonzeroPredecessor:"11"+"001011"};
+ ok(direct(adversarial.individuallyNonemptyEdges)===null,"conflicting path oracle");
+ check(adversarial.individuallyNonemptyEdges,null);
+ ok(direct(adversarial.forcedNonzeroPredecessor)==="10","nonzero predecessor oracle");
+ check(adversarial.forcedNonzeroPredecessor,"10");
+ let malformed=[];
+ for(let n=0;n<=7;n++)if(n!==2)for(let i=0;i<2**n;i++)malformed.push(n?i.toString(2).padStart(n,"0"):"");
+ malformed.push("111111111","1111111111");
+ for(let raw of malformed){
   let r=run(M,J,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed");counts.malformed++;counts.malformedTransitions+=r.t;
  }
  let scaling=[];
@@ -228,6 +250,6 @@ function audit(){
  ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"length");
- return {alphabet:J.symbols.length,states:M.q,bits:M.desc.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,counts,scaling};
+ return {alphabet:J.symbols.length,states:M.q,bits:M.desc.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,counts,scaling,adversarial};
 }
 if(process.argv.includes('--description')){let j=pathWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_PERSISTENT_PATH_OK '+JSON.stringify(audit()));
