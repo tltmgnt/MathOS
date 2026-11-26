@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted three context zero cover
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-three-context-zero-cover']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_three_context_zero_cover.js
+          node mathos/research/f038_unrestricted_three_context_zero_cover.js | tee /tmp/current.txt
+          grep -Fx 'F038_THREE_CONTEXT_ZERO_COVER_OK {"fixtures":14,"totals":[245,124,33577,13638,33577,0,141365,119,369],"forced":[4505,4505,15825],"factors":1925,"greedyContexts":245,"controls":[[4,3,81,0],[8,7,2401,1],[16,8,50625,3],[32,8,923521,7]],"allDifferent":[[9,45],[12,60],[20,100]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_THREE_CONTEXT_ZERO_COVER_GATE_OK status=OPEN promotion=NONE')
+          PY
