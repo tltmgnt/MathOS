@@ -231,7 +231,8 @@ function run(M,raw,limit=Infinity,observe=null){
  let end=p,start=p-1;while(tape[start]!==2)start--;start++;
  let selector=Array.from(tape.subarray(start,end)).join(""),workBits=head-end-1;
  if(nonblank!==selector.length+workBits)throw Error("checkpoint garbage");
- return{status:"NORMALIZED_FIXED_PATH",t,span:hi-lo+1,checkpoint:{m:vals[0]+1,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin}};
+ let groups=[];for(let i=0;i<3;i++){let g=0;for(let j=0;j<5;j++)g=2*g+tape[head-15+5*i+j];groups.push(g);}
+ return{status:"NORMALIZED_FIXED_PATH",t,span:hi-lo+1,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin}};
 }
 function audit(E){
  const C=compile(),M={...decode(C.desc),events:C.events},ok=(v,s)=>{if(!v)throw Error(s)},results=[];
@@ -262,7 +263,7 @@ function audit(E){
    }
    count++;
   });
-  if(r.status==="NORMALIZED_FIXED_PATH"){ok(oracle.next().done&&count===raw.length-n-1,"complete pool");ok(r.checkpoint.m===m&&r.checkpoint.selector===raw.slice(n+1),"checkpoint payload");}
+  if(r.status==="NORMALIZED_FIXED_PATH"){ok(oracle.next().done&&count===raw.length-n-1,"complete pool");ok(r.checkpoint.m===m&&r.checkpoint.selector===raw.slice(n+1),"checkpoint payload");let p=r.checkpoint;ok(p.rankBounds.join()===`${m-1},${m-2}`&&p.ranks.join()==="0,0,0"&&p.groups.join()==="19,20,20"&&p.workBits===15+5*m.toString(2).length&&p.head===raw.length-1&&p.selectorEnd+p.workBits+1===p.head&&p.selectorEnd-p.selectorStart===p.selector.length,"checkpoint layout");}
   return{status:r.status,t:r.t,span:r.span,count,classified,workBits:r.checkpoint?.workBits};
  }
  for(let m of [2,3,4,5]){
@@ -296,7 +297,36 @@ function audit(E){
  r=run(M,late,800000000);ok(r.status==="OUTSIDE_NORMALIZED","late malformed triple");controls.push({name:"outsideTripleMalformedLater",t:r.t});
  for(let limit of [0,1,100,results[0].t-1]){r=run(M,raw,limit);ok(r.status==="TIMEOUT"&&r.t===limit,"timeout "+limit);}
  let clock=run(M,raw,800000000).t;ok(run(M,raw,clock-1).status==="TIMEOUT"&&run(M,raw,clock).status==="NORMALIZED_FIXED_PATH","exact halt budget");
- return{mutationCases,mutationTransitions,exactBudget:clock,q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
+ // Vary payload values independently from the principal fixtures.
+ let payloads=[],dense=[];
+ for(let c of E.pool(n))if(c.every(x=>x<0&&-x<=18)){let g=c.map(x=>Math.floor((-x-1)/2));if(new Set(g).size===g.length&&g[g.length-1]-g[0]<=2)dense.push(c);}
+ for(let p=0;p<4;p++){
+  let pins=[p&1,(p>>1)&1],B=p===0?[]:p===1?[[-1],[-2]]:p===2?dense:dense.filter((_,i)=>i%3===0),input=E.encode(2,pins,B),v=check(input,2);
+  ok(E.decode(input)&&v.status==="NORMALIZED_FIXED_PATH","payload variation");
+  payloads.push({pins:pins.join(""),crossClauses:B.length,knownUnsat:p===1||p===2,L:input.length,...v});
+ }
+ ok(E.valid(outside,E.witness(2,[0,1],Array(9).fill(1)))&&E.valid(wide,E.witness(2,[1,0],Array(9).fill(1))),"outside SAT controls");
+ return{payloads,mutationCases,mutationTransitions,exactBudget:clock,q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
 }
-module.exports={compile,decode,run,audit};
-if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--validate'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else console.log('F038_REX_TERNARY_NORMALIZATION_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
+function independent(desc,raw,limit){
+ // Deliberately separate descriptor field parser, sparse tape and step implementation.
+ let j=3;while(desc[j]==="1")j++;const q=j-3,w=q.toString(2).length;j++;const rows=[];
+ for(let k=0;k<3*q;k++){const a=Number.parseInt(desc.substring(j,j+w),2),b=Number.parseInt(desc.substring(j+w,j+w+2),2),d=Number.parseInt(desc.substring(j+w+2,j+w+4),2)-1;j+=w+4;if(a>q||b>2||d< -1||d>1)throw Error("invalid descriptor");rows.push([a,b,d]);}
+ if(j!==desc.length)throw Error("description length");
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),h=0,s=0,t=0;
+ for(;t<limit&&s!==q;t++){const [a,b,d]=rows[3*s+(tape.get(h)??2)];if(b===2)tape.delete(h);else tape.set(h,b);s=a;h+=d;}
+ if(s!==q)return{status:"TIMEOUT",t};
+ return{status:tape.has(h)?tape.get(h)?"OUTSIDE_FIXED_PATH":"OUTSIDE_NORMALIZED":"NORMALIZED_FIXED_PATH",t,head:h,tape};
+}
+function independentAudit(P,E){
+ const C=P.compile(),raw=E.encode(2,[1,0],[[-1],[-2]]),r=P.run(P.decode(C.desc),raw),v=independent(C.desc,raw,r.t);
+ if(v.status!==r.status||v.t!==r.t||v.head!==r.checkpoint.head)throw Error("independent replay state");
+ const p=r.checkpoint,seq=Array.from({length:p.selector.length},(_,i)=>v.tape.get(p.selectorStart+i)).join("");
+ if(seq!==p.selector||v.tape.size!==p.selector.length+p.workBits)throw Error("independent replay payload");
+ if(independent(C.desc,raw,r.t-1).status!=="TIMEOUT")throw Error("independent cutoff");
+ let outside=E.encode(2,[1,0],[[-1,-17]]),z=independent(C.desc,outside,10000000);
+ if(z.status!=="OUTSIDE_FIXED_PATH"||z.tape.size!==1)throw Error("independent rejection");
+ return{replays:2,oneStepShort:1,transitions:v.t+z.t};
+}
+module.exports={compile,decode,run,audit,independentAudit};
+if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--validate'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else if(process.argv.includes('--independent'))console.log('F038_REX_TERNARY_NORMALIZATION_INDEPENDENT_OK '+JSON.stringify(independentAudit({compile,decode,run},require('./f038_tga_normalized_integration.js').engine())));else console.log('F038_REX_TERNARY_NORMALIZATION_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
