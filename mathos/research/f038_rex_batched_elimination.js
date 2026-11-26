@@ -156,7 +156,7 @@ function sortWorker(){
 function encode(records){return records.map(([k,p])=>[...k].map(b=>"0"+b).join("")+"10"+[...p].map(b=>"0"+b).join("")+"11").join("");}
 function logicalRun(J,raw,limit=1000000){
  const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[],copySteps=0,restoreSteps=0,joinSteps=0,joinMoves=0,inJoin=false,compares=0;
- while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(/^(copy|append|newEnd|back)[01]/.test(state))copySteps++;if(/^(restoreScan|restoreBack|restoreSlot|restoreRight|eraseDest)/.test(state))restoreSteps++;if(state==="joinLeft")inJoin=true;if(inJoin){joinSteps++;joinMoves+=+(d!==0);}if(/^readQuery[012]Scan$/.test(state)&&/^U[012]$/.test(a))compares++;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
+ while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(/^(s[12])?(copy|append|newEnd|back)[01]/.test(state))copySteps++;if(/^(s[12])?(restoreScan|restoreBack|restoreSlot|restoreRight|eraseDest)/.test(state))restoreSteps++;if(state==="joinLeft")inJoin=true;if(inJoin){joinSteps++;joinMoves+=+(d!==0);}if(/^readQuery[012]Scan$/.test(state)&&/^U[012]$/.test(a))compares++;if(/^(s[12])?makeE$/.test(state))passes++;if(/^(s[12])?eraseDest$/.test(state)&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
  return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,copySteps,restoreSteps,joinSteps,joinMoves,compares,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
 }
 
@@ -388,3 +388,65 @@ function refEliminate(rows,trace=null){
  }
  return r;
 }
+
+function audit(){
+ const J=eliminationWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)};
+ const counts={physicalCases:0,logicalOnly:0,records:0,requests:0,positiveMembership:0,candidateGroups:0,feasibleCandidates:0,outgoingGroups:0,positiveOutgoing:0,physicalTransitions:0,logicalTransitions:0,radixPasses:0,boundaryChecks:0,cutoffs:0,malformed:0,malformedTransitions:0};
+ const decode=new Map(Object.entries(M.code).map(([a,c])=>[c,a]));
+ function check(rows,physical=true){
+  let raw=encode(rows),N=raw.length,k=rows.length?rows[0][0].length:0,w=M.width,trace=[],expected=refEliminate(rows,trace),want=encode(expected),ref=logicalRun(J,raw,15000000);
+  ok(ref.state==="ready"&&ref.out===want,"logical "+JSON.stringify({rows,trace:ref.trace}));
+  ok(ref.passes===3*k&&ref.copySteps===3*k*(2*N*N+5*N)&&ref.restoreSteps===3*k*(3*N*N+5*N+2),"three sort clock "+JSON.stringify([N,k,ref.passes,ref.copySteps,ref.restoreSteps]));
+  let F=new Set(rows.filter(([k])=>k.endsWith("0")).map(([k])=>k.slice(0,-1))),C=new Map(),G=new Map(),members=0,q=0;
+  function readField(p,start){let key="";while(p.slice(start,start+2)!=="11"){key+=p[start+1];start+=2;}return key;}
+  for(let [key,p] of rows)if(key.endsWith("1")){
+   let c=readField(p,3),g=readField(p,3+2*k+2),b=+F.has(key.slice(0,-1));q++;members+=b;
+   if(!C.has(c))C.set(c,{g,b:1});ok(C.get(c).g===g,"fixture group consistency");C.get(c).b &= b;
+  }
+  for(let {g,b} of C.values())G.set(g,(G.get(g)??0)|b);
+  let cq=new Map(),gq=new Map(),mout=0;
+  for(let [g,p] of expected)if(g.startsWith("1")){
+   let c=readField(p,3+2*k+2);cq.set(c,(cq.get(c)??0)+ +p[1]);gq.set(g,(gq.get(g)??0)+ +p[2]);mout+=+p[0];
+  }
+  ok(mout===members&&cq.size===C.size&&gq.size===G.size&&[...C].every(([c,x])=>cq.get(c)===x.b)&&[...G].every(([g,b])=>gq.get(g)===b),"independent relational semantics");
+  if(!physical){counts.logicalOnly++;return null;}
+  let r=physicalRun(M,raw,300000000);
+  ok(r.state===M.q&&r.logical===ref.steps&&r.tape.size===want.length&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b)&&(N||!r.tape.has(r.head)),"physical "+JSON.stringify([N,r.t,r.state,M.q]));
+  let prep=N?(w+1)*N*(N+1)+(w+4)*N+3:1,serial=N?(w+1)*N*N+(3*w+6)*N+2*w+5:1,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.steps-ref.moves);
+  ok(JSON.stringify(r.ph)===JSON.stringify([prep,mid,serial]),"phase clocks");
+  ok(r.head===(N?-(w+1)*N-2:0)&&r.span===(N?(2*w+1)*N+2*w+2:w),"head/span");
+  if(N){
+   ok(r.checkpoints.length===4&&trace.length===4,"checkpoint count");
+   for(let i=0;i<4;i++){
+    let b=r.checkpoints[i],bits=b.words.map(x=>x[1]).join(""),project="";
+    ok(b.head===-w*N-1-w&&b.words.length===w*(N+1),"checkpoint layout");
+    for(let j=0;j<N;j++)project+=J.projection[decode.get(bits.slice(w*j,w*(j+1)))];
+    ok(bits.slice(-w)===M.code.R&&project===trace[i],"physical boundary "+i);counts.boundaryChecks++;
+   }
+  }
+  counts.physicalCases++;counts.records+=rows.length;counts.requests+=q;counts.positiveMembership+=members;counts.candidateGroups+=C.size;counts.feasibleCandidates+=[...C.values()].reduce((a,x)=>a+x.b,0);counts.outgoingGroups+=G.size;counts.positiveOutgoing+=[...G.values()].reduce((a,b)=>a+b,0);counts.physicalTransitions+=r.t;counts.logicalTransitions+=r.logical;counts.radixPasses+=ref.passes;
+  return [N,r.t,r.logical,r.span,r.ph];
+ }
+ const f=(key,id="")=>makeRecord(key,"0","000","000",id);
+ const q=(key,c,g,id="",flags="000")=>makeRecord(key,"1",c,g,id,flags);
+ const cases=[[],[makeRecord("","0","0","0","")],[makeRecord("","1","1","1","")],[makeRecord("","0","0","0",""),makeRecord("","1","1","1","")],
+ [q("01","100","110","1"),f("00"),q("00","100","110","0"),q("00","101","110","10")],
+ [q("01","100","110"),q("00","100","110"),f("00"),f("01")],
+ [q("00","100","110"),q("01","100","110")],
+ [q("00","100","110","0","111"),q("01","101","111","1","111"),f("00"),q("00","100","110","10","111")]];
+ let fixtures=cases.map(x=>check(x));
+ for(let i of [0,3]){let raw=encode(cases[i]),clock=fixtures[i][1];ok(physicalRun(M,raw,clock-1).state!==M.q,"one short");counts.cutoffs++;}
+ for(let mask=0;mask<4;mask++){
+  let rows=[q("00","100","110","0"),q("01","100","110","1"),q("01","101","110","10")];
+  if(mask&1)rows.push(f("00"));if(mask&2)rows.push(f("01"));
+  for(let j=0;j<rows.length;j++)check(rows.slice(j).concat(rows.slice(0,j)),false);
+ }
+ for(let raw of ["0","11","0010",encode([["1",""]]),encode([["1","000"]]),encode([["0","000"+field("00")+field("0")]]),encode([["0","000"+field("0")+field("00")]])]){
+  let r=physicalRun(M,raw,20000000);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,fixtures};
+}
+if(process.argv.includes('--description')){let j=eliminationWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BATCHED_ELIMINATION_OK '+JSON.stringify(audit()));
