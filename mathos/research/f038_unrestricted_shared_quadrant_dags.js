@@ -104,6 +104,40 @@ function audit(){
   let b=Math.floor(2*d/3),r=Math.floor(.9*d),l=Math.ceil(Math.log2(2*r*Math.log2(d))),s=b-l;
   ok(3*s>=d&&r-b-d/32+Math.log2(r)-l-1>0,"asymptotic comparison");asym.push([d,b,r,l,s]);
  }
- return {n,cases,clipChecks,overflow,controls,asym};
+ // Same overflowing 4-cube embedded in a passing 8-cube, in quadrant zero.
+ let P=root(8,A,(z,x,y)=>x<4&&y<4&&!!(z[4]&(1<<(4*x+y))));
+ let Y=child(P,[0,0,0,0,0,0],8);
+ ok(size(P)<=8**4&&size(Y)===size(X)&&size(Y)>4**4,"first child overflow");
+ let childOverflow=[size(P),size(Y)];
+ // Full greedy positive-round comparison on finite checkerboard slab families.
+ const parity=x=>{let v=0;while(x){v^=x&1;x>>=1;}return v;};
+ let greedyControls=[];
+ for(let [m,r,B,N] of [[32,3,16,8],[64,4,32,16]]){
+  let q=2**r,S=B/N,T=a=>a>=m/2&&a<m/2+q;
+  let F=(a,x,y)=>{let i=Math.floor((x%B)/S);
+   return T(a)?(y<m/4&&i<2*r&&i%2===((a-m/2)>>Math.floor(i/2)&1)&&((x&1)===(y&1)))||(y>=m/4&&y<m/2&&!!(parity(a&x)^(y&1))):y>=m/4&&y<m/2||y>=m/2&&!!(parity(a&x)^(y&1));};
+  let D=Array.from({length:m},()=>Array(m).fill(0));
+  for(let a=0;a<m;a++)for(let b=0;b<m;b++)for(let x=0;x<m;x++)for(let y=0;y<m;y++)D[a][b]+=!F(a,x,y)&&F(b,x,y);
+  let w=m*m*r/(8*N),checks=0,rounds=0,maxCap=0,even=0,odd=0;
+  for(let j=0;j<r;j++)if(j%2)odd|=1<<j;else even|=1<<j;
+  for(let a=0;a<m;a++)if(!T(a))for(let b=m/2;b<m/2+q;b++){ok(D[a][b]===w,"checkerboard loss");checks++;}
+  for(let f=m/2;f<m/2+q;f++){
+   const loss=(a,b)=>D[a][b]+m*m*(+(T(a)&&!T(b))+ +((a&even)===(f&even)&&(b&even)!==(f&even))+ +((a&odd)===(f&odd)&&(b&odd)!==(f&odd)));
+   let res=Array(m).fill(37*m*m),p=Array(m).fill(-1),C=[],best;
+   for(let k=1;k<=m;k++){
+    let b=-1,v=Infinity;
+    for(let j=0;j<m;j++)if(!C.includes(j)){let u=res.reduce((v,x,a)=>v+Math.min(x,loss(a,j)),0);if(u<v){v=u;b=j;}}
+    if(k===1)ok(b===f,"first greedy target");
+    C.push(b);for(let a=0;a<m;a++)if(p[a]<0||loss(a,b)<res[a]){p[a]=b;res[a]=loss(a,b);}
+    if(!best||k*m*m+v<best.v)best={C:C.slice(),p:p.slice(),v:k*m*m+v};
+    rounds++;
+   }
+   for(let a of best.C)best.p[a]=a;
+   ok(best.C.every(T)&&best.p.every((b,a)=>T(a)||b===f),"actual best greedy round outside invariant");
+   maxCap=Math.max(maxCap,best.C.length);
+  }
+  greedyControls.push([m,q,w,checks,rounds,maxCap]);
+ }
+ return {n,cases,clipChecks,overflow,controls,asym,childOverflow,greedyControls};
 }
 console.log('F038_SHARED_QUADRANT_DAGS_OK '+JSON.stringify(audit()));
