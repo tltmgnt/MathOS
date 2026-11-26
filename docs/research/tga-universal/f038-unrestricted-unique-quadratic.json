@@ -1,0 +1,199 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-UNIQUE-QUADRATIC",
+  "base_commit": "8a882a820d16f9106845c984cba35e4f65e5448e",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45752108975",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can actual exact quadratic failures be forced to have exactly one model at unbounded lengths, without randomized isolation or assuming P!=NP?",
+  "route": "negative",
+  "topology": "Compact separated unique-index layout, full-clock rejection rectangles, singleton-free rectangle induction and global row deletion.",
+  "adversarial": [
+    "Parent splice must preserve exact clocks and rejection even for noncomplementary UNSAT pairs.",
+    "Unused variables and guard bits must be forced for uniqueness.",
+    "Use actual full input length and exact stage ceiling.",
+    "Count rectangles not merely classes; delete rows globally.",
+    "Do not extrapolate to cubic."
+  ],
+  "scope": "Same U, exact stage two, revised full selector layout n=101u and length subsequence; no unbounded cubic claim.",
+  "cost": "Parent actual-clock rejection records with O(L) separated gap and exact description weights; symbolic rectangle counting, no efficient collision finder.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of unique quadratic census and inherited crossing premises"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive small rectangle census and reconstructed index truth tables, exact geometry arithmetic; not Python execution.",
+  "expected": {
+    "controls": 3,
+    "layout": [
+      [
+        2,
+        23,
+        8,
+        38,
+        8,
+        128
+      ],
+      [
+        3,
+        33,
+        27,
+        60,
+        27,
+        1458
+      ]
+    ],
+    "rectangles": [
+      [
+        0,
+        4,
+        4,
+        1,
+        1
+      ],
+      [
+        1,
+        16,
+        12,
+        2,
+        7
+      ],
+      [
+        2,
+        256,
+        72,
+        4,
+        86
+      ],
+      [
+        3,
+        65536,
+        1400,
+        8,
+        3058
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-UNIQUE-QUADRATIC.md",
+    "mathos/research/f038_unrestricted_unique_quadratic.py",
+    "mathos/research/f038_unrestricted_quadratic_stage.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Seek a genuinely new asymptotic obstruction for stage three or a uniform polynomial SAT cutoff.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can actual exact quadratic failures be forced to have exactly one model at unbounded lengths, without randomized isolation or assuming P!=NP?",
+      "strategy": "Compact the separated-index layout, fix unused variables, use all disjoint pairs rather than complements, and count singleton residuals by rectangle row deletion.",
+      "alternative": "Apply the classical singleton-free rectangle bound after exact rejection-preserving splicing.",
+      "stop_rule": "No cubic or all-exponent claim, no efficient discovery claim.",
+      "literature_leads": [
+        "Roughgarden, Communication Complexity (for Algorithm Designers), lecture 5, Lemma 4.5, https://timroughgarden.org/w15/l/l5.pdf",
+        "Parent exact U quadratic stage and quadratic census."
+      ]
+    },
+    "construct": {
+      "claim": "At unbounded subsequence sizes n=101u, |B_2^uniq(n)|>=2^(M/2)>=2^(L/3000) eventually.",
+      "scope": "Same U, exact stage two, revised full selector layout n=101u and length subsequence; no unbounded cubic claim.",
+      "derivation": "Revised geometry yields average record <=57M/100; choose common cut, partition disjoint inputs, splice rectangles, delete singleton-residual rows and count.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failures and general SAT cutoff."
+      ],
+      "candidate_tests": [
+        "Exhaust small singleton-free rectangles and exact selector layout; rational constants."
+      ]
+    },
+    "alternative": {
+      "claim": "Every rectangle avoiding singleton intersections contains at most 2^M disjoint pairs; row deletion gives a quantitative singleton residual census.",
+      "scope": "Same U, exact stage two, revised full selector layout n=101u and length subsequence; no unbounded cubic claim.",
+      "derivation": "Induction on last coordinate with two union rectangles; every removed row costs at most 2^M disjoint pairs.",
+      "unresolved_steps": [
+        "Explicit large residual discovery and higher exponent."
+      ],
+      "candidate_tests": [
+        "All rectangles at universes 0..3; exact exponent slack."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Parent splice must preserve exact clocks and rejection even for noncomplementary UNSAT pairs.",
+        "Unused variables and guard bits must be forced for uniqueness.",
+        "Use actual full input length and exact stage ceiling.",
+        "Count rectangles not merely classes; delete rows globally.",
+        "Do not extrapolate to cubic."
+      ],
+      "counterexample_candidates": [
+        "The family has a polynomial witness finder.",
+        "An equal record collision on complementary masks alone need not give unique SAT."
+      ],
+      "equivalence_audit": "Same actual decoder, selector order, stage clocks and rejection verifier; no promise change to U.",
+      "barrier_audit": "Unconditional quantitative stage-two theorem only; no P vs NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original deterministic three-symbol tape and weighted scheduler, parent exact crossing record.",
+      "cost_ledger": {
+        "encoding": "Complete selector n=101u with fixed unused bits and separated forbidden sets",
+        "preprocessing": "Common pin pattern and original prefix exclusion",
+        "inference": "Exact local-time crossing records and rectangle induction",
+        "repetitions": "All disjoint pairs and record classes counted symbolically",
+        "arithmetic_bits": "Exact integer/rational geometry and exponent comparisons",
+        "memory": "No efficient record discovery claim",
+        "reconstruction": "Unique one-hot index extension with fixed pins, OR bits and copies",
+        "overall": "Parent actual-clock rejection records with O(L) separated gap and exact description weights; symbolic rectangle counting, no efficient collision finder."
+      },
+      "missing_bounds": [
+        "Unbounded cubic or higher-stage lower bound",
+        "Independent review and Lean formalization"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Revised geometry and unique index extension",
+        "Classical rectangle induction and global row deletion",
+        "Exact stage weight slack and exponential census"
+      ],
+      "unsupported_steps": [
+        "No large explicit missed pair, new CI pending.",
+        "No independent mathematical review or Lean proof."
+      ],
+      "proof_obligations": [
+        "Review inherited full-clock splice on arbitrary disjoint pairs",
+        "Review rectangle row deletion and model uniqueness",
+        "Replay finite tests and integer slack"
+      ],
+      "formalization_plan": "Formalize singleton-free rectangle induction, row deletion, unique-index geometry and parent splice application.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Unconditional exponential census of uniquely satisfiable exact quadratic failures rather than only high-multiplicity failures.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Seek a genuinely new asymptotic obstruction for stage three or a uniform polynomial SAT cutoff.",
+      "human_review_requests": [
+        "Review geometry, fixed bits, rectangle counting and inherited clock proof."
+      ]
+    }
+  }
+}

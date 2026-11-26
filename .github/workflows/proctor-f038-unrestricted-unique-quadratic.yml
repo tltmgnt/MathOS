@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted unique quadratic
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-unique-quadratic']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_unique_quadratic.py
+          python -m mathos.research.f038_unrestricted_quadratic_census | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_QUADRATIC_CENSUS_OK {"controls":3,"partitions":[[4,16,12,24,16,8,5,8],[6,64,32,160,64,96,7,96],[8,256,80,1120,1024,96,37,192],[10,1024,192,8064,6144,1920,56,3840],[12,4096,448,59136,34816,24320,299,49920]],"traces":[[1,5832,209952,198124,233608,23656,23656,23656,47312],[2,256,9216,8572,10504,1288,1288,1288,2576],[3,256,9216,8471,10706,1490,1490,1490,2980]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_unique_quadratic | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_UNIQUE_QUADRATIC_OK {"controls":3,"layout":[[2,23,8,38,8,128],[3,33,27,60,27,1458]],"rectangles":[[0,4,4,1,1],[1,16,12,2,7],[2,256,72,4,86],[3,65536,1400,8,3058]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_UNIQUE_QUADRATIC_GATE_OK status=OPEN')
+          PY
