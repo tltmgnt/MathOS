@@ -1,0 +1,55 @@
+name: Proctor F038 unrestricted vanishing occupancy
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-vanishing-occupancy']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_vanishing_occupancy.js
+          node mathos/research/f038_unrestricted_vanishing_occupancy.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_VANISHING_OCCUPANCY_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          expected = dict(fixtures=18, models=512265, leaves=1827840,
+              descendantChecks=65, properChecks=2004, supportChecks=81252,
+              rowChecks=288, occupancyChecks=12, crossChecks=480)
+          assert all(r[k] == v for k,v in expected.items())
+          assert len(r['controls']) == 4
+          for row,m in zip(r['controls'], [17,33,65,129]):
+              assert row[0] == m
+              assert row[1] == [
+                  [m-1,76,512,1,284],
+                  [(m-1)//2,8480,262144,2,21096],
+                  [(m-1)//4,148322,134217728,2,553120]]
+          assert 0 < r['maxRatio'] < 10000
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_VANISHING_OCCUPANCY_GATE_OK status=OPEN promotion=NONE')
+          PY
