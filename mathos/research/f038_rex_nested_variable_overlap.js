@@ -284,8 +284,19 @@ function audit(){
   if(n<=2){ok(physical(M,raw,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
   scaling.push([n,raw.length,r.t,r.logical,r.span,r.ph]);
  }
+ let stress=[];
+ for(let n of [2,4,8]){
+  let t=node(3,Array.from({length:n},(_,i)=>["0","10","101",i%2]));
+  for(let j=0;j<n;j++)t.children.push(node(0,[["0","10","11",1]]));
+  let r=check(t,true,false);stress.push(["wide",n,encode(t).length,r.t,r.logical,r.span]);
+ }
+ for(let n of [4,8]){
+  let t=node(3,[["0","10","101",1]]),v=t;
+  for(let j=1;j<n;j++){let k=j%3,[x,y]=pairs[k],c=node(k,[[v.rows[0][x],v.rows[0][y],"0".repeat(j)+"1",1]]);v.children.push(c);v=c;}
+  let r=check(t,true,false);stress.push(["deep",n,encode(t).length,r.t,r.logical,r.span]);
+ }
  let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","descriptor");let b=M.q.toString(2).length;
  for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor entry");pos+=b+4;}ok(pos===M.desc.length,"length");
- return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest,physicalDigest};
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,stress,digest,physicalDigest};
 }
 if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_NESTED_VARIABLE_OVERLAP_OK '+JSON.stringify(audit()));
