@@ -1,0 +1,65 @@
+name: Proctor F038 RE-X width-three factors
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-factors']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_factors
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/w3f-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/w3f-replay.txt
+          node "$p.js" --descriptor > /tmp/w3f.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_FACTORS_OK '){const a=fs.readFileSync('/tmp/w3f-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(s=>read(s));
+          for(const r of [a,b,c]){
+            assert.equal(r.q,485080);assert.equal(r.descriptorBits,33955604);
+            assert.equal(r.plannerEntry,348809);assert.equal(r.pushEntry,353748);assert.equal(r.popEntry,355447);
+          }
+          assert.deepEqual(a.totals,{rawBits:454968,transitions:324202848,planner:3804187,maskBits:10008,ownedSlots:212,candidates:460,pushes:205,pops:133,accepted:8,refused:4});
+          assert.deepEqual(b.totals,{rawBits:485553,transitions:820850367,planner:1655912,maskBits:7857,ownedSlots:63,candidates:588,pushes:87,pops:69,accepted:2,refused:1});
+          assert.deepEqual(c.cutoffs,[0,1,100,26693937,26693938,26957864]);assert.equal(c.rejects.length,8);assert.equal(c.exactBudget,26957865);
+          for(const r of [a.rows[5],b.rows[0]]){
+            assert.deepEqual(r.order,[1,2,4,5,6,0,3,7,8]);assert.equal(r.pops,5);assert.equal(r.ownedSlots,44);
+          }
+          const r=read('replay','F038_REX_WIDTH_THREE_REPLAY_OK ');
+          assert.equal(r.transitions,54837365);assert.equal(r.q,485080);assert.equal(r.descriptorBits,33955604);
+          assert.deepEqual(r.rows.map(x=>x.status),['WIDTH_THREE_FACTORS','OUTSIDE_WIDTH_THREE']);
+          JS
+          python -m mathos.research.f038_rex_width_three_factors_codec /tmp/w3f.desc > /tmp/w3f-codec.json
+          python -m mathos.research.tga_f038_rex_024c1 > /tmp/w3f-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3f-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/w3f-gates.json') as f:
+              g=json.load(f)
+          assert r['states']==485080 and r['descriptor_bits']==33955604
+          assert r['transitions']==26957865 and r['frames']==10 and r['not_a_witness']
+          assert r['mask_blocks']==129 and r['mask_bits']==834
+          assert r['order']==[1,2,4,5,6,0,3,7,8]
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024C1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
