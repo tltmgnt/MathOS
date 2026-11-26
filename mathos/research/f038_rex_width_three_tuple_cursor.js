@@ -81,6 +81,6 @@ function machine(){
   const d=init;init=start(t,start(M,loop(n=>rd(M,x=>x==="_"?d:bit(x)?app(t,"0",mv(M,1,n)):reject))));
  }
  const entry=init;
- return{alphabet,tapes:19,ins,entry};
+ return{alphabet,tapes:19,ins,entry,tupleEntry:tuple};
 }
 module.exports={machine};
