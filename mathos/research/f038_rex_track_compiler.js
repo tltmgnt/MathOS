@@ -1,17 +1,22 @@
 // RE-X-002 actual fixed logical-to-physical track demo; not a SAT solver.
-function build(){
+function build(mode='complement'){
  const alphabet=["_","B0","B1","W0","W1","L","R","X"];
  const code={_: "222",B0:"000",B1:"001",W0:"010",W1:"011",L:"100",R:"101",X:"110"};
  // Logical worker: complement input payload into witness track, marking left/right
  // sentinels on external blank blocks, then remove markers and project W track.
  // It is not a SAT solver. Symbol alphabet represents two bit tracks + control.
  const logical=[];
- const states=["init","markL","forward","back","eraseL","ready"];
+ if(!["complement","prefixXor"].includes(mode))throw Error("unknown worker");
+ const states=["init","markL","forward","forward0","forward1","back","eraseL","ready"];
  function delta(s,a){
   if(s==="init")return a==="_"?["ready","_",0]:["markL",a,-1];
-  if(s==="markL")return ["forward","L",1];
+  if(s==="markL")return [mode==="prefixXor"?"forward0":"forward","L",1];
   if(s==="forward"){
    if(a==="B0"||a==="B1")return ["forward",a==="B0"?"W1":"W0",1];
+   if(a==="_")return ["back","R",-1];
+  }
+  if(s==="forward0"||s==="forward1"){
+   if(a==="B0"||a==="B1"){let p=+s.slice(-1)^+a.slice(-1);return ["forward"+p,"W"+p,1];}
    if(a==="_")return ["back","R",-1];
   }
   if(s==="back"){
@@ -101,8 +106,8 @@ function build(){
  return {q,T,desc,names,code,logical};
 }
 function audit(){
- const M=build(),ok=(v,s)=>{if(!v)throw Error(s)};
- function run(input,limit=Infinity){
+ const ok=(v,s)=>{if(!v)throw Error(s)};
+ function run(M,input,limit=Infinity){
   let tape=new Map([...input].map((a,i)=>[i,+a])),head=0,state=0,t=0,lo=0,hi=0,phase=[0,0,0],boundaries=[];
   while(state!==M.q&&t<limit){
    let name=M.names[state],p=name[0]==="p"?0:name[0]==="s"?2:1;
@@ -112,21 +117,36 @@ function audit(){
    if(t>1e7)throw Error("runaway");
   }return {head,state,t,tape,lo,hi,phase,boundaries};
  }
- function check(s){
-  let n=s.length,r=run(s),want=[...s].map(x=>1-+x),out=want.map((_,i)=>r.tape.get(r.head+i));
+ function check(M,s,mode){
+  let p=0,n=s.length,r=run(M,s),want=[...s].map(x=>mode==='complement'?1-+x:(p^=+x)),out=want.map((_,i)=>r.tape.get(r.head+i));
   ok(r.state===M.q&&JSON.stringify(out)===JSON.stringify(want)&&r.tape.size===n,"final "+s+" "+JSON.stringify([r.head,r.t,r.phase,out,[...r.tape]]));
   let b=r.boundaries[0],c=r.boundaries[1];ok(b&&c,"phase boundaries");
   let prepared=[...s].map(x=>M.code["B"+x]).join("");
   ok(b[3].map(x=>x[1]).join("")===prepared,"prep");
   let expected=want.map(x=>M.code["W"+x]).join("")+(n?M.code.R:"");
   ok(c[3].map(x=>x[1]).join("")===expected,"logical");
+  const expectedPhases=n?[4*n*n+11*n+3,14*n+33,4*n*n+15*n+11]:[1,5,1];
+  ok(JSON.stringify(r.phase)===JSON.stringify(expectedPhases),"phase clock");
+  ok(r.head===(n?-4*n-2:0)&&r.hi-r.lo+1===(n===0?3:n===1?10:5*n+4),"head/span");
   return r;
  }
- let counts={cases:0,transitions:0,cutoffs:0},rows=[];
- for(let n=0;n<=7;n++)for(let i=0;i<2**n;i++){
-  let s=n?i.toString(2).padStart(n,"0"):"",r=check(s);counts.cases++;counts.transitions+=r.t;
-  if(i===0){ok(run(s,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;rows.push([n,r.t,r.phase,r.hi-r.lo+1,r.head]);}
+ let results=[];
+ for(let mode of ["complement","prefixXor"]){
+  const M=build(mode),q=M.q,b=q.toString(2).length;
+  let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===q&&M.desc[pos++]==="0","header");
+  for(let [ns,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===ns&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+  ok(pos===M.desc.length,"descriptor length");
+  let counts={cases:0,transitions:0,cutoffs:0},rows=[],scaling=[];
+  for(let n=0;n<=8;n++)for(let i=0;i<2**n;i++){
+   let s=n?i.toString(2).padStart(n,"0"):"",r=check(M,s,mode);counts.cases++;counts.transitions+=r.t;
+   if(i===0){ok(run(M,s,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;rows.push([n,r.t,r.phase,r.hi-r.lo+1,r.head]);}
+  }
+  for(let n of [16,32,64,128,256]){
+   let s=Array.from({length:n},(_,i)=>String((i+Math.floor(i/7))%2)).join(""),r=check(M,s,mode);
+   scaling.push([n,r.t,r.phase,r.hi-r.lo+1,r.head]);
+  }
+  results.push({mode,states:M.q,bits:M.desc.length,counts,rows,scaling});
  }
- return {states:M.q,bits:M.desc.length,counts,rows};
+ return results;
 }
-if(process.argv.includes('--description'))console.log(build().desc);else console.log('F038_REX_TRACK_COMPILER_OK '+JSON.stringify(audit()));
+if(process.argv.includes('--description'))console.log(build(process.argv.includes('--prefix-xor')?'prefixXor':'complement').desc);else console.log('F038_REX_TRACK_COMPILER_OK '+JSON.stringify(audit()));
