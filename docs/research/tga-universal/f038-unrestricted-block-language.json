@@ -1,0 +1,720 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-BLOCK-LANGUAGE",
+  "base_commit": "5ebde0e51f54faa34e2e42964b4a306bd7357db1",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45747652824",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can exact local zero-block language bounds and full-clock branching charges close the remaining finite cubic gap without claiming that short timeouts are failures?",
+  "route": "negative",
+  "topology": "Exact prefix pruning, finite block language inclusion, branching-choice prefix measures and full-clock rational census.",
+  "adversarial": [
+    "External excursions must be overapproximated, not excluded.",
+    "Truncated graph or prefix execution cannot establish failure.",
+    "Drift and recurrence require exact cell agreement.",
+    "All retained cuts must have room for adjacent blocks and allowed neighbor states.",
+    "Finite gap closure is not an unbounded lower bound."
+  ],
+  "scope": "Same U and exact cubic stages, finite n=186..188, all-n-bit separated pin family; existence counts only.",
+  "cost": "Exact weighted prefix partition, finite overapproximating automata, branching-choice Kraft weights at the original 2^30 clock and exact rational arithmetic.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of block language and finite counting proof"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Locally executed strict C++ census; independent JS actual small crossing words and direct NFA membership, prior short scalar reference, exact BigInt rational calculation. Integrated CI pending.",
+  "expected": {
+    "bounds": [
+      [
+        186,
+        94,
+        7301105,
+        "856677121",
+        "14057067138480899636290978994920732691743761567692552136"
+      ],
+      [
+        187,
+        94,
+        7403777,
+        "276306911",
+        "141959223278425484196747769285945901534405598946554352294"
+      ],
+      [
+        188,
+        95,
+        7541417,
+        "82729961",
+        "359862334792308981576893821829282389883539791431310963192"
+      ]
+    ],
+    "census": [
+      [
+        [
+          186,
+          2048,
+          0,
+          16924167,
+          2719683,
+          3373767,
+          1459287,
+          51369,
+          115855418,
+          24476904
+        ],
+        [
+          3159063,
+          214704,
+          0,
+          0,
+          3159063,
+          4516803,
+          214704,
+          0
+        ],
+        [
+          [
+            0,
+            121113,
+            0,
+            0
+          ],
+          [
+            2,
+            84915,
+            0,
+            0
+          ],
+          [
+            3,
+            8208,
+            0,
+            0
+          ],
+          [
+            4,
+            432,
+            0,
+            0
+          ],
+          [
+            5,
+            18,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          186,
+          2048,
+          1,
+          16156656,
+          2624850,
+          899046,
+          4796352,
+          40339,
+          39190794,
+          24476904
+        ],
+        [
+          805635,
+          0,
+          93411,
+          0,
+          828612,
+          805635,
+          0,
+          93411
+        ],
+        [
+          [
+            0,
+            0,
+            86913,
+            0
+          ],
+          [
+            2,
+            0,
+            6372,
+            0
+          ],
+          [
+            3,
+            0,
+            99,
+            0
+          ],
+          [
+            4,
+            0,
+            27,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          186,
+          2048,
+          2,
+          4317723,
+          559593,
+          469620,
+          662940,
+          43516,
+          27921780,
+          6009876
+        ],
+        [
+          273726,
+          89010,
+          33750,
+          73134,
+          307071,
+          370368,
+          113499,
+          39204
+        ],
+        [
+          [
+            0,
+            76707,
+            32229,
+            73053
+          ],
+          [
+            2,
+            10593,
+            1413,
+            27
+          ],
+          [
+            3,
+            1413,
+            99,
+            54
+          ],
+          [
+            4,
+            243,
+            9,
+            0
+          ],
+          [
+            5,
+            36,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          187,
+          2048,
+          0,
+          16940817,
+          2721258,
+          3355488,
+          1459341,
+          51287,
+          116274529,
+          24476904
+        ],
+        [
+          3143313,
+          212175,
+          0,
+          0,
+          3143313,
+          4501593,
+          212175,
+          0
+        ],
+        [
+          [
+            0,
+            119718,
+            0,
+            0
+          ],
+          [
+            2,
+            83781,
+            0,
+            0
+          ],
+          [
+            3,
+            8208,
+            0,
+            0
+          ],
+          [
+            4,
+            432,
+            0,
+            0
+          ],
+          [
+            5,
+            18,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          187,
+          2048,
+          1,
+          16149978,
+          2625345,
+          903015,
+          4798566,
+          40080,
+          39215976,
+          24476904
+        ],
+        [
+          805986,
+          0,
+          97029,
+          0,
+          828963,
+          805986,
+          0,
+          97029
+        ],
+        [
+          [
+            0,
+            0,
+            90486,
+            0
+          ],
+          [
+            2,
+            0,
+            6417,
+            0
+          ],
+          [
+            3,
+            0,
+            99,
+            0
+          ],
+          [
+            4,
+            0,
+            27,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          187,
+          2048,
+          2,
+          4323078,
+          560907,
+          462339,
+          663552,
+          43471,
+          28098183,
+          6009876
+        ],
+        [
+          268254,
+          88893,
+          33714,
+          71478,
+          301284,
+          364842,
+          113319,
+          38889
+        ],
+        [
+          [
+            0,
+            76689,
+            32589,
+            71397
+          ],
+          [
+            2,
+            10494,
+            1026,
+            27
+          ],
+          [
+            3,
+            1422,
+            90,
+            54
+          ],
+          [
+            4,
+            234,
+            9,
+            0
+          ],
+          [
+            5,
+            36,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          188,
+          2048,
+          0,
+          16924779,
+          2719710,
+          3373128,
+          1459287,
+          51437,
+          115665345,
+          24476904
+        ],
+        [
+          3158541,
+          214587,
+          0,
+          0,
+          3158541,
+          4516245,
+          214587,
+          0
+        ],
+        [
+          [
+            0,
+            121113,
+            0,
+            0
+          ],
+          [
+            2,
+            84807,
+            0,
+            0
+          ],
+          [
+            3,
+            8199,
+            0,
+            0
+          ],
+          [
+            4,
+            432,
+            0,
+            0
+          ],
+          [
+            5,
+            18,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          188,
+          2048,
+          1,
+          16156620,
+          2624850,
+          899082,
+          4796352,
+          40335,
+          39201635,
+          24476904
+        ],
+        [
+          805671,
+          0,
+          93411,
+          0,
+          828648,
+          805671,
+          0,
+          93411
+        ],
+        [
+          [
+            0,
+            0,
+            86913,
+            0
+          ],
+          [
+            2,
+            0,
+            6372,
+            0
+          ],
+          [
+            3,
+            0,
+            99,
+            0
+          ],
+          [
+            4,
+            0,
+            27,
+            0
+          ]
+        ]
+      ],
+      [
+        [
+          188,
+          2048,
+          2,
+          4317561,
+          559602,
+          469845,
+          662868,
+          43498,
+          27947272,
+          6009876
+        ],
+        [
+          273870,
+          89037,
+          33795,
+          73143,
+          307215,
+          370512,
+          113535,
+          39249
+        ],
+        [
+          [
+            0,
+            76734,
+            32274,
+            73062
+          ],
+          [
+            2,
+            10593,
+            1413,
+            27
+          ],
+          [
+            3,
+            1413,
+            99,
+            54
+          ],
+          [
+            4,
+            243,
+            9,
+            0
+          ],
+          [
+            5,
+            36,
+            0,
+            0
+          ],
+          [
+            6,
+            18,
+            0,
+            0
+          ]
+        ]
+      ]
+    ],
+    "controls": 3,
+    "reference": [
+      256,
+      4096,
+      3259,
+      9777,
+      6681,
+      3755
+    ],
+    "short": [
+      [
+        9688563,
+        14788341
+      ],
+      [
+        13790259,
+        10686645
+      ],
+      [
+        2770335,
+        3239541
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-BLOCK-LANGUAGE.md",
+    "mathos/research/f038_unrestricted_block_language.cpp",
+    "mathos/research/f038_unrestricted_block_language.py",
+    "mathos/research/f038_unrestricted_kraft_crossing.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Leave the eventually easy pin family and seek a genuinely asymptotic unrestricted obstruction or uniform polynomial cutoff; no unbounded cubic conclusion from finite coverage.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can exact local zero-block language bounds and full-clock branching charges close the remaining finite cubic gap without claiming that short timeouts are failures?",
+      "strategy": "Certify left drift and exact prefix recurrence, overapproximate gap-cell alphabets and 1..3-cell departure languages, count finite antichains and binary branch spacing.",
+      "alternative": "Charge mixed finite-side exceptions separately and use exact even crossing charge for left-only output.",
+      "stop_rule": "No timeout-to-failure inference, no explicit missed pattern or asymptotic lower bound from finite census.",
+      "literature_leads": [
+        "Prior exact U Kraft crossing and prefix-pruned census; elementary regular languages and prefix code probabilities. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "At each n=186,187,188 the exact cubic residual is nonempty; the finite gap 52..233 is closed.",
+      "scope": "Same U and exact cubic stages, finite n=186..188, all-n-bit separated pin family; existence counts only.",
+      "derivation": "Common prefix and drift, exact table completion weights, sound local language overapproximation, finite antichains and branching spacing, full-clock weighted incidence bound.",
+      "unresolved_steps": [
+        "Unbounded cubic and all-exponent lower bounds or uniform cutoff."
+      ],
+      "candidate_tests": [
+        "Nine compiled class/size runs, three short-horizon checks, independent local word replay and rational bounds."
+      ]
+    },
+    "alternative": {
+      "claim": "A prefix-free set of incoming words is bounded by finite antichain capacity or branch-choice cylinder mass; for left-only outputs the incoming total is at most t/2.",
+      "scope": "Same U and exact cubic stages, finite n=186..188, all-n-bit separated pin family; existence counts only.",
+      "derivation": "Determinized block-pattern language includes all actual departures; no branching cycles yields finite antichain capacity; no all-branch cycle yields spacing d; even crossings into left side halve total.",
+      "unresolved_steps": [
+        "A new asymptotic obstruction outside the eventually easy separated-pin family."
+      ],
+      "candidate_tests": [
+        "Small actual trace membership checks and floor-sum inequalities."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "External excursions must be overapproximated, not excluded.",
+        "Truncated graph or prefix execution cannot establish failure.",
+        "Drift and recurrence require exact cell agreement.",
+        "All retained cuts must have room for adjacent blocks and allowed neighbor states.",
+        "Finite gap closure is not an unbounded lower bound."
+      ],
+      "counterexample_candidates": [
+        "A remaining table may halt much later; charge full original clock.",
+        "The prior local binary-reduction solver eventually succeeds on this entire family."
+      ],
+      "equivalence_audit": "Original complete selector and machine decoder; exact full clocks; every table accounted for; language abstraction only upper-bounds actual success.",
+      "barrier_audit": "Finite result, no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original three-symbol single-tape programs and exact weighted stages; separate finite computational audit.",
+      "cost_ledger": {
+        "encoding": "Actual full selector and exact zero-gap geometry",
+        "preprocessing": "Weighted first-use shape partitions and exact common-prefix certificates",
+        "inference": "Finite local nondeterministic closure, subset automata, antichain and weighted prefix bounds",
+        "repetitions": "Nine full audit pairs and finite exact rational search",
+        "arithmetic_bits": "Integer counts, exact cell comparisons, exact fractions",
+        "memory": "Rollback tape; finite 256-node graph limit conservatively falls back",
+        "reconstruction": "Unique assignment per family member; no explicit missed selector claimed",
+        "overall": "Exact weighted prefix partition, finite overapproximating automata, branching-choice Kraft weights at the original 2^30 clock and exact rational arithmetic."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bound",
+        "Independent mathematical review and Lean proof"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact local census and prefix pruning",
+        "Sound local-word inclusion and full-clock counting argument",
+        "Independent short and small-word replay and exact arithmetic"
+      ],
+      "unsupported_steps": [
+        "New exact-head CI pending.",
+        "No full independent reproduction of C++ census or Lean proof."
+      ],
+      "proof_obligations": [
+        "Review drift, language abstraction, capacity and branching count",
+        "Replay integrated C++ and rational bounds",
+        "Audit finite versus unbounded status"
+      ],
+      "formalization_plan": "Formalize zero-block language inclusion, prefix antichain and cylinder mass bounds, incidence counting and finite exact arithmetic.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Close the three-size finite gap and explicitly identify the asymptotic ceiling of this family.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Leave the eventually easy pin family and seek a genuinely asymptotic unrestricted obstruction or uniform polynomial cutoff; no unbounded cubic conclusion from finite coverage.",
+      "human_review_requests": [
+        "Review local language soundness, finite capacity and spacing proofs, exact clock charges."
+      ]
+    }
+  }
+}
