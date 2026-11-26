@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X ternary masks
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-masks']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_masks.js
+          node --check "$p"
+          node "$p" > /tmp/masks.txt
+          node "$p" --independent > /tmp/independent.txt
+          node "$p" --descriptor > /tmp/masks.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const a=read('/tmp/masks.txt','F038_REX_TERNARY_MASKS_OK');
+          const b=read('/tmp/independent.txt','F038_REX_TERNARY_MASKS_INDEPENDENT_OK');
+          assert.equal(a.q,65275);assert.equal(a.descriptorBits,3981779);
+          assert.deepEqual(a.totals,{rawBits:1797567,maskBits:3983,pinBits:23,preparedBits:3616,transitions:1260819418,blocks:392});
+          assert.equal(a.rows.length,8);
+          assert.deepEqual(a.rows.slice(0,4).map(r=>r.pins),['00','10','01','11']);
+          assert.equal(a.rows[0].ones,0);assert.equal(a.rows[2].ones,182);
+          assert.equal(a.rows[2].duplicateOnes,48);
+          assert.equal(a.rows.find(r=>r.m===5).t,872353008);
+          assert.equal(a.controls.length,11);assert.equal(a.cutoffs,4);assert.equal(a.exactBudget,7649152);
+          assert.equal(a.workerTransitions,2503920);assert.equal(a.workerUnsatTransitions,78018);assert.equal(a.witnessVerified,true);
+          assert.deepEqual(b,{replays:2,oneStepShort:1,maskBits:182,transitions:15336449});
+          JS
+          python -m mathos.research.f038_rex_ternary_masks_replay /tmp/masks.desc > /tmp/replay.json
+          python -m mathos.research.tga_f038_rex_022b3 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/replay.json') as f:
+              r=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert r['decoder_roundtrips']==r['one_step_short']==1
+          assert r['exact_replays']==r['witness_refusals']==3
+          assert r['mask_blocks']==49 and r['mask_bits']==182
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B3_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
