@@ -1,0 +1,694 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-CUBIC-INTERVAL",
+  "base_commit": "3ca55433171678e9074e05b62db0e7e5110e6f3c",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45739025753",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the exact U cubic-stage failure be extended unconditionally to unique-model selectors and additional lengths by proving a one-state full-input proposal invariance theorem?",
+  "route": "negative",
+  "topology": "One-state macro invariance, two-state common-prefix horizon, unique ternary pins and finite selector families.",
+  "adversarial": [
+    "One-state macro argument must preserve original clock even during local stays.",
+    "A halt on the exterior right blank is malformed only for n>=3.",
+    "Fixed early clauses can be nonzero; all candidates must share them exactly.",
+    "Counting missing patterns is not their explicit construction at every size."
+  ],
+  "scope": "Identical U and exact selector encoding; arbitrary finite binary suffixes for the one-state theorem; unconditional cubic residual counts only for n=52..92.",
+  "cost": "Exact finite symbolic census with original per-description clocks; polynomial explicit clause construction, potentially enormous finite enumeration to discover missing patterns; no asymptotic algorithm claim.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of one-state prefix theorem and finite census"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS exhaustive one-state suffix comparisons, exact arithmetic and explicit pin truth checks; not execution of new Python.",
+  "expected": {
+    "classification": [
+      2916,
+      1458,
+      729,
+      459,
+      54,
+      135,
+      9,
+      72
+    ],
+    "counts": [
+      51,
+      0,
+      93,
+      1055520,
+      63,
+      387426321,
+      149444590,
+      31349,
+      154494
+    ],
+    "explicit": [
+      [
+        0,
+        "320255973501901",
+        208,
+        154700,
+        154492,
+        52
+      ],
+      [
+        1,
+        "1446155880344525",
+        208,
+        154700,
+        154492,
+        52
+      ],
+      [
+        2,
+        "2572055787187149",
+        208,
+        154700,
+        154492,
+        52
+      ],
+      [
+        3,
+        "3697955694029773",
+        208,
+        154700,
+        154492,
+        52
+      ]
+    ],
+    "geometry": [
+      [
+        52,
+        182261,
+        54,
+        146249,
+        4096
+      ],
+      [
+        53,
+        193080,
+        54,
+        157067,
+        4096
+      ],
+      [
+        54,
+        204319,
+        54,
+        168305,
+        4096
+      ],
+      [
+        55,
+        215986,
+        54,
+        179971,
+        4096
+      ],
+      [
+        56,
+        228089,
+        54,
+        192073,
+        4096
+      ],
+      [
+        57,
+        240636,
+        54,
+        204619,
+        4096
+      ],
+      [
+        58,
+        253635,
+        54,
+        217617,
+        4096
+      ],
+      [
+        59,
+        267094,
+        57,
+        231075,
+        32768
+      ],
+      [
+        60,
+        281021,
+        57,
+        245001,
+        32768
+      ],
+      [
+        61,
+        295424,
+        57,
+        259403,
+        32768
+      ],
+      [
+        62,
+        310311,
+        57,
+        274289,
+        32768
+      ],
+      [
+        63,
+        325690,
+        57,
+        289667,
+        32768
+      ],
+      [
+        64,
+        341569,
+        57,
+        305545,
+        32768
+      ],
+      [
+        65,
+        357956,
+        57,
+        321931,
+        32768
+      ],
+      [
+        66,
+        374859,
+        57,
+        338833,
+        32768
+      ],
+      [
+        67,
+        392286,
+        57,
+        356259,
+        32768
+      ],
+      [
+        68,
+        410245,
+        57,
+        374217,
+        32768
+      ],
+      [
+        69,
+        428744,
+        57,
+        392715,
+        32768
+      ],
+      [
+        70,
+        447791,
+        57,
+        411761,
+        32768
+      ],
+      [
+        71,
+        467394,
+        57,
+        431363,
+        32768
+      ],
+      [
+        72,
+        487561,
+        57,
+        451529,
+        32768
+      ],
+      [
+        73,
+        508300,
+        57,
+        472267,
+        32768
+      ],
+      [
+        74,
+        529619,
+        60,
+        493585,
+        262144
+      ],
+      [
+        75,
+        551526,
+        60,
+        515491,
+        262144
+      ],
+      [
+        76,
+        574029,
+        60,
+        537993,
+        262144
+      ],
+      [
+        77,
+        597136,
+        60,
+        561099,
+        262144
+      ],
+      [
+        78,
+        620855,
+        60,
+        584817,
+        262144
+      ],
+      [
+        79,
+        645194,
+        60,
+        609155,
+        262144
+      ],
+      [
+        80,
+        670161,
+        60,
+        634121,
+        262144
+      ],
+      [
+        81,
+        695764,
+        60,
+        659723,
+        262144
+      ],
+      [
+        82,
+        722011,
+        60,
+        685969,
+        262144
+      ],
+      [
+        83,
+        748910,
+        60,
+        712867,
+        262144
+      ],
+      [
+        84,
+        776469,
+        60,
+        740425,
+        262144
+      ],
+      [
+        85,
+        804696,
+        60,
+        768651,
+        262144
+      ],
+      [
+        86,
+        833599,
+        60,
+        797553,
+        262144
+      ],
+      [
+        87,
+        863186,
+        60,
+        827139,
+        262144
+      ],
+      [
+        88,
+        893465,
+        60,
+        857417,
+        262144
+      ],
+      [
+        89,
+        924444,
+        60,
+        888395,
+        262144
+      ],
+      [
+        90,
+        956131,
+        60,
+        920081,
+        262144
+      ],
+      [
+        91,
+        988534,
+        60,
+        952483,
+        262144
+      ],
+      [
+        92,
+        1021661,
+        60,
+        985609,
+        262144
+      ]
+    ],
+    "layouts": [
+      [
+        52,
+        4,
+        368,
+        464,
+        125860,
+        125396,
+        208
+      ],
+      [
+        59,
+        4,
+        480,
+        464,
+        125860,
+        125396,
+        236
+      ],
+      [
+        74,
+        4,
+        720,
+        464,
+        125860,
+        125396,
+        296
+      ],
+      [
+        92,
+        4,
+        1008,
+        464,
+        125860,
+        125396,
+        368
+      ]
+    ],
+    "prefix": [
+      [
+        3,
+        0,
+        1,
+        5832,
+        46656,
+        12960,
+        1620,
+        3
+      ],
+      [
+        3,
+        0,
+        4,
+        5832,
+        46656,
+        19008,
+        2376,
+        8
+      ],
+      [
+        3,
+        0,
+        16,
+        5832,
+        46656,
+        19568,
+        2446,
+        8
+      ],
+      [
+        3,
+        0,
+        64,
+        5832,
+        46656,
+        19624,
+        2453,
+        8
+      ],
+      [
+        3,
+        1,
+        1,
+        5832,
+        46656,
+        12960,
+        1620,
+        3
+      ],
+      [
+        3,
+        1,
+        4,
+        5832,
+        46656,
+        19008,
+        2376,
+        6
+      ],
+      [
+        3,
+        1,
+        16,
+        5832,
+        46656,
+        19568,
+        2446,
+        8
+      ],
+      [
+        3,
+        1,
+        64,
+        5832,
+        46656,
+        19624,
+        2453,
+        8
+      ],
+      [
+        4,
+        0,
+        1,
+        5832,
+        46656,
+        12960,
+        1620,
+        3
+      ],
+      [
+        4,
+        0,
+        4,
+        5832,
+        46656,
+        16272,
+        2034,
+        5
+      ],
+      [
+        4,
+        0,
+        16,
+        5832,
+        46656,
+        19568,
+        2446,
+        9
+      ],
+      [
+        4,
+        0,
+        64,
+        5832,
+        46656,
+        19624,
+        2453,
+        9
+      ],
+      [
+        4,
+        1,
+        1,
+        5832,
+        46656,
+        12960,
+        1620,
+        3
+      ],
+      [
+        4,
+        1,
+        4,
+        5832,
+        46656,
+        16272,
+        2034,
+        5
+      ],
+      [
+        4,
+        1,
+        16,
+        5832,
+        46656,
+        19568,
+        2446,
+        12
+      ],
+      [
+        4,
+        1,
+        64,
+        5832,
+        46656,
+        19624,
+        2453,
+        12
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_cubic_fixture.cpp",
+    "mathos/research/f038_unrestricted_cubic_interval.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-CUBIC-INTERVAL.md"
+  ],
+  "next": "Seek unbounded-length cubic-stage adversaries or a universal polynomial cutoff; handle newly active q>=3 descriptions and nonlocal computations, not padding or finite census extrapolation.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the exact U cubic-stage failure be extended unconditionally to unique-model selectors and additional lengths by proving a one-state full-input proposal invariance theorem?",
+      "strategy": "Classify one-state macros exactly; combine prefix-invariant proposals with counted two-state descriptions and unique ternary pins.",
+      "alternative": "Use the verified explicit n=52 pin exclusion to construct a larger explicit family, and audit the exact limits at n=51 and n=93.",
+      "stop_rule": "No extrapolation from 41 sizes to infinitely many; no claim of P!=NP.",
+      "literature_leads": [
+        "Prior exact cubic fixture, actual decoder and clocks; elementary deterministic tape dynamics and counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For every 52<=n<=92, at least 149444590*2^31349 uniquely satisfiable selectors fail the exact cubic stage of the same U.",
+      "scope": "Identical U and exact selector encoding; arbitrary finite binary suffixes for the one-state theorem; unconditional cubic residual counts only for n=52..92.",
+      "derivation": "Prove one-state well-formed proposal suffix invariance for every clock; two-state programs cannot read varying final 31-variable suffix; avoid projections and add true clauses while pinning every variable.",
+      "unresolved_steps": [
+        "Unconditional cubic-stage failures at unbounded lengths and every larger exponent."
+      ],
+      "candidate_tests": [
+        "All one-state tables on differing binary suffixes, exact 41 stage geometries, actual pool layout and unique pin models."
+      ]
+    },
+    "alternative": {
+      "claim": "At n=52 the previous verified fixture implies an explicit family of 2^154494 distinct unique cubic failures; no failures occur at n<=51 because exhaustive fallback is active.",
+      "scope": "Original stage and same-length ternary-only extensions of the prior fixture.",
+      "derivation": "Force its two guards, retain one of the four excluded models, and add arbitrary satisfied ternary clauses. Proposal invariance preserves rejection. Check earlier exhaustive clocks.",
+      "unresolved_steps": [
+        "Description length 61 becomes active at n=93; no claim for later sizes."
+      ],
+      "candidate_tests": [
+        "Replay prior cubic C++ fixture in CI; verify four explicit pin extensions and exact truth counts."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "One-state macro argument must preserve original clock even during local stays.",
+        "A halt on the exterior right blank is malformed only for n>=3.",
+        "Fixed early clauses can be nonzero; all candidates must share them exactly.",
+        "Counting missing patterns is not their explicit construction at every size."
+      ],
+      "counterexample_candidates": [
+        "At n=93 new descriptions are eligible.",
+        "For arbitrarily large n the two-state prefix clock may no longer be local."
+      ],
+      "equivalence_audit": "Same original tape semantics, complete selector input, exact stage, actual verifier, no uncharged macro steps.",
+      "barrier_audit": "Finite interval and explicit n=52 family do not close the unbounded cubic or all-exponent obligation.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual deterministic U, exact tape descriptions and ordinary explicit selector encoding.",
+      "cost_ledger": {
+        "encoding": "Full normalized width-three selector pool and unique pin constraints",
+        "preprocessing": "Exact integer stage and suffix geometry",
+        "inference": "Macro invariance proof and prefix-local proposal exclusion",
+        "repetitions": "Count all eligible descriptions; optional finite search for missing projections at their original clocks",
+        "arithmetic_bits": "Exact integer lengths, counts, pin masks and bit positions",
+        "memory": "Explicit pool and finite tape arrays for regression; astronomical family not enumerated",
+        "reconstruction": "Unique model directly determined by pins; explicit four assignments at n=52",
+        "overall": "Exact finite symbolic census with original per-description clocks; polynomial explicit clause construction, potentially enormous finite enumeration to discover missing patterns; no asymptotic algorithm claim."
+      },
+      "missing_bounds": [
+        "Unbounded-length cubic counterexamples",
+        "All-exponent lower bound or uniform polynomial cutoff",
+        "Efficient asymptotic adversary discovery"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "One-state macro case split and all-clock prefix theorem",
+        "Exact earlier fallback and finite 41-size interval",
+        "Unique pin formula and residual census",
+        "Explicit larger family using verified previous cubic fixture"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No enumeration of astronomical families or explicit missing patterns for every size."
+      ],
+      "proof_obligations": [
+        "Replay parent cubic fixture and exact clocks",
+        "Check actual pool geometry, pin clauses and independent suffix simulation",
+        "Verify finite versus unbounded quantifiers"
+      ],
+      "formalization_plan": "Formalize one-state macro semantics and prefix theorem, deterministic two-state prefix locality, pin uniqueness and distinct selector counting.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Unconditional unique cubic residuals at 41 sizes and a large explicit same-length family; prove exact first possible cubic failure size.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failures",
+        "All-exponent lower bound or polynomial cutoff",
+        "Independent review"
+      ],
+      "next_question": "Seek unbounded-length cubic-stage adversaries or a universal polynomial cutoff; handle newly active q>=3 descriptions and nonlocal computations, not padding or finite census extrapolation.",
+      "human_review_requests": [
+        "Review macro case split, exact clock preservation, counting and use of parent fixture."
+      ]
+    }
+  }
+}
