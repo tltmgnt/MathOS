@@ -231,3 +231,111 @@ function logical(J,raw,limit=3000000){
  while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a);trace.push([state,head,a]);if(trace.length>16)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
  return {state,head,t,moves,trace,tape:[...tape].sort((a,b)=>a[0]-b[0]),out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=50000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(name==="read:selectRoot:")forward=snap();if(name==="read:readyAt:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function oracle(root,children){
+ for(let c=0;c<root.length;c++)for(let b=0;b<root[c].length;b++){
+  if(!root[c][b])continue;
+  let a=[];
+  function rec(i){
+   if(i===children.length)return [b,c,...a];
+   let ch=children[i];
+   for(let j=0;j<ch.u.length;j++)if(ch.u[j]&&ch.t[c][b][j][0]&&ch.t[c][b][j][1]){a.push(j);let z=rec(i+1);if(z)return z;a.pop();}
+   return null;
+  }
+  let z=rec(0);if(z)return z;
+ }return null;
+}
+function audit(){
+ const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
+ let counts={logicalCases:0,physicalCases:0,sat:0,unsat:0,physicalSat:0,physicalUnsat:0,candidates:0,physical:0,logical:0,checkpoints:0,rootEntries:0,childEntries:0,predecessors:0,malformed:0,malformedTransitions:0,cutoffs:0},digest=2166136261,physicalDigest=2166136261;
+ function check(root,children,mode=true,record=true){
+  let raw=encode(root,children),N=raw.length,w=M.width,a=oracle(root,children),want=a?root.map((g,c)=>g.map((_,b)=>+(b===a[0]&&c===a[1])).join("")).join("")+children.map((ch,i)=>ch.u.map((_,j)=>+(j===a[i+2])).join("")).join(""):null;
+  let ref=logical(J,raw,30000000);ok(ref.state===(a?"ready":"reject")&&(!a||ref.out===want),"logical "+JSON.stringify({root,children,want,ref:{state:ref.state,out:ref.out,trace:ref.trace}}));
+  let expected=[],positions=[],selected=[],preds=0,childEntries=0,rootEntries=0;
+  const token=v=>{expected.push("Z","Z",v);return expected.length-1;};
+  let msg=root.map((g,c)=>g.map((x,b)=>+(x&&children.every(ch=>ch.u.some((u,j)=>u&&ch.t[c][b][j].every(Boolean))))));
+  for(let c=0;c<root.length;c++){
+   token("IG");
+   for(let b=0;b<root[c].length;b++){let p=token("T"+root[c][b]+msg[c][b]);positions.push(p);if(a&&b===a[0]&&c===a[1])selected.push([p,"W"]);rootEntries++;}
+   token("J");
+  }token("A");
+  for(let i=0;i<children.length;i++){
+   let ch=children[i];
+   for(let j=0;j<ch.u.length;j++){let p=token("U"+ch.u[j]);positions.push(p);if(a&&j===a[i+2])selected.push([p,"UW"]);}
+   token("H");
+   for(let c=0;c<root.length;c++){
+    token("G");
+    for(let b=0;b<root[c].length;b++){
+     let p=ch.u.findIndex((u,j)=>u&&ch.t[c][b][j].every(Boolean));preds+=+(p>=0);childEntries++;token("P"+ +(p>=0));
+     for(let j=0;j<ch.u.length;j++){token("F"+ch.t[c][b][j][0]);token(j===p?"EP":"E"+ch.t[c][b][j][1]);}token("V");
+    }token("J");
+   }token("D");
+  }expected.push("R");
+  let r=null;
+  if(mode){
+   r=physical(M,raw);ok(r.state===M.q&&r.logical===ref.t,"physical halt");
+   let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+   ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clock");
+   let start=-w*N-1;
+   function unpack(cp,left){ok(cp&&cp.tape.length===w*(N+1+left)&&cp.tape.every(([p],i)=>p===start-left*w+i),"checkpoint layout");let b=cp.tape.map(x=>x[1]).join(""),v=Array.from({length:N+1+left},(_,i)=>dec.get(b.slice(w*i,w*(i+1))));ok(!left||v[0]==="L","left");return v.slice(left);}
+   ok(JSON.stringify(unpack(r.forward,1))===JSON.stringify(expected),"forward "+raw);
+   if(a){
+    ok(r.tape.size===want.length&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b),"physical output");
+    let back=expected.slice();for(let [p,v] of selected)back[p]=v;
+    ok(JSON.stringify(unpack(r.backward,0))===JSON.stringify(back),"backward "+raw);
+    let H=want.length,c=0,body=0,p=new Set(positions);
+    for(let i=N-1;i>=0;i--){let e=+p.has(i);body+=2*w*(i+1)+2*c+2*e+4;c+=e;}
+    ok(r.ph[2]===2*w*N+2*w+2+body+H+3&&r.head===-w*N-H-2,"serializer");
+   }else ok(!r.tape.has(r.head)&&r.ph[2]===0&&!r.backward,"rejection");
+  }
+  if(record){
+   counts.logicalCases++;counts.sat+=+(!!a);counts.unsat+=+(!a);counts.candidates+=children.reduce((x,ch)=>x+root.length*root[0].length*ch.u.length,0);
+   if(mode){counts.physicalCases++;counts.physicalSat+=+(!!a);counts.physicalUnsat+=+(!a);counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(!!a);counts.rootEntries+=rootEntries;counts.childEntries+=childEntries;counts.predecessors+=preds;}
+   for(let ch of raw+":"+(a?ref.out:"-")+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   if(mode){let out=a?Array.from({length:want.length},(_,i)=>r.tape.get(r.head+i)).join(""):"-";for(let ch of raw+":"+out+";")physicalDigest=Math.imul(physicalDigest^ch.charCodeAt(0),16777619)>>>0;}
+  }return r;
+ }
+ const bits=(x,n)=>Array.from({length:n},(_,j)=>(x>>j)&1),root=(b,c,x)=>Array.from({length:c},(_,j)=>bits(x>>>(j*b),b));
+ const child=(b,c,u,x,y)=>({u,t:Array.from({length:c},(_,k)=>Array.from({length:b},(_,j)=>Array.from({length:u.length},(_,i)=>[(x>>>(i+u.length*(j+b*k)))&1,(y>>>(i+u.length*(j+b*k)))&1])))});
+ for(let b=1;b<=3;b++)for(let c=1;c<=3;c++)for(let x=0;x<Math.min(16,2**(b*c));x++)check(root(b,c,x),[],x<2);
+ for(let x=0;x<16;x++)for(let y=0;y<16;y++)check(root(2,2,15),[child(2,2,[1],x,y)],x===y&&x%3===0);
+ // All ordered pairs of child messages, preserving a shared two-coordinate tuple.
+ for(let x=0;x<16;x++)for(let y=0;y<16;y++)check(root(2,2,15),[child(2,2,[1],x,15),child(2,2,[1],y,15)],x===y&&x%5===0);
+ // Contradictory pair marginals and incompatible private witnesses.
+ check(root(2,2,15),[child(2,2,[1],9,15),child(2,2,[1],6,15)]);
+ check(root(2,2,15),[child(2,2,[1,1],85,170)]);
+ let seed=0x52455816;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let i=0;i<36;i++){
+  let b=1+(rand()>>>28)%3,c=1+(rand()>>>28)%3,g=1+i%3,rootMask=Array.from({length:c},()=>Array.from({length:b},()=>rand()>>>31)),children=[];
+  for(let j=0;j<g;j++){let m=1+(rand()>>>28)%4,u=Array.from({length:m},()=>rand()>>>31),t=Array.from({length:c},()=>Array.from({length:b},()=>Array.from({length:m},()=>[rand()>>>31,rand()>>>31])));children.push({u,t});}
+  if(i%2){let B=(rand()>>>16)%b,C=(rand()>>>16)%c;rootMask[C][B]=1;for(let ch of children){let a=(rand()>>>16)%ch.u.length;ch.u[a]=1;ch.t[C][B][a]=[1,1];}}
+  check(rootMask,children,i<8);
+ }
+ let forcedRoot=root(2,3,32),forced=[1,3,2],forcedChildren=forced.map((a,i)=>({u:Array.from({length:[2,4,3][i]},()=>1),t:Array.from({length:3},(_,c)=>Array.from({length:2},(_,b)=>Array.from({length:[2,4,3][i]},(_,j)=>{let x=+(b===1&&c===2&&j===a);return [x,x];})))}));
+ check(forcedRoot,forcedChildren);
+ let good=encode([[1]],[child(1,1,[1],1,1)]),malformed=["","0","010","010110",encode([[1],[1,0]],[]),encode([[1,1],[1]],[]),encode([[1]],[child(1,1,[],0,0)]),encode([[1]],[{u:[1],t:[[[[1,1],[1,1]]]]}]),encode([[1]],[{u:[1,1],t:[[[[1,1]]]]}]),encode([[1,1]],[child(1,1,[1],1,1)]),encode([[1],[1]],[child(1,1,[1],1,1)]),encode([[1]],[child(2,1,[1],3,3)]),encode([[1]],[child(1,2,[1],3,3)]),encode([[0]],[child(1,1,[1],0,0),child(2,1,[1],3,3)]),good.slice(0,-1),good.slice(0,-3),good+"0",good+"110"];
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let m of [1,2,3,4]){
+  let R=root(m,m,0);R[m-1][m-1]=1;
+  let children=Array.from({length:2},()=>({u:Array(m).fill(1),t:Array.from({length:m},(_,c)=>Array.from({length:m},(_,b)=>Array.from({length:m},(_,a)=>{let x=+(a===m-1&&b===m-1&&c===m-1);return [x,x];})))})),raw=encode(R,children),r=check(R,children,true,false);
+  if(m<=2){ok(physical(M,raw,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+  scaling.push([m,raw.length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest,physicalDigest};
+}
+if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BRANCHING_PAIR_OK '+JSON.stringify(audit()));
