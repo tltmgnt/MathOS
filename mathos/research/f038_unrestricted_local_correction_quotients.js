@@ -157,9 +157,14 @@ function audit(){
   capCases.push([C,X.R,X.mass,score.toString()]);
  }
  let best=capCases.reduce((a,b)=>BigInt(a[3])<=BigInt(b[3])?a:b);
- let priorUnion=BigInt(4**3)*BigInt(3*4),priorExact=100n*BigInt(B.R);
+ let unionCount=0;for(let [a,x,y] of tup(4,3))if(!F(a,x,y)&&[0,1,2,3].some(b=>F(b,x,y)))unionCount++;
+ let priorUnion=BigInt(4**3)*BigInt(unionCount),priorExact=100n*BigInt(B.R);
  let portfolio=[priorUnion,priorExact,BigInt(best[3])].reduce((a,b)=>a<b?a:b);
  ok(portfolio<=priorUnion&&portfolio<=priorExact,"portfolio score dominance");
- return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls,overflowModels,mergeControl,capCases,portfolio:portfolio.toString()};
+ // Independent exact local route selection with nonzero correction and zero overflow.
+ const sparse=z=>z[0]===0&&z.slice(1,4).every(x=>x===0)?1:z[0];
+ let V=make(4,F,sparse,center,1,2);
+ ok(V.R===1&&V.mass===0&&BigInt(V.R)<priorUnion&&V.R<100*V.R,"local route selected");
+ return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls,overflowModels,mergeControl,capCases,portfolio:[unionCount,portfolio.toString()],localRoute:[V.R,V.mass,priorUnion.toString(),100*V.R]};
 }
 console.log('F038_LOCAL_CORRECTION_QUOTIENTS_OK '+JSON.stringify(audit()));
