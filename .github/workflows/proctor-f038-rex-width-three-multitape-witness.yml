@@ -1,0 +1,54 @@
+name: Proctor F038 RE-X width-three multitape witness
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-multitape-witness']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_multitape_witness
+          node --check "$p.js"
+          for suite in small larger four controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/w3w-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_MULTITAPE_WITNESS_OK ',a=fs.readFileSync('/tmp/w3w-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c,d]=['small','larger','four','controls'].map(read);
+          assert.deepEqual(a.totals,{rawBits:303312,witnessBits:124,select:5170,translate:6052,producer:217741388,steps:3951876,edges:20,candidates:294,localRows:201,liveRows:191});
+          assert.deepEqual(b.totals,{rawBits:323702,witnessBits:100,select:17465,translate:5804,producer:546163848,steps:12249088,edges:11,candidates:588,localRows:425,liveRows:425});
+          assert.deepEqual(c.totals,{rawBits:428744,witnessBits:69,select:3151,translate:3652,producer:1526876345,steps:5232769,edges:3,candidates:360,localRows:83,liveRows:82});
+          const rows=[...a.rows,...b.rows,...c.rows];
+          assert.deepEqual(rows.map(r=>r.models),[512,160,52,0,128,0,0,96,6816,1,1]);
+          assert.deepEqual(rows.map(r=>r.steps),[398854,508030,1168424,438938,462948,460775,397017,116890,10173528,2075560,5232769]);
+          assert.equal(rows.filter(r=>r.witness).length,7);
+          assert.deepEqual(c.rows[0].ranks,[3,2,1,0,3,2,1,0,3]);
+          assert.equal(c.rows[0].witness.length,69);
+          assert.deepEqual(d.cutoffs,[0,1,100,395665,395666,460811,461435,462947]);
+          assert.equal(d.malformed,4);assert.equal(d.exactBudget,462948);
+          JS
+          python -m mathos.research.tga_f038_rex_024c4 > /tmp/w3w-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3w-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024C4_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
