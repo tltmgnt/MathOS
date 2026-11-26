@@ -24,7 +24,7 @@ function audit(){
   const orig=z=>z.every(a=>a<m)&&F.every(s=>!s.R.has(key(proj(z,s.h))));
   const Z=(s,a,b,x,y)=>a<m&&b<m&&x<m&&y<m&&!s.R.has(key([a,x,y]))&&s.R.has(key([b,x,y]));
   const W=Array.from({length:m},(_,a)=>Array.from({length:m},(_,b)=>wide.reduce((v,s)=>v+cols.reduce((w,[x,y])=>w+Z(s,a,b,x,y),0),0)));
-  let Qs=Array(M).fill(0);for(let c of ctx)Qs[S.S(c)]++;
+  let Qs=Array(M).fill(0);for(let c of ctx)Qs[S.S(c)]++;ok(Qs.every(q=>q<=2*M*M)&&Qs.reduce((a,b)=>a+b,0)===m**3,"bounded unbalanced fiber");
   function narrow(a,b,c){let v=0;for(let s of local){let O=s.h.filter(g=>g>=4);if(O.length===2)continue;for(let z of tup(m,O.length)){let x=s.h.map(g=>g===0?a:g<=3?c[g-1]:z[O.indexOf(g)]),y=x.slice();y[0]=b;if(!s.R.has(key(x))&&s.R.has(key(y)))v+=m**(2-O.length);}}return v;}
   for(let policy of [0,1,2]){
    n.passes++;let maps=new Map(),cap=0,dn=0;
@@ -146,7 +146,7 @@ function audit(){
   }
   // Actual first choice and every second marginal for block-match narrow supports.
   let ctx=[m-1,Math.floor(m/3),Math.floor(m/5)],f=S.S(ctx);
-  const narrow=(a,b)=>+(a!==0&&b===0)*m*m+ +(a>=m/2&&b<m/2)*m*m+S.mask.reduce((v,M,i)=>v+((a&M)===(ctx[i]&M)&&(b&M)!==(ctx[i]&M)?m*m:0),0);
+  const narrow=(a,b)=>+(a>=m/2&&b<m/2)*m*m+S.mask.reduce((v,M,i)=>v+((a&M)===(ctx[i]&M)&&(b&M)!==(ctx[i]&M)?m*m:0),0);
   const dist=(a,b)=>narrow(a,b)+(a===b?0:D);
   let scores=Array.from({length:m},(_,b)=>Array.from({length:m},(_,a)=>dist(a,b)).reduce((v,x)=>v+x,0));
   ok(scores.every((v,b)=>b===f||v>scores[f]),"unique target");
