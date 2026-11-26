@@ -1,0 +1,263 @@
+{
+  "attempt_id": "F038-MRAX-AVOIDANCE-CERTIFICATES",
+  "base_commit": "c3f568862e9bd27385a8d13606c9814a2aed08ac",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45726384203",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can existential evidence certify absence from a circuit range using only polynomially many bit queries in the original input length?",
+  "route": "negative",
+  "topology": "Surjective small projections versus a missing global range word; adaptive transcript gluing obstruction.",
+  "adversarial": [
+    "Bit-query access is a restricted model.",
+    "Polynomial in explicit prefix length differs from polynomial in n.",
+    "NP bit-membership need not certify global range absence.",
+    "No hardness claim for circuit minimization."
+  ],
+  "scope": "All 16 binary Boolean gates, free constants, explicit prefix; adaptive bit-query verifier with arbitrary certificate and perfect soundness.",
+  "cost": "At least floor((s+3)/2)+1 distinct queries on any accepting transcript under perfect soundness",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of interpolation and oracle certificate bounds"
+    },
+    {
+      "key": "attempt_bit_membership",
+      "label": "Succinct globally consistent NP bit witnesses or fixed SAT transfer"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS scalar circuit enumeration, partial-label compilation and exact subset projection tests; not execution of Python.",
+  "expected": {
+    "interpolation": [
+      [
+        1,
+        8,
+        12,
+        1,
+        2
+      ],
+      [
+        2,
+        80,
+        216,
+        5,
+        90
+      ],
+      [
+        3,
+        6560,
+        34992,
+        13,
+        25530
+      ]
+    ],
+    "certificates": [
+      [
+        2,
+        0,
+        4,
+        4,
+        192,
+        60,
+        [
+          0,
+          0,
+          10,
+          2,
+          0
+        ]
+      ],
+      [
+        3,
+        1,
+        8,
+        38,
+        55808,
+        8066,
+        [
+          0,
+          0,
+          0,
+          0,
+          218,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      [
+        3,
+        2,
+        8,
+        152,
+        26624,
+        3848,
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          80,
+          24,
+          0
+        ]
+      ],
+      [
+        4,
+        2,
+        10,
+        238,
+        804864,
+        44016,
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          544,
+          218,
+          24,
+          0,
+          0,
+          0
+        ]
+      ],
+      [
+        3,
+        2,
+        5,
+        32,
+        0,
+        0,
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_avoidance_certificates.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-AVOIDANCE-CERTIFICATES.md"
+  ],
+  "next": "Investigate succinct globally consistent bit witnesses, separate shared advice from per-bit witnesses and NP from NP intersect coNP.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can existential evidence certify absence from a circuit range using only polynomially many bit queries in the original input length?",
+      "strategy": "Construct circuits interpolating arbitrary small samples; derive transcript indistinguishability.",
+      "alternative": "Extend to bounded-randomness verification and compute exact finite certificate complexity.",
+      "stop_rule": "Do not infer unrestricted NP nonmembership or SAT lower bounds from an oracle-access model.",
+      "literature_leads": [
+        "Prior MathOS circuit range avoidance; elementary Boolean decision-tree interpolation. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Every arbitrary q-point labeling admits a circuit of at most max(0,2q-3) gates; sound oracle certificates of missing words must inspect more than floor((s+3)/2) bits.",
+      "scope": "All 16 binary Boolean gates, free constants, explicit prefix; adaptive bit-query verifier with arbitrary certificate and perfect soundness.",
+      "derivation": "Split samples into a full binary tree; compile each node with one or three gates; interpolate the accepting transcript to an easy word.",
+      "unresolved_steps": [
+        "NP membership of a fixed hard language; certification beyond individual word queries."
+      ],
+      "candidate_tests": [
+        "All nonempty partial labelings on up to three inputs; compile and replay gate output."
+      ]
+    },
+    "alternative": {
+      "claim": "Bounded-randomness verifiers must satisfy q*(floor(beta*2^r)+1)>floor((s+3)/2); exact finite certificate sizes are computed by subset projections.",
+      "scope": "Fixed certificate, at most q queries per tape, r unbiased bits, completeness alpha>beta soundness.",
+      "derivation": "Select more accepting tapes than the soundness permits; interpolate their union; replay same certificate on easy word.",
+      "unresolved_steps": [
+        "Unrestricted randomness and general explicit-word or bit-membership certificate systems."
+      ],
+      "candidate_tests": [
+        "Exact absent-word minimum certificate size histograms and budget controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Bit-query access is a restricted model.",
+        "Polynomial in explicit prefix length differs from polynomial in n.",
+        "NP bit-membership need not certify global range absence.",
+        "No hardness claim for circuit minimization."
+      ],
+      "counterexample_candidates": [
+        "Small sample always extends to an easy word; adaptive verification and arbitrary certificate do not prevent transcript replay."
+      ],
+      "equivalence_audit": "Exact sample interpolation and identical transcript argument, distinct from global NP verification.",
+      "barrier_audit": "Restricted oracle certificate lower bound only; no unrestricted complexity separation.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Binary Boolean circuits and explicit sample encoding; oracle query measure separated from total bit cost.",
+      "cost_ledger": {
+        "encoding": "Distinct n-bit samples, labels, unary gate budget and explicit prefix",
+        "preprocessing": "Polynomial sample partition",
+        "inference": "Decision-tree compilation and transcript replay",
+        "repetitions": "Exhaustive subsets only for small finite audit; randomized union of selected tapes is an existence argument",
+        "arithmetic_bits": "Polynomial explicit sample indices and gate references",
+        "memory": "Polynomial interpolation storage; exponential finite range projection audit",
+        "reconstruction": "Checked circuit agrees with every queried position",
+        "overall": "At least floor((s+3)/2)+1 distinct queries on any accepting transcript under perfect soundness"
+      },
+      "missing_bounds": [
+        "NP membership of one hard language",
+        "Unrestricted circuit or SAT lower bound",
+        "General existential verification beyond oracle access"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Tree gate count",
+        "Adaptive transcript indistinguishability",
+        "Random-tape union lower bound",
+        "Exact finite certificate histograms"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No universal NP verifier or randomized proof system implemented."
+      ],
+      "proof_obligations": [
+        "Replay compiled gates against all sample points",
+        "Compare exact projection histograms with scalar reference",
+        "Check malformed input and threshold semantics"
+      ],
+      "formalization_plan": "Formalize sample splitting, gate counting, deterministic transcript replay and randomized union lemma.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Unconditional query lower bound for local existential hard-prefix certificates; distinguish it from NP membership.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "NP membership or fixed SAT transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate succinct globally consistent bit witnesses, separate shared advice from per-bit witnesses and NP from NP intersect coNP.",
+      "human_review_requests": [
+        "Review oracle model quantifiers, interpolation count and randomized tape bound."
+      ]
+    }
+  }
+}
