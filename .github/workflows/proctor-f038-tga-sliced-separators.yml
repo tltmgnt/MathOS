@@ -1,0 +1,43 @@
+name: Proctor F038 TGA sliced separators
+on:
+  push:
+    branches: ['research/pnp-f038-tga-sliced-separators']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_tga_sliced_separators.js
+          node mathos/research/f038_tga_sliced_separators.js | tee /tmp/sliced.txt
+          grep -Fx 'F038_TGA_SLICED_SEPARATORS_OK {"n":{"fixtures":0,"plans":746178,"eliminations":283,"bagRows":70619,"conditionings":210,"messageChecks":0,"keyChecks":0,"fullTuples":0,"models":0,"reconstruction":0,"componentWitnesses":45,"streamBatches":3647,"streamJoinChecks":283155,"splitGroups":2519,"streamOutputs":10253},"extra":{"partitions":252,"slices":45,"staticMessages":6,"dynamicMessages":165,"keyChecks":5349,"exactKeys":2723,"fullTuples":887407,"models":36838,"componentChecks":9954,"selectedWitnesses":11,"reducedChecks":276},"graph":[0,21,[[0,1,2,3],[0]]],"dense":[0,0,null],"cases":[[2,0,[0],0,5,8,[0,0,0,0,0,0,0,0,0]],[2,1,[0],0,5,4,[0,0,0,0,0,0,0,0,0]],[2,2,[0],0,5,0,null],[3,0,[0],0,5,69,[0,0,0,0,0,0,0,0,0]],[3,1,[0],0,5,53,[0,0,0,0,0,0,0,0,0]],[3,2,[0],0,5,0,null],[4,0,[0],0,5,209,[0,0,0,0,0,0,0,0,0]],[4,1,[0],0,5,199,[0,0,0,0,0,0,0,0,0]],[4,2,[0],0,5,0,null]],"mixed":[[2,16,[0],[[false,0,3,4],[true,0,2,3]]],[3,81,[0],[[false,0,3,4],[true,0,2,3]]]],"hidden":[[2,8,2048,4096,[0],[[false,0,3,4],[true,0,0,3],[true,0,0,3],[true,0,0,3],[true,0,0,3]]]],"later":[[0],27,[2,0,0,0,0,0,0,0,0]],"alternative":[[0,1,2,4],[0],9,[0,0,0,0,0,0,0,0,0]]}' /tmp/sliced.txt
+          python -m mathos.research.tga_f038_sep_002 > /tmp/sep.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/sep.json') as f:
+              sep=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert sep['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert sep['PROMOTION']=='NONE'
+          assert sep['decision']=='PRESERVE_SLICED_ROUTE_REVIEW_BEFORE_EXTENSION'
+          assert all(v['status']=='BLOCKED' for v in sep['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in sep['global_routes'].values())
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          assert len(sep['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          print('F038_TGA_SLICED_GATE_OK status=OPEN promotion=NONE')
+          PY
