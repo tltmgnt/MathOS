@@ -72,8 +72,10 @@ function compile(worker,symbols,projection){
   if(p==="sOut"){
    if(a<2)return l(s);
    if(b==="_")return r("sReturn"); // turn immediately; no output bit.
+   if(/^[01]{2}$/.test(b))return l("sPair:"+b[0],+b[1]);
    return l("sTurn",+b);
   }
+  if(p==="sPair")return a===2?l("sTurn",+b):fail();
   if(p==="sTurn")return a===2?r("sReturn"):fail();
   if(p==="sReturn")return a<2?r(s):r("sNext");
   if(p==="sFinishGap")return a===2?l("sFinish"):fail();
