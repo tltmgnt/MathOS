@@ -533,14 +533,14 @@ function decode(desc){
 function run(M,raw,limit=Infinity,observe=null){
  if(!/^[01]*$/.test(raw))throw Error("binary raw required");
  if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
- const origin=3*raw.length+1024,tape=new Uint8Array(origin+5*raw.length+1024);tape.fill(2);
+ const origin=3*raw.length+1024;let tape=new Uint8Array(origin+raw.length+1024);tape.fill(2);
  for(let i=0;i<raw.length;i++)tape[origin+i]=raw.charCodeAt(i)-48;
  let state=0,head=origin,t=0,lo=head,hi=head;const {q,T}=M;
  const event=observe?new Int32Array(q):null;if(event)for(let i=0;i<M.events.length;i++)event[M.events[i].state]=i+1;
  while(state!==q&&t<limit){
   if(event&&event[state])observe(M.events[event[state]-1],tape,head,origin);
   let v=T[3*state+tape[head]];tape[head]=(v>>2)&3;head+=(v&3)-1;state=v>>>4;t++;
-  if(head<0||head>=tape.length)throw Error("simulation buffer");if(head<lo)lo=head;if(head>hi)hi=head;
+  if(head<0)throw Error("left simulation buffer");if(head>=tape.length){let grown=new Uint8Array(tape.length*2);grown.fill(2);grown.set(tape);tape=grown;}if(head<lo)lo=head;if(head>hi)hi=head;
  }
  if(state!==q)return{status:"TIMEOUT",t,span:hi-lo+1};
  let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
