@@ -72,12 +72,12 @@ function audit(){
    attempts++;
    ok(attempts<=100,"finite escape selection");
   }while(!raw.every(r=>{for(let x=0;x<m;x+=B)for(let y=0;y<m;y+=B){let any=false;for(let v=y;v<y+B;v++)any ||= !r[x*m+v];if(!any)return false;}return true;}));
-  let pairChecks=0,rawMass=0,realMass=0,rootKeys=0,first=0,marginal=0,even=0,odd=0;
+  let pairChecks=0,rawMass=0,realMass=0,rootKeys=0,positiveEKeys=0,first=0,marginal=0,even=0,odd=0;
   for(let j=0;j<Math.log2(m)-1;j++)if(j%2)odd|=1<<j;else even|=1<<j;
   for(let a=0;a<m;a++)for(let b=0;b<m;b++)if(a!==b){
    let n=0,v=0;for(let x=0;x<m;x++)for(let y=0;y<m;y++){let e=+(!raw[a][x*m+y]&&raw[b][x*m+y]);n+=e;if(x%B===0)v+=e;}
    ok(n===D,"pair invariance");pairChecks++;
-   if(b>=q){rawMass+=n;realMass+=v;for(let x=0;x<m;x+=B)for(let y=0;y<m;y+=B){ok(raw[a].slice(x*m+y,x*m+y+B).some(v=>v===0),"joint root feasible");rootKeys++;}}
+   if(b>=q){rawMass+=n;realMass+=v;for(let x=0;x<m;x+=B)for(let y=0;y<m;y+=B){ok(raw[a].slice(x*m+y,x*m+y+B).some(v=>v===0),"joint root feasible");rootKeys++;let e=false;for(let v=y;v<y+B;v++)e ||= !raw[a][x*m+v]&&!!raw[b][x*m+v];if(e)positiveEKeys++;}}
   }
   let gate=m*(m-m/B);
   for(let f=q;f<m;f++){
@@ -88,7 +88,7 @@ function audit(){
   }
   ok(realMass>0&&realMass<rawMass,"nontrivial actual corrections");
   let multiplicity=m**3/q;
-  fields.push([m,B,attempts,pairChecks,rootKeys,rawMass*multiplicity,rawMass*multiplicity,realMass*multiplicity,first,marginal]);
+  fields.push([m,B,attempts,pairChecks,rootKeys,rawMass*multiplicity,rawMass*multiplicity,realMass*multiplicity,positiveEKeys,first,marginal]);
  }
  return {counts,fields};
 }
