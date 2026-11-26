@@ -125,7 +125,9 @@ function engine(){
  }
 
  function* pool(n){
-  for(let k=1;k<=3;k++)for(let I of subsets(Array.from({length:n},(_,i)=>i+1),k))for(let b of tup(2,k))yield I.map((x,i)=>b[i]?x:-x);
+  for(let a=1;a<=n;a++)for(let x of [-1,1])yield [a*x];
+  for(let a=1;a<=n;a++)for(let b=a+1;b<=n;b++)for(let x of [-1,1])for(let y of [-1,1])yield [a*x,b*y];
+  for(let a=1;a<=n;a++)for(let b=a+1;b<=n;b++)for(let c=b+1;c<=n;c++)for(let x of [-1,1])for(let y of [-1,1])for(let z of [-1,1])yield [a*x,b*y,c*z];
  }
  function length(n){return n+1+2*n*n+8*n*(n-1)*(n-2)/6;}
  const norm=c=>c.slice().sort((a,b)=>Math.abs(a)-Math.abs(b));
@@ -229,13 +231,40 @@ function audit(includeFixtures=false){
   rows.push([m,mode,raw.length,D.selected,r.status,r.count??null,r.Q??null,r.z??null]);
   if(includeFixtures&&m===2)fixtures.push({raw,bits:r.bits??null,status:r.status});
  }
+ // Exercise static-only, mixed static/dynamic, and empty selected cross support.
+ let integration=[];
+ for(let m of [2,3])for(let mode=0;mode<3;mode++){
+  let B=[],H=mode===0?[]:mode===1?[[0,4],[1,4],[2,4],[3,4],[0,5],[5,6],[6,7],[7,8],[5,8]]:[[0,4],[1,5],[2,6],[4,5,6],[5,6,7],[6,7,8]];
+  for(let h of H)B.push(h.map(g=>-(g*m+m)));
+  let pins=Array.from({length:m},(_,i)=>+(i%2===0)),raw=E.encode(m,pins,B),r=E.solveRaw(raw),K=new Set();
+  ok(r.status==="SAT","integration SAT");
+  for(let z of E.tup(m,9)){counts.referenceTuples++;if(B.every(c=>!c.every(x=>z[Math.floor((-x-1)/m)]===(-x-1)%m)))K.add(r.A.map(g=>z[g]).join(","));}
+  ok(r.count===K.size&&E.valid(raw,r.bits),"integration exact keys");
+  ok(mode===1?r.Q.length===1:r.Q.length===0,"static or mixed route");
+  counts.rawBits+=raw.length;counts.selectedClauses+=E.decode(raw).selected;counts.feasibleKeys+=r.count;counts.validWitnesses++;counts.keyJoins+=r.keyJoins;counts.peakBatch=Math.max(counts.peakBatch,r.peakBatch);
+  integration.push([m,mode,r.count,r.A,r.Q,r.z]);
+  if(includeFixtures&&m===2)fixtures.push({raw,bits:r.bits,status:r.status});
+ }
  let raw=E.encode(2,[0,1],[]),n=31;let selected=[],unselected=[];
  for(let i=n+1;i<raw.length;i++)(raw[i]==="1"?selected:unselected).push(i);
  for(let i of selected){let bad=raw.slice(0,i)+"0"+raw.slice(i+1);ok(E.decode(bad)===null,"missing fixed record");counts.malformed++;}
- let pos=n+1;
- for(let c of E.pool(n)){if(raw[pos]==="0"&&c.some(x=>x>0)&&!E.decode(raw.slice(0,pos)+"1"+raw.slice(pos+1))){counts.malformed++;if(counts.malformed===selected.length+12)break;}pos++;}
+ let pos=n+1,added=0,opposite=[];
+ for(let c of E.pool(n)){
+  if(c.length===1&&c[0]>=1&&c[0]<=12){
+   ok(raw[pos]==="0"&&E.solveRaw(raw.slice(0,pos)+"1"+raw.slice(pos+1)).status==="OUTSIDE_NORMALIZED","unsupported positive unit");added++;counts.malformed++;
+  }
+  if(c.length===3&&c[0]===n-3&&Math.abs(c[1])===n-1&&Math.abs(c[2])===n)opposite.push(pos);
+  pos++;
+ }
+ ok(added===12&&opposite.length===4,"adversarial positions");
+ for(let i of opposite){ok(raw[i]==="0"&&E.decode(raw.slice(0,i)+"1"+raw.slice(i+1))===null,"mixed pin sign");counts.malformed++;}
+ let both=raw.split("");for(let i of opposite)both[i]="1";ok(E.decode(both.join(""))===null,"both full pin signs");counts.malformed++;
+ // A complete valid input with a different variable count is outside the family, not UNSAT.
+ ok(E.solveRaw("100").status==="OUTSIDE_NORMALIZED","outside normalized dimension");counts.malformed++;
+
  for(let bad of [raw.slice(1),raw+"0",raw.slice(0,-1),raw.slice(0,-1)+"2","", "10"]){ok(E.solveRaw(bad).status==="OUTSIDE_NORMALIZED","malformed status");counts.malformed++;}
- return includeFixtures?fixtures:{counts,rows,machineHostCounters:E.n};
+ return includeFixtures?fixtures:{counts,rows,integration,machineHostCounters:E.n};
 }
 
-console.log(process.argv.includes('--fixtures')?JSON.stringify(audit(true)):'F038_TGA_NORMALIZED_INTEGRATION_OK '+JSON.stringify(audit()));
+if(process.argv.includes('--solve')) console.log(JSON.stringify(engine().solveRaw(require('fs').readFileSync(0,'utf8'))));
+else console.log(process.argv.includes('--fixtures')?JSON.stringify(audit(true)):'F038_TGA_NORMALIZED_INTEGRATION_OK '+JSON.stringify(audit()));
