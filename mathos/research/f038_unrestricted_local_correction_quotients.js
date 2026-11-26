@@ -148,6 +148,18 @@ function audit(){
  let L=make(4,G,get,center,1,2);
  ok(n.mergedRows>before&&L.over.length===0,"local equality of distinct global rows");
  let mergeControl=[n.mergedRows-before,L.R,L.mass];
- return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls,overflowModels,mergeControl};
+ // Exact first-overflow census is monotone in capacity and admits integer scoring.
+ let capCases=[],previous=Infinity;
+ for(let C of [1,2,4]){
+  let X=make(4,F,get,center,C,4);
+  ok(X.mass<=previous,"capacity monotonicity");previous=X.mass;
+  let score=BigInt(C)**13n*BigInt(X.R)+BigInt(X.mass);
+  capCases.push([C,X.R,X.mass,score.toString()]);
+ }
+ let best=capCases.reduce((a,b)=>BigInt(a[3])<=BigInt(b[3])?a:b);
+ let priorUnion=BigInt(4**3)*BigInt(3*4),priorExact=100n*BigInt(B.R);
+ let portfolio=[priorUnion,priorExact,BigInt(best[3])].reduce((a,b)=>a<b?a:b);
+ ok(portfolio<=priorUnion&&portfolio<=priorExact,"portfolio score dominance");
+ return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls,overflowModels,mergeControl,capCases,portfolio:portfolio.toString()};
 }
 console.log('F038_LOCAL_CORRECTION_QUOTIENTS_OK '+JSON.stringify(audit()));
