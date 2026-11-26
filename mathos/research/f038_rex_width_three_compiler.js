@@ -109,7 +109,12 @@ function encode(M,J,inputs){
  if(inputs.length!==J.tapes||inputs.some(s=>[...s].some(x=>!J.alphabet.includes(x)||x==="L"||x==="_")))throw Error("input");
  return ["G",...inputs.flatMap((s,i)=>["hL",...[...s].map(x=>"u"+x),"u_",i===inputs.length-1?"E":"D"])].map(x=>M.codes[x]).join("");
 }
-function descriptor(M){const w=M.q.toString(2).length,chunks=["111"+"1".repeat(M.q)+"0"];for(let i=0;i<M.T.length;i+=8192)chunks.push(Array.from(M.T.subarray(i,i+8192),v=>(v>>>4).toString(2).padStart(w,"0")+((v>>2)&3).toString(2).padStart(2,"0")+(v&3).toString(2).padStart(2,"0")).join(""));return chunks.join("");}
+function* descriptorChunks(M){
+ const w=M.q.toString(2).length;
+ yield "111"+"1".repeat(M.q)+"0";
+ for(let i=0;i<M.T.length;i+=8192)yield Array.from(M.T.subarray(i,i+8192),v=>(v>>>4).toString(2).padStart(w,"0")+((v>>2)&3).toString(2).padStart(2,"0")+(v&3).toString(2).padStart(2,"0")).join("");
+}
+function descriptor(M){return Array.from(descriptorChunks(M)).join("");}
 function run(M,raw,limit=Infinity){
  let t=0,h=0,s=0,tape=new Uint8Array(raw.length+1024);tape.fill(2);for(let i=0;i<raw.length;i++)tape[i]=+raw[i];let hi=raw.length-1;
  while(s!==M.q&&t<limit){let v=M.T[3*s+tape[h]];tape[h]=(v>>2)&3;h+=(v&3)-1;s=v>>>4;t++;if(h<0)throw Error("left boundary");if(h===tape.length){let a=new Uint8Array(tape.length*2);a.fill(2);a.set(tape);tape=a;}hi=Math.max(h,hi);}
@@ -120,4 +125,4 @@ function run(M,raw,limit=Infinity){
   if(!x||!["u","h"].includes(x[0]))throw Error("physical grammar "+i+" "+x);if(x[0]==="h"){if(head!==null)throw Error("duplicate head");head=cell;}if(cell===0&&x.slice(1)!=="L")throw Error("sentinel");if(cell>0)word+=x.slice(1);cell++;
  }throw Error("missing end");
 }
-module.exports={machine,compile,encode,descriptor,run};
+module.exports={machine,compile,encode,descriptor,descriptorChunks,run};
