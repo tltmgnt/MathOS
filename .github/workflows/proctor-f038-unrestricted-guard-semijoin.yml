@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted guard semijoin
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-guard-semijoin']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_guard_semijoin.js
+          node mathos/research/f038_unrestricted_guard_semijoin.js | tee /tmp/current.txt
+          grep -Fx 'F038_GUARD_SEMIJOIN_OK {"fixtures":16,"totals":[280,6344,33280,4237,1816,1299,979,320,40368,323120,16184,39134,37792,687104,15977,15977],"empty":8,"wideOnly":230,"certChecks":41984,"fallback":0,"controls":[[4,12,12,0],[8,112,112,0],[16,960,960,0],[32,7936,7936,0],[64,64512,64512,0]],"fragmentation":[[4,1,32,false],[8,1,256,true],[16,1,2048,true],[32,1,16384,true]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_GUARD_SEMIJOIN_GATE_OK status=OPEN promotion=NONE')
+          PY
