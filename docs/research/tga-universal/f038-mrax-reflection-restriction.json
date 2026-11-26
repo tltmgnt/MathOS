@@ -1,0 +1,193 @@
+{
+  "attempt_id": "F038-MRAX-REFLECTION-RESTRICTION",
+  "base_commit": "14b92bd684b9efdfebe115ab61f5fc6594628fef",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45725430105",
+  "targets": [
+    "universal_lower_bound",
+    "short_proofs",
+    "discovery",
+    "machine_cost"
+  ],
+  "hypothesis": "Can a witness-separated universal rejection encoding settle the augmented-resolution transfer premise without assuming polynomial SAT algorithms produce proofs?",
+  "route": "negative",
+  "topology": "Exact guarded-domain specialization and path gluing; proof restriction not runtime simulation.",
+  "adversarial": [
+    "Resolution lower bounds do not transfer to runtime.",
+    "Specific pool encoding, not arbitrary reflection encodings.",
+    "DNF lower bound is representation-specific."
+  ],
+  "scope": "Explicit width-three clause pool, unary clock, deterministic rejection circuit independent of satisfying witness; ordinary resolution.",
+  "cost": "Polynomial proof simulation; no polynomial bound on universal reflection proofs",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of reflection restriction and lower-bound transfer"
+    },
+    {
+      "key": "attempt_other_simulation",
+      "label": "Noncircular simulation in a model not limited by resolution reflection"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS reachability, presence subset and source assignment enumeration; not Python execution.",
+  "expected": {
+    "small": [
+      [
+        1,
+        64,
+        7,
+        57,
+        2,
+        1024,
+        272,
+        26
+      ],
+      [
+        2,
+        1024,
+        49,
+        975,
+        4,
+        131072,
+        18496,
+        47
+      ],
+      [
+        3,
+        16384,
+        343,
+        16041,
+        8,
+        0,
+        0,
+        68
+      ]
+    ],
+    "large": [
+      [
+        8,
+        256,
+        173
+      ],
+      [
+        16,
+        65536,
+        341
+      ],
+      [
+        32,
+        4294967296,
+        677
+      ]
+    ],
+    "controls": 3
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_reflection_restriction.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-REFLECTION-RESTRICTION.md"
+  ],
+  "next": "Investigate uniform computational lower-bound quantifiers and a proof-system-independent model; stop pursuing short resolution reflection.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can a witness-separated universal rejection encoding settle the augmented-resolution transfer premise without assuming polynomial SAT algorithms produce proofs?",
+      "strategy": "Separate input-selection and computation variables from independent satisfying witness; specialize by restriction.",
+      "alternative": "Construct a compact diamond-chain rejector with exponentially many minimal rejected inputs.",
+      "stop_rule": "If reflection certificates provably inherit resolution lower bounds, reject the short-reflection premise for that calculus; do not infer P!=NP.",
+      "literature_leads": [
+        "Prior MathOS reflection transfer; Ben-Sasson and Wigderson, Short Proofs Are Narrow, JACM 2001, https://eccc.weizmann.ac.il/eccc-reports/1999/TR99-022/"
+      ]
+    },
+    "construct": {
+      "claim": "Witness-separated reflection augmentation is polynomially equivalent to ordinary resolution on normalized 3CNF, and reflection length dominates every rejected instance's resolution length.",
+      "scope": "Explicit width-three clause pool, unary clock, deterministic rejection circuit independent of satisfying witness; ordinary resolution.",
+      "derivation": "Fix presence and all computation gate bits to a rejecting execution; every gate clause disappears and guarded clauses become exactly the input; restrict refutation.",
+      "unresolved_steps": [
+        "Unrestricted lower bound and a noncircular simulation theorem for a different model."
+      ],
+      "candidate_tests": [
+        "Replay reflection refutations and exact specializations for every rejected small diamond input."
+      ]
+    },
+    "alternative": {
+      "claim": "Diamond-chain Horn rejection has exponential positive-DNF core-cover size but linear-size resolution reflection proofs.",
+      "scope": "Specified implication pool and monotone rejection circuit.",
+      "derivation": "Two alternative paths per segment; 2^k minimal subsets; guarded path propagation combines at each OR gate.",
+      "unresolved_steps": [
+        "General computation lower bounds; no general circuit lower bound."
+      ],
+      "candidate_tests": [
+        "Enumerate small presence subsets and source models; produce large compact proofs and reject corrupt traces."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Resolution lower bounds do not transfer to runtime.",
+        "Specific pool encoding, not arbitrary reflection encodings.",
+        "DNF lower bound is representation-specific."
+      ],
+      "counterexample_candidates": [
+        "Hard 3CNF restrictions refute short-resolution reflection premise; diamond circuit compresses explicit core enumeration."
+      ],
+      "equivalence_audit": "Exact restriction and polynomial simulation both directions for the chosen calculus.",
+      "barrier_audit": "Augmented resolution lower bound established via classical base lower bound, but necessary short-reflection premise fails.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit normalized CNF, unary clock and deterministic circuit bit encodings.",
+      "cost_ledger": {
+        "encoding": "Polynomial width-three pool and bounded computation circuit",
+        "preprocessing": "Polynomial in explicit lengths and unary clock; general compiler abstract",
+        "inference": "Ordinary resolution proof restriction and guarded path derivation",
+        "repetitions": "One reflection proof covers all rejecting selections; 2^k explicit minimal cores",
+        "arithmetic_bits": "Polynomial indices and trace lengths",
+        "memory": "Polynomial verifier storage in supplied proof length",
+        "reconstruction": "Restrict exact rejecting computation and replay resulting source proof",
+        "overall": "Polynomial proof simulation; no polynomial bound on universal reflection proofs"
+      },
+      "missing_bounds": [
+        "Universal SAT runtime lower bound",
+        "Noncircular unrestricted simulation in another model"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact pool restriction and proof-system equivalence",
+        "Worst-case reflection lower-bound transfer",
+        "Diamond minimal-core count and compact proof"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "General bounded-machine circuit compiler not implemented."
+      ],
+      "proof_obligations": [
+        "Check gate truth conditions and exact restriction",
+        "Replay actual proofs, width and size bounds",
+        "Check source models and minimal rejection counts"
+      ],
+      "formalization_plan": "Formalize restriction transfer and compact circuit derivation; independently review classical lower-bound application.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Close the specified augmented-resolution lower-bound premise conditionally on classical resolution results, and show its required short-reflection premise fails; demonstrate compact reflection for structured rejectors.",
+      "remaining_gaps": [
+        "Unrestricted SAT lower bound",
+        "Noncircular simulation for other models",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate uniform computational lower-bound quantifiers and a proof-system-independent model; stop pursuing short resolution reflection.",
+      "human_review_requests": [
+        "Review encoding quantifiers, restriction costs, classical lower-bound dependency and DNF scope."
+      ]
+    }
+  }
+}
