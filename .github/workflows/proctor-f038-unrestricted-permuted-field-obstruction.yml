@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted permuted field obstruction
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-permuted-field-obstruction']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_permuted_field_obstruction.js
+          node mathos/research/f038_unrestricted_permuted_field_obstruction.js | tee /tmp/current.txt
+          grep -Fx 'F038_PERMUTED_FIELD_OBSTRUCTION_OK {"checks":{"pair":5264,"triple":848,"tripleDirect":768,"greedyFirst":56,"greedyStop":2632,"map":336,"dag":552212,"run":1987,"union":5376},"fields":[[16,4,48,10,36,2880],[32,8,192,43,145,23808],[64,16,768,183,567,193536]],"greedy":[[16,8,48,8],[32,16,192,16],[64,32,768,32]],"tiles":[[16,4,0,0,0,32,8,[1,10,19],30,174,21,47],[16,4,12,4,0,28,6,[1,10,17],28,170,7,39],[16,4,0,12,12,32,8,[1,12,23],36,217,6,43],[32,8,0,0,0,128,16,[1,15,278,127],421,2360,38,731],[32,8,24,8,0,120,15,[1,15,231,119],366,1989,21,606],[32,8,0,24,24,128,16,[1,14,243,128],386,2104,51,520],[64,16,0,0,0,512,32,[1,15,1980,2014,512],4522,28619,19,10017],[64,16,48,16,0,496,31,[1,15,1842,1957,496],4311,27947,27,10024],[64,16,0,48,48,512,32,[1,15,1887,2021,512],4436,28840,19,10010]],"asym":[[128,85,12,344,357,13],[256,170,13,688,738,50],[512,341,13,1380,1507,127],[1024,682,14,2760,3040,280]],"urnChecks":890}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_PERMUTED_FIELD_OBSTRUCTION_GATE_OK status=OPEN promotion=NONE')
+          PY
