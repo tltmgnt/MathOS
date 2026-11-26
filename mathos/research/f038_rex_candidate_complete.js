@@ -87,10 +87,11 @@ function audit(R,E){
  // Actual physical worker, two whole-candidate batches; one positive and one negative.
  check(P,2,[f([0],["0"])],0,[],1);
  // Same outgoing OR can reside on an infeasible last candidate.
- const before=L.stats.unsafeRepresentative;check(L,2,[f([0],["0"])],0,[],2);ok(L.stats.unsafeRepresentative>before,"OR representative is not a witness");
+ const before=P.stats.unsafeRepresentative;check(P,2,[f([0],["0"])],0,[],2);ok(P.stats.unsafeRepresentative>before,"OR representative is not a witness");
  // Two namespaces with disjoint supports cannot substitute for one another.
- check(L,2,[f([0],["0"]),f([0],["1"])],0,[],2);
+ check(P,2,[f([0],["0"]),f([0],["1"])],0,[],2);
  check(L,2,[],0,[],1);
+ check(L,2,[f([0,1],["0,0","1,1"]),f([0],["1"])],0,[1],3);
  check(H,2,[f([],[])],0,[],1);
  check(H,2,[f([],[""])],0,[],1);
  for(let m of [2,3,4])for(let w=0;w<=3;w++)for(let j=0;j<3;j++){
@@ -102,7 +103,7 @@ function audit(R,E){
   for(let cap of [Math.max(1,m*m-1),m**3])check(H,m,F,0,h,cap);
  }
  // Use the actual SEP-003 decoder, planner, elimination history and witness verifier.
- let normalized={cases:0,sat:0,unsat:0,ineligible:0,rawBits:0,exactKeys:0,verifiedWitnesses:0},details=[];
+ let normalized={cases:0,sat:0,unsat:0,ineligible:0,rawBits:0,exactKeys:0,verifiedWitnesses:0,referenceTuples:0,ineligibleSatControls:0,malformedControls:0},details=[];
  for(let m of [2,3,4])for(let j=0;j<4;j++){
   let base=E(),pins=Array.from({length:m},(_,i)=>(i+j)%2),B=[];
   let scopes=j===3?[...base.subsets([...Array(9).keys()],2)]:j===2?[[0,4],[1,4],[2,4],[3,4],[0,5],[5,6],[6,7],[7,8],[5,8]]:[[0,4],[1,4],[2,5],[3,6],[0,1,2]];
@@ -110,6 +111,22 @@ function audit(R,E){
   if(j===1)for(let a=0;a<m;a++)B.push([-(4*m+a+1)]);
   let raw=base.encode(m,pins,B),a=base.solveRaw(raw),b=E(false,(...args)=>H.bag(...args).S).solveRaw(raw);
   ok(eq(a,b),"normalized full record equality "+JSON.stringify([m,j,a,b]));
+  if(b.status==="INELIGIBLE"){ok(base.valid(raw,base.witness(m,pins,Array(9).fill(0))),"ineligible SAT control");normalized.ineligibleSatControls++;}
+  else {
+   let keys=new Set();
+   for(let z of base.tup(m,9)){
+    normalized.referenceTuples++;
+    if(B.every(c=>!c.every(x=>z[Math.floor((-x-1)/m)]===(-x-1)%m)))keys.add(key(b.A.map(g=>z[g])));
+   }
+   ok(keys.size===b.count&&b.status===(keys.size?"SAT":"UNSAT"),"independent normalized enumeration");
+  }
+  if(m===2&&j===0){
+   let prior=H.stats.bags;
+   for(let invalid of [raw.slice(0,-1),raw+"0",raw.slice(1),"100",""]){
+    let c=E(false,(...args)=>H.bag(...args).S).solveRaw(invalid);ok(c.status==="OUTSIDE_NORMALIZED","malformed status");normalized.malformedControls++;
+   }
+   ok(H.stats.bags===prior,"no bag processing on malformed");
+  }
   normalized.cases++;normalized.rawBits+=raw.length;normalized.exactKeys+=b.count??0;
   if(b.status==="SAT"){ok(base.valid(raw,b.bits),"original witness");normalized.sat++;normalized.verifiedWitnesses++;}
   else if(b.status==="UNSAT")normalized.unsat++;else normalized.ineligible++;
