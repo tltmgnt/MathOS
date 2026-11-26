@@ -1,0 +1,236 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-PLANTED-DENSITY",
+  "base_commit": "49c5a2f451fc9fda4ccbec993630047540cf19c6",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45741475515",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can dense planted redundant-clause selectors give unbounded cubic failures, or can a single fixed program of the unchanged U exclude that region within the exact cubic stage?",
+  "route": "negative",
+  "topology": "Complete-support forced assignments, bounded witness completion, actual cubic clock inclusion and exact planted census upper bound.",
+  "adversarial": [
+    "Seven clauses, not six, force the entire triple.",
+    "One-tape overhead and fixed description length must be charged.",
+    "A density upper bound cannot prove nonemptiness or emptiness.",
+    "Planted-pair sampling is not uniform over arbitrary satisfiable selectors."
+  ],
+  "scope": "Same universal U, actual explicit selector order, all satisfiable source formulas at sufficiently large n; probability statement only for the specified planted distribution.",
+  "cost": "Fixed general tape program exists by charged quadratic simulation; O(L^(17/6) polylog L) transitions, below exact cubic budget eventually; no concrete code or n0 supplied.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of complete-block recovery and cubic-stage bound"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS clause-list scanning and exact BigInt block-occupancy histograms; not execution of new Python.",
+  "expected": {
+    "controls": 4,
+    "hist": [
+      [
+        3,
+        1,
+        [
+          "1",
+          "0",
+          "0",
+          "127"
+        ]
+      ],
+      [
+        4,
+        4,
+        [
+          "97283",
+          "8193532",
+          "0",
+          "0",
+          "260144641"
+        ]
+      ],
+      [
+        5,
+        10,
+        [
+          "1069284634125342970",
+          "2040935523798449935",
+          "85947547486093978870",
+          "0",
+          "0",
+          "1091533853073393531649"
+        ]
+      ]
+    ],
+    "scan": [
+      [
+        1,
+        4,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0
+      ],
+      [
+        2,
+        256,
+        0,
+        0,
+        0,
+        256,
+        0,
+        0
+      ],
+      [
+        3,
+        256,
+        8,
+        8,
+        1,
+        247,
+        8,
+        28
+      ],
+      [
+        4,
+        12,
+        4,
+        20,
+        0,
+        8,
+        4,
+        26
+      ],
+      [
+        16,
+        12,
+        8,
+        5516,
+        0,
+        4,
+        9,
+        131412
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_planted_density.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-PLANTED-DENSITY.md"
+  ],
+  "next": "Seek unconditional unbounded cubic-stage failures among formulas not covered by the complete-support recovery theorem, or prove a uniform polynomial cutoff; do not infer failure existence from rarity.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can dense planted redundant-clause selectors give unbounded cubic failures, or can a single fixed program of the unchanged U exclude that region within the exact cubic stage?",
+      "strategy": "Derive exact forced assignments from seven-of-eight triple blocks, enumerate a logarithmic number of uncovered bits, charge full input scans and one-tape simulation.",
+      "alternative": "Bound the cubic residual mass under independent planted ternary selection and distinguish pair sampling from uniform unique selectors.",
+      "stop_rule": "No claim of cubic failure existence, general SAT cutoff or unrestricted lower bound from a density upper bound.",
+      "literature_leads": [
+        "Prior same-U finite pin interval and sparse trace CNF; elementary complete-support recovery, union bounds and standard fixed multitape-to-one-tape simulation. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For sufficiently large n, any exact cubic-stage residual has more than floor(log2(n)/4) variables uncovered by complete triple blocks.",
+      "scope": "Same universal U, actual explicit selector order, all satisfiable source formulas at sufficiently large n; probability statement only for the specified planted distribution.",
+      "derivation": "Complete blocks force three bits, logarithmic remaining assignment search is charged O(n^(5/4)L polylog L) on fixed multitape machine, quadratic tape simulation yields O(L^(17/6) polylog L), included in same U stage three.",
+      "unresolved_steps": [
+        "Unconditional unbounded B_3 existence or universal polynomial cutoff.",
+        "Explicit compiled program and threshold n0."
+      ],
+      "candidate_tests": [
+        "Actual pool block order and original verifier, small exhaustive selectors and cap boundary."
+      ]
+    },
+    "alternative": {
+      "claim": "Uniform planted ternary selectors fail the exact cubic stage with probability at most exp(-Omega(n^2 log n)); the same asymptotic upper bound holds uniformly over uniquely satisfiable ternary-only selectors.",
+      "scope": "Independent selection of each clause true under a uniformly planted witness; conditioning on unique models removes multiplicity.",
+      "derivation": "Complete support indicators independent with probability 1/128; for r uncovered vertices all intersecting triples incomplete; union bound and positive unique probability.",
+      "unresolved_steps": [
+        "No lower bound on residual count or efficient sampling of rare bad selectors."
+      ],
+      "candidate_tests": [
+        "Exact weighted uncovered histograms and all small-r union bounds."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Seven clauses, not six, force the entire triple.",
+        "One-tape overhead and fixed description length must be charged.",
+        "A density upper bound cannot prove nonemptiness or emptiness.",
+        "Planted-pair sampling is not uniform over arbitrary satisfiable selectors."
+      ],
+      "counterexample_candidates": [
+        "Finite cubic pin fixtures need not lie beyond the unspecified n0.",
+        "Correlated planting can avoid complete triples; sparse structured formulas remain outside sufficient success condition."
+      ],
+      "equivalence_audit": "Same actual pool and selector representation, output convention and original weighted stage; no extra restricted-program assumption.",
+      "barrier_audit": "No unbounded cubic or all-exponent lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Unchanged U; fixed multitape bit algorithm simulated in original three-symbol one-tape syntax.",
+      "cost_ledger": {
+        "encoding": "Actual full normalized selector input and explicit assignment output",
+        "preprocessing": "Scan unary header and original triple blocks; counters and forced assignment",
+        "inference": "Verify every completed assignment against original clauses",
+        "repetitions": "At most n^(1/4) completions, O(L) full scans each",
+        "arithmetic_bits": "Binary support and assignment counters, O(polylog L) overhead",
+        "memory": "Explicit work tapes; quadratic one-tape simulation, no free indexing",
+        "reconstruction": "Write n verified consecutive output bits and position halt head",
+        "overall": "Fixed general tape program exists by charged quadratic simulation; O(L^(17/6) polylog L) transitions, below exact cubic budget eventually; no concrete code or n0 supplied."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic-stage failures or uniform cutoff",
+        "Explicit compiled description and numerical n0"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Seven-of-eight local forcing",
+        "Charged fixed program inclusion at exact cubic stage",
+        "Planted-pair and unique-selector probability bounds",
+        "Independent finite scans and exact weighted histograms"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "General source-to-U compilation and numerical threshold not implemented."
+      ],
+      "proof_obligations": [
+        "Verify pool order, conflicts and candidate cap",
+        "Review quadratic bit-tape simulation and description absorption",
+        "Audit union bound and distribution conditioning"
+      ],
+      "formalization_plan": "Formalize local block forcing, bounded enumeration, fixed tape simulation and stage inclusion, then exact probability/census inequality.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Establish an unconditional structural necessary condition on all sufficiently large cubic residuals and exclude naive uniform dense planted discovery by a sharp probability upper bound.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review and formal compilation"
+      ],
+      "next_question": "Seek unconditional unbounded cubic-stage failures among formulas not covered by the complete-support recovery theorem, or prove a uniform polynomial cutoff; do not infer failure existence from rarity.",
+      "human_review_requests": [
+        "Review forcing, clock exponent, finite threshold, and planted versus unique conditioning."
+      ]
+    }
+  }
+}
