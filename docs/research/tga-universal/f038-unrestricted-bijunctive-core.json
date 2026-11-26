@@ -1,0 +1,276 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-BIJUNCTIVE-CORE",
+  "base_commit": "c6c7890098ba590b7220d3665b5705a3e99786db",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45742034703",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the exact unchanged U exclude all satisfiable selectors with a logarithmically small hitting set of semantically irreducible ternary blocks within its cubic stage?",
+  "route": "negative",
+  "topology": "Local pair-clause closure, irreducible-support hitting sets, implication matrix and exact cubic-stage inclusion.",
+  "adversarial": [
+    "Semantic local equivalence is not global 2-CNF equivalence.",
+    "All branches and tape scans must be charged, including cover search, edge sorting and matrix updates.",
+    "The hitting-set failure branch is not UNSAT.",
+    "Fixed description length and strict exponent slack are essential."
+  ],
+  "scope": "All original satisfiable selectors at sufficiently large n, exact unchanged U and cubic stage; local relation reductions and a bounded hitting-set algorithm.",
+  "cost": "O(n L polylog L) fixed multitape bit time and O(L^(8/3) polylog L) actual one-tape transitions by quadratic simulation; fixed description length; no explicit compiled code or n0.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of block reduction, hitting set and cubic-stage cost"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS majority-closure classification, brute cover and source-model reference; not execution of new Python.",
+  "expected": {
+    "controls": 4,
+    "hist": [
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        8,
+        0
+      ],
+      [
+        2,
+        28,
+        0
+      ],
+      [
+        3,
+        48,
+        8
+      ],
+      [
+        4,
+        44,
+        26
+      ],
+      [
+        5,
+        24,
+        32
+      ],
+      [
+        6,
+        12,
+        16
+      ],
+      [
+        7,
+        0,
+        8
+      ],
+      [
+        8,
+        1,
+        0
+      ]
+    ],
+    "local": [
+      256,
+      166,
+      90,
+      768
+    ],
+    "rows": [
+      [
+        1,
+        0,
+        4,
+        0,
+        4,
+        0,
+        3,
+        3,
+        1,
+        4
+      ],
+      [
+        2,
+        0,
+        256,
+        0,
+        256,
+        0,
+        95,
+        95,
+        161,
+        128
+      ],
+      [
+        3,
+        1,
+        384,
+        166,
+        384,
+        0,
+        352,
+        352,
+        32,
+        1251
+      ],
+      [
+        4,
+        1,
+        128,
+        308,
+        111,
+        17,
+        72,
+        62,
+        49,
+        116
+      ],
+      [
+        5,
+        1,
+        128,
+        790,
+        16,
+        112,
+        65,
+        6,
+        10,
+        75
+      ],
+      [
+        9,
+        2,
+        8,
+        13,
+        7,
+        1,
+        7,
+        6,
+        1,
+        2383
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_bijunctive_core.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-BIJUNCTIVE-CORE.md"
+  ],
+  "next": "Investigate actual unbounded B_3 witnesses satisfying both recovery exclusions, or a universal polynomial success cutoff; do not infer residual nonemptiness from structural necessity.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the exact unchanged U exclude all satisfiable selectors with a logarithmically small hitting set of semantically irreducible ternary blocks within its cubic stage?",
+      "strategy": "Classify every ternary block by exact pair-clause closure, find a logarithmic hitting set of irreducible supports, and solve 2-CNF branches with charged sequential matrix closure.",
+      "alternative": "Use majority closure as an independent local characterization and derive matching consequences; audit relation to previous complete-support criterion.",
+      "stop_rule": "No inference from large hitting number to bad-instance existence; no unrestricted SAT cutoff or lower bound claimed.",
+      "literature_leads": [
+        "Classical 2-CNF backdoor-set branching (Nishimura, Ragde, Szeider, SAT 2004); SAT backdoors: Depth beats size (2024); prior exact U planted-density result. No novelty claim for backdoor methods."
+      ]
+    },
+    "construct": {
+      "claim": "For sufficiently large n, every p in B_3(n) has irreducible-support hitting number tau(p)>floor(log_3 n).",
+      "scope": "All original satisfiable selectors at sufficiently large n, exact unchanged U and cubic stage; local relation reductions and a bounded hitting-set algorithm.",
+      "derivation": "Local 2-CNF equivalents for 166 of 256 masks; ternary branching discovers small hitting sets, enumerates assignments, and uses explicit implication transitive closure; charged bit-machine simulation fits the exact cubic stage.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failures or uniform cutoff.",
+        "Explicit compiled program and numerical inclusion threshold."
+      ],
+      "candidate_tests": [
+        "All 256 local masks; exact cover existence and complete source model sets on small selectors; original verifier and cap boundaries."
+      ]
+    },
+    "alternative": {
+      "claim": "Local reducibility equals majority closure, and cubic-stage residuals must have more than floor(log_3 n) irreducible supports and a growing maximal matching. These criteria complement complete-support recovery.",
+      "scope": "All original satisfiable selectors at sufficiently large n, exact unchanged U and cubic stage; local relation reductions and a bounded hitting-set algorithm.",
+      "derivation": "Pair projection argument, majority closure of binary clauses, maximal matching union hits all supports; prior criterion can independently exclude densely pinned inputs.",
+      "unresolved_steps": [
+        "No converse from structural core size to actual stage failure."
+      ],
+      "candidate_tests": [
+        "Independent majority-closure classification and brute cover enumeration."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Semantic local equivalence is not global 2-CNF equivalence.",
+        "All branches and tape scans must be charged, including cover search, edge sorting and matrix updates.",
+        "The hitting-set failure branch is not UNSAT.",
+        "Fixed description length and strict exponent slack are essential."
+      ],
+      "counterexample_candidates": [
+        "Large irreducible hitting number may still yield an easy formula.",
+        "Small n may precede the unknown fixed program inclusion threshold."
+      ],
+      "equivalence_audit": "Actual selector block order, exact local model sets, original assignment verifier and output convention, unchanged U and exact cubic clocks.",
+      "barrier_audit": "No unbounded cubic or all-exponent lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Unchanged U, fixed multitape bit algorithm and explicit quadratic one-tape simulation.",
+      "cost_ledger": {
+        "encoding": "Original unary header and complete normalized selector, explicit short literal records",
+        "preprocessing": "Constant mask classification and sequential support parsing",
+        "inference": "Bounded hitting set recursion, exact branch simplification, sorted implication edges and matrix Warshall witness",
+        "repetitions": "O(3^b) cover nodes and <=2^b binary branches, both O(n)",
+        "arithmetic_bits": "Binary support/counter records and sequential comparisons; polynomial-log overhead",
+        "memory": "Sequential fixed work tapes and explicit old/new reachability matrices, no free indexing",
+        "reconstruction": "Compare complementary reachability rows, verify and position n consecutive output bits",
+        "overall": "O(n L polylog L) fixed multitape bit time and O(L^(8/3) polylog L) actual one-tape transitions by quadratic simulation; fixed description length; no explicit compiled code or n0."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic failures or uniform cutoff",
+        "Concrete original tape description and numerical n0"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact local equivalence and majority characterization",
+        "Bounded hitting-set search correctness",
+        "Binary reachability row witness proof",
+        "Sequential bit-cost and exact stage inclusion"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No actual general U program compiled or asymptotic clock measured."
+      ],
+      "proof_obligations": [
+        "Verify actual pool sign order and local relation equality",
+        "Replay brute-force cover and model references",
+        "Audit sequential matrix cost and stage exponent"
+      ],
+      "formalization_plan": "Formalize block equivalence, hitting-set search, implication closure model construction, and fixed-machine cost simulation.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Establish a complementary structural necessary condition on every sufficiently large cubic residual, excluding all locally reducible or small-cover formulas within the original clock.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review and formal machine compilation"
+      ],
+      "next_question": "Investigate actual unbounded B_3 witnesses satisfying both recovery exclusions, or a universal polynomial success cutoff; do not infer residual nonemptiness from structural necessity.",
+      "human_review_requests": [
+        "Review local closure, row-order model proof, sequential bit accounting and asymptotic threshold."
+      ]
+    }
+  }
+}
