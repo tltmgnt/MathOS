@@ -38,7 +38,7 @@ function audit(){
     }
    }
    joint.rectangle++;if([...counts.values()].some(v=>v===N)){joint.strictReject++;return false;}
-   if(Math.min(X.length,Y.length)===1){
+   if(Math.min(X.length,Y.length)<=C){
     joint.singleton++;for(let x of X)for(let y of Y){let k=[...z,x,y];if(!L.some(r=>bad(r,k)))return true;}
     joint.strictReject++;return false;
    }
@@ -56,7 +56,7 @@ function audit(){
    let pairs=masks[0].flatMap(x=>masks[1].map(y=>[...z,x,y]));
    if(F.some(s=>s.h.includes(4)&&s.h.includes(5)&&pairs.every(k=>s.f(s.h.map(g=>k[g])))))return false;
    let exact=pairs.some(k=>F.filter(s=>s.h.every(g=>g<6)).every(s=>!s.f(s.h.map(g=>k[g]))));
-   if(Math.min(...masks.map(S=>S.length))===1)return exact;
+   if(Math.min(...masks.map(S=>S.length))<=C)return exact;
    if(!exact)joint.wideUnionMiss++;
    return true;
   }
@@ -200,6 +200,47 @@ function audit(){
  let F1=([x,y])=>x===y,F2=([x,y])=>x!==y;
  ok(!pairs.every(F1)&&!pairs.every(F2)&&pairs.every(z=>F1(z)||F2(z)),"union obstruction");
  let adversary=[X.length,Y.length,pairs.filter(F1).length,pairs.filter(F2).length,pairs.filter(z=>!F1(z)&&!F2(z)).length];
- return {n,joint,cases,controls,overflowControls,gateControls,adversary};
+ // Exhaust all nonempty masks and pairs of 2x2 forbidden relations.
+ let bounded={tests:0,falseNegatives:0,missedAtOne:0,missedAtTwo:0,singletonUnionReject:0};
+ for(let X of [[0],[1],[0,1]])for(let Y of [[0],[1],[0,1]])for(let a=0;a<16;a++)for(let b=0;b<16;b++){
+  let P=X.flatMap(x=>Y.map(y=>1<<(2*x+y))),exact=P.some(v=>!(v&a)&&!(v&b)),rect=!P.every(v=>v&a)&&!P.every(v=>v&b);
+  for(let C of [1,2]){
+   let keep=rect&&(Math.min(X.length,Y.length)>C||exact);bounded.tests++;
+   if(exact&&!keep)bounded.falseNegatives++;
+   if(!exact&&keep)bounded[C===1?"missedAtOne":"missedAtTwo"]++;
+   if(C===1&&rect&&!exact&&!keep)bounded.singletonUnionReject++;
+   ok(!exact||keep,"sound bounded joint");if(Math.min(X.length,Y.length)<=C)ok(keep===exact,"bounded exact");
+  }
+ }
+ ok(bounded.missedAtOne>0&&bounded.missedAtTwo===0&&bounded.singletonUnionReject>0,"bounded union adversary");
+ let fieldJoint=[];
+ for(let [m,poly,B] of [[16,19,4],[32,37,8],[64,67,16]]){
+  function mul(a,b){let r=0;while(b){if(b&1)r^=a;b>>=1;a<<=1;if(a&m)a^=poly;}return r;}
+  let q=m/2,perm=Array.from({length:m*m},(_,i)=>i),seed=0x1038;
+  for(let i=perm.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;let j=seed%(i+1);[perm[i],perm[j]]=[perm[j],perm[i]];}
+  let F=Array.from({length:m},(_,a)=>Uint8Array.from(perm,i=>+( (mul(a,Math.floor(i/m))^(i%m))<m/4)));
+  let independent=0,jointReject=0,raw=0,filtered=0,actual=0,first=0,stop=0;
+  let even=0,odd=0;for(let j=0;j<Math.log2(m)-1;j++)if(j%2)odd|=1<<j;else even|=1<<j;
+  let D=(m/4)*(3*m/4),gate=m*(m-m/B);
+  for(let b=q;b<m;b++){
+   const loss=(a,c)=>(a===c?0:D)+gate*(+(a>=q&&c<q)+ +((a&even)===(b&even)&&(c&even)!==(b&even))+ +((a&odd)===(b&odd)&&(c&odd)!==(b&odd)));
+   let sums=Array(m).fill(0);for(let c=0;c<m;c++)for(let a=0;a<m;a++)sums[c]+=loss(a,c);
+   ok(sums.every((s,c)=>c===b||s>sums[b]),"actual greedy first");first++;
+   for(let c=0;c<m;c++)if(c!==b){let gain=0;for(let a=0;a<m;a++)gain+=Math.max(0,loss(a,b)-loss(a,c));ok(gain<=D&&gain<m*m,"actual greedy stop");stop++;}
+   for(let a=0;a<m;a++)if(a!==b)for(let x0=0;x0<m;x0+=B)for(let y0=0;y0<m;y0+=B){
+    independent++;let allowed=false;
+    for(let y=y0;y<y0+B;y++)if(y<B&&!F[a][x0*m+y])allowed=true;
+    if(!allowed)jointReject++;
+    if(y0>=B)ok(!allowed,"outside escape no joint completion");
+    for(let x=x0;x<x0+B;x++)for(let y=y0;y<y0+B;y++){
+     let e=+(!F[a][x*m+y]&&F[b][x*m+y]);raw+=e;if(allowed)filtered+=e;if(x===x0&&y<B)actual+=e;
+    }
+   }
+  }
+  ok(actual>0&&actual<=filtered&&filtered<=m*q*m*B,"nonvacuous joint escape");
+  let mult=m**3/q;
+  fieldJoint.push([m,B,independent,jointReject,raw*mult,filtered*mult,actual*mult,first,stop]);
+ }
+ return {n,joint,cases,controls,overflowControls,gateControls,adversary,bounded,fieldJoint};
 }
 console.log('F038_FAR_BOUNDED_JOINT_SEMIJOINS_OK '+JSON.stringify(audit()));
