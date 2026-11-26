@@ -1,0 +1,184 @@
+{
+  "attempt_id": "F038-MRAX-WITNESS-PASS-FRONTIER",
+  "base_commit": "1206b75765a7ef4a10493dbadfebf1f3605070a8",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45727064154",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Which explicit structural restrictions allow polynomial witness-to-deterministic-circuit compilation, and what happens when they are removed?",
+  "route": "negative",
+  "topology": "Multigraph of shared intermediate state constraints; crossing-edge frontier exact contraction.",
+  "adversarial": [
+    "Frontier layout is supplied, not discovered for free.",
+    "Constant pass count and width alone do not ensure tractability.",
+    "Formula-specific no-input verifier has a trivial constant deterministic circuit; compiler cost is essential.",
+    "One-bit transition prototype is not a general machine compiler."
+  ],
+  "scope": "r permutations of h shared witness bits, explicit W states, polynomially constructible transition predicates, counted multiedges.",
+  "cost": "h W^(c+2r) poly(L); arbitrary two-order width-three uniform projection NP-complete",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of witness frontier compilation and SAT reduction"
+    },
+    {
+      "key": "attempt_input_dependent_transfer",
+      "label": "Resource-preserving structural transfer for input-dependent verifier families"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JavaScript witness runs, crossing-edge counts and CNF occurrence enumeration; not execution of Python.",
+  "expected": {
+    "passes": [
+      [
+        3,
+        384,
+        768,
+        6144,
+        684,
+        84,
+        3118,
+        36,
+        1216,
+        4
+      ],
+      [
+        4,
+        1536,
+        3072,
+        49152,
+        2850,
+        222,
+        25876,
+        36,
+        5824,
+        5
+      ]
+    ],
+    "cnf": [
+      256,
+      2048,
+      164025,
+      320,
+      265,
+      128,
+      128,
+      77,
+      14
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_witness_pass_frontier.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-WITNESS-PASS-FRONTIER.md"
+  ],
+  "next": "Investigate input-dependent verifier structural transfer or charged layout discovery; distinguish uniform compilation from nonuniform lower bounds.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Which explicit structural restrictions allow polynomial witness-to-deterministic-circuit compilation, and what happens when they are removed?",
+      "strategy": "Contract a shared-state graph of repeated witness passes using a supplied frontier layout.",
+      "alternative": "Reduce CNF SAT to a width-three verifier with two differently ordered witness passes.",
+      "stop_rule": "Do not confuse uniform compilation hardness with nonuniform circuit lower bounds or ignore witness consistency.",
+      "literature_leads": [
+        "Prior MathOS bit-witness consistency; elementary finite-state graph frontier DP and standard 3SAT NP-completeness. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "A repeated-witness finite-state verifier has exact deterministic circuit compilation in h W^(c+2r) poly(L) time/size for a supplied frontier layout.",
+      "scope": "r permutations of h shared witness bits, explicit W states, polynomially constructible transition predicates, counted multiedges.",
+      "derivation": "Identify witness occurrences, label intervening edges by states, enforce one bit at each vertex, contract local predicates while retaining crossing state assignments.",
+      "unresolved_steps": [
+        "Universal useful layout guarantee for unrestricted input-dependent NP verifier families."
+      ],
+      "candidate_tests": [
+        "Compile all small two-pass fixtures and replay against exhaustive witness enumeration."
+      ]
+    },
+    "alternative": {
+      "claim": "Existential projection of two differently ordered width-three passes is NP-complete.",
+      "scope": "Explicit transition tables; fixed formula encoded in program; nonempty CNF clauses.",
+      "derivation": "Use one bit per literal occurrence, check clauses in pass one and consistency of variable occurrences in pass two.",
+      "unresolved_steps": [
+        "Nonuniform lower-bound transfer for an input-dependent family; no unrestricted runtime lower bound."
+      ],
+      "candidate_tests": [
+        "All 256 small CNF subsets, occurrence-model equivalence, actual compilation on small fixtures."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Frontier layout is supplied, not discovered for free.",
+        "Constant pass count and width alone do not ensure tractability.",
+        "Formula-specific no-input verifier has a trivial constant deterministic circuit; compiler cost is essential.",
+        "One-bit transition prototype is not a general machine compiler."
+      ],
+      "counterexample_candidates": [
+        "Clause-order versus variable-order occurrence passes encode general SAT."
+      ],
+      "equivalence_audit": "One bit per vertex, shared edge states and exact frontier contraction; uniform/nonuniform transfer distinguished.",
+      "barrier_audit": "Restricted compilation theorem and NP-completeness, not a proof of P!=NP.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit finite states and transition circuits, bit-cost gate construction.",
+      "cost_ledger": {
+        "encoding": "Witness permutations, state tables, ordinary input transition predicates",
+        "preprocessing": "Build multigraph and check supplied layout polynomially",
+        "inference": "Local two-bit-choice predicates and OR/AND contraction over crossing state assignments",
+        "repetitions": "h stages of contraction with at most W^(c+2r) enumerated combinations each",
+        "arithmetic_bits": "Polynomial state and edge indices, explicit gate references",
+        "memory": "Bounded by explicit circuit and tables; reconstruct using predecessor choices",
+        "reconstruction": "Concrete witness via fixed-input DP backpointers and original run replay",
+        "overall": "h W^(c+2r) poly(L); arbitrary two-order width-three uniform projection NP-complete"
+      },
+      "missing_bounds": [
+        "Universal polynomial layout/compiler guarantee",
+        "Resource-preserving nonuniform lower-bound transfer",
+        "Unrestricted deterministic SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact edge-state gluing",
+        "Frontier invariant and cost",
+        "Two-pass width-three SAT reduction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "General machine-to-verifier compiler not implemented."
+      ],
+      "proof_obligations": [
+        "Replay symbolic circuits and witness backpointers against brute force",
+        "Check exact source and occurrence witness semantics",
+        "Test malformed layouts and repeated edge/state cases"
+      ],
+      "formalization_plan": "Formalize occurrence-edge gluing and frontier DP invariant, then review SAT reduction and uniform cost.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Identify a structural polynomial witness elimination theorem and a sharp pass/width-only obstruction.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Input-dependent verifier structural guarantee",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate input-dependent verifier structural transfer or charged layout discovery; distinguish uniform compilation from nonuniform lower bounds.",
+      "human_review_requests": [
+        "Review frontier state invariant, bit cost, common-order bound and width-three reduction."
+      ]
+    }
+  }
+}
