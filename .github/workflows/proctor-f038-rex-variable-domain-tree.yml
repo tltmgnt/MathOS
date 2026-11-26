@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X variable-domain tree
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-domain-tree']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_variable_domain_tree.js
+          node mathos/research/f038_rex_variable_domain_tree.js | tee /tmp/tree.txt
+          grep -Fx 'F038_REX_VARIABLE_DOMAIN_TREE_OK {"alphabet":38,"width":6,"logicalStates":254,"rules":9652,"states":41352,"bits":2522476,"counts":{"valid":712,"sat":265,"unsat":447,"nodes":1541,"branching":95,"domainValues":2967,"edgeEntries":2745,"physical":35151943,"logical":1408292,"checkpoints":977,"messageEntries":2967,"predecessors":751,"malformed":75,"malformedTransitions":74145,"cutoffs":3},"scaling":[[2,60,141381,5779,430,[26223,91979,23179]],[3,90,336534,14255,643,[58233,227215,51086]],[4,128,701379,30243,912,[116867,482523,101989]],[8,360,5758959,253795,2548,[913323,4056155,789481]]],"digest":2490725291}' /tmp/tree.txt
+          sed -n 's/^F038_REX_VARIABLE_DOMAIN_TREE_OK //p' /tmp/tree.txt > /tmp/tree.json
+          python -m mathos.research.validate_f038_rex_variable_domain_tree /tmp/tree.json
+          python -m mathos.research.tga_f038_rex_013 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_VARIABLE_DOMAIN_TREE_GENERAL_WIDTH_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_VARIABLE_DOMAIN_TREE_GATE_OK status=OPEN promotion=NONE')
+          PY
