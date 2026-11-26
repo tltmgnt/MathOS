@@ -1,0 +1,46 @@
+name: Proctor F038 unrestricted tail union recovery
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-tail-union-recovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_tail_union_recovery.js
+          node mathos/research/f038_unrestricted_tail_union_recovery.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_TAIL_UNION_RECOVERY_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":16,"passes":48,"scoreChecks":464,"keyChecks":3016,"unionBitChecks":73138,"fullChecks":484680,"success":180479,"heavy":11471,"head":1004,"union":6996,"narrow":1527,"unionModels":16424,"headModels":1044,"localUnionChecks":1124942,"localHeadChecks":2213966,"children":3258880,"roots":80028,"greedyChecks":776}
+          assert r['selected'] == {"0,0":12,"0,40":9,"1,1":16,"0,1":1,"0,90":10}
+          assert r['controls'] == [[8,2,4,6,16,56],[16,4,16,28,32,240],[32,8,64,120,64,992],[64,16,256,496,128,4032]]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_TAIL_UNION_RECOVERY_GATE_OK status=OPEN promotion=NONE')
+          PY
