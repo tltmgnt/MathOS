@@ -286,9 +286,15 @@ function audit(){
   if(w<=2){ok(physical(M,raw,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
   scaling.push([w,raw.length,r.t,r.logical,r.span,r.ph]);
  }
+ let rowScaling=[];
+ for(let n of [1,2,4,8]){
+  let P=Array.from({length:n},()=>["101","11","0",1]),C=Array.from({length:n},()=>["101","10","1",1]);
+  let raw=encode(0,P,C),r=check(0,P,C,true,false);
+  rowScaling.push([n,raw.length,r.t,r.logical,r.span,r.ph]);
+ }
  let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"descriptor length");
- return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest,physicalDigest};
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,rowScaling,digest,physicalDigest};
 }
 if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_RANKED_OVERLAP_OK '+JSON.stringify(audit()));
