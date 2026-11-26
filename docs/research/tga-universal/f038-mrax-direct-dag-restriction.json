@@ -1,0 +1,205 @@
+{
+  "attempt_id": "F038-MRAX-DIRECT-DAG-RESTRICTION",
+  "base_commit": "500b68dd2723f376d3e55b591a5102d9bc3787cd",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45730185298",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can direct DAG restriction charging replace exponential formula unfolding and yield a valid general circuit lower-bound measure?",
+  "route": "negative",
+  "topology": "Overlapping block-dependent sub-DAGs and their distinct entering wires; physical support-difference incidence.",
+  "adversarial": [
+    "Syntactic support overapproximates semantic dependence.",
+    "One gate can be charged to many blocks.",
+    "Even exact residual counts can have superlinear sum in small circuits.",
+    "Bound on average charge is not a superpolynomial circuit-size bound."
+  ],
+  "scope": "Single-output binary DAG, disjoint input blocks present at output, syntactic support, output ancestor cone.",
+  "cost": "J(C)>=t*m for universal selector, S*d>=t*m under per-gate charge cap d; no unrestricted size bound",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of direct boundary charging and indirect-storage counterexample"
+    },
+    {
+      "key": "attempt_general_charge",
+      "label": "Noncircular semantic or physical-gate charge theorem for arbitrary computation"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JavaScript gate enumeration, signature and support-charge audit, actual mux circuits; not execution of Python.",
+  "expected": {
+    "restrictions": [
+      [
+        3,
+        4096,
+        12288,
+        49152,
+        98304,
+        21280,
+        40448,
+        4,
+        5,
+        6
+      ],
+      [
+        4,
+        4096,
+        8192,
+        32768,
+        131072,
+        13344,
+        15360,
+        2,
+        2,
+        2
+      ]
+    ],
+    "isa": [
+      [
+        1,
+        2,
+        5,
+        6,
+        4,
+        8,
+        8,
+        16
+      ],
+      [
+        2,
+        4,
+        14,
+        27,
+        16,
+        40,
+        48,
+        256
+      ],
+      [
+        3,
+        8,
+        35,
+        84,
+        64,
+        160,
+        208,
+        16384
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_direct_dag_restriction.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-DIRECT-DAG-RESTRICTION.md"
+  ],
+  "next": "Investigate semantic restriction measures or gate elimination with a justified general physical-gate charge theorem; test shared mux counterexamples.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can direct DAG restriction charging replace exponential formula unfolding and yield a valid general circuit lower-bound measure?",
+      "strategy": "Count distinct entering wires of each block-dependent sub-DAG and sum physical gate support differences.",
+      "alternative": "Build an explicit indirect-storage-access circuit with superlinear summed log residual counts and linear gate size.",
+      "stop_rule": "Do not convert a superlinear aggregate charge into physical gate count without a justified per-gate bound.",
+      "literature_leads": [
+        "Prior MathOS guarded selector restrictions; elementary subfunction counting and indirect storage access. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For arbitrary binary circuits, sum log2 residual counts <= sum boundary wires <= J(C); the universal SAT selector has J(C)>=t*m=Omega(N^(4/3)/log N).",
+      "scope": "Single-output binary DAG, disjoint input blocks present at output, syntactic support, output ancestor cone.",
+      "derivation": "Fix outside inputs, record incoming cut values, evaluate dependent DAG; count each gate incidence by support symmetric difference.",
+      "unresolved_steps": [
+        "Independent universal control on per-gate charges for SAT or a stronger semantic measure."
+      ],
+      "candidate_tests": [
+        "All three-gate truth-function assignments on two skeletons and every block restriction."
+      ]
+    },
+    "alternative": {
+      "claim": "Indirect storage access has sum log residual counts k^2 but 3(l+1)(k-1) gates, refuting universal linear charging of exact subfunction counts.",
+      "scope": "k=2^l pointer blocks of l bits, one primary address and k-bit data table, binary gate mux trees.",
+      "derivation": "Select pointer block i and arbitrary data table to realize every function on that block; shared selection circuits are linear in input length.",
+      "unresolved_steps": [
+        "A noncircular property separating SAT from compact shared selection circuitry."
+      ],
+      "candidate_tests": [
+        "Construct mux DAGs and verify every small pointer and table configuration; count structural charges."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Syntactic support overapproximates semantic dependence.",
+        "One gate can be charged to many blocks.",
+        "Even exact residual counts can have superlinear sum in small circuits.",
+        "Bound on average charge is not a superpolynomial circuit-size bound."
+      ],
+      "counterexample_candidates": [
+        "Indirect storage access realizes k^2 summed log residuals with O(k log k) gates."
+      ],
+      "equivalence_audit": "Exact cut signature evaluation and physical incidence sum; explicit separation of gate count and interface count.",
+      "barrier_audit": "No unrestricted SAT runtime lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit binary Boolean DAG with input block partition and syntactic support bitsets.",
+      "cost_ledger": {
+        "encoding": "Polynomial clause pool and disjoint guarded pin blocks from prior cycle",
+        "preprocessing": "Compute ancestor cone, supports and boundary lists in polynomial graph time",
+        "inference": "Evaluate restricted DAG given boundary signature; count symmetric differences",
+        "repetitions": "Exponential exact residual enumeration only for small fixtures",
+        "arithmetic_bits": "Exact bitsets, integer incidence and subfunction counts",
+        "memory": "Polynomial structural accounting; exact residual tables may be exponential",
+        "reconstruction": "Replay dependent DAG from boundary bits and in-block inputs",
+        "overall": "J(C)>=t*m for universal selector, S*d>=t*m under per-gate charge cap d; no unrestricted size bound"
+      },
+      "missing_bounds": [
+        "Universal per-gate charge cap or stronger measure",
+        "Unrestricted deterministic SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Restriction signature factorization",
+        "Gate incidence symmetric-difference identity",
+        "Transfer of previous guarded-block lower bound",
+        "Indirect storage counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general circuit minimizer or unrestricted semantic measure implemented."
+      ],
+      "proof_obligations": [
+        "Check exact replay and signature equivalence",
+        "Check physical gate support incidence accounting",
+        "Replay actual multiplexer DAGs and malformed controls"
+      ],
+      "formalization_plan": "Formalize ancestor support, cut replay, incidence counting and mux construction separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Replace unfolding by a direct physical DAG interface measure and derive a superlinear aggregate charge bound, while demonstrating the exact limitation of additive subfunction counts.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Independent general gate charging theorem",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate semantic restriction measures or gate elimination with a justified general physical-gate charge theorem; test shared mux counterexamples.",
+      "human_review_requests": [
+        "Review cut membership, distinct wire versus incidence counts, SAT transfer and indirect-storage family."
+      ]
+    }
+  }
+}
