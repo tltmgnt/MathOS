@@ -1,0 +1,56 @@
+name: Proctor F038 RE-X relational reference
+on:
+  push:
+    branches: ['research/pnp-f038-rex-relational-reference']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_relational_bridge.js
+          node mathos/research/f038_rex_relational_bridge.js > /tmp/rex008.json
+          cmp /tmp/rex008.json docs/research/tga-universal/REX-008-bridge-evidence.json
+          python -m mathos.research.finite_relational_elimination
+          python -m mathos.research.validate_finite_relational_elimination /tmp/rex008.json | tee /tmp/validation.txt
+          grep -Fx 'REX_BRIDGE_OK cases=6' /tmp/validation.txt
+          grep -Fx 'FINITE_RELATIONAL_ELIMINATION_OK suites=8 pairs=256 orders=512 randomized=500' /tmp/validation.txt
+          python -m mathos.research.tga_f038_rex_008 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          from mathos.research.finite_relational_elimination import Solver, Factor
+          for r in (2,4,8,12):
+              s=Solver({'a':[0,1], **{f'b{i}':[0,1] for i in range(r)}},batch_size=3)
+              st=s.initial_state([Factor(('a',f'b{i}'),((0,0),(0,1),(1,0))) for i in range(r)])
+              _,trace=s.stage(st,'a')
+              assert trace.candidate_count==2**(r+1)
+              assert trace.joint_count==2**r+1
+              assert len(trace.outgoing_rows)==2**r
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_RELATIONAL_REFERENCE_PHYSICAL_LIFECYCLE_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_RELATIONAL_REFERENCE_GATE_OK status=OPEN promotion=NONE')
+          PY
