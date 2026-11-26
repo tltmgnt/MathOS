@@ -106,15 +106,16 @@ function audit(){
  for(let q of [4,8,16,32]){
   let m=q-1,max=0,count=0,loss=0,lower=Infinity;
   for(let c of tuples(m,3)){
-   let C=new Map();for(let a=1;a<q;a++){
-    let x=c.map(v=>v+1),k=key(x.map(v=>par(v&a)));if(!C.has(k))C.set(k,a);let b=C.get(k);
+   let C=new Map(),x=c.map(v=>v+1);for(let a=1;a<q;a++){
+    let k=x.includes(a)?"singleton:"+a:"fiber:"+key(x.map(v=>par(v&a)));if(!C.has(k))C.set(k,a);let b=C.get(k);
+    assert(x.every(v=>a===v||b!==v),"conditioned inequality preserved");
     assert(x.every(v=>par(a&v)===par(b&v)),"preserved fibers");
     for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)assert(par(a&(x[i]^x[j]))===par(b&(x[i]^x[j])),"preserved triples");
     if(a!==b){loss+=5*m;assert(b!==a,"positive binary loss");}count++;
    }max=Math.max(max,C.size);
   }
   for(let a=1;a<q;a++)for(let b=1;b<q;b++)if(a!==b){let n=0;for(let x=1;x<q;x++)n+=par(a&x)===0&&a!==x&&(par(b&x)!==0||b===x);lower=Math.min(lower,n);}
-  assert(max<=8&&lower>=q/4-1,"control bound");controls.push([q,max,count,loss,lower]);
+  assert(max<=11&&lower>=q/4-1,"control bound");controls.push([q,max,count,loss,lower]);
  }
  return {fixtures:16,total,forced,matrixChecks,greedyChecks,blockChecks,controls};
 }
