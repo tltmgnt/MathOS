@@ -1,0 +1,42 @@
+name: MRA-X certificate audit
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-certify.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-certify.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_certify.py --output certification-evidence.json
+      - name: Verify certificates and replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_certify as c
+          import mra_x_gap_agent as g
+          r=json.load(open('certification-evidence.json'))
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert len(r['rows'])==len(r['certificates'])==60
+          assert r['rejected_controls']==8
+          assert sum(x['inequalities'] for x in r['rows'])==49216
+          assert all(x['exact']<=x['baseline'] for x in r['rows'])
+          def stable(x):
+              x.pop('evidence_sha256',None)
+              for row in x['rows']:
+                  for k in ('certified_ns','verification_ns','baseline_ns'): row.pop(k)
+              return x
+          assert stable(r)==stable(c.audit())
+          PY
