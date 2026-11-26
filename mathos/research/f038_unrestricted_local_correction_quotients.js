@@ -126,6 +126,28 @@ function audit(){
   for(let a=0;a<m;a++)for(let x=0;x<m;x+=b)for(let y=0;y<m;y++){ok(Array.from({length:m},(_,b)=>raw(b,x,y)).some(Boolean),"full union");uniform++;}
   controls.push([m,b,j,traceChecks,maxTrace,minLoss,sums[0],uniform]);
  }
- return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls};
+ // Full overflow traversal: compare actual accepted original model sets against
+ // direct expanded guard, including models admitted only by abandonment.
+ let overflowModels=[];
+ for(let [X,b] of [[A,2],[B,4]]){
+  let got=new Set(),expected=new Set(),abandoned=0;
+  const original=z=>!F(z[0],z[4],z[5])&&z[6]!==z[7]&&z[3]!==z[8];
+  for(let z of tup(4,9))if(original(z)&&(X.E(z.slice(0,6))||X.belongs(z.slice(0,6))))expected.add(key(z));
+  function go(T,o,t){
+   if(T.overflow){for(let z of tup(t,9)){let x=z.map((a,i)=>a+o[i]);if(original(x)){got.add(key(x));abandoned++;}}return;}
+   if(!T.flag)return;if(t===1){if(original(o))got.add(key(o));return;}
+   for(let d of tup(2,9)){let u=t/2,idx=d.slice(0,6).reduce((v,x)=>2*v+x,0);go(T.ch[idx],o.map((a,i)=>a+d[i]*u),u);}
+  }
+  for(let q of tup(4/b,9))go(X.roots.get(key(q.slice(0,6))),q.map(a=>a*b),b);
+  ok(abandoned>0&&got.size===expected.size&&[...got].every(k=>expected.has(k)),"integrated overflow equality");
+  n.abandonedModels+=abandoned;overflowModels.push([b,got.size,abandoned]);
+ }
+ // Distinct global rows become equal on a free square and are interned again.
+ let before=n.mergedRows;
+ const G=(a,x,y)=>a===1?x===0&&y===0:a===2?(x===0&&y===0)||(x===3&&y===3):a===3?(x===0&&y===0)||(x===2&&y===3):false;
+ let L=make(4,G,get,center,1,2);
+ ok(n.mergedRows>before&&L.over.length===0,"local equality of distinct global rows");
+ let mergeControl=[n.mergedRows-before,L.R,L.mass];
+ return {n,overflow:[A.over.length,A.mass,B.over.length,B.mass,overflowWitness],controls,overflowModels,mergeControl};
 }
 console.log('F038_LOCAL_CORRECTION_QUOTIENTS_OK '+JSON.stringify(audit()));
