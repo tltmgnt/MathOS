@@ -1,0 +1,235 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-QUADRATIC-CENSUS",
+  "base_commit": "a6c82c4f1cf687efb4ebaa048c36d315d6496b70",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45751773081",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the existing actual quadratic-stage existence proof yield an unconditional exponential census with controlled witness multiplicity, rather than another conditional hardness transfer?",
+  "route": "negative",
+  "topology": "Equal-weight record classes, collision mass and Hamming-ball subtraction with exact clock-preserving crosses.",
+  "adversarial": [
+    "All parent clock and rejection-splice premises must be retained.",
+    "Equal weight is needed for both ordered crosses to be SAT.",
+    "Subtract near pairs in the full cube, not only a representative class.",
+    "Do not claim the known subcubic family proves B_3."
+  ],
+  "scope": "Actual unchanged U, exact quadratic stage on the prior unbounded subsequence n=11m, distinct selector census and multiplicity; no cubic extension.",
+  "cost": "Mathematical ordered-pair counting with prior exact clock and compressed rejection records; no efficient collision discovery assumed.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of exponential quadratic census and parent premises"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS compact trace execution, equal-weight partitions, exact ordered crossed output checks, synthetic mask partition census; not Python execution.",
+  "expected": {
+    "controls": 3,
+    "partitions": [
+      [
+        4,
+        16,
+        12,
+        24,
+        16,
+        8,
+        5,
+        8
+      ],
+      [
+        6,
+        64,
+        32,
+        160,
+        64,
+        96,
+        7,
+        96
+      ],
+      [
+        8,
+        256,
+        80,
+        1120,
+        1024,
+        96,
+        37,
+        192
+      ],
+      [
+        10,
+        1024,
+        192,
+        8064,
+        6144,
+        1920,
+        56,
+        3840
+      ],
+      [
+        12,
+        4096,
+        448,
+        59136,
+        34816,
+        24320,
+        299,
+        49920
+      ]
+    ],
+    "traces": [
+      [
+        1,
+        5832,
+        209952,
+        198124,
+        233608,
+        23656,
+        23656,
+        23656,
+        47312
+      ],
+      [
+        2,
+        256,
+        9216,
+        8572,
+        10504,
+        1288,
+        1288,
+        1288,
+        2576
+      ],
+      [
+        3,
+        256,
+        9216,
+        8471,
+        10706,
+        1490,
+        1490,
+        1490,
+        2980
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-QUADRATIC-CENSUS.md",
+    "mathos/research/f038_unrestricted_quadratic_census.py",
+    "mathos/research/f038_unrestricted_quadratic_stage.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Seek a genuinely new unrestricted asymptotic obstruction for cubic-stage failure or a general polynomial SAT cutoff; the quadratic family has a subcubic recovery algorithm.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the existing actual quadratic-stage existence proof yield an unconditional exponential census with controlled witness multiplicity, rather than another conditional hardness transfer?",
+      "strategy": "Refine the parent record partition by Hamming weight; count all far ordered collisions using Cauchy-Schwarz and a Hamming-ball bound.",
+      "alternative": "Use the exact free-variable count to lower-bound the number of witnesses on every retained crossed input.",
+      "stop_rule": "No unbounded cubic claim, efficient collision finder or lower bound for arbitrary SAT algorithms.",
+      "literature_leads": [
+        "Prior exact U quadratic-stage and crossing adversary notes; elementary Cauchy-Schwarz and binomial volume counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "At sufficiently large sizes on the prior subsequence at least 2^(57M/50) distinct B_2 selectors have more than (M/128)2^(m+5) models.",
+      "scope": "Actual unchanged U, exact quadratic stage on the prior unbounded subsequence n=11m, distinct selector census and multiplicity; no cubic extension.",
+      "derivation": "Strict parent average implies >=1/17 good cuts; partition a common cut by record and weight, subtract near pairs, splice both directions and count unique selectors.",
+      "unresolved_steps": [
+        "Unbounded cubic-stage failure or general cutoff."
+      ],
+      "candidate_tests": [
+        "Independent compact crossing replay and synthetic equal-weight partition checks."
+      ]
+    },
+    "alternative": {
+      "claim": "The unconditional exact B_2 census is at least 2^(L/2000) along the parent subsequence.",
+      "scope": "Actual unchanged U, exact quadratic stage on the prior unbounded subsequence n=11m, distinct selector census and multiplicity; no cubic extension.",
+      "derivation": "Use M/L limit and count all distinct ordered crosses; each surviving index uniquely forces nonfree bits.",
+      "unresolved_steps": [
+        "No efficient discovery or same-family cubic failure."
+      ],
+      "candidate_tests": [
+        "Exact rational geometry and integer Hamming-volume bound, actual layout free-bit controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "All parent clock and rejection-splice premises must be retained.",
+        "Equal weight is needed for both ordered crosses to be SAT.",
+        "Subtract near pairs in the full cube, not only a representative class.",
+        "Do not claim the known subcubic family proves B_3."
+      ],
+      "counterexample_candidates": [
+        "A large collision class need not contain adjacent masks.",
+        "Higher stages solve the family eventually."
+      ],
+      "equivalence_audit": "Same exact U and prior input layout, unchanged clocks, injective forbidden masks and verified model multiplicity.",
+      "barrier_audit": "Quantitative quadratic theorem only; no new exponent.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original general one-tape weighted stage; mathematical counting, not uncharged execution.",
+      "cost_ledger": {
+        "encoding": "Actual normalized full selector with two separated forbidden sets and fixed pins",
+        "preprocessing": "Parent fixed common pin selection and rejection records",
+        "inference": "Cauchy-Schwarz collision mass, Hamming ball subtraction and exact splicing",
+        "repetitions": "All complementary masks and ordered pairs counted symbolically",
+        "arithmetic_bits": "Exact integer inequalities and asymptotic rational constants",
+        "memory": "No efficient collision discovery claim",
+        "reconstruction": "Surviving one-hot indices and free extensions; exact model multiplicity",
+        "overall": "Mathematical ordered-pair counting with prior exact clock and compressed rejection records; no efficient collision discovery assumed."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bound",
+        "Independent proof review and Lean formalization"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Parent strict average and good cut count",
+        "Equal-weight far collision counting and injection",
+        "Exact model count and exponent slack",
+        "Independent small trace replay"
+      ],
+      "unsupported_steps": [
+        "Parent premises not independently formally verified; new CI pending.",
+        "No actual large collision located."
+      ],
+      "proof_obligations": [
+        "Review inherited splice lemma and asymptotic bounds",
+        "Replay finite counts and free-bit controls"
+      ],
+      "formalization_plan": "Formalize record-class pair counting, Hamming ball bound, equal-weight splice and model multiplicity.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Strengthen unconditional actual quadratic-stage failure from existence to an exponential census, with explicit model multiplicity.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Seek a genuinely new unrestricted asymptotic obstruction for cubic-stage failure or a general polynomial SAT cutoff; the quadratic family has a subcubic recovery algorithm.",
+      "human_review_requests": [
+        "Review inherited crossing premises, far-pair count and free variables."
+      ]
+    }
+  }
+}
