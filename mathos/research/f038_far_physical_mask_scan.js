@@ -98,6 +98,16 @@ function audit(){
   let stream=Array.from({length:n},(_,i)=>String((i*13+i*i+Math.floor(i/7))%2)).join(""),mask=Array.from({length:k},(_,i)=>String(+(i%3===0))).join("");
   let r=run(stream,mask);scaling.push([n,k,n-k+1,r.steps,r.logical,r.span]);
  }
- return {states:q,descriptionBits:desc.length,blockWidth:width,alphabet:symbols.length,tests,transitions,windows,cutoffs,scaling};
+ // Exact table validation, including all states, raw symbols, moves and destinations.
+ let left=0,stay=0,right=0;
+ for(let [a,w,d] of T){ok(Number.isInteger(a)&&a>=0&&a<=q&&[0,1,2].includes(w)&&[-1,0,1].includes(d),"transition range");if(d<0)left++;else if(d===0)stay++;else right++;}
+ // Adversarial final alignment and internal blank physical cells: all-zero,
+ // all-one, alternating masks, maximal window, and single-position window.
+ let edge=[];
+ for(let [n,k] of [[17,1],[17,17],[33,16],[65,32]])for(let mode=0;mode<3;mode++){
+  let stream=Array.from({length:n},(_,i)=>String(mode===0?0:mode===1?1:i%2)).join(""),mask=Array.from({length:k},(_,i)=>String(mode===0?1:mode===1?0:(i+1)%2)).join("");
+  let r=run(stream,mask);ok(!run(stream,mask,r.steps-1).halt,"edge exact clock");edge.push([n,k,mode,r.steps,r.outputs.split("1").length-1]);
+ }
+ return {states:q,descriptionBits:desc.length,blockWidth:width,alphabet:symbols.length,tests,transitions,windows,cutoffs,scaling,table:[left,stay,right],edge};
 }
 if(process.argv.includes('--description')) console.log(compile().desc); else console.log('F038_FAR_PHYSICAL_MASK_SCAN_OK '+JSON.stringify(audit()));
