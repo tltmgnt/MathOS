@@ -200,9 +200,35 @@ function audit(){
   let r=check(f,q,false);scaling.push([n,encode(f,q).length,r.t,r.logical,r.span,r.ph]);
  }
  let pos=3;while(M.desc[pos]==="1")pos++;
- ok(pos-3===M.q&&M.desc[pos++]==="0","header");const b=M.q.toString(2).length;
- for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos-3===M.q&&M.desc[pos++]==="0","header");const b=M.q.toString(2).length,decoded=[];
+ for(let [s,w,d] of M.T){let row=[parseInt(M.desc.slice(pos,pos+b),2),parseInt(M.desc.slice(pos+b,pos+b+2),2),parseInt(M.desc.slice(pos+b+2,pos+b+4),2)-1];ok(row[0]===s&&row[1]===w&&row[2]===d,"descriptor");decoded.push(row);pos+=b+4;}
  ok(pos===M.desc.length,"descriptor length");
- return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,unsortedCounterexample:true};
+ // Independently parse all short raw strings, including malformed grammar.
+ let grammar={cases:0,valid:0,rejected:0,transitions:0};
+ function parse(raw){
+  let f=[],q=[],side=f,k="",sep=false;
+  if(raw.length%2)return null;
+  for(let i=0;i<raw.length;i+=2){
+   let t=raw.slice(i,i+2);
+   if(t[0]==="0")k+=t[1];
+   else if(t==="10"){side.push(k);k="";}
+   else {if(sep||k)return null;sep=true;side=q;}
+  }
+  return sep&&!k?{f,q}:null;
+ }
+ for(let n=0;n<=6;n++)for(let i=0;i<2**n;i++){
+  let raw=n?i.toString(2).padStart(n,"0"):"",r=physicalRun(M,raw),p=parse(raw);
+  ok(r.state===M.q,"short halt");grammar.cases++;grammar.transitions+=r.t;
+  if(!p){ok(!r.tape.has(r.head),"short invalid");grammar.rejected++;}
+  else {let want=p.q.map(k=>+p.f.includes(k));ok(r.tape.size===want.length&&want.every((v,i)=>r.tape.get(r.head+i)===v),"short valid");grammar.valid++;}
+ }
+ let U={selectorInputs:0,noCandidate:0};
+ for(let n of [1,2])for(let p=0;p<2**(n===1?2:8);p++){
+  let raw="1".repeat(n)+"0"+Array.from({length:n===1?2:8},(_,i)=>(p>>i)&1).join(""),tape=new Map([...raw].map((v,i)=>[i,+v])),state=0,head=0;
+  for(let i=0;i<10000&&state!==M.q;i++){let [a,w,d]=decoded[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);state=a;head+=d;}
+  ok(state===M.q&&!tape.has(head),"selector contract blank");U.selectorInputs++;U.noCandidate++;
+ }
+ let uq=physicalRun(M,encode(["0"],["1","0"]));ok(uq.state===M.q&&uq.tape.get(uq.head)===0&&uq.tape.get(uq.head+1)===0,"unsorted query control");
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,grammar,U,unsortedCounterexample:true,unsortedQueryCounterexample:true};
 }
 if(process.argv.includes('--description')){let j=joinWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_FACTOR_MEMBERSHIP_OK '+JSON.stringify(audit()));
