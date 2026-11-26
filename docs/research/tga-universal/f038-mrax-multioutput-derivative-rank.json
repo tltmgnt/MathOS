@@ -1,0 +1,224 @@
+{
+  "attempt_id": "F038-MRAX-MULTIOUTPUT-DERIVATIVE-RANK",
+  "base_commit": "07cce6d4a5bf8c876cc16c3d941459a2c4fec941",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45731282868",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can multi-output affine-AND normal form give a physical gate lower bound beyond affine-cover enumeration, and transfer it to one SAT output?",
+  "route": "negative",
+  "topology": "Degree filtration of Boolean function space, commuting coordinate differences and shared multi-output gate spans.",
+  "adversarial": [
+    "Output count grows exponentially.",
+    "Rank-zero does not force initial degree-building gates.",
+    "Affine operation cost is excluded from MC and must be separately charged for an upper bound on total size.",
+    "Formal derivative and Boolean finite difference differ; multilinearization may be costly."
+  ],
+  "scope": "Boolean multilinear ring, multiple explicitly available output wires, affine operations free and shared binary AND gates.",
+  "cost": "Exact MC=2^N-N-1 for complete derivative batch; single-output transfer only weak bound, affine costs separate",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of degree-filtered rank and exact derivative-batch complexity"
+    },
+    {
+      "key": "attempt_single_output_transfer",
+      "label": "Resource-charged single-output structural transfer or gate-elimination bound"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JavaScript truth-table rank modulo monomials, derivative replay and exhaustive product pairs; not execution of Python.",
+  "expected": {
+    "ranks": [
+      [
+        2,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      [
+        3,
+        128,
+        256,
+        640,
+        768,
+        512
+      ],
+      [
+        4,
+        256,
+        768,
+        4352,
+        5120,
+        2816
+      ]
+    ],
+    "products": [
+      [
+        1,
+        16,
+        32,
+        8,
+        8,
+        12
+      ],
+      [
+        2,
+        256,
+        2048,
+        512,
+        512,
+        768
+      ],
+      [
+        3,
+        65536,
+        1572864,
+        393216,
+        393216,
+        589824
+      ]
+    ],
+    "selector": [
+      [
+        1,
+        2,
+        4,
+        4,
+        [
+          1
+        ]
+      ],
+      [
+        2,
+        8,
+        256,
+        256,
+        [
+          1,
+          9,
+          37,
+          93,
+          163,
+          219,
+          247
+        ]
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_multioutput_derivative_rank.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-MULTIOUTPUT-DERIVATIVE-RANK.md"
+  ],
+  "next": "Investigate a resource-charged programmable single-output restriction evaluator or direct gate elimination, not explicit output-count amplification.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can multi-output affine-AND normal form give a physical gate lower bound beyond affine-cover enumeration, and transfer it to one SAT output?",
+      "strategy": "Use degree-filtered rank of output functions modulo low-degree polynomials; apply to Boolean finite differences.",
+      "alternative": "Charge simultaneous derivative compilation and check failure of ordinary differentiation in the Boolean ring.",
+      "stop_rule": "Do not treat explicitly many outputs or free multilinearization as a single-output circuit lower bound.",
+      "literature_leads": [
+        "Prior MathOS selector-degree symmetry and affine-selector rigidity; elementary Boolean ring and GF(2) rank. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Positive degree-filtered output rank rho_d forces at least d-2+rho_d AND gates; full-degree derivative batches have exact exponential MC at order N-2.",
+      "scope": "Boolean multilinear ring, multiple explicitly available output wires, affine operations free and shared binary AND gates.",
+      "derivation": "First d-2 nonlinear gate outputs have low degree; quotient rank charges remaining gates; distinct derivative top monomials establish rank; construct all monomials for exact upper bound.",
+      "unresolved_steps": [
+        "A noncircular lower bound for the original single-output SAT selector."
+      ],
+      "candidate_tests": [
+        "Exhaust small full-degree functions, filtered ranks and monomial reconstruction; actual universal selector derivative bases."
+      ]
+    },
+    "alternative": {
+      "claim": "Shift-copy derivative compilation costs t_r times single-output AND count; ordinary formal product differentiation is invalid on Boolean functions and explicit batches can force exponential overhead even for AND_N.",
+      "scope": "Finite differences on GF(2) Boolean cube; explicit output batch versus programmable single output.",
+      "derivation": "XOR shifted evaluations; expansion has extra cross term; AND_N gives exact exponential multi-output complexity and linear single-output complexity.",
+      "unresolved_steps": [
+        "Efficient programmable derivative evaluation transfer or single-output gate elimination."
+      ],
+      "candidate_tests": [
+        "All small Boolean product pairs and every coordinate difference; AND and rank-zero controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Output count grows exponentially.",
+        "Rank-zero does not force initial degree-building gates.",
+        "Affine operation cost is excluded from MC and must be separately charged for an upper bound on total size.",
+        "Formal derivative and Boolean finite difference differ; multilinearization may be costly."
+      ],
+      "counterexample_candidates": [
+        "u=v=x_i defeats ordinary Leibniz rule; AND_N has linear single-output MC and exponential explicit derivative batch MC."
+      ],
+      "equivalence_audit": "Exact filtered-rank inequality with positive-rank premise, full derivative basis and exact AND-count construction; distinct explicit-output and programmable models.",
+      "barrier_audit": "No unrestricted single-output SAT runtime or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Boolean multilinear ring over GF(2), shared AND gates with affine operations free; total binary gates charged separately.",
+      "cost_ledger": {
+        "encoding": "Explicit N-bit selector inputs and output derivative index family",
+        "preprocessing": "Normalize binary gates into affine-AND form; symbolic proof not an efficient truth-table expansion",
+        "inference": "Degree-filtered quotient rank and finite-difference leading monomials",
+        "repetitions": "t_r shifted copies for generic batch compiler; exponential finite rank enumeration",
+        "arithmetic_bits": "Exact GF2 coefficient and rank operations; count explicit vector labels",
+        "memory": "Exponential explicit output batch and monomial tables; no compact evaluator assumed",
+        "reconstruction": "Actual AND monomial DAG plus affine output combinations; shifted evaluation XORs",
+        "overall": "Exact MC=2^N-N-1 for complete derivative batch; single-output transfer only weak bound, affine costs separate"
+      },
+      "missing_bounds": [
+        "Single-output superpolynomial circuit lower bound",
+        "Resource-preserving programmable evaluation or gate-elimination theorem"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Degree-filtered rank bound",
+        "Derivative basis and exact multiplicative complexity",
+        "Shift-copy transfer and product-rule counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No efficient simultaneous derivative compiler or unrestricted circuit minimizer."
+      ],
+      "proof_obligations": [
+        "Replay finite derivative bases and degree-filtered ranks",
+        "Construct and replay monomial AND DAG",
+        "Check Boolean product rule and malformed dimensions"
+      ],
+      "formalization_plan": "Formalize Boolean ring normal form, degree prefix lemma, quotient rank, derivative monomials and explicit monomial circuit.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Derive a directly charged nonlinear gate invariant and exact exponential multi-output complexity; identify why explicit derivative expansion cannot amplify single-output hardness.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Single-output gate-sensitive transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate a resource-charged programmable single-output restriction evaluator or direct gate elimination, not explicit output-count amplification.",
+      "human_review_requests": [
+        "Review degree filtration, rank-positive premise, exact MC model and Boolean derivative transfer costs."
+      ]
+    }
+  }
+}
