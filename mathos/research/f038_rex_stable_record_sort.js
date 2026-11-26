@@ -155,7 +155,73 @@ function sortWorker(){
 }
 function encode(records){return records.map(([k,p])=>[...k].map(b=>"0"+b).join("")+"10"+[...p].map(b=>"0"+b).join("")+"11").join("");}
 function logicalRun(J,raw,limit=1000000){
- const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0;
- while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(state==="makeE")passes++;if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
- return {state,head,steps,moves,passes,span:hi-lo+1,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
+ const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[];
+ while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
+ return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
 }
+
+function physicalRun(M,raw,limit=50000000){
+ let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0;
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [s,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=s;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }
+ return {tape,head,state,t,span:hi-lo+1,ph,logical};
+}
+function audit(){
+ const J=sortWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)};
+ let counts={cases:0,records:0,rawBits:0,transitions:0,logical:0,passes:0,suffixChecks:0,cutoffs:0,malformed:0,malformedTransitions:0};
+ let cmp=(a,b)=>a<b?-1:a>b?1:0;
+ function check(rows,record=true){
+  let raw=encode(rows),N=raw.length,w=M.width,want=encode(rows.slice().sort((a,b)=>cmp(a[0],b[0]))),r=physicalRun(M,raw),ref=logicalRun(J,raw,5000000);
+  ok(r.state===M.q&&r.tape.size===want.length&&[...want].every((v,i)=>r.tape.get(r.head+i)===+v)&&(want.length||!r.tape.has(r.head)),"sort "+JSON.stringify({rows,head:r.head,t:r.t,ref:ref.trace}));
+  ok(ref.state==="ready"&&ref.out===want&&ref.steps===r.logical,"logical reference");
+  let k=rows.length?rows[0][0].length:0;
+  ok(ref.passes===k&&ref.snapshots.length===k,"pass count");
+  for(let j=1;j<=k;j++){
+   let expected=encode(rows.slice().sort((a,b)=>cmp(a[0].slice(-j),b[0].slice(-j))));
+   ok(ref.snapshots[j-1]===expected,"stable suffix pass");
+  }
+  let prep=N?(w+1)*N*(N+1)+(w+4)*N+3:1;
+  let serial=N?(w+1)*N*N+(3*w+6)*N+2*w+5:1;
+  let mid=(3*w-2)*ref.moves+(2*w-1)*(ref.steps-ref.moves);
+  ok(JSON.stringify(r.ph)===JSON.stringify([prep,mid,serial]),"phase "+JSON.stringify({N,r:r.ph,expected:[prep,mid,serial]}));
+  ok(r.head===(N?-(w+1)*N-2:0),"head");
+  ok(r.span===(N?(2*w+1)*N+2*w+2:w),"span "+JSON.stringify({N,span:r.span}));
+  if(record){counts.cases++;counts.records+=rows.length;counts.rawBits+=N;counts.transitions+=r.t;counts.logical+=r.logical;counts.passes+=k;counts.suffixChecks+=k;}
+  return r;
+ }
+ let cases=[[],[["0",""]],[["1","10"],["0","1"],["1","0"]],[["11",""],["00","1"],["10","0"],["01","11"]],[["1",""],["1","0"],["1","01"],["1","1"]]];
+ for(let rows of cases){let r=check(rows);ok(physicalRun(M,encode(rows),r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+ // Exhaust every ordered sequence of up to four one-bit keys and up to three
+ // two-bit keys, with distinct payload IDs, verifying duplicate-key stability.
+ for(let k of [1,2])for(let n=1;n<=(k===1?4:3);n++)for(let j=0;j<2**(k*n);j++){
+  let word=j.toString(2).padStart(k*n,"0"),rows=Array.from({length:n},(_,i)=>[word.slice(k*i,k*(i+1)),i.toString(2)]);
+  check(rows);
+ }
+ // Seeded variable-size payloads, multi-bit keys and long common prefixes.
+ let seed=0x52455804;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let j=0;j<12;j++){
+  let k=3+j%3,n=2+j%4,rows=Array.from({length:n},()=>[(rand()%2**k).toString(2).padStart(k,"0"),(rand()%16).toString(2)]);
+  check(rows);
+ }
+ check([["000000000001","101"],["000000000000","0"],["000000000001","11"]]);
+ // Distinct key widths, empty key, malformed token stream or incomplete record.
+ for(let raw of ["0","00","10","11","0010","0010110","001010","001001","00101111",encode([["0",""],["00",""]]),encode([["11","1"],["1","0"]]),encode([["00",""],["00",""],["1",""]])]){
+  let r=physicalRun(M,raw,2000000),ref=logicalRun(J,raw);
+  ok(r.state===M.q&&!r.tape.has(r.head)&&ref.state==="reject","reject "+raw);counts.malformed++;counts.malformedTransitions+=r.t;
+ }
+ let scaling=[];
+ for(let n of [4,8,16]){
+  let k=Math.ceil(Math.log2(n)),rows=Array.from({length:n},(_,i)=>[(n-1-i).toString(2).padStart(k,"0"),i.toString(2).padStart(k,"0")]);
+  let r=check(rows,false);scaling.push([n,k,encode(rows).length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;
+ ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"length");
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling};
+}
+if(process.argv.includes('--description')){let j=sortWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_STABLE_RECORD_SORT_OK '+JSON.stringify(audit()));
