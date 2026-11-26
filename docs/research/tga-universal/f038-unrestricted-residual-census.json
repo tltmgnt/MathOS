@@ -1,0 +1,520 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-RESIDUAL-CENSUS",
+  "base_commit": "8c18a1b861c7ad1c5997c0518d650e8a6d5f6de0",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45736972330",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can actual cubic-stage calls support a total polynomial witness finder through bounded self-reduction, or force a quantitative residual census when a stronger stage fails?",
+  "route": "negative",
+  "topology": "Guarded prefix pair queries, bounded witness frontier and disjoint residual stars across exact U stages.",
+  "adversarial": [
+    "Failed stage queries may be UNSAT; only the lost satisfying pivot gives a common witness.",
+    "K is existential and may exceed known exponents.",
+    "The inequality cannot be reversed.",
+    "Large B_k at one exponent does not rule out a later polynomial cutoff."
+  ],
+  "scope": "Same U, explicit normalized selector pool and exact stage clocks; arbitrary original source formulas; fixed k,d with one fresh disjunction variable.",
+  "cost": "At most n L^(2d) stage calls, polynomial total bit cost for fixed k,d, no unconditional success guarantee; existential uniform K absorbs simulation.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of residual census and witness-star transfer"
+    },
+    {
+      "key": "attempt_cubic_census",
+      "label": "Prove actual higher-stage bad witnesses or a universal polynomial local census"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS guarded clause evaluation, exact short built-in outcomes and bounded-frontier reference; not execution of Python.",
+  "expected": {
+    "encoding": [
+      3584,
+      28672,
+      1024,
+      27648,
+      3584
+    ],
+    "frontier": [
+      [
+        0,
+        1,
+        256,
+        95,
+        32,
+        63,
+        512,
+        0,
+        512,
+        88,
+        70
+      ],
+      [
+        0,
+        2,
+        256,
+        95,
+        56,
+        39,
+        1024,
+        0,
+        512,
+        64,
+        44
+      ],
+      [
+        0,
+        3,
+        256,
+        95,
+        78,
+        17,
+        768,
+        0,
+        256,
+        32,
+        17
+      ],
+      [
+        0,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        256,
+        95,
+        60,
+        35,
+        480,
+        32,
+        448,
+        48,
+        36
+      ],
+      [
+        1,
+        2,
+        256,
+        95,
+        78,
+        17,
+        928,
+        32,
+        448,
+        24,
+        17
+      ],
+      [
+        1,
+        3,
+        256,
+        95,
+        95,
+        0,
+        704,
+        32,
+        224,
+        0,
+        0
+      ],
+      [
+        1,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        1,
+        256,
+        95,
+        78,
+        17,
+        480,
+        56,
+        424,
+        24,
+        17
+      ],
+      [
+        2,
+        2,
+        256,
+        95,
+        78,
+        17,
+        928,
+        32,
+        448,
+        24,
+        17
+      ],
+      [
+        2,
+        3,
+        256,
+        95,
+        95,
+        0,
+        704,
+        32,
+        224,
+        0,
+        0
+      ],
+      [
+        2,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        1,
+        256,
+        95,
+        78,
+        17,
+        480,
+        56,
+        424,
+        24,
+        17
+      ],
+      [
+        3,
+        2,
+        256,
+        95,
+        78,
+        17,
+        928,
+        32,
+        448,
+        24,
+        17
+      ],
+      [
+        3,
+        3,
+        256,
+        95,
+        95,
+        0,
+        704,
+        32,
+        224,
+        0,
+        0
+      ],
+      [
+        3,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        1,
+        256,
+        95,
+        95,
+        0,
+        456,
+        78,
+        378,
+        0,
+        0
+      ],
+      [
+        4,
+        2,
+        256,
+        95,
+        95,
+        0,
+        904,
+        56,
+        424,
+        0,
+        0
+      ],
+      [
+        4,
+        3,
+        256,
+        95,
+        95,
+        0,
+        704,
+        32,
+        224,
+        0,
+        0
+      ],
+      [
+        4,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        1,
+        256,
+        95,
+        95,
+        0,
+        456,
+        78,
+        378,
+        0,
+        0
+      ],
+      [
+        5,
+        2,
+        256,
+        95,
+        95,
+        0,
+        904,
+        56,
+        424,
+        0,
+        0
+      ],
+      [
+        5,
+        3,
+        256,
+        95,
+        95,
+        0,
+        704,
+        32,
+        224,
+        0,
+        0
+      ],
+      [
+        5,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        1,
+        256,
+        95,
+        95,
+        0,
+        417,
+        95,
+        322,
+        0,
+        0
+      ],
+      [
+        6,
+        2,
+        256,
+        95,
+        95,
+        0,
+        812,
+        95,
+        339,
+        0,
+        0
+      ],
+      [
+        6,
+        3,
+        256,
+        95,
+        95,
+        0,
+        634,
+        95,
+        161,
+        0,
+        0
+      ],
+      [
+        6,
+        4,
+        256,
+        95,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_residual_census.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-RESIDUAL-CENSUS.md"
+  ],
+  "next": "Investigate the cubic-stage local residual census or a direct resource-preserving adversarial construction at higher exponents; do not reverse the census implication.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can actual cubic-stage calls support a total polynomial witness finder through bounded self-reduction, or force a quantitative residual census when a stronger stage fails?",
+      "strategy": "Injective guarded-prefix disjunctions and bounded-frontier search using exact stage-k witness calls.",
+      "alternative": "Derive residual census amplification and a conditional polynomial decision route without assuming sparse hardness.",
+      "stop_rule": "No false UNSAT conclusion on FAIL, no reversed exponent transfer, no claim of cubic counterexamples.",
+      "literature_leads": [
+        "Prior residual B_k and universal search equivalence; classical SAT self-reducibility and sparse-hardness style pruning. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For every fixed k,d some K>=k satisfies |B_k(n+1)|>=L(n)^d |B_K(n)| at every n, with common-witness stars recoverable given a source model.",
+      "scope": "Same U, explicit normalized selector pool and exact stage clocks; arbitrary original source formulas; fixed k,d with one fresh disjunction variable.",
+      "derivation": "Injective one-switch pair queries, bounded frontier, first deletion of any satisfying model prefix, charged polynomial simulation into U at K.",
+      "unresolved_steps": [
+        "Existence of B_K for all exponents, or a polynomial local census."
+      ],
+      "candidate_tests": [
+        "All ordered prefix pairs and all small assignments; actual parent stage calls and loss-star replay."
+      ]
+    },
+    "alternative": {
+      "claim": "A polynomial global census or polynomial local satisfiable-pivot star bound for some B_k implies P=NP; under P!=NP every fixed B_k has superpolynomial census along lengths.",
+      "scope": "Same U, explicit normalized selector pool and exact stage clocks; arbitrary original source formulas; fixed k,d with one fresh disjunction variable.",
+      "derivation": "Choose cap above polynomial bound and absorb finite lengths; alternatively use unbounded B_K and the quantitative transfer.",
+      "unresolved_steps": [
+        "Neither a universal polynomial census nor an unconditional higher-stage failure theorem is supplied."
+      ],
+      "candidate_tests": [
+        "Finite frontier losses and fallback success controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Failed stage queries may be UNSAT; only the lost satisfying pivot gives a common witness.",
+        "K is existential and may exceed known exponents.",
+        "The inequality cannot be reversed.",
+        "Large B_k at one exponent does not rule out a later polynomial cutoff."
+      ],
+      "counterexample_candidates": [
+        "Small stage zero loses satisfiable prefixes at cap one; exhaustive fallback has no such failures."
+      ],
+      "equivalence_audit": "Actual selector order, one fresh switch, exact pair projection and injection, all calls charged, same-U fixed program simulation and failure direction.",
+      "barrier_audit": "No cubic-stage or all-exponent lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Same U stage, explicit selectors, deterministic bounded frontier and verified witnesses.",
+      "cost_ledger": {
+        "encoding": "Original pool plus one switch, explicit n+1 selector encoding",
+        "preprocessing": "Polynomial pool indexing and guarded query construction",
+        "inference": "Expand prefixes, test b pairs with actual stage and delete pivot only as a lossy search operation",
+        "repetitions": "At most n b^2 calls, b=L^d for fixed d",
+        "arithmetic_bits": "Charge selector indices, bitmasks, stage clocks and counters",
+        "memory": "Polynomial bounded prefix list, explicit query and optional deletion logs",
+        "reconstruction": "Drop switch from verified query witness; recover loss star given original witness",
+        "overall": "At most n L^(2d) stage calls, polynomial total bit cost for fixed k,d, no unconditional success guarantee; existential uniform K absorbs simulation."
+      },
+      "missing_bounds": [
+        "Unconditional all-exponent bad instances or a global polynomial cutoff",
+        "Explicit numerical K and verified general machine compiler not supplied"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact disjunction and injectivity",
+        "Bounded search and loss-star theorem",
+        "Quantified same-U census transfer",
+        "Conditional polynomial census criterion"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No actual unbounded cubic-stage witness or polynomial census established."
+      ],
+      "proof_obligations": [
+        "Replay actual parent stages and guarded assignments",
+        "Recover a star for every lost witness",
+        "Check exponent transfer direction and simulation scope"
+      ],
+      "formalization_plan": "Formalize guarded query normalization, frontier preservation until deletion, star injectivity and fixed machine simulation bound.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Link different exponents of the exact unrestricted residual family by a quantitative witness-preserving transfer and a direct conditional positive route.",
+      "remaining_gaps": [
+        "Unrestricted cubic and all higher exponents",
+        "Universal polynomial census or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Investigate the cubic-stage local residual census or a direct resource-preserving adversarial construction at higher exponents; do not reverse the census implication.",
+      "human_review_requests": [
+        "Review exact query bound, injection, loss-star certificate, fixed program simulation and census quantifiers."
+      ]
+    }
+  }
+}

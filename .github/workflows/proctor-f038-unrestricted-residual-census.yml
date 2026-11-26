@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted residual census
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-residual-census']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_residual_census.py
+          python -m mathos.research.f038_unrestricted_symbolic_counterexamples | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_SYMBOLIC_OK {"controls":5,"programs":[[1,192,24960,7552,956,15432,17408],[2,192,24960,6374,834,11245,18586],[3,192,24960,4188,538,7340,20772]],"stages":[[1,0,4,0,3,4,4],[1,1,4,2,1,4,1],[1,2,4,3,0,4,0],[1,3,4,3,0,4,0],[1,4,4,3,0,4,0],[1,5,4,3,0,4,0],[1,6,4,3,0,4,0],[2,0,256,0,95,128,128],[2,1,256,32,63,128,76],[2,2,256,78,17,128,17],[2,3,256,78,17,128,17],[2,4,256,95,0,128,0],[2,5,256,95,0,128,0],[2,6,256,95,0,128,0]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_residual_census | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_CENSUS_OK {"controls":5,"encoding":[3584,28672,1024,27648,3584],"frontier":[[0,1,256,95,32,63,512,0,512,88,70],[0,2,256,95,56,39,1024,0,512,64,44],[0,3,256,95,78,17,768,0,256,32,17],[0,4,256,95,95,0,0,0,0,0,0],[1,1,256,95,60,35,480,32,448,48,36],[1,2,256,95,78,17,928,32,448,24,17],[1,3,256,95,95,0,704,32,224,0,0],[1,4,256,95,95,0,0,0,0,0,0],[2,1,256,95,78,17,480,56,424,24,17],[2,2,256,95,78,17,928,32,448,24,17],[2,3,256,95,95,0,704,32,224,0,0],[2,4,256,95,95,0,0,0,0,0,0],[3,1,256,95,78,17,480,56,424,24,17],[3,2,256,95,78,17,928,32,448,24,17],[3,3,256,95,95,0,704,32,224,0,0],[3,4,256,95,95,0,0,0,0,0,0],[4,1,256,95,95,0,456,78,378,0,0],[4,2,256,95,95,0,904,56,424,0,0],[4,3,256,95,95,0,704,32,224,0,0],[4,4,256,95,95,0,0,0,0,0,0],[5,1,256,95,95,0,456,78,378,0,0],[5,2,256,95,95,0,904,56,424,0,0],[5,3,256,95,95,0,704,32,224,0,0],[5,4,256,95,95,0,0,0,0,0,0],[6,1,256,95,95,0,417,95,322,0,0],[6,2,256,95,95,0,812,95,339,0,0],[6,3,256,95,95,0,634,95,161,0,0],[6,4,256,95,95,0,0,0,0,0,0]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_CENSUS_GATE_OK status=OPEN')
+          PY
