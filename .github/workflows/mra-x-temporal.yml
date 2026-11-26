@@ -1,0 +1,41 @@
+name: MRA-X temporal learning
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-temporal.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_temporal.py --output temporal-evidence.json --model temporal-model.json
+      - name: Replay deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import mra_x_temporal as t
+          import mra_x_gap_agent as g
+          r=json.load(open('temporal-evidence.json'))
+          model=json.load(open('temporal-model.json'))
+          assert g.digest(model['model'])==model['sha256']==r['model_sha256']
+          assert r['checks']==876 and r['controls']==5
+          assert r['training_comparisons']==56 and len(r['rows'])==18
+          assert all(len(b['learned'])==len(b['baseline'])==10 for b in r['rows'])
+          def stable(x):
+              h=x.pop('evidence_sha256')
+              assert g.digest(x)==h
+              for k in ('performance','geomean_ratio','worst_ratio','decision'): x.pop(k)
+              return x
+          assert stable(r)==stable(t.audit(Path('replay-model.json')))
+          PY

@@ -1,0 +1,44 @@
+name: MRA-X compact proof verification
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-compact.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-compact.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_compact_audit.py --directory compact-audit
+      - run: python3 tools/mra_x_compact_audit.py --directory compact-replay
+      - name: Check deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import mra_x_archive as a
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              r.pop('timings')
+              return r
+          r=stable('compact-audit/evidence.json')
+          assert r==stable('compact-replay/evidence.json')
+          assert len(r['rows'])==6 and r['controls']==15
+          expected={'states':72,'feasible':66,'full_visits':25524,'fresh_visits':8510,'hits':1736,'buckets':2592,'seek_states':276,'seek_visits':48564,'prefix_visits':62908,'compact_bytes':268921,'index_bytes':6257,'legacy_bytes':721134}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          for p in Path('compact-audit').glob('*'):
+              if p.name!='evidence.json':
+                  assert p.read_bytes()==(Path('compact-replay')/p.name).read_bytes()
+          PY

@@ -1,0 +1,38 @@
+name: MRA-X compositional verification
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-compose.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-compose.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install -y libz3-4
+      - run: python3 tools/mra_x_compose.py --output compose-evidence.json
+      - name: Replay certificates
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_compose as c
+          import mra_x_gap_agent as g
+          r=json.load(open('compose-evidence.json'))
+          assert r==c.audit()
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert len(r['rows'])==115 and r['global_queries']==71 and r['controls']==9
+          assert len(r['lemmas'])==3 and all(x['result']=='unsat' for x in r['lemmas'])
+          expected={'queries':370,'hits':637,'attainment':1594,'buckets':1007,'feasible':48}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          PY

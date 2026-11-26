@@ -1,0 +1,45 @@
+name: MRA-X predictive proof economics
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-proofeconomics.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_proofeconomics_audit.py --model frozen-model.json --directory economics-audit
+      - run: python3 tools/mra_x_proofeconomics_audit.py --model frozen-model.json --directory economics-replay
+      - name: Check correctness and frozen decision replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_boundproof as p
+          training=json.load(open('frozen-model.json'))
+          assert len(training['model']['rows'])==72 and len(training['calibration'])==36
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert p.digest(r)==h
+              assert r['model_sha256']==p.digest(training)
+              r.pop('timings')
+              return r
+          r=stable('economics-audit/evidence.json')
+          assert r==stable('economics-replay/evidence.json')
+          assert len(r['rows'])==180 and len(r['controls'])==7
+          assert len({x['name'] for x in r['rows']})==36
+          assert sum(x['methods']['elimination']['receipt']['optimum'] is not None for x in r['rows'])==140
+          for x in r['rows']:
+              a=x['methods']['elimination']['receipt']
+              assert all(m['receipt']['optimum']==a['optimum'] and m['receipt']['problem_sha256']==a['problem_sha256'] for m in x['methods'].values())
+          PY

@@ -1,0 +1,47 @@
+name: MRA-X unified verified system
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-system.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_system_audit.py --directory system-audit
+      - run: python3 tools/mra_x_system_audit.py --directory system-replay
+      - name: Check deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              for key in ('timings','geomean','worst','decisions','physical_ratio'): r.pop(key)
+              for stream in r['rows']:
+                  # SQLite page sizes can differ between environments.
+                  for row in stream['methods'].values(): row.pop('pages')
+              return r
+          r=stable('system-audit/evidence.json')
+          assert r==stable('system-replay/evidence.json')
+          assert len(r['rows'])==8 and r['controls']==15
+          assert sum(x['export']['checks'] for x in r['rows'])==72
+          assert sum(x['export']['standalone'] for x in r['rows'])==8
+          for method in ('full','routed','performance','protected'):
+              rows=[x for stream in r['rows'] for x in stream['methods'][method]['rows']]
+              assert len(rows)==144 and sum(x['optimum'] is not None for x in rows)==136
+              assert sum(stream['methods'][method]['oracle_checks'] for stream in r['rows'])==144
+              assert sum(stream['methods'][method]['oracle_visits'] for stream in r['rows'])==141675
+          PY

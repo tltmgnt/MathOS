@@ -1,0 +1,44 @@
+name: MRA-X verified service
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-service.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-service.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_service_audit.py --directory service-audit
+      - run: python3 tools/mra_x_service_audit.py --directory service-replay
+      - name: Check reproducible evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_archive as a
+          def stable(p):
+              r=json.load(open(p))
+              h=r.pop('evidence_sha256')
+              assert a.digest(r)==h
+              r.pop('timings')
+              return r
+          r=stable('service-audit/evidence.json')
+          assert r==stable('service-replay/evidence.json')
+          assert r['controls']==11 and r['reopens']==18
+          assert len(r['rows'])==6
+          assert [x['chosen'] for x in r['rows']]==['gzip','gzip','gzip','block2','gzip','block2']
+          assert sum(len(x['transactions']) for x in r['rows'])==60
+          assert sum(t['actual'] for x in r['rows'] for t in x['transactions'])==6932
+          assert sum(x['metrics']['selected']['fresh'] for x in r['rows'])==14423
+          assert sum(x['metrics']['selected']['realized_proxy'] for x in r['rows'])==307828
+          PY

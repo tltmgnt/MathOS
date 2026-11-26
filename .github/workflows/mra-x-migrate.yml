@@ -1,0 +1,38 @@
+name: MRA-X domain migration
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-migrate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-migrate.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_migrate.py --output migration-evidence.json
+      - name: Verify evidence and deterministic replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_migrate as m
+          import mra_x_gap_agent as g
+          r=json.load(open('migration-evidence.json'))
+          assert r==m.audit()
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert len(r['rows'])==120 and r['controls']==6 and r['recoveries']==24
+          assert sum(x['migrated'] for x in r['rows'])==72
+          assert sum(x['reused'] or 0 for x in r['rows'])==696
+          expected={'actual':35258,'full':45494,'baseline':27783,'feasible':108}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          PY

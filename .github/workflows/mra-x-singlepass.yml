@@ -1,0 +1,46 @@
+name: MRA-X shared checkpoint representation
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-singlepass.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_singlepass_audit.py --directory shared-audit
+      - name: Replay all correctness checks without timing
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import mra_x_singlepass_audit as v
+          import mra_x_archive as a
+          root=Path('shared-replay')
+          root.mkdir()
+          rows=[]
+          methods={'full':v.s.Store,'routed':v.r.Store,'release':v.rel.Store,'singlepass':v.sp.Store}
+          for name,d,edits in v.corpus():
+              results={key:v.old.run(cls,root/f'{name}-{key}.sqlite',d,edits,True)[0] for key,cls in methods.items()}
+              rows.append(dict(name=name,**results))
+          controls,crashes=v.faults(root)
+          first=json.load(open('shared-audit/evidence.json'))
+          h=first.pop('evidence_sha256')
+          assert a.digest(first)==h
+          assert dict(rows=rows,controls=controls,crashes=crashes)=={key:first[key] for key in ('rows','controls','crashes')}
+          assert len(rows)==6 and controls==18
+          for method,expected in [('full',(8385,28455,28455,0)),('routed',(8385,28455,8352,2052)),('release',(8385,28455,8352,2052)),('singlepass',(8385,28455,8352,2052))]:
+              rr=[x for y in rows for x in y[method]['rows']]
+              assert len(rr)==108 and sum(x['optimum'] is not None for x in rr)==100
+              assert tuple(sum(x[k] for x in rr) for k in ('actual','full','fresh','hits'))==expected
+          PY

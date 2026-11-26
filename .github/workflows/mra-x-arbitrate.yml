@@ -1,0 +1,39 @@
+name: MRA-X migration arbitration
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-arbitrate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-arbitrate.yml'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_arbitrate.py --output arbitration-evidence.json
+      - name: Check evidence and replay
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from collections import Counter
+          import mra_x_arbitrate as a
+          import mra_x_gap_agent as g
+          r=json.load(open('arbitration-evidence.json'))
+          assert r==a.audit()
+          h=r.pop('evidence_sha256')
+          assert g.digest(r)==h
+          assert len(r['rows'])==120 and r['controls']==5 and r['reopens']==24
+          assert all(x['actual']<=x['bound']<=x['full'] for x in r['rows'])
+          assert Counter(x['selected'] for x in r['rows'])=={'indexed':60,'reorder':34,'rebuild':19,'preserve':7}
+          expected={'actual':20296,'bound':24535,'full':40745,'rebuild':32339,'preserve':37720,'feasible':107}
+          assert all(sum(x[k] for x in r['rows'])==v for k,v in expected.items())
+          PY
