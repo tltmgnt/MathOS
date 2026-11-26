@@ -14,7 +14,7 @@ function audit(){
   if(r.t>=t){ok(contains(o,r.o,r.t),"aligned containment");return {...r,o:Array(o.length).fill(0),t};}
   ok(contains(r.o,o,t),"aligned reverse containment");return {...r,o:r.o.map((a,i)=>a-o[i])};
  }
- let totals=Array(16).fill(0),fixtures=0,empty=0,wideOnly=0;
+ let totals=Array(16).fill(0),fixtures=0,empty=0,wideOnly=0,certChecks=0,fallback=0;
  for(let m of [2,3])for(let mode=0;mode<8;mode++){
   let M=1;while(M<m)M*=2;let b=2;
   let R=H.map(h=>({h,F:new Set([...tup(m,h.length)].filter(z=>{
@@ -67,10 +67,15 @@ function audit(){
    return {...s,F};
   });
   let raw=[];
+  function cert(C){let yes=true;for(let t=1;t<=M;t*=2)for(let q of tup(M/t,3)){
+   let o=q.map(a=>a*t),n=C.filter(r=>clip(r,o,t)).length;certChecks++;if(n>2*t*t)yes=false;}return yes;}
   for(let s of filtered){
    let C=s.h.length===3?cover(M,3,z=>s.F.has(key(z))):[...s.F].map(k=>({o:k.split(",").map(Number),t:1}));
+   let selected=s;
+   if(s.h.length===3&&!cert(C)){selected=B.find(x=>key(x.h)===key(s.h));C=cover(M,3,z=>selected.F.has(key(z)));ok(cert(C),"fallback certificate");fallback++;}
+   
    totals[7]+=C.length;
-   for(let z of tup(M,s.h.length)){ok(C.filter(r=>contains(z,r.o,r.t)).length===+s.F.has(key(z)),"filtered cover");totals[8]++;}
+   for(let z of tup(M,s.h.length)){ok(C.filter(r=>contains(z,r.o,r.t)).length===+selected.F.has(key(z)),"selected cover");totals[8]++;}
    raw.push(...C.map(r=>({...r,h:s.h})));
   }
   for(let g of G.filter(g=>!P.includes(g)))for(let a=m;a<M;a++)raw.push({h:[g],o:[a],t:1});
@@ -105,6 +110,14 @@ function audit(){
   ok(n===m*m*(m-1)/4&&C.length===n&&D.length===0,"dense singleton cover separation");controls.push([m,n,C.length,D.length]);
  }
  ok(empty>0&&wideOnly>0,"empty and wide-only mask effects exercised");
- return {fixtures,totals,empty,wideOnly,controls};
+ let fragmentation=[];
+ for(let m of [4,8,16,32]){
+  let C=cover(m,3,()=>true),D=cover(m,3,z=>z[0]%2===1);
+  ok(C.length===1&&D.length===m**3/2,"filter can fragment full cube");
+  let useOriginal=D.length>2*m*m;
+  if(m>=8)ok(useOriginal,"unfiltered fallback required");
+  fragmentation.push([m,C.length,D.length,useOriginal]);
+ }
+ return {fixtures,totals,empty,wideOnly,certChecks,fallback,controls,fragmentation};
 }
 console.log('F038_GUARD_SEMIJOIN_OK '+JSON.stringify(audit()));
