@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted private stationary
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-private-stationary']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_private_stationary.js
+          node mathos/research/f038_unrestricted_private_stationary.js | tee /tmp/current.txt
+          grep -Fx 'F038_PRIVATE_STATIONARY_OK {"fixtures":16,"stats":[208,161560,26680,715264,260678,260678,147060,13399,11650,895488,257856,4104,7506,7506],"failedCert":0,"controls":[[4,4,21,32],[8,8,85,256],[16,16,341,2048],[32,32,1365,16384],[64,64,5461,131072]],"bad":16}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_PRIVATE_STATIONARY_GATE_OK status=OPEN promotion=NONE')
+          PY
