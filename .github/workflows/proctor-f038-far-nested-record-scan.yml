@@ -1,0 +1,45 @@
+name: Proctor F038 FAR nested record scan
+on:
+  push:
+    branches: ['research/pnp-f038-far-nested-record-scan']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_far_nested_record_scan.js
+          node --check mathos/research/f038_far_pair_union.js
+          node mathos/research/f038_far_nested_record_scan.js | tee /tmp/nested.txt
+          grep -Fx 'F038_FAR_NESTED_RECORD_SCAN_OK {"states":156493,"descriptionBits":10485035,"alphabet":720,"blockWidth":6,"tests":5620,"transitions":40120496,"answers":10572,"cutoffs":12,"scaling":[[1,1,1,922,56,42,"0"],[4,8,3,67749,3992,324,"1111"],[8,16,4,404464,23807,780,"11111111"],[16,32,5,2266239,133342,1836,"1111111111111111"],[32,64,6,12088510,711165,4236,"11111111111111111111111111111111"],[8,8,12,1145752,67431,1308,"01001001"]]}' /tmp/nested.txt
+          node mathos/research/f038_far_pair_union.js | tee /tmp/union.txt
+          grep -Fx 'F038_FAR_PAIR_UNION_OK {"counts":{"rectangles":2304,"oldMiss":50,"exactMiss":0,"localKeys":43328,"localPairs":58412,"matchingRecords":20250,"coveredPairs":9532,"nesting":1810,"duplicates":90,"strictOld":2408},"fields":[[16,4,1,240,1920,2949120,2949120,761856,1114,8,120],[32,8,1,992,7936,195035136,195035136,23789568,6294,16,496],[64,16,1,4032,32256,12683575296,12683575296,799014912,30937,32,2016]]}' /tmp/union.txt
+          python -m mathos.research.tga_f038_far_003 > /tmp/far.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/far.json') as f:
+              far=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert far['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert far['PROMOTION']=='NONE'
+          assert far['bounded_cycles_completed']==3
+          assert far['decision']=='COMPLETE_BOUNDED_MISSION_REVIEW_OR_REDIRECT'
+          assert all(far[k]['status']=='BLOCKED' for k in ('PHYS-02','FAR-05','restricted_evidence','uniform_recovery'))
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_FAR_NESTED_GATE_OK status=OPEN promotion=NONE')
+          PY
