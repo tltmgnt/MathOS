@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted symbolic counterexamples
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-symbolic-counterexamples']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_symbolic_counterexamples.py
+          python -m mathos.research.f038_unrestricted_quadratic_stage | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_QUADRATIC_OK {"controls":4,"counts":[[1,20,0,"5832"],[2,42,1,"387420489"],[3,61,2,"101559956668416"],[4,92,2,"68952523554931640625"],[5,114,3,"96806918768257718637133824"],[6,136,3,"244416145091043012544965789715329"],[7,158,3,"1009212044656507725162109374628859215872"]],"layout":[[3,33,27,15,405,216,15],[4,44,64,15,960,512,15]],"splice":[[1,5832,209952,105870,211740,16238,1692,0,117698],[2,256,9216,5289,10578,836,104,732,5933],[3,256,9216,5923,11846,931,109,1644,6668]],"subsequence":[[16,"3","33","27","45860","13347","21641",699768,277],[24,"21","231","9261","16329314","4156923","8097041",973302,281],[32,"134","1474","2406104","4265692619","1064731305","2128745441",993183,281],[40,"852","9372","618470208","1097402828061","273066213569","548188194081",998082,281],[48,"5413","59543","158603979997","281462105981970","70001852676347","140621244188241",999954,281],[56,"34370","378070","40601174453000","72053265056793791","17918838303592521","35999400878257601",999939,281],[64,"218240","2400640","10394486964224000","18446738006373508481","4587441105545661441","9216432724820147201",999999,281]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_symbolic_counterexamples | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_SYMBOLIC_OK {"controls":5,"programs":[[1,192,24960,7552,956,15432,17408],[2,192,24960,6374,834,11245,18586],[3,192,24960,4188,538,7340,20772]],"stages":[[1,0,4,0,3,4,4],[1,1,4,2,1,4,1],[1,2,4,3,0,4,0],[1,3,4,3,0,4,0],[1,4,4,3,0,4,0],[1,5,4,3,0,4,0],[1,6,4,3,0,4,0],[2,0,256,0,95,128,128],[2,1,256,32,63,128,76],[2,2,256,78,17,128,17],[2,3,256,78,17,128,17],[2,4,256,95,0,128,0],[2,5,256,95,0,128,0],[2,6,256,95,0,128,0]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_SYMBOLIC_GATE_OK status=OPEN')
+          PY

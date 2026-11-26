@@ -1,0 +1,304 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-SYMBOLIC-COUNTEREXAMPLES",
+  "base_commit": "216203d8c872d240283216bdc88cf6dc4c117a21",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45735702198",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Attack the exact same-U higher-exponent counterexample language by constructing its symbolic bounded computation CNF, and audit what residual hardness proves.",
+  "route": "negative",
+  "topology": "Symbolic time-space tape evolution, exact stage success and residual counterexample languages.",
+  "adversarial": [
+    "Compilation is not satisfying-witness discovery.",
+    "Explicit formula size changes the clock of a self-reference attempt.",
+    "Fixed-k polynomial cost is not uniform in k.",
+    "Finite checks do not establish asymptotic counterexample existence."
+  ],
+  "scope": "Same U, selector encoding, built-ins, program descriptions and exact stage clocks; symbolic counterexample predicate for arbitrary n,s.",
+  "cost": "Polynomial in L+2^s; O(poly(L+s)4^s) gates/clauses; fixed-k polynomial constructor, no polynomial SAT search claim.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of symbolic same-U counterexample compiler and residual dichotomy"
+    },
+    {
+      "key": "attempt_all_exponents",
+      "label": "Same-U bad witnesses for all k>=3 or uniform polynomial cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JS program and built-in stage outcomes; not execution of Python.",
+  "expected": {
+    "programs": [
+      [
+        1,
+        192,
+        24960,
+        7552,
+        956,
+        15432,
+        17408
+      ],
+      [
+        2,
+        192,
+        24960,
+        6374,
+        834,
+        11245,
+        18586
+      ],
+      [
+        3,
+        192,
+        24960,
+        4188,
+        538,
+        7340,
+        20772
+      ]
+    ],
+    "stages": [
+      [
+        1,
+        0,
+        4,
+        0,
+        3,
+        4,
+        4
+      ],
+      [
+        1,
+        1,
+        4,
+        2,
+        1,
+        4,
+        1
+      ],
+      [
+        1,
+        2,
+        4,
+        3,
+        0,
+        4,
+        0
+      ],
+      [
+        1,
+        3,
+        4,
+        3,
+        0,
+        4,
+        0
+      ],
+      [
+        1,
+        4,
+        4,
+        3,
+        0,
+        4,
+        0
+      ],
+      [
+        1,
+        5,
+        4,
+        3,
+        0,
+        4,
+        0
+      ],
+      [
+        1,
+        6,
+        4,
+        3,
+        0,
+        4,
+        0
+      ],
+      [
+        2,
+        0,
+        256,
+        0,
+        95,
+        128,
+        128
+      ],
+      [
+        2,
+        1,
+        256,
+        32,
+        63,
+        128,
+        76
+      ],
+      [
+        2,
+        2,
+        256,
+        78,
+        17,
+        128,
+        17
+      ],
+      [
+        2,
+        3,
+        256,
+        78,
+        17,
+        128,
+        17
+      ],
+      [
+        2,
+        4,
+        256,
+        95,
+        0,
+        128,
+        0
+      ],
+      [
+        2,
+        5,
+        256,
+        95,
+        0,
+        128,
+        0
+      ],
+      [
+        2,
+        6,
+        256,
+        95,
+        0,
+        128,
+        0
+      ]
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_symbolic_counterexamples.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-SYMBOLIC-COUNTEREXAMPLES.md"
+  ],
+  "next": "Find actual bad witnesses for the exact cubic and all higher stage cutoffs at unbounded lengths, or prove a uniform polynomial success cutoff for the same U; no restricted-model detour.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Attack the exact same-U higher-exponent counterexample language by constructing its symbolic bounded computation CNF, and audit what residual hardness proves.",
+      "strategy": "Compile the exact general tape interpreter, built-ins and witness verification into symbolic width-three CNF without enumerating selectors.",
+      "alternative": "Prove the exact residual NP-completeness dichotomy for fixed-stage failure languages and audit the same-clock diagonal gap.",
+      "stop_rule": "Do not claim that the counterexample encoding forces SAT, or that exponent three has been established.",
+      "literature_leads": [
+        "Prior same-U quadratic stage proof; classical bounded computation encoding and elementary NP reductions. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "An exact symbolic width-three H_(n,s) has a uniform explicit constructor polynomial in L+2^s with unique gate extension; it encodes the actual universal stage failure.",
+      "scope": "Same U, selector encoding, built-ins, program descriptions and exact stage clocks; symbolic counterexample predicate for arbitrary n,s.",
+      "derivation": "Per-cell symbol and head/state event circuits, absorbing halt, terminal output verification, exact built-ins and weighted clocks; definitional CNF.",
+      "unresolved_steps": [
+        "Prove actual H satisfiability at arbitrarily large n for integer k>=3."
+      ],
+      "candidate_tests": [
+        "Compare symbolic program outputs to concrete interpreter; check all bounded-stage CNF base assignments."
+      ]
+    },
+    "alternative": {
+      "claim": "For fixed k the exact failure language B_k is either empty (implying P=NP) or NP-complete; finite B_k implies P=NP.",
+      "scope": "Same stage on explicit valid selectors; fixed exponent and nonuniform constant bad instance only in the many-one proof.",
+      "derivation": "SAT equals successful bounded stage OR residual failure; map successful instances to a fixed bad yes-instance, otherwise preserve input.",
+      "unresolved_steps": [
+        "Prove nonemptiness or infinitude for k>=3 without assuming P!=NP."
+      ],
+      "candidate_tests": [
+        "Exact stage success and residual witness counts; zero residual examples."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Compilation is not satisfying-witness discovery.",
+        "Explicit formula size changes the clock of a self-reference attempt.",
+        "Fixed-k polynomial cost is not uniform in k.",
+        "Finite checks do not establish asymptotic counterexample existence."
+      ],
+      "counterexample_candidates": [
+        "Small stages can solve every satisfiable selector; active exhaustive fallback makes the residual empty at that size."
+      ],
+      "equivalence_audit": "Same decoded transition and time bound, all short built-ins, absorbing halt and actual output verification; unique extension; exact residual dichotomy.",
+      "barrier_audit": "No cubic-stage or all-exponent lower bound, no P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Same deterministic tape interpreter and verified witness scheduler; explicit Boolean gate and bit encoding.",
+      "cost_ledger": {
+        "encoding": "Original unary-n selector bits and independent witness bits; explicit CNF and wire indices",
+        "preprocessing": "Enumerate valid transition descriptions and build initial symbolic tape",
+        "inference": "Bounded cell-event simulation and exact terminal verification; residual many-one reduction",
+        "repetitions": "Sum quadratic per-program costs over length-weighted clocks; finite validation separately",
+        "arithmetic_bits": "Charge description lengths, counters, residues and wire IDs",
+        "memory": "Polynomial in L+2^s; explicit gate cache, clauses and auxiliary wires",
+        "reconstruction": "Read p and x from any H model; gate extension unique",
+        "overall": "Polynomial in L+2^s; O(poly(L+s)4^s) gates/clauses; fixed-k polynomial constructor, no polynomial SAT search claim."
+      },
+      "missing_bounds": [
+        "Actual bad witness existence for all k>=3 or universal cutoff",
+        "Unrestricted deterministic SAT runtime lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact symbolic tape semantics",
+        "Built-in clock and residue semantics",
+        "Definitional CNF and charged size",
+        "Residual NP-completeness dichotomy"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No large cubic-stage instance constructed or solved."
+      ],
+      "proof_obligations": [
+        "Replay independent scalar references and symbolic gate evaluation",
+        "Check width and uniqueness controls",
+        "Preserve same U and exact stage"
+      ],
+      "formalization_plan": "Formalize bounded tape simulation by time induction, exact stage disjunction and gate-equivalence CNF; audit residual reduction.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Implement the exact higher-exponent counterexample predicate without truth-table expansion and expose its residual complexity, leaving the all-exponent theorem open.",
+      "remaining_gaps": [
+        "Integer exponents k>=3",
+        "Universal lower bound",
+        "Independent review"
+      ],
+      "next_question": "Find actual bad witnesses for the exact cubic and all higher stage cutoffs at unbounded lengths, or prove a uniform polynomial success cutoff for the same U; no restricted-model detour.",
+      "human_review_requests": [
+        "Review cell boundary, clocks, residue logic, full cost and fixed-k reduction."
+      ]
+    }
+  }
+}
