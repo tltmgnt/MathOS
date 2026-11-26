@@ -118,7 +118,7 @@ function audit(E,A){
  }
  let B=[...E.subsets([0,1,2,3],2)].map(h=>mk(2,h,[0,0])),raw=E.encode(2,[0,1],B);
  ok(E.solveRaw(raw).status==="SAT"&&!produce(E.decode(raw),E),"coverage obstruction");
- let good=E.encode(2,[0,1],[]),j=good.indexOf("0")+1;
+ let good=E.encode(2,[0,1],[]),j=good.indexOf("0")+2;
  for(let bad of [good.slice(1),good+"0",good.slice(0,-1),good.slice(0,-1)+"2",good.slice(0,j)+"1"+good.slice(j+1),""]){ok(E.decode(bad)===null,"malformed");counts.malformed++;}
  return {graphs,counts,results,descriptorBits:M.desc.length};
 }
