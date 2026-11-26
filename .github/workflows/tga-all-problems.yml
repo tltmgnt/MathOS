@@ -1,0 +1,47 @@
+name: TGA simultaneous Millennium research campaign
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'mathos/research/tga_all_problems.py'
+      - 'mathos/research/millennium_followup*.py'
+      - 'mathos/proof_analysis/**'
+      - 'docs/research/CLAY_*.json'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - 'tests/test_tga_all_problems.py'
+      - '.github/workflows/tga-all-problems.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mathos/research/tga_all_problems.py'
+      - 'mathos/research/millennium_followup*.py'
+      - 'mathos/proof_analysis/**'
+      - 'docs/research/CLAY_*.json'
+      - 'docs/proof-analysis/OBLIGATIONS.v1.json'
+      - 'tests/test_tga_all_problems.py'
+      - '.github/workflows/tga-all-problems.yml'
+permissions:
+  contents: read
+jobs:
+  all-tracks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_tga_all_problems.py' -v
+      - run: python -m unittest discover -s tests -p 'test_millennium_followup_round4.py' -v
+      - name: Run all seven tracks concurrently
+        run: python -m mathos.research.tga_all_problems --workers 7 --output-dir "$RUNNER_TEMP/tga-all"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tga-all-problems-bounded-evidence
+          path: ${{ runner.temp }}/tga-all/
+          if-no-files-found: warn
+          retention-days: 30
