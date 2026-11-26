@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X branching pair separators
+on:
+  push:
+    branches: ['research/pnp-f038-rex-branching-pair-separators']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_branching_pair_separators.js
+          node mathos/research/f038_rex_branching_pair_separators.js | tee /tmp/pair.txt
+          grep -Fx 'F038_REX_BRANCHING_PAIR_OK {"alphabet":49,"width":6,"logicalStates":313,"rules":15337,"states":56306,"bits":3434670,"counts":{"logicalCases":641,"physicalCases":39,"sat":451,"unsat":190,"physicalSat":22,"physicalUnsat":17,"candidates":3872,"physical":23051988,"logical":738354,"checkpoints":61,"rootEntries":153,"childEntries":138,"predecessors":55,"malformed":18,"malformedTransitions":298083,"cutoffs":2},"scaling":[[1,66,125965,4184,470,[31617,66614,27734]],[2,219,1298141,41655,1545,[339453,665335,293353]],[3,546,7816383,244992,3841,[2096097,3916972,1803314]],[4,1119,32203687,992573,7861,[8784153,15875213,7544321]]],"digest":1105793626,"physicalDigest":640776826}' /tmp/pair.txt
+          sed -n 's/^F038_REX_BRANCHING_PAIR_OK //p' /tmp/pair.txt > /tmp/pair.json
+          python -m mathos.research.validate_f038_rex_branching_pair_separators /tmp/pair.json
+          python -m mathos.research.tga_f038_rex_016 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_COMMON_PAIR_BRANCHING_CHANGING_OVERLAP_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_BRANCHING_PAIR_GATE_OK status=OPEN promotion=NONE')
+          PY
