@@ -97,7 +97,7 @@ function compile(worker,symbols,projection){
 
 
 function worker(){
- const symbols=["__","0_","1_","L","R","Z","D","A","IG","G","J","V","P","Q","Q0","Q1","U","UW","BI","BG","BW","W","M0","M1","MW","T0","T1","TW","CM0","CM1","CT0","CT1","CTW","F0","F1","E0","E1","EP","K0","K1","KV","X","Y"];
+ const symbols=["__","0_","1_","L","R","Z","D","A","IG","G","J","V","P","Q","Q0","Q1","QW","U","UW","BI","BG","BW","W","M0","M1","MW","T0","T1","TW","CM0","CM1","CMW","CT0","CT1","CTW","F0","F1","E0","E1","EP","K0","K1","KV","X","Y"];
  const projection=Object.fromEntries(symbols.filter(a=>a!=="__").map(a=>[a,a==="MW"||a==="W"?"1":a==="M0"||a==="M1"||a==="G"?"0":"_"]));
  const defs=new Map(),add=(s,fn)=>{if(defs.has(s))throw Error("duplicate "+s);defs.set(s,fn)};
  const z=(s,a)=>[s,a,0],r=(s,a)=>[s,a,1],l=(s,a)=>[s,a,-1],bad=()=>z("reject","__");
@@ -140,7 +140,7 @@ function worker(){
  find("ivLeftRestore",cur,a=>r("ivLeftNext",a.slice(1)));
  next("ivLeftNext",a=>/^M[01]$/.test(a)?z("ivRightRestore0","C"+a):a==="J"?z("ivRightRestore1",a):bad());
  for(let end of [0,1]){
-  find("ivRightRestore"+end,a=>/^Q[01]$/.test(a),a=>r("ivRightNext"+end,"M"+a[1]));
+  find("ivRightRestore"+end,a=>/^Q[01W]$/.test(a),a=>r("ivRightNext"+end,"M"+a[1]));
   next("ivRightNext"+end,a=>/^M[01]$/.test(a)?end?bad():z("ivLeftRestore","Q"+a[1]):a==="J"?end?z("ivAdvance",a):bad():bad());
  }
  find("ivAdvance",a=>a==="BI",a=>z("ivNew","IG"));
@@ -158,7 +158,7 @@ function worker(){
   next(mode+"SourceFirst",a=>msg(a)?z(mode+"EdgeFirst","C"+a):bad());
   // Backward traverses just the chosen destination group, all its pairs,
   // selecting a source entry only at its selected pair's EP marker.
-  find(mode+"EdgeFirst",a=>a==="Q"||/^Q[01]$/.test(a),a=>r(mode+"FirstF",a));
+  find(mode+"EdgeFirst",a=>a==="Q"||/^Q[01W]$/.test(a),a=>r(mode+"FirstF",a));
   next(mode+"FirstF",a=>edge(a)?z(mode+"Read0","K"+a[1]):bad());
   for(let hit of [0,1]){
    find(mode+"Read"+hit,cur,a=>z(mode+"ReadK"+hit+(a.endsWith("1")||a.endsWith("W")?1:0),a));
@@ -176,7 +176,7 @@ function worker(){
     }
    }
    if(mode==="b"){
-    find("bCheckSelected"+hit,a=>/^Q[01]$/.test(a),a=>z(a==="Q1"?"bSelectSource":"bRestoreEP"+hit,a));
+    find("bCheckSelected"+hit,a=>/^Q[01W]$/.test(a),a=>z(a==="QW"?"bSelectSource":"bRestoreEP"+hit,a));
     find("bRestoreEP"+hit,a=>a==="X",a=>r("bNextF"+hit,"EP"));
    }
    next(mode+"NextF"+hit,a=>edge(a)?z(mode+"Restore"+hit+"0","K"+a[1]):a==="V"?z(mode+"Restore"+hit+"1","KV"):bad());
@@ -184,11 +184,11 @@ function worker(){
     find(mode+"Restore"+hit+end,cur,a=>r(mode+"SrcNext"+hit+end,a.slice(1)));
     walk(mode+"SrcNext"+hit+end,1,a=>msg(a)?end?bad():z(mode+"Read"+hit,"C"+a):a==="J"?end?z(mode+"PairDone"+hit,a):bad():null);
    }
-   find(mode+"PairDone"+hit,a=>a==="Q"||/^Q[01]$/.test(a),a=>z(mode+"PairFinish"+hit,mode==="f"?"T"+hit:a==="Q1"?"TW":"T"+a[1]));
+   find(mode+"PairDone"+hit,a=>a==="Q"||/^Q[01W]$/.test(a),a=>z(mode+"PairFinish"+hit,mode==="f"?"T"+hit:a==="QW"?"TW":a==="Q"?"T0":"T"+a[1]));
    // locate end of this pair using the unique KV marker, then find next pair.
    find(mode+"PairFinish"+hit,a=>a==="KV",a=>r(mode+"DestPairNext","V"));
   }
-  next(mode+"DestPairNext",a=>mode==="f"&&a==="P"?z(mode+"GroupAdvance0","Q"):mode==="b"&&/^T[01W]$/.test(a)?z(mode+"GroupAdvance0",a==="TW"?"Q1":"Q0"):a==="J"?z(mode+"GroupAdvance1",a):bad());
+  next(mode+"DestPairNext",a=>mode==="f"&&a==="P"?z(mode+"GroupAdvance0","Q"):mode==="b"&&/^T[01W]$/.test(a)?z(mode+"GroupAdvance0",a==="TW"?"QW":"Q"+a[1]):a==="J"?z(mode+"GroupAdvance1",a):bad());
   for(let end of [0,1]){
    find(mode+"GroupAdvance"+end,bc,a=>r(mode+"SourceGroupEnd"+end,brestore(a)));
    walk(mode+"SourceGroupEnd"+end,1,a=>a==="J"?r(mode+"SourceGroupNext"+end,a):null);
@@ -214,12 +214,12 @@ function worker(){
  // after A, not by a global scan.
  add("bFindGroup",a=>a==="A"?r("bFindSelected",a):bad());
  walk("bFindSelected",1,a=>a==="W"?r("bPairFirst","UW"):a==="D"?bad():null);
- next("bPairFirst",a=>/^T[01W]$/.test(a)?z("bSource",a==="TW"?"Q1":"Q0"):bad());
+ next("bPairFirst",a=>/^T[01W]$/.test(a)?z("bSource",a==="TW"?"QW":"Q"+a[1]):bad());
  // At selected predecessor, mark source cell and its group; then stop
  // processing this destination group (dimensions already validated forward).
  find("bSelectSource",cur,a=>a==="CM1"||a==="CT1"?z("bSelectGroup",a==="CM1"?"MW":"TW"):bad());
  find("bSelectGroup",bc,a=>z("bRestoreDest",a==="BI"?"IG":"W"));
- find("bRestoreDest",a=>a==="Q1",a=>z("bRestoreMark","T1"));
+ find("bRestoreDest",a=>a==="QW",a=>z("bRestoreMark","T1"));
  find("bRestoreMark",a=>a==="X",a=>z("bRestoreGroup","EP"));
  find("bRestoreGroup",a=>a==="UW",a=>z("bAfterGroup","W"));
  find("bAfterGroup",a=>a==="A",a=>l("bPrevCheck",a));
