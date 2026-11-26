@@ -1,0 +1,220 @@
+{
+  "attempt_id": "F038-MRAX-BIT-WITNESS-CONSISTENCY",
+  "base_commit": "47dc1f300792950502f72ca6aa9ade79e02ea3eb",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45726741786",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can per-bit existential witnesses or shared advice place the earlier deterministic hard language in NP without hiding global consistency?",
+  "route": "negative",
+  "topology": "Witness/advice fiber projection and singleton consistency; quantified circuit range avoidance.",
+  "adversarial": [
+    "Shared advice may not be uniformly computable.",
+    "Local singleton labels do not ensure cross-advice agreement.",
+    "Avoiding nondeterministic circuits rules out NP membership for the new growing-budget language.",
+    "Explicit budget length must be charged."
+  ],
+  "scope": "Explicit Boolean verifier circuit, polynomial bounded witnesses and advice, polynomial advice validity.",
+  "cost": "Fixed exponent P^Sigma3P; growing budget superpolynomial; promise verification complexities separate",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of advice quantifiers, promise reductions and nondeterministic circuit counting"
+    },
+    {
+      "key": "attempt_fixed_np_language",
+      "label": "Hard deterministic function in a fixed NP language or sufficient lower-bound transfer"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JS circuit/witness and verifier relation enumeration; not execution of Python.",
+  "expected": {
+    "ranges": [
+      [
+        2,
+        0,
+        1,
+        4,
+        257,
+        1284,
+        16,
+        -1
+      ],
+      [
+        3,
+        0,
+        2,
+        8,
+        230801,
+        1615205,
+        152,
+        22
+      ],
+      [
+        3,
+        1,
+        1,
+        8,
+        577,
+        4038,
+        38,
+        1
+      ],
+      [
+        3,
+        1,
+        2,
+        8,
+        452161,
+        3616710,
+        152,
+        22
+      ],
+      [
+        3,
+        2,
+        2,
+        8,
+        803601,
+        7231623,
+        152,
+        22
+      ],
+      [
+        4,
+        1,
+        1,
+        10,
+        785,
+        6279,
+        54,
+        1
+      ]
+    ],
+    "relations": [
+      65536,
+      65025,
+      961,
+      900,
+      1296,
+      17136,
+      972,
+      16308,
+      1440
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_bit_witness_consistency.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-BIT-WITNESS-CONSISTENCY.md"
+  ],
+  "next": "Seek a different resource-preserving lower-bound transfer or justified structural witness-to-circuit theorem; no further avoidance-only optimization.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can per-bit existential witnesses or shared advice place the earlier deterministic hard language in NP without hiding global consistency?",
+      "strategy": "Characterize exact advice and witness quantifiers and complexity of consistency/totality.",
+      "alternative": "Count nondeterministic circuit output ranges with independent witnesses per input.",
+      "stop_rule": "Do not identify avoidance of nondeterministic circuits with an NP language or assume advice can be uniformly chosen.",
+      "literature_leads": [
+        "Previous MathOS circuit avoidance and oracle interpolation; standard NP/poly circuit characterization and two-block QBF completeness. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Uniform two-sided bit witnesses require total consistent label projections; blanket consistency is coNP-complete and totality Pi2P-complete under the stated promises.",
+      "scope": "Explicit Boolean verifier circuit, polynomial bounded witnesses and advice, polynomial advice validity.",
+      "derivation": "Union singleton semantics gives NP intersect coNP; lengthwise chosen advice gives both sides in NP/poly; reduce UNSAT and forall-exists QBF to the respective promises.",
+      "unresolved_steps": [
+        "Uniform positive witness predicate for the earlier deterministic hard language."
+      ],
+      "candidate_tests": [
+        "All one-bit input/advice/witness/label relations and finite reduction fixtures."
+      ]
+    },
+    "alternative": {
+      "claim": "Sparse-prefix avoidance against nondeterministic circuits gives fixed-exponent P^Sigma3P languages and one growing-budget language outside NP/poly.",
+      "scope": "Fan-in-two Boolean gates, independent existential witnesses, h<=2s+1 used witness bits.",
+      "derivation": "Count syntactic circuits; membership uses existential circuit and positive witnesses then universal negative witnesses; missing prefix completion adds one existential block.",
+      "unresolved_steps": [
+        "NP membership of the earlier deterministic avoidance language; a fixed NP-complete lower bound."
+      ],
+      "candidate_tests": [
+        "Scalar versus bit-parallel existential range enumeration and witness control."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Shared advice may not be uniformly computable.",
+        "Local singleton labels do not ensure cross-advice agreement.",
+        "Avoiding nondeterministic circuits rules out NP membership for the new growing-budget language.",
+        "Explicit budget length must be charged."
+      ],
+      "counterexample_candidates": [
+        "Two total advice functions disagree; total union with opposite label iff a source CNF is satisfiable."
+      ],
+      "equivalence_audit": "Separate uniform NP, two-sided witnesses, NP/poly, and range membership quantifiers.",
+      "barrier_audit": "No unrestricted SAT lower bound or proof of P!=NP.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean circuits, polynomial bounded witnesses/advice, unary budgets.",
+      "cost_ledger": {
+        "encoding": "Explicit verifier, gate references and witness lengths",
+        "preprocessing": "Polynomial normalization and advice validity test",
+        "inference": "Existential projection, quantified range tests; explicit finite enumeration only",
+        "repetitions": "m Sigma3P prefix-completion queries or exponential enumeration",
+        "arithmetic_bits": "Charge explicit budget and prefix lengths; exact bit operations",
+        "memory": "Polynomial in explicit verifier input for witness checks; exponential range storage possible",
+        "reconstruction": "Independent witnesses for each accepted bit; no uniform advice construction presumed",
+        "overall": "Fixed exponent P^Sigma3P; growing budget superpolynomial; promise verification complexities separate"
+      },
+      "missing_bounds": [
+        "Uniform NP witness predicate for deterministic hard language",
+        "Fixed SAT lower-bound transfer",
+        "Unrestricted deterministic computational lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Advice union quantifier theorem",
+        "Consistency and totality reductions",
+        "Nondeterministic circuit counting and range quantifiers"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No quantified oracle or general machine compiler implemented."
+      ],
+      "proof_obligations": [
+        "Enumerate exact small existential ranges",
+        "Classify all small verifier relations",
+        "Replay finite promise-reduction fixtures and witness semantics"
+      ],
+      "formalization_plan": "Formalize existential projection and consistency/totality, then review circuit counting and complexity quantifiers.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Expose shared-advice consistency barriers and show stronger avoidance cannot itself produce an NP language.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "NP membership of earlier deterministic hard language",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Seek a different resource-preserving lower-bound transfer or justified structural witness-to-circuit theorem; no further avoidance-only optimization.",
+      "human_review_requests": [
+        "Review advice quantifiers, explicit promise reductions and NP/poly equivalence."
+      ]
+    }
+  }
+}
