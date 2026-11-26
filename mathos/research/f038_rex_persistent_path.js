@@ -171,6 +171,7 @@ function run(M,J,raw,limit=50000000){
 function audit(){
  const J=pathWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)};
  let counts={valid:0,sat:0,unsat:0,vertices:0,physical:0,logical:0,checkpoints:0,historyEntries:0,malformed:0,malformedTransitions:0,cutoffs:0};
+ let digest=2166136261;
  const dec=new Map(Object.entries(M.code).map(([s,c])=>[c,s]));
  function check(raw,want,record=true){
   let r=run(M,J,raw),N=raw.length,w=M.width,n=1+(N-2)/6;
@@ -214,7 +215,7 @@ function audit(){
    ok(r.t===11*N*N+60*N+6*n*n-n+27,"closed form");
    if(record){counts.checkpoints+=2;counts.historyEntries+=2*(n-1);}
   }
-  if(record){counts.valid++;counts.sat+=+(want!==null);counts.unsat+=+(want===null);counts.vertices+=n;counts.physical+=r.t;counts.logical+=r.logical;}
+  if(record){let actual=want===null?'-':Array.from({length:n},(_,i)=>r.tape.get(r.head+i)).join('');for(let ch of raw+':'+actual+';')digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;counts.valid++;counts.sat+=+(want!==null);counts.unsat+=+(want===null);counts.vertices+=n;counts.physical+=r.t;counts.logical+=r.logical;}
   return r;
  }
  for(let N of [2,8])for(let i=0;i<2**N;i++){let raw=i.toString(2).padStart(N,"0");check(raw,direct(raw));}
@@ -250,6 +251,6 @@ function audit(){
  ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
  for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
  ok(pos===M.desc.length,"length");
- return {alphabet:J.symbols.length,states:M.q,bits:M.desc.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,counts,scaling,adversarial};
+ return {alphabet:J.symbols.length,states:M.q,bits:M.desc.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,counts,scaling,adversarial,digest};
 }
 if(process.argv.includes('--description')){let j=pathWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_PERSISTENT_PATH_OK '+JSON.stringify(audit()));
