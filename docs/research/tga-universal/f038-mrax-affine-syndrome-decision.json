@@ -1,0 +1,248 @@
+{
+  "attempt_id": "F038-MRAX-AFFINE-SYNDROME-DECISION",
+  "base_commit": "008500fa576b015dd510d7035a6ed2ad95b18eb2",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45732063063",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can affine selector reparametrization preserve ordinary SAT decision and eliminate free selector dimensions with a charged structural parameter?",
+  "route": "negative",
+  "topology": "Affine selector fibers intersect downward assignment cubes; image subspaces and exact union-of-sums reachability.",
+  "adversarial": [
+    "Codimension is not affine dimension.",
+    "Replacing union by span mixes incompatible source signs.",
+    "Dual CNF construction alone does not solve its satisfiability.",
+    "NP-completeness does not prove P!=NP; disjoint rows may have large rank."
+  ],
+  "scope": "Explicit clause list, binary selector equations and source variables, independent rows after elimination; ordinary existential decision.",
+  "cost": "2^r poly(L) FPT in affine codimension; NP-complete disjoint width-three parity systems",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of syndrome DP and disjoint parity reduction"
+    },
+    {
+      "key": "attempt_structural_preprocessing",
+      "label": "Decision-preserving low effective codimension or interface-width preprocessing with full cost"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS brute selector enumeration and tagged block-choice counting; not execution of Python.",
+  "expected": {
+    "syndromes": [
+      [
+        1,
+        0,
+        1,
+        1,
+        4,
+        3,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        4,
+        8,
+        16,
+        12,
+        7,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        16,
+        64,
+        64,
+        48,
+        37,
+        27,
+        21
+      ],
+      [
+        1,
+        3,
+        64,
+        512,
+        256,
+        192,
+        169,
+        343,
+        301
+      ],
+      [
+        2,
+        1,
+        64,
+        128,
+        16384,
+        6080,
+        128,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        64,
+        256,
+        16384,
+        6080,
+        256,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        64,
+        512,
+        16384,
+        6080,
+        504,
+        8,
+        8
+      ],
+      [
+        2,
+        4,
+        64,
+        1024,
+        16384,
+        6080,
+        979,
+        45,
+        40
+      ]
+    ],
+    "reduction": [
+      256,
+      1024,
+      12288,
+      95,
+      128,
+      192,
+      163,
+      16
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_affine_syndrome_decision.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-AFFINE-SYNDROME-DECISION.md"
+  ],
+  "next": "Investigate rank decomposition or tree-structured syndrome interfaces with charged discovery and exact preservation; test against the disjoint-row reduction.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can affine selector reparametrization preserve ordinary SAT decision and eliminate free selector dimensions with a charged structural parameter?",
+      "strategy": "Use affine codimension, column spans and exact syndrome reachability over source-variable choices.",
+      "alternative": "Reduce 3SAT to disjoint narrow parity equations and test a dual CNF characterization.",
+      "stop_rule": "Do not claim a universal low-rank representation, or equate FPT feasibility with polynomial general SAT.",
+      "literature_leads": [
+        "Previous MathOS universal selector, affine selector rigidity and programmable parity; elementary binary linear algebra and finite-state DP. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Affine selector feasibility admits exact witness-preserving deterministic 2^r poly(L) time and space at codimension r, with an equivalent dual CNF.",
+      "scope": "Explicit clause list, binary selector equations and source variables, independent rows after elimination; ordinary existential decision.",
+      "derivation": "Satisfied columns form a sum of per-variable sign spans; maintain exact union of syndrome sums, recording predecessor and column provenance; dual annihilator tests are clauses.",
+      "unresolved_steps": [
+        "Efficient universal codimension reduction or stronger structural transfer."
+      ],
+      "candidate_tests": [
+        "Exhaust small matrices and RHS values; replay selector/source witnesses and dual clauses."
+      ]
+    },
+    "alternative": {
+      "claim": "Affine selector feasibility is NP-complete even for disjoint independent parity rows of width at most three, all RHS bits one.",
+      "scope": "Full normalized universal width-three pool; fresh clause guards; all other selector bits unrestricted.",
+      "derivation": "Pin each guard false and require odd parity of its tagged literal selectors; exact bidirectional reduction from 3SAT.",
+      "unresolved_steps": [
+        "Any general polynomial preprocessing to low codimension would imply P=NP; no unrestricted lower bound."
+      ],
+      "candidate_tests": [
+        "All small source formula subsets, actual tagged clause constraints and bounded DP reconstruction."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Codimension is not affine dimension.",
+        "Replacing union by span mixes incompatible source signs.",
+        "Dual CNF construction alone does not solve its satisfiability.",
+        "NP-completeness does not prove P!=NP; disjoint rows may have large rank."
+      ],
+      "counterexample_candidates": [
+        "Opposite signed unit columns with independent syndromes: their sum is linearly reachable but not SAT reachable.",
+        "Tagged clause reduction has disjoint rows yet represents arbitrary 3SAT."
+      ],
+      "equivalence_audit": "Exact rank reduction, one truth value per source variable, XOR provenance, dual annihilator equivalence and decision-preserving reduction.",
+      "barrier_audit": "No unrestricted deterministic lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean source clauses and GF2 matrix, exact syndrome bitsets and deterministic DP.",
+      "cost_ledger": {
+        "encoding": "Charge full explicit input including variable count, clause literals and matrix",
+        "preprocessing": "Polynomial augmented row reduction and per-sign column basis computation",
+        "inference": "Exact union of two syndrome-sum sets per variable; dual CNF equivalence",
+        "repetitions": "At most r XOR shifts per sign per variable over 2^r states; bounded brute regression only",
+        "arithmetic_bits": "Rank-width syndrome vectors and N-bit selector provenance; exact bit operations",
+        "memory": "2^r poly(L), two layers for decision or n layers of backpointers",
+        "reconstruction": "Recover source assignment and selector mask, replay original equations and clauses",
+        "overall": "2^r poly(L) FPT in affine codimension; NP-complete disjoint width-three parity systems"
+      },
+      "missing_bounds": [
+        "Universal polynomial codimension or interface-width reduction with charged discovery",
+        "Unrestricted SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Syndrome span characterization and exact DP",
+        "Dual CNF equivalence",
+        "Rank-reduced witness reconstruction",
+        "Disjoint parity row NP-completeness reduction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No universal low-rank preprocessor or unrestricted SAT solver."
+      ],
+      "proof_obligations": [
+        "Compare all bounded syndrome results and reconstructed witnesses",
+        "Check dual tests per source assignment",
+        "Replay tagged reductions and incompatible-sign control"
+      ],
+      "formalization_plan": "Formalize binary elimination equivalence, per-sign column spans, reachability induction and reconstruction, then guard reduction.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Restore ordinary existential decision and supply an explicit FPT affine selector compiler with a matching scope barrier from disjoint narrow equations.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Efficient decision-preserving structural preprocessing",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate rank decomposition or tree-structured syndrome interfaces with charged discovery and exact preservation; test against the disjoint-row reduction.",
+      "human_review_requests": [
+        "Review span/union distinction, row-reduction provenance, dual CNF and disjoint parity reduction."
+      ]
+    }
+  }
+}
