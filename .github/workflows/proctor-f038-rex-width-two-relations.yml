@@ -1,0 +1,56 @@
+name: Proctor F038 RE-X width-two relations
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-relations']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_relations
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/relations-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/relations-replay.txt
+          node "$p.js" --descriptor > /tmp/relations.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_RELATIONS_OK '){const a=fs.readFileSync('/tmp/relations-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c]=['small','larger','controls'].map(s=>read(s));
+          for(const r of [a,b,c]){assert.equal(r.q,544469);assert.equal(r.descriptorBits,39746241);}
+          assert.deepEqual(a.totals,{rawBits:341226,transitions:372995929,maskBits:7506,ones:872,parents:63,relations:63,relationBits:3966,candidates:234,accepted:7});
+          assert.deepEqual(b.totals,{rawBits:161851,transitions:478253648,maskBits:2619,ones:41,parents:9,relations:9,relationBits:1914,candidates:117,accepted:1});
+          assert.deepEqual([...a.rows,...b.rows].map(r=>r.t),[29486059,34283828,39503716,55936039,39188901,26655850,29478381,39070066,79393089,478253648]);
+          assert.equal(c.controls.length,7);assert.equal(c.cutoffs,4);assert.equal(c.exactBudget,34283828);
+          assert.deepEqual(read('replay','F038_REX_WIDTH_TWO_RELATIONS_REPLAY_OK '),{q:544469,descriptorBits:39746241,transitions:34283828,maskBlocks:129,maskBits:834,outputBits:682,relationBits:480,bagRecords:9});
+          JS
+          python -m mathos.research.f038_rex_width_two_relations_codec /tmp/relations.desc > /tmp/relations-codec.json
+          python -m mathos.research.tga_f038_rex_023c2 > /tmp/relations-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/relations-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/relations-gates.json') as f:
+              g=json.load(f)
+          assert r['transitions']==34283828 and r['mask_blocks']==129 and r['mask_bits']==834
+          assert r['parent_records']==9 and r['bag_records']==9 and r['output_bits']==682 and r['relation_bits']==480 and r['not_a_witness']
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023C2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
