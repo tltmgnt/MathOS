@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X quadratic overlap
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ranked-overlap']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_ranked_overlap.js
+          node mathos/research/f038_rex_ranked_overlap.js | tee /tmp/overlap.txt
+          grep -Fx 'F038_REX_RANKED_OVERLAP_OK {"alphabet":38,"width":6,"logicalStates":476,"rules":18088,"states":48417,"bits":2953441,"counts":{"logicalCases":825,"physicalCases":45,"positiveCases":74,"negativeCases":751,"physicalPositive":11,"physicalNegative":34,"parentRows":873,"childRows":879,"physical":11149207,"logical":192813,"checkpoints":90,"physicalParentFlags":63,"physicalChildFlags":65,"malformed":13,"malformedTransitions":109276,"cutoffs":2},"scaling":[[1,80,130996,2779,568,[46163,44329,40504]],[2,98,198342,4339,694,[68897,69249,60196]],[4,134,374434,8467,946,[127973,135217,111244]],[8,206,892218,20755,1450,[300557,331665,259996]],[16,350,2590186,61459,2458,[863453,982609,744124]]],"rowScaling":[[1,71,102890,2154,505,[36497,34354,32039]],[2,137,367911,7379,967,[133715,117859,116337]],[4,269,1387697,27153,1895,[511103,434053,442541]],[8,533,5386245,103997,3751,[1997687,1663177,1725381]]],"digest":3392018395,"physicalDigest":1193114046}' /tmp/overlap.txt
+          sed -n 's/^F038_REX_RANKED_OVERLAP_OK //p' /tmp/overlap.txt > /tmp/overlap.json
+          python -m mathos.research.validate_f038_rex_variable_overlap_alignment /tmp/overlap.json
+          python -m mathos.research.tga_f038_rex_019 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_QUADRATIC_EDGE_NESTED_LIFECYCLE_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_QUADRATIC_OVERLAP_GATE_OK status=OPEN promotion=NONE')
+          PY
