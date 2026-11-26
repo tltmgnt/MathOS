@@ -1,0 +1,33 @@
+name: Proctor F038 unrestricted aligned separators
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-aligned-separators']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_aligned_separators.py
+          python -m mathos.research.f038_unrestricted_aligned_separators | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_ALIGNED_SEPARATORS_OK {"exponents":["10","62/7","62/21"],"fixtures":12,"nested":[1458,16384,65536,256,1458,32768,16384],"shifts":372,"sums":[3181,23154,2903,774,3084,789504,3084,9325,789504,394752]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_ALIGNED_SEPARATORS_GATE_OK status=OPEN promotion=NONE')
+          PY
