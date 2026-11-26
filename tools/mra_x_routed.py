@@ -16,7 +16,7 @@ import mra_x_state as state
 def sha(raw): return hashlib.sha256(raw).hexdigest()
 
 
-def verify(snap,doc,receipts):
+def verify(snap,doc,receipts,*,shared=False):
     """Build all routes independently; only reuse exact verified local obligations."""
     a.fields(snap,'schema version domains order budget inputs outputs records counts')
     a.require(type(snap['schema']) is int and snap['schema']==1 and type(snap['version']) is int and snap['version']>=0)
@@ -31,7 +31,13 @@ def verify(snap,doc,receipts):
     a.require(all(type(x) is list and len(x)==len(order) for x in (outputs,records,counts)))
     # Canonical equality prevents Python's bool/int equality from masking corruption.
     problem=dict(domains=d,factors=[f for _,f in inputs])
-    a.require(a.canonical(doc['problem'])==a.canonical(problem) and a.canonical([doc['messages'],r['trace'],r['order']])==a.canonical([outputs,records,order]))
+    if shared:
+        # Fast path is valid only when the certificate actually shares checked objects.
+        p=doc['problem']; a.fields(p,'domains factors')
+        a.require(p['domains'] is d and type(p['factors']) is list and len(p['factors'])==len(inputs) and all(f is item[1] for f,item in zip(p['factors'],inputs)))
+        a.require(doc['messages'] is outputs and r['trace'] is records and r['order'] is order)
+    else:
+        a.require(a.canonical(doc['problem'])==a.canonical(problem) and a.canonical([doc['messages'],r['trace'],r['order']])==a.canonical([outputs,records,order]))
     e=idx.Indexed(d,order,snap['budget']); routes=e.buckets; rank=e.rank; n=e.n
     routing=visits=fresh=hits=lookups=width=0; staged={}; back=[]
     def put(key,f,after=-1):
