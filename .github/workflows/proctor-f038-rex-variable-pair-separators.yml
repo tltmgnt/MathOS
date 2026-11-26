@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X variable pair separators
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-pair-separators']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_variable_pair_separators.js
+          node mathos/research/f038_rex_variable_pair_separators.js | tee /tmp/pair.txt
+          grep -Fx 'F038_REX_VARIABLE_PAIR_OK {"alphabet":45,"width":6,"states":46712,"bits":2849436,"rules":12150,"counts":{"logicalCases":637,"physicalCases":49,"sat":534,"unsat":103,"physicalSat":33,"physicalUnsat":16,"candidates":4498,"physical":13339362,"logical":368438,"checkpoints":82,"entries":339,"predecessors":38,"malformed":17,"malformedTransitions":304508,"cutoffs":2},"scaling":[[1,33,33257,1119,239,[8187,17749,7321]],[2,114,306710,8338,808,[92913,132978,80819]],[3,285,1687543,38765,2011,[573423,619265,494855]],[4,582,6564950,133584,4098,[2380965,2135464,2048521]]],"digest":2820171537,"physicalDigest":268898126}' /tmp/pair.txt
+          sed -n 's/^F038_REX_VARIABLE_PAIR_OK //p' /tmp/pair.txt > /tmp/pair.json
+          python -m mathos.research.validate_f038_rex_variable_pair_separators /tmp/pair.json
+          python -m mathos.research.tga_f038_rex_015 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_VARIABLE_PAIR_SEPARATOR_GENERAL_BAGS_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_VARIABLE_PAIR_GATE_OK status=OPEN promotion=NONE')
+          PY
