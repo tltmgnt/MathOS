@@ -332,13 +332,13 @@ function audit(P,E,A){
   rows.push({m,mode,pins:p.pins,L:raw.length,maskBits:p.maskBits,ones,selected:B.length,duplicateOnes:ones-B.length,preparedBits:prepared.length,t:r.t,span:r.span});
   return {raw,r,prepared};
  }
- for(let mode=0;mode<4;mode++)check(2,mode,[mode&1,(mode>>1)&1]);
- for(let m of [3,4])check(m,3,Array.from({length:m},(_,i)=>i%2));
+ let dense;for(let mode=0;mode<4;mode++){let v=check(2,mode,[mode&1,(mode>>1)&1]);if(mode===2)dense=v;}
+ for(let m of [3,4,5])check(m,3,Array.from({length:m},(_,i)=>i%2));
  let forced=check(3,1,[1,0,1]);
  let raw=E.encode(2,[0,1],[]),n=31,pos=new Map(),at=n+1;for(let c of E.pool(n))pos.set(c.join(","),at++);
  const flip=(s,i)=>s.slice(0,i)+(s[i]==="1"?"0":"1")+s.slice(i+1);
  let wide=E.encode(2,[0,1],[[-1,-17]]),wide3=E.encode(2,[0,1],[[-1,-3,-17]]);
- for(let [name,bad,want] of [["empty","","OUTSIDE_NORMALIZED"],["header","1".repeat(32)+"0","OUTSIDE_NORMALIZED"],["earlyMandatory",flip(raw,pos.get("-31")),"OUTSIDE_NORMALIZED"],["latePin",flip(raw,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"],["truncated",raw.slice(0,-1),"OUTSIDE_NORMALIZED"],["extra",raw+"1","OUTSIDE_NORMALIZED"],["outside",wide,"OUTSIDE_FIXED_PATH"],["outsideTriple",wide3,"OUTSIDE_FIXED_PATH"],["outsideLateMalformed",flip(wide,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"]]){
+ for(let [name,bad,want] of [["empty","","OUTSIDE_NORMALIZED"],["header","1".repeat(32)+"0","OUTSIDE_NORMALIZED"],["earlyMandatory",flip(raw,pos.get("-31")),"OUTSIDE_NORMALIZED"],["firstSignOnly",raw.slice(0,n+2),"OUTSIDE_NORMALIZED"],["partialTernary",raw.slice(0,pos.get("-1,-3,-5")+1),"OUTSIDE_NORMALIZED"],["latePin",flip(raw,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"],["truncated",raw.slice(0,-1),"OUTSIDE_NORMALIZED"],["extra",raw+"1","OUTSIDE_NORMALIZED"],["outside",wide,"OUTSIDE_FIXED_PATH"],["outsideTriple",wide3,"OUTSIDE_FIXED_PATH"],["outsideLateMalformed",flip(wide,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"]]){
   let r=run(M,bad,500000000);ok(r.status===want,"control "+name+" "+JSON.stringify(r));controls.push({name,status:r.status,t:r.t});
  }
  let clock=run(M,raw,500000000).t;
@@ -346,8 +346,32 @@ function audit(P,E,A){
  ok(run(M,raw,clock).status==="MASKS_PREPARED","exact clock");
  // Worker input is reconstructed only by the host oracle; this is not same-machine handoff.
  const J=A.worker(),Q=A.compile(J.rules,J.symbols,J.projection),worker=A.physical(Q,forced.prepared,120000000);
- ok(worker.state===Q.q&&worker.tape.has(worker.head),"inherited worker replay");
- return {q:C.q,descriptorBits:C.desc.length,rows,controls,cutoffs:4,exactBudget:clock,workerTransitions:worker.t,totals:rows.reduce((a,r)=>({rawBits:a.rawBits+r.L,maskBits:a.maskBits+r.maskBits,pinBits:a.pinBits+r.pins.length,preparedBits:a.preparedBits+r.preparedBits,transitions:a.transitions+r.t,blocks:a.blocks+49}),{rawBits:0,maskBits:0,pinBits:0,preparedBits:0,transitions:0,blocks:0})};
+ ok(worker.state===Q.q&&Array.from({length:7},(_,i)=>worker.tape.get(worker.head+i)).join("")==="1111111","inherited worker row certificate");
+ let witness=E.witness(3,[1,0,1],Array(9).fill(2));ok(E.valid(forced.raw,witness),"original Boolean witness validation");
+ let unsat=A.physical(Q,dense.prepared,120000000);ok(unsat.state===Q.q&&!unsat.tape.has(unsat.head),"dense worker UNSAT");
+ return {q:C.q,descriptorBits:C.desc.length,rows,controls,cutoffs:4,exactBudget:clock,workerTransitions:worker.t,workerUnsatTransitions:unsat.t,witnessVerified:true,totals:rows.reduce((a,r)=>({rawBits:a.rawBits+r.L,maskBits:a.maskBits+r.maskBits,pinBits:a.pinBits+r.pins.length,preparedBits:a.preparedBits+r.preparedBits,transitions:a.transitions+r.t,blocks:a.blocks+49}),{rawBits:0,maskBits:0,pinBits:0,preparedBits:0,transitions:0,blocks:0})};
 }
-module.exports={compile,decode,run,audit};
-if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--produce'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else console.log('F038_REX_TERNARY_MASKS_OK '+JSON.stringify(audit(require('./f038_rex_multitape_producer.js'),require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_nested_variable_overlap.js'))));}
+function sparse(desc,raw,budget){
+ let j=3;while(desc[j]==="1")j++;let q=j-3,b=q.toString(2).length;j++;
+ let table=[];for(let i=0;i<3*q;i++){let a=parseInt(desc.slice(j,j+b),2),w=parseInt(desc.slice(j+b,j+b+2),2),d=parseInt(desc.slice(j+b+2,j+b+4),2)-1;j+=b+4;if(a>q||w>2||d< -1||d>1)throw Error("descriptor field");table.push([a,w,d]);}
+ if(j!==desc.length)throw Error("descriptor size");
+ let tape=new Map([...raw].map((x,i)=>[i,+x])),h=0,state=0,t=0;
+ while(state!==q&&t<budget){let [a,w,d]=table[3*state+(tape.get(h)??2)];if(w===2)tape.delete(h);else tape.set(h,w);h+=d;state=a;t++;}
+ return {halt:state===q,t,h,tape};
+}
+function independentAudit(E){
+ const C=compile(),M=decode(C.desc),raw=E.encode(2,[1,0],[[-1],[-3],[-5],[-1,-3],[-1,-3,-5]]),r=run(M,raw),v=sparse(C.desc,raw,r.t),p=r.checkpoint;
+ const ok=(a,s)=>{if(!a)throw Error(s)};
+ ok(v.halt&&v.t===r.t&&v.h===p.head&&!v.tape.has(v.h),"sparse halt");
+ const seq=(start,end)=>Array.from({length:end-start},(_,i)=>v.tape.get(start+i)).join("");
+ ok(seq(p.selectorStart,p.selectorEnd)===p.selector,"sparse payload");
+ let cursor=p.selectorStart-1,blocks=[];
+ for(let i=0;i<50;i++){ok(!v.tape.has(cursor),"sparse delimiter");cursor--;let bits=[];while(v.tape.has(cursor))bits.push(v.tape.get(cursor--));blocks.push(bits.join(""));}
+ ok(blocks.slice(0,49).every((b,i)=>b===p.masks[i])&&blocks[49]===p.pins&&cursor===p.leftBoundary&&v.tape.size===p.selector.length+p.workBits+p.maskBits+p.pins.length,"sparse masks");
+ ok(!sparse(C.desc,raw,r.t-1).halt,"sparse one step short");
+ let outside=E.encode(2,[1,0],[[-1,-17]]),x=sparse(C.desc,outside,20000000);
+ ok(x.halt&&x.tape.size===1&&x.tape.get(x.h)===1,"sparse rejection cleanup");
+ return {replays:2,oneStepShort:1,maskBits:p.maskBits,transitions:v.t+x.t};
+}
+module.exports={compile,decode,run,audit,independentAudit};
+if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--produce'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else if(process.argv.includes('--independent'))console.log('F038_REX_TERNARY_MASKS_INDEPENDENT_OK '+JSON.stringify(independentAudit(require('./f038_tga_normalized_integration.js').engine())));else console.log('F038_REX_TERNARY_MASKS_OK '+JSON.stringify(audit(require('./f038_rex_multitape_producer.js'),require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_nested_variable_overlap.js'))));}
