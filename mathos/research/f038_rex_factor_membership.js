@@ -152,3 +152,14 @@ function logicalRun(J,raw,limit=1000000){
  while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",r=T.get(state+":"+a);if(!r)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>20)trace.shift();let [s,w,d]=r;if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;state=s;steps++;}
  return {state,head,steps,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").filter(x=>x==="0"||x==="1").join("")};
 }
+
+function physicalRun(M,raw,limit=20000000){
+ let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,trace=[];
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":")){logical++;trace.push([name,head]);if(trace.length>12)trace.shift();}
+  let [s,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=s;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }
+ return {tape,head,state,t,span:hi-lo+1,ph,logical,trace};
+}
