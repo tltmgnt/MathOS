@@ -43,6 +43,7 @@ function audit(A,C,P,K,L,E,suite="ir"){
  }
  const B=[[-1,-3,-5],[-2,-4,-7],[-1,-6,-8],[-3,-5,-7],[-2],[-1,-4]];
  if(suite==="physical")check("four-bag-triples",2,[1,0],B,[0,8]);
+ else if(suite==="physicalTrap")check("greedy-trap",2,[0,1],trap.map(h=>h.map(v=>-(2*v+1))),[3]);
  else if(suite==="physical3")check("m3-mixed",3,[1,0,1],[[-1,-4,-7],[-2,-6,-10],[-3,-8,-11],[-4,-7,-10],[-1],[-5,-9]],[0]);
  else if(suite==="ir"){
   const a=check("four-bag-triples",2,[1,0],B,[]);
