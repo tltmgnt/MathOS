@@ -296,9 +296,33 @@ function audit(){
   let r=check(rows,false);scaling.push([rows.length,k+1,encode(rows).length,r.t,r.joinPhysical,r.span,r.ph]);
  }
  let pos=3;while(M.desc[pos]==="1")pos++;
- ok(pos-3===M.q&&M.desc[pos++]==="0","descriptor header");let b=M.q.toString(2).length;
- for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos-3===M.q&&M.desc[pos++]==="0","descriptor header");let b=M.q.toString(2).length,decoded=[];
+ for(let [s,w,d] of M.T){let row=[parseInt(M.desc.slice(pos,pos+b),2),parseInt(M.desc.slice(pos+b,pos+b+2),2),parseInt(M.desc.slice(pos+b+2,pos+b+4),2)-1];ok(row[0]===s&&row[1]===w&&row[2]===d,"descriptor");decoded.push(row);pos+=b+4;}
  ok(pos===M.desc.length,"descriptor length");
- return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling};
+ let grammar={cases:0,valid:0,rejected:0,transitions:0};
+ function parse(raw){
+  if(raw.length%2)return null;
+  let rows=[],k="",p="",keyMode=true;
+  for(let i=0;i<raw.length;i+=2){
+   let t=raw.slice(i,i+2);
+   if(t[0]==="0"){if(keyMode)k+=t[1];else p+=t[1];}
+   else if(t==="10"){if(!keyMode||!k)return null;keyMode=false;}
+   else {if(keyMode||k.endsWith("1")&&!p)return null;rows.push([k,p]);k="";p="";keyMode=true;}
+  }
+  return keyMode&&!k&&rows.every(([k])=>k.length===rows[0][0].length)?rows:null;
+ }
+ for(let n=0;n<=8;n++)for(let i=0;i<2**n;i++){
+  let raw=n?i.toString(2).padStart(n,"0"):"",r=physicalRun(M,raw),rows=parse(raw);
+  ok(r.state===M.q,"short halt");grammar.cases++;grammar.transitions+=r.t;
+  if(rows===null){ok(!r.tape.has(r.head),"short rejection");grammar.rejected++;}
+  else {let want=encode(reference(rows));ok(r.tape.size===want.length&&[...want].every((v,j)=>r.tape.get(r.head+j)===+v),"short output");grammar.valid++;}
+ }
+ let U={selectorInputs:0,noCandidate:0};
+ for(let n of [1,2])for(let p=0;p<2**(n===1?2:8);p++){
+  let raw="1".repeat(n)+"0"+Array.from({length:n===1?2:8},(_,i)=>(p>>i)&1).join(""),tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0;
+  for(let t=0;t<10000&&state!==M.q;t++){let [a,w,d]=decoded[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);head+=d;state=a;}
+  ok(state===M.q&&!tape.has(head),"original selector non-solver");U.selectorInputs++;U.noCandidate++;
+ }
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,grammar,U};
 }
 if(process.argv.includes('--description')){let j=joinedWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_RETAINED_JOIN_OK '+JSON.stringify(audit()));
