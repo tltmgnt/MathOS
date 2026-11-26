@@ -132,7 +132,7 @@ def check(doc, expected=None):
     d,fs = problem(doc['problem']); identity = digest(doc['problem'])
     if expected is not None: require(type(expected) is str and identity == expected)
     c,groups = components(d,fs); const = score(c,{})
-    optimum,w,proofs = doc['optimum'], doc['witness'], doc['proofs']; budget = Budget()
+    optimum,w,proofs = doc['optimum'],doc['witness'],doc['proofs']; budget = Budget()
     require(type(proofs) is list)
     if optimum is None:
         require(w is None)
