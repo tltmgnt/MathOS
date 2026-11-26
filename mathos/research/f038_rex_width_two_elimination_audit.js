@@ -66,6 +66,14 @@ function audit(P,E,suite="small"){
   check("disconnected-unsat",2,[0,0],[[-1,-7,-17],[-3],[-4],[-5,-13]],"FOREST_UNSAT");
   check("unary-unsat",2,[0,1],[[-1],[-2]],"FOREST_UNSAT");
   check("K4-SAT-refusal",2,[1,1],clique([0,1,2,3]),"OUTSIDE_WIDTH_TWO");ok(rows.at(-1).models>0,"refused SAT");
+ }else if(suite==="joint"){
+  // Centers 0,8 are not initially eligible. Leaf 1 owns a ternary bag
+  // with the owner in its middle field; both separator fields are
+  // nonadjacent in the sorted row layout. Later center bag owns inequality.
+  const B=[...E.tup(2,3)].filter(z=>z[0]!==z[2]).map(z=>[0,1,8].map((v,i)=>-(2*v+z[i]+1)));
+  for(let v=2;v<=7;v++)B.push([-1,-(2*v+1)],[-(2*v+1),-17]);
+  B.push([-1,-17],[-2,-18]);
+  const r=check("middle-owner-joint-unsat",2,[1,1],B,"FOREST_UNSAT");ok(rows.at(-1).local.every(x=>x>0)&&r.r.checkpoint.plan[0].join()==="1,0,8","middle owner nonempty local");
  }else if(suite==="larger"){
   let seed=0x52455823;const rnd=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
   let H=[[0,4,8],[1,4,8],[2,5,6],[3,7],[0],[8],[4,8]];
