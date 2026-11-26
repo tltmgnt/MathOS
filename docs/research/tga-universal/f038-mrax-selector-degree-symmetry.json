@@ -1,0 +1,293 @@
+{
+  "attempt_id": "F038-MRAX-SELECTOR-DEGREE-SYMMETRY",
+  "base_commit": "9521903cfd5f9084e76abd262e0d0dde71c3fd2f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45728449215",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can a compositional algebraic measure yield an unconditional lower bound for arbitrary fan-in-two SAT selector circuits, beyond fixed-partition rank?",
+  "route": "negative",
+  "topology": "Source translation group acting on constraint subsets; top Boolean cube coefficient and shared-gate algebraic substitution.",
+  "adversarial": [
+    "Linear in selector length is not a separation.",
+    "Full degree can be achieved by a linear-size circuit.",
+    "Arbitrary subpools need not be sign invariant.",
+    "Odd-characteristic XOR is not affine."
+  ],
+  "scope": "Nonempty sign-invariant normalized non-tautological clause pool; unrestricted fan-out and reuse, fixed fan-in-two basis.",
+  "cost": "General binary circuit >=N-1 nonlinear gates and nonlinear depth >=ceil(log2 N) over GF2; linear bound only",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of orbit parity, multilinear substitution and prime-domain extension"
+    },
+    {
+      "key": "attempt_stronger_measure",
+      "label": "A compositional lower-bound measure exceeding linear degree ceiling"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Universal deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS scalar assignment-union, prime-domain selector and circuit enumeration; not execution of Python.",
+  "expected": {
+    "polynomials": [
+      [
+        1,
+        2,
+        3,
+        3,
+        3,
+        2,
+        1
+      ],
+      [
+        2,
+        8,
+        15,
+        15,
+        15,
+        8,
+        1
+      ],
+      [
+        3,
+        26,
+        255,
+        255,
+        255,
+        26,
+        1
+      ],
+      [
+        4,
+        64,
+        65535,
+        43145,
+        34953,
+        64,
+        1
+      ]
+    ],
+    "prime": [
+      [
+        2,
+        1,
+        1,
+        2,
+        4,
+        8,
+        3,
+        1
+      ],
+      [
+        2,
+        2,
+        2,
+        8,
+        256,
+        1024,
+        95,
+        1
+      ],
+      [
+        3,
+        1,
+        1,
+        3,
+        8,
+        24,
+        7,
+        2
+      ],
+      [
+        3,
+        2,
+        2,
+        15,
+        32768,
+        294912,
+        19759,
+        2
+      ],
+      [
+        5,
+        1,
+        1,
+        5,
+        32,
+        160,
+        31,
+        4
+      ]
+    ],
+    "circuits": [
+      [
+        2,
+        0,
+        4,
+        [
+          2,
+          2,
+          0
+        ]
+      ],
+      [
+        2,
+        1,
+        16,
+        [
+          2,
+          6,
+          8
+        ]
+      ],
+      [
+        3,
+        1,
+        38,
+        [
+          2,
+          12,
+          24,
+          0
+        ]
+      ],
+      [
+        3,
+        2,
+        152,
+        [
+          2,
+          14,
+          72,
+          64
+        ]
+      ],
+      [
+        4,
+        1,
+        70,
+        [
+          2,
+          20,
+          48,
+          0,
+          0
+        ]
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_selector_degree_symmetry.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-SELECTOR-DEGREE-SYMMETRY.md"
+  ],
+  "next": "Investigate a stronger restriction-sensitive algebraic measure or gate-elimination recurrence and its compositional counterexamples.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can a compositional algebraic measure yield an unconditional lower bound for arbitrary fan-in-two SAT selector circuits, beyond fixed-partition rank?",
+      "strategy": "Compute full multilinear degree by source sign-flip orbit symmetry and transfer to nonlinear gate count.",
+      "alternative": "Extend orbit argument to prime-domain constraint pools and test the degree ceiling against small circuits.",
+      "stop_rule": "Do not promote a linear bound in selector length to a superpolynomial separation.",
+      "literature_leads": [
+        "Prior MathOS universal selector and rank compression; classical multilinear Boolean polynomial degree and finite p-group orbit counting. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The full Boolean selector function has degree N over GF2 and every binary circuit computing it requires at least N-1 nonaffine gates.",
+      "scope": "Nonempty sign-invariant normalized non-tautological clause pool; unrestricted fan-out and reuse, fixed fan-in-two basis.",
+      "derivation": "Orbit parity of satisfiable subsets leaves only empty subset; reverse substitution of AND gates increases multilinear degree at most one per gate.",
+      "unresolved_steps": [
+        "Superpolynomial lower bound for the same fixed NP-complete family."
+      ],
+      "candidate_tests": [
+        "Union parity polynomial, direct Möbius transforms, circuit degree distributions."
+      ]
+    },
+    "alternative": {
+      "claim": "Prime-domain translation-invariant nontrivial constraint pools have full selector coefficient (-1)^N over GF(p), while maximal degree alone permits linear-size circuits.",
+      "scope": "Prime p, coordinate translation group, Boolean selector bits; no identically true constraints.",
+      "derivation": "Orbit sizes divisible by p except fixed subsets; nonempty invariant subset infeasible; AND of N bits attains full degree with N-1 gates.",
+      "unresolved_steps": [
+        "A stronger compositional measure with a noncircular superpolynomial bound."
+      ],
+      "candidate_tests": [
+        "Prime-domain signed coefficient enumeration and compact AND controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Linear in selector length is not a separation.",
+        "Full degree can be achieved by a linear-size circuit.",
+        "Arbitrary subpools need not be sign invariant.",
+        "Odd-characteristic XOR is not affine."
+      ],
+      "counterexample_candidates": [
+        "AND_N attains maximal degree and exact linear gate count; asymmetric clause pool lacks orbit theorem."
+      ],
+      "equivalence_audit": "Exact full coefficient and gate substitution invariant; distinguish selector count from source models.",
+      "barrier_audit": "No superpolynomial general circuit bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean selectors, multilinear polynomials, binary gate DAGs and finite field arithmetic.",
+      "cost_ledger": {
+        "encoding": "Polynomial Boolean width-three pool, explicit prime-domain fixtures",
+        "preprocessing": "Source translations induce constraint permutations",
+        "inference": "Orbit sum and reverse topological gate substitution as mathematical proof",
+        "repetitions": "Exponential finite assignment-subset or selector enumeration only",
+        "arithmetic_bits": "Exact GF2 parity and signed integer coefficients mod prime",
+        "memory": "Finite coefficient maps exponential; no efficient general polynomial expansion asserted",
+        "reconstruction": "Direct coefficient replay and small circuit truth tables",
+        "overall": "General binary circuit >=N-1 nonlinear gates and nonlinear depth >=ceil(log2 N) over GF2; linear bound only"
+      },
+      "missing_bounds": [
+        "Superpolynomial general circuit lower bound",
+        "Stronger justified compositional measure"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Sign-orbit parity theorem",
+        "Degree bound under shared-gate substitution",
+        "Prime-domain extension",
+        "Degree ceiling counterexample"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general circuit minimizer or superpolynomial lower-bound algorithm."
+      ],
+      "proof_obligations": [
+        "Replay finite coefficient maps and symmetry",
+        "Check prime-domain signed coefficients",
+        "Check circuit degrees and tight AND controls"
+      ],
+      "formalization_plan": "Formalize finite group action, orbit sum, Boolean multilinear substitution and degree transfer separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Obtain a genuine general fan-in-two circuit lower bound for the universal selector family, while identifying its linear degree ceiling.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Superpolynomial circuit measure or transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate a stronger restriction-sensitive algebraic measure or gate-elimination recurrence and its compositional counterexamples.",
+      "human_review_requests": [
+        "Review orbit action, multilinear degree substitution with reuse, prime-domain field conventions and exact scope."
+      ]
+    }
+  }
+}
