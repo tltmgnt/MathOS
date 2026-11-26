@@ -1,0 +1,285 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-FEW-MODEL-ISOLATION",
+  "base_commit": "61359554a86daed1343eddce87a7d46c543c27e9",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45749269887",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can bounded-ambiguity source residuals deterministically transfer to many actual unique residuals without a randomized separation assumption?",
+  "route": "negative",
+  "topology": "Finite-field evaluation buckets, parsimonious accumulator rows, exact model-count census transfer and conditional multiplicity dichotomy.",
+  "adversarial": [
+    "Root bound does not isolate arbitrary exponentially many models.",
+    "Field construction and all bucket calls must be charged.",
+    "Auxiliary variables must have unique extension.",
+    "K is not necessarily k; promise unique search is not merely a language-class equality."
+  ],
+  "scope": "All original selectors with at most n^d models, fixed k,d, same U and exact clocks; transfer from some K>=k, no unconditional existence assertion.",
+  "cost": "Polynomial field construction, Q^2 full target selectors, h=O_d(n log(n+2)), exact fixed-stage calls and projected verification; fixed source polynomial exponent absorbed into K.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of deterministic isolation and exact residual transfer"
+    },
+    {
+      "key": "attempt_many_models",
+      "label": "Unrestricted high-multiplicity residuals or unbounded hard few-model inputs"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage failure or cutoff"
+    }
+  ],
+  "independent_reference": "Independent JS polynomial arithmetic, exhaustive small model subsets, full target clause generation and bit-flip tests; not new Python execution.",
+  "expected": {
+    "controls": 3,
+    "encoding": [
+      [
+        1,
+        1,
+        4,
+        64,
+        4,
+        16,
+        32,
+        8,
+        8,
+        0,
+        128,
+        96
+      ],
+      [
+        2,
+        2,
+        10,
+        1160,
+        16,
+        256,
+        1024,
+        132,
+        102,
+        15,
+        5120,
+        8192
+      ],
+      [
+        3,
+        4,
+        23,
+        15226,
+        8,
+        128,
+        1024,
+        72,
+        24,
+        18,
+        6304,
+        20480
+      ]
+    ],
+    "fields": [
+      [
+        1,
+        2,
+        4,
+        1
+      ],
+      [
+        2,
+        7,
+        16,
+        18
+      ],
+      [
+        3,
+        11,
+        64,
+        196
+      ],
+      [
+        4,
+        19,
+        256,
+        1800
+      ],
+      [
+        5,
+        37,
+        1024,
+        15376
+      ],
+      [
+        6,
+        67,
+        4096,
+        127008
+      ]
+    ],
+    "rows": [
+      [
+        1,
+        1,
+        2,
+        4,
+        2,
+        16,
+        8,
+        0,
+        8,
+        4,
+        4
+      ],
+      [
+        2,
+        2,
+        7,
+        16,
+        10,
+        256,
+        96,
+        16,
+        144,
+        56,
+        52
+      ],
+      [
+        3,
+        4,
+        19,
+        256,
+        92,
+        65536,
+        13568,
+        1216,
+        50752,
+        3312,
+        2928
+      ],
+      [
+        4,
+        5,
+        37,
+        130,
+        10,
+        133120,
+        27993,
+        479,
+        104648,
+        1095,
+        852
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-FEW-MODEL-ISOLATION.md",
+    "mathos/research/f038_unrestricted_few_model_isolation.py",
+    "mathos/research/f038_unrestricted_isolation_transfer.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Investigate hard residuals with many witnesses or establish unbounded hard few-model residuals without presupposing P!=NP; no finite-to-infinite extrapolation.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can bounded-ambiguity source residuals deterministically transfer to many actual unique residuals without a randomized separation assumption?",
+      "strategy": "Evaluate each model's binary polynomial over a deterministically constructed finite field and enumerate all evaluation buckets; encode each bucket parsimoniously.",
+      "alternative": "Use per-model root bounds to obtain a multiplicity-weighted unique residual census and a promise enumeration consequence.",
+      "stop_rule": "No claim of deterministic isolation for arbitrary multiplicity or unbounded residual existence.",
+      "literature_leads": [
+        "Elementary finite-field root bound and polynomial evaluation hashing; prior same-U randomized isolation and exact residual transfer. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For each k,d some K>=k gives |B_k^uniq(h)|>=sum_{p in B_K^{<=d}(n)} M(p)[Q-(n-1)(M(p)-1)] at every n.",
+      "scope": "All original selectors with at most n^d models, fixed k,d, same U and exact clocks; transfer from some K>=k, no unconditional existence assertion.",
+      "derivation": "At most n-1 collision evaluations per distinct witness pair, explicit polynomial field and all buckets, unique auxiliary extension and injective alpha tag, fixed polynomial source search and exact stage absorption.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic or all-exponent failure.",
+        "No numerical K or compiled original description."
+      ],
+      "candidate_tests": [
+        "All small field products, model-subset bucket census, exact source/target selector model correspondence."
+      ]
+    },
+    "alternative": {
+      "claim": "Eventual success at a fixed stage on every unique selector implies polynomial-time enumeration of all models on every fixed polynomial-model promise.",
+      "scope": "Conditional deterministic promise search and multiplicity dichotomy, not P=NP.",
+      "derivation": "Each model has an isolated bucket; run all exact target stages and deduplicate projected verified witnesses; finite exceptions hardcode.",
+      "unresolved_steps": [
+        "High-multiplicity SAT and unbounded few-model hardness."
+      ],
+      "candidate_tests": [
+        "Check each individual witness's isolation count, tag inversion and auxiliary uniqueness."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Root bound does not isolate arbitrary exponentially many models.",
+        "Field construction and all bucket calls must be charged.",
+        "Auxiliary variables must have unique extension.",
+        "K is not necessarily k; promise unique search is not merely a language-class equality."
+      ],
+      "counterexample_candidates": [
+        "Many-model residuals may evade the deterministic guarantee.",
+        "Different alpha can give identical maps without a forced tag."
+      ],
+      "equivalence_audit": "Original full normalized selector, actual verified target stage and original projection, exact fixed exponent quantifiers.",
+      "barrier_audit": "No unrestricted lower-bound exponent or resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Fixed deterministic bit algorithm, original weighted U stages and polynomial-overhead tape simulation.",
+      "cost_ledger": {
+        "encoding": "Complete target selector with h=n+r(n+2) variables",
+        "preprocessing": "Trial division of degree-r monic polynomials and field powers",
+        "inference": "Exact bucket CNF and original stage-k witness search",
+        "repetitions": "Q^2 bucket pairs, polynomial for fixed d",
+        "arithmetic_bits": "r-bit polynomial coordinates, exact XOR and reduction",
+        "memory": "Explicit full selector and polynomial stage simulation",
+        "reconstruction": "Read original n bits, verify and optionally deduplicate all projected models",
+        "overall": "Polynomial field construction, Q^2 full target selectors, h=O_d(n log(n+2)), exact fixed-stage calls and projected verification; fixed source polynomial exponent absorbed into K."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic and all-exponent lower bound",
+        "Concrete original compiler and numerical K"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Field collision bound and deterministic construction",
+        "Exact auxiliary extension and selector injection",
+        "Quantified residual transfer and conditional promise enumeration"
+      ],
+      "unsupported_steps": [
+        "No actual large stage or independent mathematical review.",
+        "Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Review field root bound and collision count",
+        "Check original clause order and unique tags",
+        "Audit fixed polynomial clock absorption"
+      ],
+      "formalization_plan": "Formalize finite-field evaluation, root counting, accumulator extension, selector injection and original stage transfer.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Strengthen the asymptotic unrestricted investigation by deterministic multiplicity-sensitive transfer; distinguish few-model from high-multiplicity residuals.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Investigate hard residuals with many witnesses or establish unbounded hard few-model residuals without presupposing P!=NP; no finite-to-infinite extrapolation.",
+      "human_review_requests": [
+        "Review finite-field construction, model-count weighted injection, and exact stage quantifiers."
+      ]
+    }
+  }
+}

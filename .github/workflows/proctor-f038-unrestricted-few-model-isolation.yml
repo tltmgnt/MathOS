@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted few model isolation
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-few-model-isolation']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_few_model_isolation.py
+          python -m mathos.research.f038_unrestricted_block_language | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_BLOCK_LANGUAGE_OK {"bounds":[[186,94,7301105,"856677121","14057067138480899636290978994920732691743761567692552136"],[187,94,7403777,"276306911","141959223278425484196747769285945901534405598946554352294"],[188,95,7541417,"82729961","359862334792308981576893821829282389883539791431310963192"]],"census":[[[186,2048,0,16924167,2719683,3373767,1459287,51369,115855418,24476904],[3159063,214704,0,0,3159063,4516803,214704,0],[[0,121113,0,0],[2,84915,0,0],[3,8208,0,0],[4,432,0,0],[5,18,0,0],[6,18,0,0]]],[[186,2048,1,16156656,2624850,899046,4796352,40339,39190794,24476904],[805635,0,93411,0,828612,805635,0,93411],[[0,0,86913,0],[2,0,6372,0],[3,0,99,0],[4,0,27,0]]],[[186,2048,2,4317723,559593,469620,662940,43516,27921780,6009876],[273726,89010,33750,73134,307071,370368,113499,39204],[[0,76707,32229,73053],[2,10593,1413,27],[3,1413,99,54],[4,243,9,0],[5,36,0,0],[6,18,0,0]]],[[187,2048,0,16940817,2721258,3355488,1459341,51287,116274529,24476904],[3143313,212175,0,0,3143313,4501593,212175,0],[[0,119718,0,0],[2,83781,0,0],[3,8208,0,0],[4,432,0,0],[5,18,0,0],[6,18,0,0]]],[[187,2048,1,16149978,2625345,903015,4798566,40080,39215976,24476904],[805986,0,97029,0,828963,805986,0,97029],[[0,0,90486,0],[2,0,6417,0],[3,0,99,0],[4,0,27,0]]],[[187,2048,2,4323078,560907,462339,663552,43471,28098183,6009876],[268254,88893,33714,71478,301284,364842,113319,38889],[[0,76689,32589,71397],[2,10494,1026,27],[3,1422,90,54],[4,234,9,0],[5,36,0,0],[6,18,0,0]]],[[188,2048,0,16924779,2719710,3373128,1459287,51437,115665345,24476904],[3158541,214587,0,0,3158541,4516245,214587,0],[[0,121113,0,0],[2,84807,0,0],[3,8199,0,0],[4,432,0,0],[5,18,0,0],[6,18,0,0]]],[[188,2048,1,16156620,2624850,899082,4796352,40335,39201635,24476904],[805671,0,93411,0,828648,805671,0,93411],[[0,0,86913,0],[2,0,6372,0],[3,0,99,0],[4,0,27,0]]],[[188,2048,2,4317561,559602,469845,662868,43498,27947272,6009876],[273870,89037,33795,73143,307215,370512,113535,39249],[[0,76734,32274,73062],[2,10593,1413,27],[3,1413,99,54],[4,243,9,0],[5,36,0,0],[6,18,0,0]]]],"controls":3,"reference":[256,4096,3259,9777,6681,3755],"short":[[9688563,14788341],[13790259,10686645],[2770335,3239541]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_few_model_isolation | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_FEW_MODEL_ISOLATION_OK {"controls":3,"encoding":[[1,1,4,64,4,16,32,8,8,0,128,96],[2,2,10,1160,16,256,1024,132,102,15,5120,8192],[3,4,23,15226,8,128,1024,72,24,18,6304,20480]],"fields":[[1,2,4,1],[2,7,16,18],[3,11,64,196],[4,19,256,1800],[5,37,1024,15376],[6,67,4096,127008]],"rows":[[1,1,2,4,2,16,8,0,8,4,4],[2,2,7,16,10,256,96,16,144,56,52],[3,4,19,256,92,65536,13568,1216,50752,3312,2928],[4,5,37,130,10,133120,27993,479,104648,1095,852]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_FEW_MODEL_ISOLATION_GATE_OK status=OPEN')
+          PY
