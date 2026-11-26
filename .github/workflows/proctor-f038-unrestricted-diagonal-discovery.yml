@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted diagonal discovery
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-diagonal-discovery']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_diagonal_discovery.py
+          python -m mathos.research.f038_unrestricted_cubic_interval | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_CUBIC_INTERVAL_OK {"classification":[2916,1458,729,459,54,135,9,72],"controls":4,"counts":[51,0,93,1055520,63,387426321,149444590,31349,154494],"explicit":[[0,"320255973501901",208,154700,154492,52],[1,"1446155880344525",208,154700,154492,52],[2,"2572055787187149",208,154700,154492,52],[3,"3697955694029773",208,154700,154492,52]],"geometry":[[52,182261,54,146249,4096],[53,193080,54,157067,4096],[54,204319,54,168305,4096],[55,215986,54,179971,4096],[56,228089,54,192073,4096],[57,240636,54,204619,4096],[58,253635,54,217617,4096],[59,267094,57,231075,32768],[60,281021,57,245001,32768],[61,295424,57,259403,32768],[62,310311,57,274289,32768],[63,325690,57,289667,32768],[64,341569,57,305545,32768],[65,357956,57,321931,32768],[66,374859,57,338833,32768],[67,392286,57,356259,32768],[68,410245,57,374217,32768],[69,428744,57,392715,32768],[70,447791,57,411761,32768],[71,467394,57,431363,32768],[72,487561,57,451529,32768],[73,508300,57,472267,32768],[74,529619,60,493585,262144],[75,551526,60,515491,262144],[76,574029,60,537993,262144],[77,597136,60,561099,262144],[78,620855,60,584817,262144],[79,645194,60,609155,262144],[80,670161,60,634121,262144],[81,695764,60,659723,262144],[82,722011,60,685969,262144],[83,748910,60,712867,262144],[84,776469,60,740425,262144],[85,804696,60,768651,262144],[86,833599,60,797553,262144],[87,863186,60,827139,262144],[88,893465,60,857417,262144],[89,924444,60,888395,262144],[90,956131,60,920081,262144],[91,988534,60,952483,262144],[92,1021661,60,985609,262144]],"layouts":[[52,4,368,464,125860,125396,208],[59,4,480,464,125860,125396,236],[74,4,720,464,125860,125396,296],[92,4,1008,464,125860,125396,368]],"prefix":[[3,0,1,5832,46656,12960,1620,3],[3,0,4,5832,46656,19008,2376,8],[3,0,16,5832,46656,19568,2446,8],[3,0,64,5832,46656,19624,2453,8],[3,1,1,5832,46656,12960,1620,3],[3,1,4,5832,46656,19008,2376,6],[3,1,16,5832,46656,19568,2446,8],[3,1,64,5832,46656,19624,2453,8],[4,0,1,5832,46656,12960,1620,3],[4,0,4,5832,46656,16272,2034,5],[4,0,16,5832,46656,19568,2446,9],[4,0,64,5832,46656,19624,2453,9],[4,1,1,5832,46656,12960,1620,3],[4,1,4,5832,46656,16272,2034,5],[4,1,16,5832,46656,19568,2446,12],[4,1,64,5832,46656,19624,2453,12]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_diagonal_discovery | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_DIAGONAL_OK {"controls":4,"linear":[[1,5832,46656,19624,2453,44203,5832,3379],[2,5832,46656,19624,2453,44203,5832,3379],[4,5832,46656,19624,2453,44203,5832,3379]],"writers":[[1,2,4,12,1],[2,4,8,48,6],[3,8,16,144,28],[4,16,32,384,120],[5,32,64,960,496],[6,64,128,2304,2016]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_DIAGONAL_GATE_OK status=OPEN')
+          PY

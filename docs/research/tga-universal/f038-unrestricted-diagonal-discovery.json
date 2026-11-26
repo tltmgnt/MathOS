@@ -1,0 +1,224 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-DIAGONAL-DISCOVERY",
+  "base_commit": "092e604742fc63f1bd42d2cb63a8e9b1e2338175",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45739898930",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can a uniform witnessed adversary directly defeat all clocked polynomial algorithms, and what resource obstruction arises from exact program self-description?",
+  "route": "negative",
+  "topology": "Clocked counterexample search, source-as-data self-description, exponential binary-clock discovery lower bound and same-U list transfer.",
+  "adversarial": [
+    "Binary clock length is essential.",
+    "Generator output must contain explicit selector and witness, not succinct output.",
+    "Compiler polynomial overhead and program description size must both be charged.",
+    "Linear-domain totality uses previous quadratic theorem, not an assumption that P!=NP."
+  ],
+  "scope": "Actual same-U general program descriptions and output convention; external binary clocks on individual programs for discovery analysis; original U stages unchanged.",
+  "cost": "Exponential-in-binary-descriptor discovery lower bound along self-description family; original stage list-generation consequence; no unrestricted SAT decision runtime bound.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of parameterized compiler and diagonal discovery theorem"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS one-state linear-clock tests and direct writer simulations; not execution of new Python.",
+  "expected": {
+    "linear": [
+      [
+        1,
+        5832,
+        46656,
+        19624,
+        2453,
+        44203,
+        5832,
+        3379
+      ],
+      [
+        2,
+        5832,
+        46656,
+        19624,
+        2453,
+        44203,
+        5832,
+        3379
+      ],
+      [
+        4,
+        5832,
+        46656,
+        19624,
+        2453,
+        44203,
+        5832,
+        3379
+      ]
+    ],
+    "writers": [
+      [
+        1,
+        2,
+        4,
+        12,
+        1
+      ],
+      [
+        2,
+        4,
+        8,
+        48,
+        6
+      ],
+      [
+        3,
+        8,
+        16,
+        144,
+        28
+      ],
+      [
+        4,
+        16,
+        32,
+        384,
+        120
+      ],
+      [
+        5,
+        32,
+        64,
+        960,
+        496
+      ],
+      [
+        6,
+        64,
+        128,
+        2304,
+        2016
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_diagonal_discovery.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-DIAGONAL-DISCOVERY.md"
+  ],
+  "next": "Seek unconditional unbounded B_3 failures with an existence or formula-only adversary that does not require cheap witness generation, or prove a uniform polynomial cutoff.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can a uniform witnessed adversary directly defeat all clocked polynomial algorithms, and what resource obstruction arises from exact program self-description?",
+      "strategy": "Prove exact clocked counterexample-generator equivalence and construct a parameterized self-description using a fixed polynomial-overhead interpreter and binary clock.",
+      "alternative": "Analyze unclocked total discovery and same-U polynomial witnessed list generators; expose distinction between formula discovery and witness discovery.",
+      "stop_rule": "Do not confuse a discovery lower bound with a SAT decision lower bound or claim cubic infinitude.",
+      "literature_leads": [
+        "Classical self-reference and universal simulation; prior exact quadratic-stage proof and actual tape decoder. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "A total computable generator of counterexamples with witnesses for all clocked polynomial programs exists iff P!=NP; for linear clocks such a generator exists unconditionally but necessarily takes exponential time along a self-description family.",
+      "scope": "Actual same-U general program descriptions and output convention; external binary clocks on individual programs for discovery analysis; original U stages unchanged.",
+      "derivation": "Enumerate failures; linear domain follows from prior unbounded quadratic failures; reconstruct own description from literal source and binary h, run generator on clock 2^h and emit supplied witness; charge polynomial simulation and explicit output.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic-stage failure or uniform polynomial cutoff."
+      ],
+      "candidate_tests": [
+        "Exact finite linear-clock witness failure and writer output/timeout convention; binary clock tuple encoding."
+      ]
+    },
+    "alternative": {
+      "claim": "Total unclocked witnessed discovery on all valid codes cannot defeat every polynomial-time program; no single polynomial witnessed-list generator supplies same-U bad instances at exponents tending to infinity.",
+      "scope": "Actual same-U general program descriptions and output convention; external binary clocks on individual programs for discovery analysis; original U stages unchanged.",
+      "derivation": "Fixed self-description in the unclocked case; fixed list-recomputing program dominates its own generated witnesses at some stage exponent.",
+      "unresolved_steps": [
+        "A resource-preserving existence argument or formula-only adversary at unbounded cubic stage."
+      ],
+      "candidate_tests": [
+        "Actual interpreter counterexample and direct writer controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Binary clock length is essential.",
+        "Generator output must contain explicit selector and witness, not succinct output.",
+        "Compiler polynomial overhead and program description size must both be charged.",
+        "Linear-domain totality uses previous quadratic theorem, not an assumption that P!=NP."
+      ],
+      "counterexample_candidates": [
+        "A generator without witnesses is outside the theorem.",
+        "A separate generator with degree depending on k is outside the same-U uniform-list corollary."
+      ],
+      "equivalence_audit": "Original decoder, output convention and U stage unchanged; explicit self-description using source-as-data, exact external clock and quantifiers.",
+      "barrier_audit": "No unbounded cubic or SAT decision lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original deterministic three-symbol one-tape descriptions, external clock descriptor for discovery; fixed multitape interpreter simulated with polynomial overhead.",
+      "cost_ledger": {
+        "encoding": "Binary length-coded descriptor tuple, full selector and full witness output",
+        "preprocessing": "Fixed source-as-data compiler with finite-state loader; description length O(log h log log h)",
+        "inference": "Run G on reconstructed own code and binary clock, emit its verified witness",
+        "repetitions": "Exhaustive discovery for totality; exact finite linear-clock regression separately",
+        "arithmetic_bits": "Charge writing h+1 clock bits, explicit tuple and selector lengths",
+        "memory": "Polynomial simulator overhead in input and generator runtime; no free tape operations",
+        "reconstruction": "Counterexample generator supplies witness; compiled self-program emits it at exact head position",
+        "overall": "Exponential-in-binary-descriptor discovery lower bound along self-description family; original stage list-generation consequence; no unrestricted SAT decision runtime bound."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent SAT lower bound",
+        "Implemented general source-to-U compiler and formal simulation proof"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Clocked discovery equivalence and nonvacuous linear-domain totality from prior theorem",
+        "Parameterized self-description and exponential cost contradiction",
+        "Unclocked totality obstruction and uniform-list stage corollary",
+        "Finite actual clock/output checks"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "Generic compiler is mathematical, not implemented in this cycle."
+      ],
+      "proof_obligations": [
+        "Review loader and interpreter overhead",
+        "Replay actual clocked counterexamples and witness writers",
+        "Preserve discovery versus decision distinction"
+      ],
+      "formalization_plan": "Formalize finite-state loader and fixed interpreter with polynomial overhead, tuple encoding and diagonal self-description, then exact clocked contradiction.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Identify a nonvacuous exponential cost barrier to uniform witnessed counterexample discovery and constrain direct unrestricted adversarial strategy.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review and formal compiler"
+      ],
+      "next_question": "Seek unconditional unbounded B_3 failures with an existence or formula-only adversary that does not require cheap witness generation, or prove a uniform polynomial cutoff.",
+      "human_review_requests": [
+        "Review self-description construction, binary input length, runtime absorption and previous quadratic theorem dependency."
+      ]
+    }
+  }
+}
