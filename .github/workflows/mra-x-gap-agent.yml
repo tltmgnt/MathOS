@@ -1,0 +1,42 @@
+name: MRA-X gap agent
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_topology.py'
+      - 'tools/mra_x_gap_agent.py'
+      - '.github/workflows/mra-x-gap-agent.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_topology.py'
+      - 'tools/mra_x_gap_agent.py'
+      - '.github/workflows/mra-x-gap-agent.yml'
+permissions:
+  contents: read
+jobs:
+  campaign:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_gap_agent.py --rounds 2 --output agent-evidence.json
+      - name: Verify evidence and failure gates
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          from unittest.mock import patch
+          import mra_x_gap_agent as a
+          assert a.priority_plan(['x'])[1]=='deterministic_fallback'
+          assert a.priority_plan(list(a.FAMILIES))[1]=='accepted_advisory_priority'
+          assert a.campaign(1,budget=1)['status']=='budget_exhausted'
+          with patch.object(a.ref,'solve',side_effect=RuntimeError('injected')):
+              r=a.campaign(1)
+              assert r['status']=='counterexample' and r['counterexamples']
+          with open('agent-evidence.json') as f:
+              r=json.load(f)
+          h=r.pop('evidence_sha256')
+          assert h==a.digest(r)
+          assert r['candidate_checks']==416 and not r['counterexamples']
+          PY
