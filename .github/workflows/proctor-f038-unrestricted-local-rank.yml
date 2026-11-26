@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted local rank
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-local-rank']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_local_rank.js
+          node mathos/research/f038_unrestricted_local_rank.js | tee /tmp/current.txt
+          grep -Fx 'F038_LOCAL_RANK_OK {"fixtures":16,"stats":[161560,26680,260678,147060,260678,13399,11650,895488,4104,7506,7506],"rankChecks":258393,"encodingChecks":504480,"rebases":179304,"controls":[[16,4,16,65536,false],[32,5,32,1048576,false],[64,6,64,16777216,true],[128,7,128,268435456,true],[256,8,256,4294967296,true],[512,9,512,68719476736,true]],"intervals":8733,"transformChecks":256}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LOCAL_RANK_GATE_OK status=OPEN promotion=NONE')
+          PY
