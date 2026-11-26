@@ -155,20 +155,20 @@ function sortWorker(){
 }
 function encode(records){return records.map(([k,p])=>[...k].map(b=>"0"+b).join("")+"10"+[...p].map(b=>"0"+b).join("")+"11").join("");}
 function logicalRun(J,raw,limit=1000000){
- const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[],copySteps=0,restoreSteps=0;
- while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(/^(copy|append|newEnd|back)[01]/.test(state))copySteps++;if(/^(restoreScan|restoreBack|restoreSlot|restoreRight|eraseDest)/.test(state))restoreSteps++;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
- return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,copySteps,restoreSteps,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
+ const T=new Map(J.rules.map(([s,a,...r])=>[s+":"+a,r])),tape=new Map([...raw].map((b,i)=>[i,b+"_"]));let state="init",head=0,steps=0,trace=[],lo=0,hi=0,passes=0,moves=0,snapshots=[],copySteps=0,restoreSteps=0,joinSteps=0,joinMoves=0,inJoin=false,compares=0;
+ while(!["ready","reject"].includes(state)&&steps<limit){let a=tape.get(head)??"__",rule=T.get(state+":"+a);if(!rule)throw Error("missing "+state+":"+a);trace.push([state,head,a]);if(trace.length>15)trace.shift();let [s,w,d]=rule;if(/^(copy|append|newEnd|back)[01]/.test(state))copySteps++;if(/^(restoreScan|restoreBack|restoreSlot|restoreRight|eraseDest)/.test(state))restoreSteps++;if(state==="joinLeft")inJoin=true;if(inJoin){joinSteps++;joinMoves+=+(d!==0);}if(/^readQuery[012]Scan$/.test(state)&&/^U[012]$/.test(a))compares++;if(state==="makeE")passes++;if(state==="eraseDest"&&a==="R"){snapshots.push([...tape].filter(([i])=>i>=0&&i<head).sort((a,b)=>a[0]-b[0]).map(([,v])=>v==="M0"?"0":v==="M1"?"1":J.projection[v]??"").join(""));}if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;lo=Math.min(lo,head);hi=Math.max(hi,head);moves+=+(d!==0);state=s;steps++;}
+ return {state,head,steps,moves,passes,span:hi-lo+1,trace,snapshots,copySteps,restoreSteps,joinSteps,joinMoves,compares,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"").join("")};
 }
 
 function physicalRun(M,raw,limit=50000000){
- let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0;
+ let tape=new Map([...raw].map((b,i)=>[i,+b])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,joinPhysical=0,inJoin=false,boundary=null;
  while(state!==M.q&&t<limit){
-  let name=M.names[state];ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  let name=M.names[state];if(name==="read:joinLeft:"){inJoin=true;boundary={head,words:[...tape.entries()].sort((a,b)=>a[0]-b[0])};}if(inJoin&&name[0]!=="s")joinPhysical++;ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
   if(name.startsWith("read:")&&name.endsWith(":"))logical++;
   let [s,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
   head+=d;state=s;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
  }
- return {tape,head,state,t,span:hi-lo+1,ph,logical};
+ return {tape,head,state,t,span:hi-lo+1,ph,logical,joinPhysical,boundary};
 }
 
 function joinedWorker(){
@@ -241,3 +241,64 @@ function joinedWorker(){
  return {symbols,projection:J.projection,rules};
 }
 function reference(rows){let set=new Set(rows.filter(([k])=>k.endsWith("0")).map(([k])=>k.slice(0,-1)));return rows.slice().sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).map(([k,p])=>[k,k.endsWith("1")?(set.has(k.slice(0,-1))?"1":"0")+p.slice(1):p]);}
+
+function audit(){
+ const J=joinedWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)};
+ let counts={cases:0,records:0,factors:0,queries:0,positive:0,rawBits:0,transitions:0,logical:0,passes:0,sortBoundaryChecks:0,joinLogical:0,joinPhysical:0,comparedSymbols:0,cutoffs:0,malformed:0,malformedTransitions:0};
+ const cmp=(a,b)=>a<b?-1:a>b?1:0;
+ function check(rows,record=true){
+  const raw=encode(rows),N=raw.length,w=M.width,expected=reference(rows),want=encode(expected),r=physicalRun(M,raw,100000000),ref=logicalRun(J,raw,10000000),k=rows.length?rows[0][0].length:0;
+  ok(r.state===M.q&&r.tape.size===want.length&&[...want].every((v,i)=>r.tape.get(r.head+i)===+v)&&(want.length||!r.tape.has(r.head)),"join "+JSON.stringify({rows,head:r.head,t:r.t,trace:ref.trace}));
+  ok(ref.state==="ready"&&ref.out===want&&ref.steps===r.logical,"logical reference");
+  ok(ref.passes===k&&ref.snapshots.length===k,"pass count");
+  for(let j=1;j<=k;j++)ok(ref.snapshots[j-1]===encode(rows.slice().sort((a,b)=>cmp(a[0].slice(-j),b[0].slice(-j)))),"suffix invariant");
+  if(N){
+   // Physical checkpoint at actual transition into join phase, no reset.
+   const decode=new Map(Object.entries(M.code).map(([s,c])=>[c,s])),b=r.boundary;
+   ok(b&&b.head===-w*N-1-w&&b.words.length===w*(N+1),"boundary head/span");
+   let bits=b.words.map(x=>x[1]).join(""),project="";
+   for(let i=0;i<N;i++)project+=J.projection[decode.get(bits.slice(w*i,w*(i+1)))];
+   ok(bits.slice(-w)===M.code.R&&project===encode(rows.slice().sort((a,b)=>cmp(a[0],b[0]))),"physical sorted boundary");
+  }else ok(!r.boundary,"empty");
+  let prep=N?(w+1)*N*(N+1)+(w+4)*N+3:1;
+  let serial=N?(w+1)*N*N+(3*w+6)*N+2*w+5:1;
+  let mid=(3*w-2)*ref.moves+(2*w-1)*(ref.steps-ref.moves);
+  ok(JSON.stringify(r.ph)===JSON.stringify([prep,mid,serial]),"clock");
+  ok(r.joinPhysical===(3*w-2)*ref.joinMoves+(2*w-1)*(ref.joinSteps-ref.joinMoves),"join phase clock");
+  ok(r.head===(N?-(w+1)*N-2:0)&&r.span===(N?(2*w+1)*N+2*w+2:w),"head/span");
+  let q=rows.filter(([k])=>k.endsWith("1")).length;
+  ok(ref.compares<=q*k,"comparison charging");
+  if(record){counts.cases++;counts.records+=rows.length;counts.factors+=rows.length-q;counts.queries+=q;counts.positive+=expected.filter(([k,p])=>k.endsWith("1")&&p[0]==="1").length;counts.rawBits+=N;counts.transitions+=r.t;counts.logical+=r.logical;counts.passes+=k;counts.sortBoundaryChecks+=+(N>0);counts.joinLogical+=ref.joinSteps;counts.joinPhysical+=r.joinPhysical;counts.comparedSymbols+=ref.compares;}
+  return r;
+ }
+ const controls=[[],[["1","1"]],[["0",""],["1","0"]],[["11","1"],["00",""],["01","0"],["10","01"]],[["11","11"],["00",""],["01","00"],["11","10"]],[["101","10"],["100","01"],["011","00"],["100","11"],["101","01"]]];
+ for(let rows of controls){let r=check(rows);ok(physicalRun(M,encode(rows),r.t-1).state!==M.q,"short clock");counts.cutoffs++;}
+ // All ordered sequences of up to three (key,role) records over one-bit actual keys.
+ for(let n=1;n<=3;n++)for(let x=0;x<4**n;x++){
+  let word=x.toString(2).padStart(2*n,"0"),rows=Array.from({length:n},(_,i)=>{let k=word.slice(2*i,2*i+2);return [k,(i%2)+i.toString(2).padStart(2,"0")];});
+  check(rows);
+ }
+ // Adversarial duplicate and long common-prefix keys, variable payloads.
+ let seed=0x52455805;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let j=0;j<10;j++){
+  let k=3+j%3,n=2+j%3,rows=Array.from({length:n},(_,i)=>[(rand()>>>16)%2**k, (rand()>>>16)%32].map((v,i)=>v.toString(2).padStart(i?1:k,"0")));
+  check(rows);
+ }
+ check([["000000001","101"],["000000000","0"],["000000011","11"]]);
+ check([["111","1"],["111","01"],["110",""],["110","101"],["001","011"]]);
+ for(let raw of ["0","00","10","11","0010","0010110","001010","001001","00101111",encode([["0",""],["00",""]]),encode([["11","1"],["1","0"]]),encode([["1",""]]),encode([["10",""],["11",""]])]){
+  let r=physicalRun(M,raw,2000000),ref=logicalRun(J,raw);
+  ok(r.state===M.q&&!r.tape.has(r.head)&&ref.state==="reject","malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;
+ }
+ let scaling=[];
+ for(let n of [2,4,8]){
+  let k=Math.ceil(Math.log2(n)),rows=Array.from({length:2*n},(_,i)=>[((n-1-(i%n)).toString(2).padStart(k,"0"))+(i<n?"1":"0"),"0"+i.toString(2).padStart(k+1,"0")]);
+  let r=check(rows,false);scaling.push([rows.length,k+1,encode(rows).length,r.t,r.joinPhysical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;
+ ok(pos-3===M.q&&M.desc[pos++]==="0","descriptor header");let b=M.q.toString(2).length;
+ for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling};
+}
+if(process.argv.includes('--description')){let j=joinedWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_RETAINED_JOIN_OK '+JSON.stringify(audit()));
