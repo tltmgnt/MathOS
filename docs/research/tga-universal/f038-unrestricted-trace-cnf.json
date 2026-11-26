@@ -1,0 +1,299 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-TRACE-CNF",
+  "base_commit": "061df10db86225b75915d10cbcbd1b65e87a2b31",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45740952937",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the exact unrestricted counterexample CNF be reduced from quadratic tableau cost to near-linear stage-budget size without copying all input and output cells for each program?",
+  "route": "negative",
+  "topology": "Sparse time-order and memory-order records, shared authenticated table lookups, exact simultaneous rejection certificates.",
+  "adversarial": [
+    "Memory keys must include program identity and time.",
+    "All initial symbol claims and selected-clause lookups must be authenticated.",
+    "Timeout, halt, malformed and falsified output cases must be exhaustive and mutually safe.",
+    "CNF extension need not be unique; finite canonical tests alone do not prove soundness."
+  ],
+  "scope": "Identical U and exact stage clocks on the original explicit selector; existential trace and rejection certificate CNF for arbitrary n,s.",
+  "cost": "O((L+2^s) poly(s+log(L+2))) ordinary explicit CNF bits; uniform polynomial constructor in L+2^s; no claim of quasilinear one-tape construction or SAT search.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of sparse trace CNF soundness and cost"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS scalar actual transition semantics on every small selector and three-program batches; not execution of new Python.",
+  "expected": {
+    "batches": [
+      [
+        1,
+        1,
+        8,
+        32,
+        96,
+        64,
+        28,
+        2,
+        2,
+        30
+      ],
+      [
+        1,
+        4,
+        8,
+        32,
+        96,
+        21,
+        49,
+        15,
+        11,
+        24
+      ],
+      [
+        2,
+        1,
+        8,
+        2048,
+        6144,
+        4096,
+        1792,
+        224,
+        32,
+        2016
+      ],
+      [
+        2,
+        4,
+        8,
+        2048,
+        6144,
+        1664,
+        3072,
+        1264,
+        144,
+        1928
+      ]
+    ],
+    "controls": 5,
+    "stages": [
+      [
+        1,
+        0,
+        8,
+        4,
+        4
+      ],
+      [
+        1,
+        1,
+        8,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        8,
+        0,
+        0
+      ],
+      [
+        1,
+        3,
+        8,
+        0,
+        0
+      ],
+      [
+        1,
+        4,
+        8,
+        0,
+        0
+      ],
+      [
+        1,
+        5,
+        8,
+        0,
+        0
+      ],
+      [
+        1,
+        6,
+        8,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        1024,
+        128,
+        128
+      ],
+      [
+        2,
+        1,
+        1024,
+        76,
+        76
+      ],
+      [
+        2,
+        2,
+        1024,
+        17,
+        17
+      ],
+      [
+        2,
+        3,
+        1024,
+        17,
+        17
+      ],
+      [
+        2,
+        4,
+        1024,
+        0,
+        0
+      ],
+      [
+        2,
+        5,
+        1024,
+        0,
+        0
+      ],
+      [
+        2,
+        6,
+        1024,
+        0,
+        0
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_trace_cnf.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-TRACE-CNF.md"
+  ],
+  "next": "Use the compact same-U failure predicate to investigate actual unbounded cubic failures or a uniform cutoff; compilation alone does not imply satisfiability.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the exact unrestricted counterexample CNF be reduced from quadratic tableau cost to near-linear stage-budget size without copying all input and output cells for each program?",
+      "strategy": "Sparse time records, memory-order sorting, shared input and clause lookups, constant terminal reads to certify actual rejection.",
+      "alternative": "Audit same-clock self-reference and encoding expansion rather than infer SAT of the compact formula.",
+      "stop_rule": "Do not claim a new exponent or a satisfying model from encoding size alone.",
+      "literature_leads": [
+        "Van Melkebeek survey, near-linear Cook reductions using sorting networks; From RAM to SAT; prior exact symbolic H compiler. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "An explicit width-three J_(n,s) encodes the exact previous H predicate with O((L+2^s) poly(s+log(L+2))) bit size.",
+      "scope": "Identical U and exact stage clocks on the original explicit selector; existential trace and rejection certificate CNF for arbitrary n,s.",
+      "derivation": "Compute transitions from guessed reads, sort memory records by program/address/time, authenticate initial data and chosen violated clauses by shared table lookups, and certify failure with timeout, blank or false selected clause.",
+      "unresolved_steps": [
+        "Prove actual J satisfiability at unbounded cubic lengths or a uniform success cutoff."
+      ],
+      "candidate_tests": [
+        "Actual batched trace circuits versus original interpreter, exact CNF extension, sort and corruption controls, full small-stage wrapper."
+      ]
+    },
+    "alternative": {
+      "claim": "The compact compiler does not create a same-length diagonal contradiction or establish an efficient SAT search procedure.",
+      "scope": "Identical U and exact stage clocks on the original explicit selector; existential trace and rejection certificate CNF for arbitrary n,s.",
+      "derivation": "The ordinary CNF is a different formula, potentially larger; its complete selector representation and clock change. No existence of a model is implied.",
+      "unresolved_steps": [
+        "Resource-preserving adversarial existence, not just compilation."
+      ],
+      "candidate_tests": [
+        "Active exhaustive fallback and successful-output rejection-certificate controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Memory keys must include program identity and time.",
+        "All initial symbol claims and selected-clause lookups must be authenticated.",
+        "Timeout, halt, malformed and falsified output cases must be exhaustive and mutually safe.",
+        "CNF extension need not be unique; finite canonical tests alone do not prove soundness."
+      ],
+      "counterexample_candidates": [
+        "A forged initial symbol or unselected clause would yield a false failure without lookup constraints.",
+        "Feeding the compiled CNF back to U changes the input length and clock."
+      ],
+      "equivalence_audit": "Same U descriptions, exact per-program clocks, absorbing halt, authentic sparse memory semantics, original verifier and built-ins.",
+      "barrier_audit": "No cubic or all-exponent existence theorem; no P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Same original tape interpreter and verified witness scheduler; bounded-fan-in Boolean circuit and explicit width-three CNF.",
+      "cost_ledger": {
+        "encoding": "Original selector/witness and sparse records of logarithmic-width addresses, times and metadata",
+        "preprocessing": "Generate actual transition tables and one shared original input and clause table",
+        "inference": "Local transitions, deterministic sorting networks, authenticated lookup, constant-sized rejection certificate per program",
+        "repetitions": "At most (s+1)2^s scheduled transitions and O(2^s) terminal records",
+        "arithmetic_bits": "Charge record widths, comparison and addition circuits, wire-index bits",
+        "memory": "Explicit network and trace variables; polynomial constructor storage, no per-program full input copies in formula",
+        "reconstruction": "Read p,x from model; trace uniquely determined, rejection reason may vary",
+        "overall": "O((L+2^s) poly(s+log(L+2))) ordinary explicit CNF bits; uniform polynomial constructor in L+2^s; no claim of quasilinear one-tape construction or SAT search."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent counterexample existence",
+        "Independent proof review and Lean formalization",
+        "Large-stage implementation performance"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Sparse trace consistency induction",
+        "Shared lookup soundness and constant terminal rejection certificates",
+        "Exact stage wrapper and explicit bit-size bound",
+        "Finite independent reference and CNF regression"
+      ],
+      "unsupported_steps": [
+        "No actual large cubic-stage formula generated or solved.",
+        "Independent mathematical review and Lean formalization not supplied."
+      ],
+      "proof_obligations": [
+        "Replay concrete interpreter versus symbolic batches",
+        "Check sorting payload, lookup and memory consistency",
+        "Audit clock and output semantics and bit-size bound"
+      ],
+      "formalization_plan": "Formalize bitonic sorting permutation and order, shared table lookup induction, time induction for sparse memory, and exact failure certificate equivalence.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Improve explicit exact unrestricted failure CNF from quadratic tableau in stage budget to quasilinear in stage budget up to polynomial-log factors.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failures",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Use the compact same-U failure predicate to investigate actual unbounded cubic failures or a uniform cutoff; compilation alone does not imply satisfiability.",
+      "human_review_requests": [
+        "Review sorted trace consistency, rejection coverage and actual size accounting."
+      ]
+    }
+  }
+}
