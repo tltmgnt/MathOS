@@ -155,10 +155,10 @@ function worker(){
  reg("finish0",a=>raw(a)?z("ready",a):bad());
  initial("");
  const rules=[];
- // Build only reachable finite-control states, with sparse symbol rules.
+ // Build only reachable finite-control states, with total symbol rules, including explicit aligned rejection.
  for(let [s,fn] of defs)for(let a of symbols){
   let [t,w,d]=fn(a);
-  if(t!=="reject"||a==="__"||raw(a))rules.push([s,a,t,w,d]);
+  rules.push([s,a,t,w,d]);
  }
  return {symbols,projection,rules};
 }
@@ -176,3 +176,84 @@ function logical(J,raw,limit=2000000){
  while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a)??["reject","__",0];trace.push([state,head,a]);if(trace.length>12)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
  return {state,head,t,moves,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=30000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(/^read:choose[01]{4}:$/.test(name))forward={...snap(),mask:name.slice(11,15)};if(name==="read:finish0:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function audit(){
+ const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
+ let counts={valid:0,sat:0,unsat:0,variables:0,bags:0,candidates:0,physical:0,logical:0,checkpoints:0,messageEntries:0,predecessors:0,malformed:0,malformedTransitions:0,cutoffs:0},digest=2166136261;
+ const bits=(x,n)=>Array.from({length:n},(_,i)=>(x>>i)&1),all=[1,1,1,1],stage=(x,y)=>Array.from({length:4},(_,j)=>Array.from({length:2},(_,a)=>[(x>>(2*j+a))&1,(y>>(2*j+a))&1]));
+ function check(initial,stages,record=true,known=undefined){
+  let raw=encode(initial,stages),N=raw.length,w=M.width,g=stages.length,n=g+2,want=known===undefined?oracle(initial,stages):known,ref=logical(J,raw),r=physical(M,raw);
+  ok(r.state===M.q&&ref.state===(want===null?"reject":"ready")&&r.logical===ref.t,"halt "+JSON.stringify({raw,ref,t:r.t}));
+  let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+  ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clock "+JSON.stringify({raw,ph:r.ph,prep,mid}));
+  let start=-w*N-1;
+  function unpack(cp){
+   ok(cp&&cp.tape.length===w*(N+1)&&cp.tape.every(([p],i)=>p===start+i),"checkpoint layout");
+   let b=cp.tape.map(x=>x[1]).join("");return Array.from({length:N+1},(_,i)=>dec.get(b.slice(w*i,w*(i+1))));
+  }
+  let expected=[...raw].map(b=>b+"_"),msg=initial.slice(),preds=0;
+  for(let i=0;i<g;i++){
+   let next=[];
+   for(let j=0;j<4;j++){
+    let p=[0,1].find(a=>msg[2*a+(j>>1)]&&stages[i][j][a].every(Boolean));
+    if(p===undefined)p=2;next.push(+(p!==2));preds+=+(p!==2);
+    let pos=4+16*i+4*j+3;expected[pos]="H"+raw[pos]+p;
+   }msg=next;
+  }expected.push("R");
+  ok(JSON.stringify(unpack(r.forward))===JSON.stringify(expected)&&r.forward.mask===msg.join("")&&r.forward.head===start+w*(N-1),"forward checkpoint "+JSON.stringify({raw,mask:r.forward?.mask,msg}));
+  if(want!==null){
+   ok(r.tape.size===n&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b)&&ref.out===want,"output");
+   let b=expected.slice(),positions=new Set([2,3]);b[2]="I"+raw[2]+want[0];b[3]="I"+raw[3]+want[1];
+   for(let i=0;i<g;i++){let j=2*+want[i+1]+ +want[i+2],p=4+16*i+4*j+3;positions.add(p);ok(expected[p][2]===want[i],"predecessor provenance");b[p]="O"+expected[p].slice(1)+want[i+2];}
+   ok(JSON.stringify(unpack(r.backward))===JSON.stringify(b)&&r.backward.head===start,"backward checkpoint");
+   let body=0,c=0;for(let i=N-1;i>=0;i--){let e=+positions.has(i);body+=2*w*(i+1)+2*c+2*e+4;c+=e;}
+   ok(r.ph[2]===2*w*N+2*w+2+body+n+3&&r.head===-w*N-n-2,"serializer");
+   ok(ref.t===2*N+g+2&&ref.moves===2*N,"logical success clock");
+  }else{
+   ok(!r.tape.has(r.head)&&r.ph[2]===0&&!r.backward,"reject");
+   ok(ref.t===N+2&&ref.moves===N+1,"logical reject clock");
+  }
+  if(record){
+   let out=want===null?"-":Array.from({length:n},(_,i)=>r.tape.get(r.head+i)).join("");for(let ch of raw+":"+out+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   counts.valid++;counts.sat+=+(want!==null);counts.unsat+=+(want===null);counts.variables+=n;counts.bags+=g;counts.candidates+=8*g;counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(want!==null);counts.messageEntries+=4*(g+1);counts.predecessors+=preds;
+  }return r;
+ }
+ for(let x=0;x<16;x++)check(bits(x,4),[]);
+ for(let x=0;x<256;x++)check(all,[stage(x,255)]);
+ for(let x=0;x<16;x++)for(let y=0;y<16;y++)check(all,[stage(17*x,17*y)]);
+ let conflict=stage(85,170);ok(oracle(all,[conflict])===null,"factor obstruction");check(all,[conflict]);
+ let eq=stage(195,255),neq=stage(90,255);
+ ok(oracle(all,[eq])!==null&&oracle(all,[neq])!==null&&oracle(all,[eq,neq])===null,"pair obstruction fixture");
+ check(all,[eq,neq]);
+ let seed=0x52455814;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let i=0;i<64;i++){
+  let g=1+i%6,initial=bits(rand()>>>16,4),stages=Array.from({length:g},()=>stage(rand()>>>16,rand()>>>16));
+  if(i%2){let a=Array.from({length:g+2},()=>rand()>>>31);initial[2*a[0]+a[1]]=1;for(let j=0;j<g;j++)stages[j][2*a[j+1]+a[j+2]][a[j]]=[1,1];}
+  check(initial,stages);
+ }
+ let malformed=[];for(let n=0;n<4;n++)for(let x=0;x<2**n;x++)malformed.push(n?x.toString(2).padStart(n,"0"):"");
+ for(let g of [0,1])for(let r=1;r<16;r++)malformed.push("1".repeat(4+16*g+r));
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let g of [1,2,4,8,16,32]){
+  let stages=Array.from({length:g},()=>stage(128,128)),initial=[0,0,0,1],raw=encode(initial,stages),r=check(initial,stages,false,"1".repeat(g+2));
+  if(g<=8){ok(physical(M,raw,r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+  scaling.push([g+2,raw.length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest};
+}
+if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_PAIR_SEPARATORS_OK '+JSON.stringify(audit()));
