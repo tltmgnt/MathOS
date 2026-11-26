@@ -1,0 +1,178 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-CUBIC-FIXTURE",
+  "base_commit": "a2a9efd961b5ea5e5520a7e1d4f5182671cb6230",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45737556047",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Construct and certify an explicit finite member of the same B_3 language at n=52.",
+  "route": "negative",
+  "topology": "Explicit pin selector, exact two-state partial-description partition and certified one-state nonhalting.",
+  "adversarial": [
+    "Hash equality alone cannot prove a cycle.",
+    "Partial transition-table coverage must count completions exactly.",
+    "A finite input does not establish an asymptotic time bound."
+  ],
+  "scope": "Same U, exact stage 54, all scheduled descriptions on this one selector.",
+  "cost": "Finite exhaustive coverage, no asymptotic polynomial construction claim",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of actual finite cubic-stage certificate"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Prove cubic-stage bad witnesses at unbounded lengths"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Local C++ exact coverage execution, independent of parent Python tape interpreter; integrated input comparison pending CI.",
+  "expected": {
+    "geometry": [
+      52,
+      182208,
+      182261,
+      54,
+      5461,
+      5409,
+      200,
+      320255973501901,
+      8,
+      17179869184,
+      4096
+    ],
+    "one": [
+      729,
+      135,
+      2453,
+      2155,
+      351,
+      9,
+      8,
+      34531128
+    ],
+    "two": [
+      3770339,
+      387420489,
+      1248498321,
+      1305117,
+      652531,
+      156,
+      145013
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_cubic_fixture.py",
+    "mathos/research/f038_unrestricted_cubic_fixture.cpp",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-CUBIC-FIXTURE.md"
+  ],
+  "next": "Extend cubic-stage failure to unbounded lengths with an actual same-U adversary, or prove a uniform cutoff; control longer and newly active programs, not padding alone.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Construct and certify an explicit finite member of the same B_3 language at n=52.",
+      "strategy": "Fix a 50-bit pin pattern and exhaustively cover the actual one- and two-state stage-54 descriptions.",
+      "alternative": "Use exact prefix locality for two-state programs and certified cycles or drift for one-state runs.",
+      "stop_rule": "Any unresolved run fails the audit; finite bad input is not an asymptotic bound.",
+      "literature_leads": [
+        "Prior same-U universal scheduler, prefix adversary and residual dichotomy; no novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "The explicit 200-clause selector at n=52 with pin a=0x123456789abcd belongs to B_3(52).",
+      "scope": "Same U, exact stage 54, all scheduled descriptions on this one selector.",
+      "derivation": "Pin all first 50 bits, cover 27^6 two-state tables by lazy first-use branching, enumerate all 18^3 one-state tables with exact loop certificates; reject actual built-ins.",
+      "unresolved_steps": [
+        "Unbounded-length cubic counterexamples and all higher exponents."
+      ],
+      "candidate_tests": [
+        "Local compiled C++ exhaustive coverage and original Python fixture replay."
+      ]
+    },
+    "alternative": {
+      "claim": "Nonempty B_3 implies NP-completeness by the previous dichotomy, but does not imply infinitude.",
+      "scope": "Fixed exponent three; no efficient uniform bad-instance generator asserted.",
+      "derivation": "Use the explicit finite bad selector as the constant yes-instance in the prior residual reduction; padding may activate additional descriptions.",
+      "unresolved_steps": [
+        "Prove infinitely many cubic-stage failures or a uniform polynomial cutoff."
+      ],
+      "candidate_tests": [
+        "Check exact clock and valid code lengths, prevent an unresolved run being counted as failure."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Hash equality alone cannot prove a cycle.",
+        "Partial transition-table coverage must count completions exactly.",
+        "A finite input does not establish an asymptotic time bound."
+      ],
+      "counterexample_candidates": [
+        "New valid descriptions activate as input size grows.",
+        "The chosen formula is a simple pin family and is polynomially solvable."
+      ],
+      "equivalence_audit": "Same encoding and clock, exact output read and prefix horizon, exact cycle replay and coverage of all valid programs.",
+      "barrier_audit": "No universal lower bound or resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Actual same-U tape transition tables, C++ finite exact simulation with Python parent replay.",
+      "cost_ledger": {
+        "encoding": "Explicit 182261-bit original selector tape",
+        "preprocessing": "Build and compare actual pool and independent tape",
+        "inference": "Exact partial-table branching and certified one-state nonhalting",
+        "repetitions": "All valid descriptions covered, shared execution classes counted, original clocks retained",
+        "arithmetic_bits": "64-bit counters and pattern, exact cell equality, hash only as heuristic period proposal",
+        "memory": "Mutable tapes, rollback logs and exact replay arrays",
+        "reconstruction": "Explicit witness a and arbitrary guard values",
+        "overall": "Finite exhaustive coverage, no asymptotic polynomial construction claim"
+      },
+      "missing_bounds": [
+        "Infinitely many n for exponent three",
+        "All larger exponents or uniform polynomial cutoff"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Explicit satisfying witness and pin equivalence",
+        "Exact clock and description coverage",
+        "Two-state partial-table partition",
+        "One-state certified loops and escapes"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "Integrated Python and C++ CI pending."
+      ],
+      "proof_obligations": [
+        "Byte-for-byte parent input comparison",
+        "Exact coverage and failure assertions",
+        "Review nonhalting certificates"
+      ],
+      "formalization_plan": "Formalize finite coverage partition and exact replay refinement; independently audit concrete counterexample.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Actual finite cubic-stage counterexample and nonempty residual NP-completeness consequence, not asymptotic cubic failure.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failures",
+        "All-exponent lower bound",
+        "Independent review"
+      ],
+      "next_question": "Extend cubic-stage failure to unbounded lengths with an actual same-U adversary, or prove a uniform cutoff; control longer and newly active programs, not padding alone.",
+      "human_review_requests": [
+        "Review finite interpreter refinement, coverage and exact nonhalting proofs."
+      ]
+    }
+  }
+}
