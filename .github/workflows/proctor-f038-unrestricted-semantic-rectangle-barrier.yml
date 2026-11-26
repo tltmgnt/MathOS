@@ -1,0 +1,33 @@
+name: Proctor F038 unrestricted semantic rectangle barrier
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-semantic-rectangle-barrier']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_semantic_rectangle_barrier.py
+          python -m mathos.research.f038_unrestricted_semantic_rectangle_barrier | tee /tmp/semantic.txt
+          grep -Fx 'F038_UNRESTRICTED_SEMANTIC_RECTANGLE_BARRIER_OK {"layout":[[2,23,15250,16,160],[3,33,45860,16,540]],"rectangles":[[0,1,1,1,0],[1,4,3,2,1],[2,16,9,4,6],[3,64,27,8,28],[4,256,81,16,120],[5,1024,243,32,496],[6,4096,729,64,2016],[7,16384,2187,128,8128],[8,65536,6561,256,32640]]}' /tmp/semantic.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_SEMANTIC_RECTANGLE_GATE_OK status=OPEN promotion=NONE')
+          PY
