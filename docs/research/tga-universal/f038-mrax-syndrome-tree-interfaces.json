@@ -1,0 +1,235 @@
+{
+  "attempt_id": "F038-MRAX-SYNDROME-TREE-INTERFACES",
+  "base_commit": "18190395b6c529457d2631e26f86dbec92cd1aa7",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45732559171",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can local syndrome interaction rank replace global equation rank with fully charged layout discovery?",
+  "route": "negative",
+  "topology": "Complementary affine syndrome cosets, exact tree joins and tagged hypergraph cut rank.",
+  "adversarial": [
+    "Width counts possible interface states, not actual runtime lower bound.",
+    "Exact discovery costs exponential in source variables.",
+    "Easy formulas can have large width in this encoding.",
+    "Leaf feasibility must preserve one truth value; span union is not a substitute."
+  ],
+  "scope": "Explicit GF2 syndrome columns, source-variable tree, arbitrary clause lists; dependent rows allowed.",
+  "cost": "O(n 4^k poly(L)) supplied-tree time; no uncharged discovery or universal width guarantee",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of coset contraction, layout discovery and cut rank"
+    },
+    {
+      "key": "attempt_representation_change",
+      "label": "Sound representation change with charged discovery and reconstruction"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS brute span sets, selector enumeration and hypergraph cut counts; not execution of Python.",
+  "expected": {
+    "random": [
+      [
+        0,
+        32,
+        32,
+        32,
+        0,
+        0,
+        160,
+        0
+      ],
+      [
+        1,
+        32,
+        64,
+        64,
+        30,
+        1,
+        546,
+        0
+      ],
+      [
+        2,
+        32,
+        128,
+        128,
+        60,
+        2,
+        1824,
+        0
+      ],
+      [
+        3,
+        32,
+        256,
+        252,
+        88,
+        3,
+        5288,
+        4
+      ],
+      [
+        4,
+        32,
+        512,
+        496,
+        107,
+        4,
+        12712,
+        16
+      ]
+    ],
+    "tagged": [
+      256,
+      95,
+      26244,
+      1024,
+      8,
+      163,
+      446,
+      4
+    ],
+    "complete": [
+      [
+        2,
+        1,
+        2,
+        8,
+        1,
+        1
+      ],
+      [
+        3,
+        3,
+        6,
+        64,
+        2,
+        2
+      ],
+      [
+        4,
+        6,
+        12,
+        1024,
+        4,
+        4
+      ]
+    ],
+    "controls": 5
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_syndrome_tree_interfaces.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-SYNDROME-TREE-INTERFACES.md"
+  ],
+  "next": "Investigate sound rank-aware local elimination or alternative encodings with reconstruction, rather than optimizing fixed cuts.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can local syndrome interaction rank replace global equation rank with fully charged layout discovery?",
+      "strategy": "Retain affine complementary cosets on a supplied binary decomposition of source variables.",
+      "alternative": "Derive exact hypergraph cut rank for tagged SAT and layout-independent dense-pair obstruction.",
+      "stop_rule": "Do not equate large width with intrinsic SAT hardness or assume low-width discovery is free.",
+      "literature_leads": [
+        "Prior affine syndrome decision; elementary subspace intersection and tree dynamic programming. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Exact witness-preserving tree DP in O(n 4^k poly(L)) time and O(n 2^k poly(L)) space for supplied maximum intersection rank k.",
+      "scope": "Explicit GF2 syndrome columns, source-variable tree, arbitrary clause lists; dependent rows allowed.",
+      "derivation": "Intersect local span with target plus complementary span; enumerate the affine coset via kernel projection; join child tables and backtrack.",
+      "unresolved_steps": [
+        "Uniform efficient low-width representation and layout discovery."
+      ],
+      "candidate_tests": [
+        "Random small matrices, all targets, brute selector sets, large rank width-zero controls."
+      ]
+    },
+    "alternative": {
+      "claim": "Tagged SAT reduction has exact hyperedge cut rank; complete positive pair family forces k>=ceil(2a^2/9) on every layout.",
+      "scope": "Fixed tagged reduction from prior cycle; no claim for equivalent recodings.",
+      "derivation": "Independent clause coordinates appear on both sides precisely for split clause stars; balanced original-variable cut crosses all corresponding pairs.",
+      "unresolved_steps": [
+        "Decision-preserving representation change independent of the proved fixed-encoding obstruction."
+      ],
+      "candidate_tests": [
+        "All 256 two-variable source formulas, exact subset layout DP, complete pair fixtures."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Width counts possible interface states, not actual runtime lower bound.",
+        "Exact discovery costs exponential in source variables.",
+        "Easy formulas can have large width in this encoding.",
+        "Leaf feasibility must preserve one truth value; span union is not a substitute."
+      ],
+      "counterexample_candidates": [
+        "Complete positive pair formulas force quadratic width yet are trivially SAT; opposite signed unit columns cannot be merged."
+      ],
+      "equivalence_audit": "Exact complementary coset, leaf membership, child join converse, original witness replay and hypergraph rank identity.",
+      "barrier_audit": "No unrestricted SAT lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit Boolean clauses and GF2 columns, supplied binary tree, exact syndrome arithmetic.",
+      "cost_ledger": {
+        "encoding": "Charge full explicit matrix, clause list, variable count and layout",
+        "preprocessing": "Polynomial bases and rank checks; coset elimination and kernel projection",
+        "inference": "At most 2^k interface states, up to 4^k pairs per internal node",
+        "repetitions": "n leaves and n-1 joins; exact layout search O(3^n poly(L)) separately",
+        "arithmetic_bits": "Explicit ambient syndrome and selector masks, exact bit operations",
+        "memory": "O(n 2^k poly(L)) solver; O(2^n poly(L)) discovery",
+        "reconstruction": "Leaf column provenance and internal witness pairs, original replay",
+        "overall": "O(n 4^k poly(L)) supplied-tree time; no uncharged discovery or universal width guarantee"
+      },
+      "missing_bounds": [
+        "Efficient general representation transformation",
+        "Unrestricted deterministic SAT lower bound"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Affine coset characterization and kernel projection",
+        "Exact tree join induction and backtracking",
+        "Charged subset layout recurrence",
+        "Tagged cut-rank identity and balanced cut lower bound"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No FPT optimal-layout discovery or general low-width preprocessor."
+      ],
+      "proof_obligations": [
+        "Compare bounded tables and witnesses to brute enumeration",
+        "Check tagged cuts and optimal layouts",
+        "Check noncoordinate, inconsistent and width-zero controls"
+      ],
+      "formalization_plan": "Formalize subspace projection, interface join induction, witness reconstruction and tagged hypergraph cuts separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Replace global rank by local intersection rank with exact reconstruction and show a fixed-encoding layout barrier.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Decision-preserving representation changes and charged discovery",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate sound rank-aware local elimination or alternative encodings with reconstruction, rather than optimizing fixed cuts.",
+      "human_review_requests": [
+        "Review coset dimension, join converse, discovery recurrence and balanced cut quantifiers."
+      ]
+    }
+  }
+}

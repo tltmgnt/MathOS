@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X syndrome tree interfaces
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-syndrome-tree-interfaces']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_syndrome_tree_interfaces.py
+          python -m mathos.research.f038_affine_syndrome_decision | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_AFFINE_SYNDROME_OK {"controls":4,"reduction":[256,1024,12288,95,128,192,163,16],"syndromes":[[1,0,1,1,4,3,1,0,0],[1,1,4,8,16,12,7,1,1],[1,2,16,64,64,48,37,27,21],[1,3,64,512,256,192,169,343,301],[2,1,64,128,16384,6080,128,0,0],[2,2,64,256,16384,6080,256,0,0],[2,3,64,512,16384,6080,504,8,8],[2,4,64,1024,16384,6080,979,45,40]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_syndrome_tree_interfaces | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_MRAX_SYNDROME_TREE_OK {"complete":[[2,1,2,8,1,1],[3,3,6,64,2,2],[4,6,12,1024,4,4]],"controls":5,"random":[[0,32,32,32,0,0,160,0],[1,32,64,64,30,1,546,0],[2,32,128,128,60,2,1824,0],[3,32,256,252,88,3,5288,4],[4,32,512,496,107,4,12712,16]],"tagged":[256,95,26244,1024,8,163,446,4]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_SYNDROME_TREE_GATE_OK status=OPEN')
+          PY
