@@ -1,5 +1,5 @@
 // REX-024A exact compressed witness replay and selector budget ledger.
-function audit(P,Q,S,E,W,suite="small"){
+function audit(P,Q,S,E,suite="small"){
  const ok=(v,s)=>{if(!v)throw Error(s)},M=P.compile({packed:true}),C=Q.refine(M),desc=Q.encode(C),D=P.decode(desc);
  ok(desc.length===C.stats.quotientBits&&D.q===C.q&&D.T.every((v,i)=>v===C.T[i]),"exact quotient codec");
  // A representative class may contain several original program entry
@@ -67,4 +67,4 @@ function controls(P,Q,old){
  return{randomMachines:256,agreement:true};
 }
 module.exports={audit,controls};
-if(require.main===module){const P=require('./f038_rex_width_two_witness.js'),Q=require('./f038_rex_width_two_quotient.js'),S=require('./f038_rex_stage_audit.js'),E=require('./f038_tga_normalized_integration.js').engine();if(process.argv.includes('--descriptor'))process.stdout.write(Q.encode(Q.refine(P.compile({packed:true}))));else if(process.argv[2]==='controls')console.log('F038_REX_WIDTH_TWO_ADMISSION_CONTROLS '+JSON.stringify(controls(P,Q,require('./f038_rex_stage_quotient.js'))));else console.log('F038_REX_WIDTH_TWO_ADMISSION_OK '+JSON.stringify(audit(P,Q,S,E,null,process.argv[2]||'small')));}
+if(require.main===module){const P=require('./f038_rex_width_two_witness.js'),Q=require('./f038_rex_width_two_quotient.js'),S=require('./f038_rex_stage_audit.js'),E=require('./f038_tga_normalized_integration.js').engine();if(process.argv.includes('--original-descriptor'))process.stdout.write(P.compile().desc);else if(process.argv.includes('--descriptor'))process.stdout.write(Q.encode(Q.refine(P.compile({packed:true}))));else if(process.argv[2]==='controls')console.log('F038_REX_WIDTH_TWO_ADMISSION_CONTROLS '+JSON.stringify(controls(P,Q,require('./f038_rex_stage_quotient.js'))));else console.log('F038_REX_WIDTH_TWO_ADMISSION_OK '+JSON.stringify(audit(P,Q,S,E,process.argv[2]||'small')));}
