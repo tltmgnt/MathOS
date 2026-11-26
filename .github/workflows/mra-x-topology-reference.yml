@@ -1,0 +1,22 @@
+name: MRA-X topology reference
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_topology.py'
+      - '.github/workflows/mra-x-topology-reference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_topology.py'
+      - '.github/workflows/mra-x-topology-reference.yml'
+permissions:
+  contents: read
+jobs:
+  differential:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_topology.py --self-test
