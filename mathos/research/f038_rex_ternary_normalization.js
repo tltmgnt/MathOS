@@ -236,7 +236,7 @@ function run(M,raw,limit=Infinity,observe=null){
 function audit(E){
  const C=compile(),M={...decode(C.desc),events:C.events},ok=(v,s)=>{if(!v)throw Error(s)},results=[];
  function check(raw,m){
-  const n=19*m-7,oracle=E.pool(n);let count=0;
+  const n=19*m-7,oracle=E.pool(n),required=new Set(E.fixed(m,null).map(c=>c.join(",")));let count=0,classified={required:0,optional:0,forbidden:0,pin:0},firstPin=-1;
   const r=run(M,raw,800000000,(e,tape,h,origin)=>{
    const c=oracle.next();ok(!c.done&&c.value.length===e.k,"pool arity "+count);
    let gs=[];for(let i=0;i<3;i++){let g=0;for(let j=0;j<5;j++)g=2*g+tape[h-15+5*i+j];gs.push(g);}
@@ -244,12 +244,28 @@ function audit(E){
    const index=(g,r)=>g<9?g*m+r+1:g<18?9*m+(g-9)*(m-1)+r+1:g===18?18*m-9+r+1:g===19?n-1:n;
    ok(vals[0]===m-1&&vals[1]===m-2&&c.value.every((x,i)=>Math.abs(x)===index(gs[i],vals[2+i])&&+(x>0)===(e.s>>(e.k-1-i)&1)),"address "+count+" expected "+c.value+" got "+gs+"/"+vals+" state "+JSON.stringify(e));
    ok(h-origin+1===n+1+count&&tape[h+1]===+raw[n+1+count],"raw cursor "+count);
+   // Independent clause-list oracle for the classification of every bit.
+   const pin=c.value.length===3&&Math.abs(c.value[0])>=n-m-1&&Math.abs(c.value[0])<=n-2&&Math.abs(c.value[1])===n-1&&Math.abs(c.value[2])===n;
+   const groups=c.value.map(x=>Math.floor((Math.abs(x)-1)/m));
+   const cross=c.value.every(x=>Math.abs(x)<=9*m)&&new Set(groups).size===e.k;
+   if(pin){
+    ok(e.type==="Pin","pin classification "+count);
+    if(e.s===0)firstPin=tape[h+1];else ok(e.sreq===firstPin,"pin sign memory");
+    classified.pin++;
+   }else{
+    ok(e.type!=="Pin","spurious pin "+count);
+    const wantRequired=required.has(c.value.join(",")),gotRequired=e.type.startsWith("Req")&&e.s===e.sreq;
+    const wantOptional=cross&&c.value.every(x=>x<0),gotOptional=(e.type==="Optional"||e.type==="Outside")&&e.s===0;
+    ok(wantRequired===gotRequired&&wantOptional===gotOptional,"clause classification "+count+" "+c.value+" "+JSON.stringify(e));
+    if(wantOptional)ok((e.type==="Outside")===(groups[groups.length-1]-groups[0]>2),"scope classification "+count);
+    classified[wantRequired?"required":wantOptional?"optional":"forbidden"]++;
+   }
    count++;
   });
   if(r.status==="NORMALIZED_FIXED_PATH"){ok(oracle.next().done&&count===raw.length-n-1,"complete pool");ok(r.checkpoint.m===m&&r.checkpoint.selector===raw.slice(n+1),"checkpoint payload");}
-  return{status:r.status,t:r.t,span:r.span,count,workBits:r.checkpoint?.workBits};
+  return{status:r.status,t:r.t,span:r.span,count,classified,workBits:r.checkpoint?.workBits};
  }
- for(let m of [2,3]){
+ for(let m of [2,3,4,5]){
   let n=19*m-7,pins=Array.from({length:m},(_,i)=>i%2),B=[];
   for(let g=0;g<9;g++)B.push([-(g*m+1)]);
   for(let g=0;g<7;g++)B.push([-(g*m+1),-((g+1)*m+m),-((g+2)*m+1)]);
@@ -264,9 +280,23 @@ function audit(E){
  }
  let outside=E.encode(2,[0,1],[[-1,-17]]);ok(E.decode(outside),"outside is normalized");
  let r=run(M,outside,800000000);ok(r.status==="OUTSIDE_FIXED_PATH","outside "+JSON.stringify(r));controls.push({name:"outside",t:r.t});
- let both=flip(outside,positions.get("-31"));ok(!E.decode(both),"malformed outside");r=run(M,both,800000000);ok(r.status==="OUTSIDE_NORMALIZED","malformed priority");controls.push({name:"outsideMalformed",t:r.t});
+ let both=flip(outside,positions.get("-28,-30,-31"));ok(!E.decode(both),"malformed outside");r=run(M,both,800000000);ok(r.status==="OUTSIDE_NORMALIZED","malformed priority");controls.push({name:"outsideMalformed",t:r.t});
+ // Check all mandatory clauses and every lifted pin bit for the smallest dimension.
+ const mandatory=E.fixed(2,[0,1]),seen=new Set();let mutationCases=0,mutationTransitions=0;
+ function mutation(name,bad){ok(!E.decode(bad),"reference mutation "+name);let v=run(M,bad,800000000);ok(v.status==="OUTSIDE_NORMALIZED","mutation "+name);mutationCases++;mutationTransitions+=v.t;}
+ for(let c of mandatory){let p=positions.get(c.join(","));ok(p!==undefined&&raw[p]==="1","mandatory position");if(seen.has(p))continue;seen.add(p);mutation(c.join(","),flip(raw,p));}
+ for(let c of E.pool(n))if(c.length===3&&Math.abs(c[0])>=28&&Math.abs(c[0])<=29&&Math.abs(c[1])===30&&Math.abs(c[2])===31&&raw[positions.get(c.join(","))]==="0")mutation("opposite pin "+c,flip(raw,positions.get(c.join(","))));
+ let allPins=raw;for(let c of E.pool(n))if(c.length===3&&Math.abs(c[0])===28&&Math.abs(c[1])===30&&Math.abs(c[2])===31&&allPins[positions.get(c.join(","))]==="0")allPins=flip(allPins,positions.get(c.join(",")));
+ mutation("both pin signs",allPins);
+ for(let c of [[1,3],[-1,3],[-1,-2,-3],[-1,-3,5],[-19,-20],[-28,30]])mutation("illegal "+c,flip(raw,positions.get(c.join(","))));
+ // Exercise ternary structural refusal and malformed-later precedence.
+ let wide=E.encode(2,[1,0],[[-1,-3,-17]]),late=flip(wide,positions.get("28,-30,-31"));
+ ok(E.decode(wide)&&!E.decode(late),"ternary wide controls");
+ r=run(M,wide,800000000);ok(r.status==="OUTSIDE_FIXED_PATH","wide triple");controls.push({name:"outsideTriple",t:r.t});
+ r=run(M,late,800000000);ok(r.status==="OUTSIDE_NORMALIZED","late malformed triple");controls.push({name:"outsideTripleMalformedLater",t:r.t});
  for(let limit of [0,1,100,results[0].t-1]){r=run(M,raw,limit);ok(r.status==="TIMEOUT"&&r.t===limit,"timeout "+limit);}
- return{q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
+ let clock=run(M,raw,800000000).t;ok(run(M,raw,clock-1).status==="TIMEOUT"&&run(M,raw,clock).status==="NORMALIZED_FIXED_PATH","exact halt budget");
+ return{mutationCases,mutationTransitions,exactBudget:clock,q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
 }
 module.exports={compile,decode,run,audit};
 if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--validate'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else console.log('F038_REX_TERNARY_NORMALIZATION_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
