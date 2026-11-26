@@ -1,0 +1,45 @@
+name: Proctor F038 TGA normalized integration
+on:
+  push:
+    branches: ['research/pnp-f038-tga-normalized-integration']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_tga_normalized_integration.js
+          node mathos/research/f038_tga_normalized_integration.js | tee /tmp/normalized.txt
+          grep -Fx 'F038_TGA_NORMALIZED_INTEGRATION_OK {"counts":{"rawBits":3113331,"selectedClauses":2292,"referenceTuples":907602,"feasibleKeys":583,"validWitnesses":12,"unsat":3,"ineligible":3,"malformed":79,"keyJoins":7483,"peakBatch":64},"rows":[[2,0,37914,80,"SAT",8,[0],[0,0,0,0,0,0,0,0,0]],[2,1,37914,88,"UNSAT",0,[0],null],[2,2,37914,86,"SAT",2,[0],[1,0,0,0,0,0,0,0,0]],[2,3,37914,91,"INELIGIBLE",null,null,null],[3,0,161851,150,"SAT",46,[0],[0,0,0,0,0,0,0,0,0]],[3,1,161851,144,"UNSAT",0,[0],null],[3,2,161851,140,"SAT",8,[0],[2,0,0,0,0,0,0,0,0]],[3,3,161851,140,"INELIGIBLE",null,null,null],[4,0,428744,221,"SAT",180,[0],[0,0,0,0,0,0,0,0,0]],[4,1,428744,227,"UNSAT",0,[0],null],[4,2,428744,220,"SAT",48,[0],[3,0,0,0,0,0,1,0,0]],[4,3,428744,198,"INELIGIBLE",null,null,null]],"integration":[[2,0,16,[0,1,2,3],[],[0,0,0,0,0,0,0,0,0]],[2,1,16,[0,1,2,3],[0],[0,0,0,0,0,0,0,0,0]],[2,2,16,[0,1,2,3],[],[0,0,0,0,0,0,0,0,0]],[3,0,81,[0,1,2,3],[],[0,0,0,0,0,0,0,0,0]],[3,1,81,[0,1,2,3],[0],[0,0,0,0,0,0,0,0,0]],[3,2,81,[0,1,2,3],[],[0,0,0,0,0,0,0,0,0]]],"machineHostCounters":{"fixtures":0,"plans":1135918,"eliminations":260,"bagRows":0,"conditionings":186,"messageChecks":0,"keyChecks":0,"fullTuples":0,"models":0,"reconstruction":0,"componentWitnesses":46,"streamBatches":2754,"streamJoinChecks":111687,"splitGroups":1800,"streamOutputs":7131,"peakBagBatch":15},"productionHostCounters":{"fixtures":0,"plans":1135918,"eliminations":260,"bagRows":0,"conditionings":186,"messageChecks":0,"keyChecks":0,"fullTuples":0,"models":0,"reconstruction":0,"componentWitnesses":46,"streamBatches":718,"streamJoinChecks":111687,"splitGroups":0,"streamOutputs":7131,"peakBagBatch":64}}' /tmp/normalized.txt
+          node mathos/research/f038_tga_normalized_integration.js --fixtures > /tmp/fixtures.json
+          python -m mathos.research.f038_tga_normalized_replay /tmp/fixtures.json
+          python -m mathos.research.tga_f038_sep_003 > /tmp/sep.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/sep.json') as f:
+              sep=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert sep['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert sep['PROMOTION']=='NONE'
+          assert sep['decision']=='PRESERVE_HOST_INTEGRATION_PHYSICAL_COMPILATION_OPEN'
+          assert all(v['status']=='BLOCKED' for v in sep['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in sep['global_routes'].values())
+          assert sep['integration_route']['status']=='BLOCKED'
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_TGA_NORMALIZED_GATE_OK status=OPEN promotion=NONE')
+          PY
