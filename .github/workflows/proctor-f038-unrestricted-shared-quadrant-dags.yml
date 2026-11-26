@@ -1,0 +1,50 @@
+name: Proctor F038 unrestricted shared quadrant DAGs
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-shared-quadrant-dags']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_shared_quadrant_dags.js
+          node mathos/research/f038_unrestricted_shared_quadrant_dags.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_SHARED_QUADRANT_DAGS_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":20,"root":22358,"child":283265,"intern":856460,"hit":1169770,"zero":2902777,"reachable":492831,"member":62656,"positive":21706,"volume":41600,"full":2626560,"models":9656,"overflow":0}
+          assert r['clipChecks'] == 262144
+          assert r['overflow'] == [272,7,196608,49200]
+          assert r['childOverflow'] == [528,272]
+          assert r['controls'] == [[16,4,8,2,16,24,18688,1,341],[32,5,16,2,32,60,175104,1,1365],[64,6,16,4,64,93,3248128,1,5461]]
+          assert r['greedyControls'] == [[32,8,48,192,256,1],[64,16,128,768,1024,1]]
+          assert r['asym'] == [[64,42,57,10,32],[128,85,115,11,74],[256,170,230,12,158],[512,341,460,14,327]]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_SHARED_QUADRANT_DAGS_GATE_OK status=OPEN promotion=NONE')
+          PY
