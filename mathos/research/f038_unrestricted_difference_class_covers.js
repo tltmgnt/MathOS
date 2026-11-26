@@ -118,7 +118,11 @@ function audit(){
  let product=[rec.length,B.removed,A.removed,...Qs.map(Q=>new Set(rec.map(r=>Q.labels[r.a][r.b])).size),new Set(rec.map(r=>key(Qs.map(Q=>Q.labels[r.a][r.b])))).size];
  // A nontrivial heavy class trim with genuinely nonzero differences.
  let Q=census(8,(a,x,y)=>a!==0&&x===a&&y===0),rr=[...tup(8,3)].map(c=>({a:0,c,b:1+((c[0]+2*c[1]+4*c[2])%7)})),R=classTrim(rr,8,1,1,[Q]),keep=new Set(R.live.map(id)),heavyModels=0;
- for(let r of rr)if(!keep.has(id(r))){ok(Q.loss[r.a][r.b]===1,"nonzero heavy exception");heavyModels++;}
+ for(let r of rr)if(!keep.has(id(r))){
+  const F=(a,x,y)=>a!==0&&x===a&&y===0;
+  ok(Q.loss[r.a][r.b]===1&&!F(r.a,r.b,0)&&F(r.b,r.b,0)&&r.a!==r.b,"heavy original witness");
+  heavyModels++;
+ }
  ok(heavyModels===R.removed&&heavyModels>0,"heavy recount");
  // Uniform loss and actual greedy singleton checks for distinct raw rows with hidden target variation.
  const parity=x=>{let v=0;while(x){v^=x&1;x>>=1;}return v;};
@@ -150,6 +154,9 @@ function audit(){
   let b=Math.floor(2*d/3),r=Math.floor(0.9*d),logCap=d/32+1.25*b;
   ok(logCap<r&&Math.ceil(r/2)<=b,"old cap obstruction");exponents.push([d,b,r,logCap]);
  }
- return {n,selected,product,heavy:[rr.length,R.live.length,R.removed,R.tail,heavyModels],controls,exponents};
+ // Nonself substitutions with no directed differences consume no class slots.
+ let zero=census(8,()=>false),zr=classTrim(rr,8,1,1,[zero]);
+ ok(zr.removed===0&&zr.live.length===rr.length,"zero differences require no rows");
+ return {n,selected,product,heavy:[rr.length,R.live.length,R.removed,R.tail,heavyModels],controls,exponents,zeroControl:[rr.length,zr.removed]};
 }
 console.log('F038_DIFFERENCE_CLASS_COVERS_OK '+JSON.stringify(audit()));
