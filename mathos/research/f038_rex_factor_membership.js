@@ -163,3 +163,46 @@ function physicalRun(M,raw,limit=20000000){
  }
  return {tape,head,state,t,span:hi-lo+1,ph,logical,trace};
 }
+
+function audit(){
+ const J=joinWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)};
+ let counts={cases:0,queries:0,positive:0,transitions:0,logical:0,cutoffs:0,malformed:0,malformedTransitions:0};
+ function check(f,q,record=true){
+  let raw=encode(f,q),want=q.map(k=>+f.includes(k)),r=physicalRun(M,raw),N=raw.length,h=q.length,w=M.width;
+  ok(r.state===M.q&&r.tape.size===want.length&&want.every((b,i)=>r.tape.get(r.head+i)===b)&&(!want.length?!r.tape.has(r.head):true),"join "+JSON.stringify({f,q,head:r.head,phase:r.ph,trace:r.trace}));
+  let ref=logicalRun(J,raw,2000000);
+  ok(ref.state==="ready"&&ref.out===want.join("")&&ref.steps===r.logical,"logical reference");
+  let prep=(1+w)*N*(N+1)+(w+4)*N+3;
+  // Original serializer generalized to w; there are N nonblank cells, with
+  // one output at every query delimiter's second token bit.
+  let emitted=0,body=0,marks=[];
+  let pos=encode(f,[]).length;
+  for(let k of q){pos+=2*k.length+2;marks.push(pos-1);}
+  for(let i=N-1;i>=0;i--){let e=+marks.includes(i);body+=2*w*(i+1)+2*emitted+2*e+4;emitted+=e;}
+  let serial=2*w*N+2*w+2+body+h+3;
+  ok(r.ph[0]===prep&&r.ph[2]===serial,"physical phase clocks "+JSON.stringify({N,h,ph:r.ph,prep,serial}));
+  ok(r.ph[1]<=(3*w-2)*r.logical&&r.ph[1]>=(2*w-1)*r.logical,"logical cost");
+  if(record){counts.cases++;counts.queries+=q.length;counts.positive+=want.reduce((a,b)=>a+b,0);counts.transitions+=r.t;counts.logical+=r.logical;}
+  return r;
+ }
+ const keys=["","0","00","01","1","10","11"];
+ for(let mask=0;mask<128;mask++)check(keys.filter((_,i)=>mask>>i&1),keys.flatMap(k=>[k,k]));
+ for(let [f,q] of [[[],[]],[[""],[]],[[],[""]],[["","0","0","01"],["","0","0","00","01","1"]],[["00000000000000000000000000000001","1"],["00000000000000000000000000000000","00000000000000000000000000000001","1"]]]){
+  let r=check(f,q);ok(physicalRun(M,encode(f,q),r.t-1).state!==M.q,"cutoff");counts.cutoffs++;
+ }
+ for(let raw of ["","0","00","10","0011","1100","1111","110","00101100","1110100"]){
+  let r=physicalRun(M,raw,200000);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw+" "+JSON.stringify(r.trace));counts.malformed++;counts.malformedTransitions+=r.t;
+ }
+ let unsorted=physicalRun(M,encode(["1","0"],["0"]));ok(unsorted.state===M.q&&unsorted.tape.get(unsorted.head)===0,"unsorted assumption counterexample");
+ let scaling=[];
+ for(let n of [4,8,16]){
+  let k=Math.ceil(Math.log2(n*2)),f=Array.from({length:n},(_,i)=>(2*i).toString(2).padStart(k,"0")),q=Array.from({length:2*n},(_,i)=>i.toString(2).padStart(k,"0"));
+  let r=check(f,q,false);scaling.push([n,encode(f,q).length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;
+ ok(pos-3===M.q&&M.desc[pos++]==="0","header");const b=M.q.toString(2).length;
+ for(let [s,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===s&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");
+ return {alphabet:J.symbols.length,logicalStates:new Set(J.rules.map(r=>r[0])).size,logicalRules:J.rules.length,width:M.width,states:M.q,bits:M.desc.length,counts,scaling,unsortedCounterexample:true};
+}
+if(process.argv.includes('--description')){let j=joinWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_FACTOR_MEMBERSHIP_OK '+JSON.stringify(audit()));
