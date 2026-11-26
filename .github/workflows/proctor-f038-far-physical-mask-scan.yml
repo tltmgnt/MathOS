@@ -1,0 +1,42 @@
+name: Proctor F038 FAR physical mask scan
+on:
+  push:
+    branches: ['research/pnp-f038-far-physical-mask-scan']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_far_physical_mask_scan.js
+          node mathos/research/f038_far_physical_mask_scan.js | tee /tmp/mask.txt
+          grep -Fx 'F038_FAR_PHYSICAL_MASK_SCAN_OK {"states":2021,"descriptionBits":92970,"blockWidth":4,"alphabet":60,"tests":10668,"transitions":3409992,"windows":20052,"cutoffs":21,"scaling":[[32,4,29,6810,627,136],[64,4,61,14458,1331,264],[128,4,125,29754,2739,520],[64,8,57,23446,2147,264],[128,16,113,86286,7875,520],[256,32,225,330238,30083,1032],[512,64,449,1291230,117507,2056]],"table":[3906,1188,969],"edge":[[17,1,0,1764,0],[17,1,1,1764,0],[17,1,2,1764,8],[17,17,0,404,0],[17,17,1,404,0],[17,17,2,404,0],[33,16,0,13421,0],[33,16,1,13421,0],[33,16,2,13421,9],[65,32,0,49277,0],[65,32,1,49277,0],[65,32,2,49277,17]]}' /tmp/mask.txt
+          node mathos/research/f038_far_physical_mask_scan.js --description > /tmp/mask.desc
+          python -m mathos.research.tga_f038_far_002 /tmp/mask.desc /tmp/mask.txt > /tmp/far.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          with open('/tmp/far.json') as f:
+              far = json.load(f)
+          assert far['PNP_RESOLUTION_STATUS'] == gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert far['PROMOTION'] == 'NONE'
+          assert len(far['replays']) == 6
+          assert all(far[k]['status'] == 'BLOCKED' for k in ('FAR-05','restricted_evidence','uniform_recovery'))
+          assert gap['selector_route']['status'] == gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_FAR_PHYSICAL_MASK_GATE_OK status=OPEN promotion=NONE')
+          PY
