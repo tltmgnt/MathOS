@@ -23,5 +23,13 @@ function compare(H,P,K,L,Q){
  ok(count===A.q+1&&map[A.q]===B.q,"full rooted isomorphism");
  return{direct:A.stats,staged:B.stats,logical:B.logical,isomorphismStates:count,checks};
 }
-module.exports={audit,compare};
-if(require.main===module){const H=require('./f038_rex_width_three_headers.js'),P=require('./f038_rex_width_three_projection.js'),K=require('./f038_rex_width_three_compiler.js'),Q=require('./f038_rex_width_two_quotient.js');const r=process.argv[2]==='compare'?compare(H,P,K,require('./f038_rex_width_three_compact_compiler.js'),Q):audit(H,P,K,Q,require('./f038_rex_width_three_factors.js'),require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_width_three_headers_audit.js'));console.log('F038_REX_WIDTH_THREE_COMPACT_OK '+JSON.stringify(r));}
+function smoke(H,P,K,Q){
+ const J=P.compact(H.machine()),M=K.compile(J),R=Q.refine(M),C={...M,q:R.q,T:R.T};
+ const frame=(v,i)=>"0".repeat(54)+v.toString(2).padStart(4,"0")+(i===0?"11":"00")+(v===9?"0".repeat(24):"1001".repeat(4)+"10000000")+"b";
+ const input="H"+Array.from({length:10},(_,i)=>frame(i,i)).join(""),raw=K.encode(C,J,[input,...Array(8).fill("")]),r=K.run(C,raw,672898103);
+ const routes=Array.from({length:9},(_,i)=>i.toString(2).padStart(4,"0")+"10010:;").join("");
+ if(r.status!=="COMPLETE"||r.t!==672898103||r.span!==10190||r.tapes[6]!==routes||r.tapes[7].length!==504)throw Error("exact empty replay");
+ return{stats:R.stats,t:r.t,span:r.span,route:r.tapes[6],scopeBits:r.tapes[7].length};
+}
+module.exports={audit,compare,smoke};
+if(require.main===module){const H=require('./f038_rex_width_three_headers.js'),P=require('./f038_rex_width_three_projection.js'),K=require('./f038_rex_width_three_compiler.js'),Q=require('./f038_rex_width_two_quotient.js');const r=process.argv[2]==='smoke'?smoke(H,P,K,Q):process.argv[2]==='compare'?compare(H,P,K,require('./f038_rex_width_three_compact_compiler.js'),Q):audit(H,P,K,Q,require('./f038_rex_width_three_factors.js'),require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_width_three_headers_audit.js'));console.log('F038_REX_WIDTH_THREE_COMPACT_OK '+JSON.stringify(r));}
