@@ -193,3 +193,97 @@ function logical(J,raw,limit=2000000){
  while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let row=rules.get(state+":"+a);if(!row)throw Error(state+":"+a);let [s,w,d]=row;trace.push([state,head,a]);if(trace.length>16)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
  return {state,head,t,moves,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=40000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(name==="read:rootRewind:")forward=snap();if(name==="read:readyAt:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function flatten(t){let nodes=[];function visit(t,p){let i=nodes.length;nodes.push({u:t.u,e:t.e,p});for(let c of t.children)visit(c,i);}visit(t,-1);return nodes;}
+function oracle(t){
+ let nodes=flatten(t),a=[];
+ function search(i){
+  if(i===nodes.length)return a.slice();
+  let v=nodes[i];for(let j=0;j<v.u.length;j++)if(v.u[j]&&(v.p<0||v.e[a[v.p]][j])){a.push(j);let r=search(i+1);if(r)return r;a.pop();}return null;
+ }return search(0);
+}
+function audit(){
+ const J=worker(),M=compile(J.rules,J.symbols,J.projection),ok=(x,s)=>{if(!x)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
+ let counts={valid:0,sat:0,unsat:0,nodes:0,branching:0,domainValues:0,edgeEntries:0,physical:0,logical:0,checkpoints:0,messageEntries:0,predecessors:0,malformed:0,malformedTransitions:0,cutoffs:0};
+ let digest=2166136261;
+ function check(t,record=true){
+  let raw=encode(t),N=raw.length,w=M.width,nodes=flatten(t),a=oracle(t),H=nodes.reduce((x,v)=>x+v.u.length,0),want=a?nodes.map((v,i)=>v.u.map((_,j)=>+(j===a[i])).join("")).join(""):null;
+  let ref=logical(J,raw,30000000),r=physical(M,raw);
+  ok(r.state===M.q&&ref.state===(a?"ready":"reject")&&r.logical===ref.t,"termination "+JSON.stringify({raw,ref,t:r.t}));
+  let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+  ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clocks");
+  let start=-w*N-1;
+  function unpack(cp,left){
+   ok(cp&&cp.tape.length===w*(N+1+left),"checkpoint size");let bits=cp.tape.map(x=>x[1]).join(""),v=Array.from({length:N+1+left},(_,i)=>dec.get(bits.slice(i*w,(i+1)*w)));
+   ok(cp.tape.every(([pos],i)=>pos===start-left*w+i)&&v.at(-1)==="R"&&(!left||v[0]==="L"),"checkpoint layout");return v.slice(left);
+  }
+  function msg(t){return t.u.map((u,b)=>+(u&&t.children.every(c=>msg(c).some((m,j)=>m&&c.e[b][j]))));}
+  let expected=[],positions=[],openings=[],preds=0,selected=[],idx=0;
+  function node(t){
+   let m=msg(t),i=idx++;openings.push(expected.length+1);expected.push("Z","F");
+   for(let j=0;j<t.u.length;j++){positions.push(expected.length+1);if(a&&j===a[i])selected.push(expected.length+1);expected.push("Z","T"+t.u[j]+m[j]);}
+   expected.push("Z","D");
+   for(let col of t.e){
+    let p=m.findIndex((v,j)=>v&&col[j]);preds+=+(p>=0);
+    for(let j=0;j<col.length;j++)expected.push("Z",j===p?"P":"E"+col[j]);expected.push("Z","J");
+   }expected.push("Z","S");for(let c of t.children)node(c);expected.push("Z","C");
+  }
+  node(t);expected.push("R");
+  ok(JSON.stringify(unpack(r.forward,1))===JSON.stringify(expected),"forward checkpoint "+raw);
+  if(a){
+   ok(r.tape.size===H&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b)&&ref.out===want,"physical output "+raw);
+   let b=expected.slice();for(let i of openings)b[i]="G";for(let i of selected)b[i]="W";
+   ok(JSON.stringify(unpack(r.backward,0))===JSON.stringify(b),"backward checkpoint "+raw);
+   let body=0,c=0,p=new Set(positions);
+   for(let i=N-1;i>=0;i--){let e=+p.has(i);body+=2*w*(i+1)+2*c+2*e+4;c+=e;}
+   ok(r.ph[2]===2*w*N+2*w+2+body+H+3&&r.head===-w*N-H-2,"serializer");
+  }else ok(!r.tape.has(r.head)&&r.ph[2]===0&&!r.backward,"rejection");
+  if(record){
+   let out=a?Array.from({length:H},(_,i)=>r.tape.get(r.head+i)).join(""):"-";for(let ch of raw+":"+out+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   counts.valid++;counts.sat+=+(!!a);counts.unsat+=+(!a);counts.nodes+=nodes.length;counts.branching+=+(nodes.some((_,i)=>nodes.filter(v=>v.p===i).length>1));counts.domainValues+=H;counts.edgeEntries+=nodes.reduce((x,v)=>x+v.e.reduce((y,c)=>y+c.length,0),0);counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(!!a);counts.messageEntries+=H;counts.predecessors+=preds;
+  }return r;
+ }
+ const bits=(x,n)=>Array.from({length:n},(_,i)=>(x>>i)&1),leaf=(u,e)=>({u,e,children:[]}),root=(u,children)=>({u,e:[],children});
+ for(let m=1;m<=4;m++)for(let x=0;x<2**m;x++)check(root(bits(x,m),[]));
+ for(let [m,n] of [[1,1],[1,2],[2,1],[1,3],[3,1],[2,2]])for(let x=0;x<2**(m+n+m*n);x++){
+  let b=bits(x,m+n+m*n);check(root(b.slice(0,m),[leaf(b.slice(m,m+n),Array.from({length:m},(_,j)=>b.slice(m+n+j*n,m+n+(j+1)*n)))]));
+ }
+ // All child-message combinations at a three-rank parent, with singleton children.
+ for(let x=0;x<8;x++)for(let y=0;y<8;y++)check(root([1,1,1],[leaf([1],bits(x,3).map(b=>[b])),leaf([1],bits(y,3).map(b=>[b]))]));
+ let seed=0x52455813;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let i=0;i<32;i++){
+  let n=3+i%4,nodes=[],parents=[-1];
+  for(let j=0;j<n;j++){
+   let d=1+(rand()>>>28)%3,u=Array.from({length:d},()=>rand()>>>31),p=j?(rand()>>>16)%j:-1; if(j)parents.push(p);
+   let e=p<0?[]:nodes[p].u.map(()=>Array.from({length:d},()=>rand()>>>31));nodes.push(leaf(u,e));if(j)nodes[p].children.push(nodes[j]);
+  }
+  if(i%2){let a=nodes.map(v=>(rand()>>>16)%v.u.length);for(let j=0;j<n;j++){nodes[j].u[a[j]]=1;if(j)nodes[j].e[a[parents[j]]][a[j]]=1;}}
+  check(nodes[0]);
+ }
+ check(root([1,1],[leaf([1],[[1],[0]]),leaf([1],[[0],[1]])]));
+ check(root([1,1,1],[{u:[1,1],e:[[0,0],[0,0],[0,1]],children:[leaf([0,0,1],[[0,0,0],[0,0,1]])]},leaf([1],[[0],[0],[1]])]));
+ let malformed=[];for(let n=0;n<=5;n++)for(let x=0;x<2**n;x++)malformed.push(n?x.toString(2).padStart(n,"0"):"");
+ let good=encode(root([1],[]));malformed.push(good.slice(0,-1),good.slice(0,-2),good+good,good+"0",encode(leaf([1],[[1]])),encode(root([1],[leaf([1],[])])),encode(root([1],[leaf([1],[[1,0]])])),encode(root([1],[leaf([1,1],[[1]])])),encode(root([1,1],[leaf([1],[[1]])])),encode(root([1],[leaf([1],[[1],[1]])])),encode(root([],[])),encode(root([0],[leaf([0,0],[[0]])])));
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let m of [2,3,4,8]){
+  let u=Array(m).fill(1),e=Array.from({length:m},(_,j)=>Array.from({length:m},(_,k)=>+(j===m-1&&k===m-1))),t=root(u,[leaf(u,e),leaf(u,e)]),r=check(t,false);
+  if(m<=4){ok(physical(M,encode(t),r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+  scaling.push([m,encode(t).length,r.t,r.logical,r.span,r.ph]);
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","descriptor header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"descriptor length");return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest};
+}
+if(process.argv.includes('--description')){let j=worker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_VARIABLE_DOMAIN_TREE_OK '+JSON.stringify(audit()));
