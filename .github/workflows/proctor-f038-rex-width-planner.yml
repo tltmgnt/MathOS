@@ -1,0 +1,65 @@
+name: Proctor F038 RE-X width planner
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-planner']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m mathos.research.validate_finite_relational_elimination docs/research/tga-universal/REX-008-bridge-evidence.json
+          python -m mathos.research.validate_f038_rex_width_planner | sed -n 's/^REX_WIDTH_PLANNER_OK //p' > /tmp/width.json
+          node --check mathos/research/f038_rex_width_bridge.js
+          node mathos/research/f038_rex_width_bridge.js /tmp/width.json > /tmp/width-bridge.json
+          cmp /tmp/width-bridge.json docs/research/tga-universal/REX-009-width-bridge-evidence.json
+          python -m mathos.research.validate_f038_rex_width_planner /tmp/width-bridge.json | tee /tmp/validation.txt
+          grep -Fx 'REX_WIDTH_PHYSICAL_BRIDGE_OK' /tmp/validation.txt
+          python -m mathos.research.tga_f038_rex_009 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          from itertools import combinations, product
+          from mathos.research.finite_relational_elimination import Solver, Factor
+          from mathos.research.f038_rex_width_planner import Planner
+          with open('/tmp/width.json') as f:
+              audit=json.load(f)
+          assert audit['counts']==dict(plans=584,orders=23064,admitted=538,rejected=46,stages=2035,candidate_rows=7723,greedy_worse=68,greedy_blocked=1)
+          s=Solver({'a':range(1),'b':range(2),'c':range(3),'d':range(4)})
+          st=s.initial_state([Factor(e,tuple(product(*(s.domains[v] for v in e)))) for e in [('a','b'),('a','c'),('b','d'),('c','d')]])
+          p=Planner(s,st,retain=('d',),cap=3,max_width=3,max_outgoing=8,max_candidates=16)
+          assert p.greedy() is None
+          assert p.exact().order==('b','c','a') and p.exact().peak_candidates==12
+          for m in (2,3,8,32):
+              names=tuple(str(i) for i in range(9))
+              s=Solver({v:range(m) for v in names})
+              st=s.initial_state([Factor(e,((0,0),)) for e in combinations(names[:5],2)])
+              assert all((0,0) in f.rows for f in st.factors)
+              assert Planner(s,st,cap=m**3,max_width=4,max_outgoing=m**3,max_candidates=m**4).exact() is None
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_WIDTH_PLANNER_PHYSICAL_LIFECYCLE_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_WIDTH_PLANNER_GATE_OK status=OPEN promotion=NONE')
+          PY
