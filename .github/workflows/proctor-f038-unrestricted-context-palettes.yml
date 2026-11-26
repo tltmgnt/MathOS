@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted context palettes
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-context-palettes']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_context_palettes.js
+          node mathos/research/f038_unrestricted_context_palettes.js | tee /tmp/current.txt
+          grep -Fx 'F038_CONTEXT_PALETTES_OK {"fixtures":16,"stats":[323120,113765,3502,5438,341,4976,1606528,1253904,503296,1253904,49585,47152,1245696,8208,5438,5438],"greedyChecks":4920,"penaltyChecks":1552,"selected":[466,0,294,2980],"forced":[280,208,10226,2458],"deletionChecks":2048,"allNonzero":367,"splices":1497,"uniform":[[16,8,210],[32,16,930],[64,32,3906]],"patterns":65536}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_CONTEXT_PALETTES_GATE_OK status=OPEN promotion=NONE')
+          PY
