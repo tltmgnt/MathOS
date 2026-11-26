@@ -1,0 +1,35 @@
+name: Proctor F038 unrestricted distributed hyperclique
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-distributed-hyperclique']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_distributed_hyperclique.py
+          python -m mathos.research.f038_unrestricted_semantic_rectangle_barrier | tee /tmp/prior.txt
+          grep -F 'F038_UNRESTRICTED_SEMANTIC_RECTANGLE_BARRIER_OK' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_distributed_hyperclique | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_DISTRIBUTED_HYPERCLIQUE_OK [[3,2,13,2640,7,6,2,56,7,45,19],[3,3,20,9941,7,6,2,189,7,171,62],[4,2,16,5009,7,6,3,112,14,168,25],[4,3,25,19676,7,6,2,567,21,978,124],[5,2,19,8494,7,5,3,224,28,636,37],[5,3,30,34311,7,6,2,1701,63,5391,262],[6,2,22,13311,7,4,2,448,56,2184,68],[6,3,35,54846,7,6,2,5103,189,27486,741]]' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_DISTRIBUTED_HYPERCLIQUE_GATE_OK status=OPEN promotion=NONE')
+          PY
