@@ -160,3 +160,95 @@ function logical(J,raw,limit=2000000){
  while(!["ready","reject"].includes(state)&&t<limit){let a=tape.get(head)??"__";let [s,w,d]=rules.get(state+":"+a);trace.push([state,head,a]);if(trace.length>12)trace.shift();if(w==="__")tape.delete(head);else tape.set(head,w);head+=d;moves+=+(d!==0);state=s;t++;}
  return {state,head,t,moves,trace,out:[...tape].sort((a,b)=>a[0]-b[0]).map(([,a])=>J.projection[a]??"_").filter(a=>a!=="_").join("")};
 }
+
+function physical(M,raw,limit=30000000){
+ let tape=new Map([...raw].map((v,i)=>[i,+v])),head=0,state=0,t=0,lo=0,hi=0,ph=[0,0,0],logical=0,forward=null,backward=null;
+ const snap=()=>({head,tape:[...tape].sort((a,b)=>a[0]-b[0])});
+ while(state!==M.q&&t<limit){
+  let name=M.names[state];if(name==="read:rootRewind:")forward=snap();if(name==="read:readyAt:")backward=snap();
+  ph[name[0]==="p"?0:name[0]==="s"?2:1]++;
+  if(name.startsWith("read:")&&name.endsWith(":"))logical++;
+  let [q,w,d]=M.T[3*state+(tape.get(head)??2)];
+  if(w===2)tape.delete(head);else tape.set(head,w);
+  head+=d;state=q;t++;lo=Math.min(lo,head);hi=Math.max(hi,head);
+ }
+ return {tape,head,state,t,ph,logical,span:hi-lo+1,forward,backward};
+}
+function flatten(t){let nodes=[];function visit(t,p){let i=nodes.length;nodes.push({u:t.u,e:t.e,p});for(let c of t.children)visit(c,i);}visit(t,-1);return nodes;}
+function oracle(t){
+ let nodes=flatten(t),n=nodes.length;
+ for(let i=0;i<2**n;i++){let bits=i.toString(2).padStart(n,"0").split("").map(Number);
+  if(nodes.every((v,j)=>v.u[bits[j]]&&(v.p===-1||v.e[2*bits[j]+bits[v.p]])))return bits.join("");
+ }return null;
+}
+function audit(){
+ const J=treeWorker(),M=compile(J.rules,J.symbols,J.projection),ok=(v,s)=>{if(!v)throw Error(s)},dec=new Map(Object.entries(M.code).map(([a,b])=>[b,a]));
+ const counts={valid:0,sat:0,unsat:0,nodes:0,branches:0,physical:0,logical:0,checkpoints:0,messageEntries:0,malformed:0,malformedTransitions:0,cutoffs:0};let digest=2166136261;
+ function check(t,record=true,known=undefined){
+  let raw=encode(t),N=raw.length,w=M.width,n=N/16,want=known===undefined?oracle(t):known,ref=logical(J,raw),r=physical(M,raw);
+  ok(r.state===M.q&&ref.state===(want===null?"reject":"ready")&&r.logical===ref.t,"termination "+JSON.stringify({raw,ref,t:r.t}));
+  let prep=(w+1)*N*(N+1)+(w+4)*N+3,mid=(3*w-2)*ref.moves+(2*w-1)*(ref.t-ref.moves);
+  ok(r.ph[0]===prep&&r.ph[1]===mid,"phase clocks");
+  let start=-w*N-1;
+  function unpack(cp,left){
+   ok(cp&&cp.tape.length===w*(N+1+left),"checkpoint size");
+   let bits=cp.tape.map(x=>x[1]).join(""),a=Array.from({length:N+1+left},(_,i)=>dec.get(bits.slice(i*w,(i+1)*w)));
+   ok(cp.tape.every(([pos],i)=>pos===start-left*w+i)&&a.at(-1)==="R"&&(!left||a[0]==="L"),"checkpoint layout");
+   return a.slice(left);
+  }
+  let expected=[],positions=[];
+  function expectedNode(t){
+   let m=t.u.map((u,b)=>+(u&&t.children.every(c=>{let a=message(c);return a[0]&&c.e[b]||a[1]&&c.e[2+b];})));
+   positions.push(expected.length+1);expected.push("Z","F","Z","T"+t.u[0]+m[0],"Z","T"+t.u[1]+m[1]);
+   for(let e of t.e)expected.push("Z","E"+e);
+   for(let c of t.children)expectedNode(c);
+   expected.push("Z","C");
+  }
+  function message(t){return t.u.map((u,b)=>+(u&&t.children.every(c=>{let a=message(c);return a[0]&&c.e[b]||a[1]&&c.e[2+b];})));}
+  expectedNode(t);expected.push("R");
+  ok(JSON.stringify(unpack(r.forward,1))===JSON.stringify(expected),"forward messages and factor preservation");
+  if(want!==null){
+   ok(r.tape.size===n&&[...want].every((b,i)=>r.tape.get(r.head+i)===+b)&&ref.out===want,"output "+raw);
+   let back=expected.slice();for(let i=0;i<n;i++)back[positions[i]]="W"+want[i];
+   ok(JSON.stringify(unpack(r.backward,0))===JSON.stringify(back),"backward checkpoint");
+   let body=0,c=0,p=new Set(positions);
+   for(let i=N-1;i>=0;i--){let emit=+p.has(i);body+=2*w*(i+1)+2*c+2*emit+4;c+=emit;}
+   ok(r.ph[2]===2*w*N+2*w+2+body+n+3&&r.head===-w*N-n-2,"serializer");
+  }else ok(!r.tape.has(r.head)&&r.ph[2]===0&&!r.backward,"rejection");
+  if(record){
+   let actual=want===null?"-":Array.from({length:n},(_,i)=>r.tape.get(r.head+i)).join("");
+   for(let ch of raw+":"+actual+";")digest=Math.imul(digest^ch.charCodeAt(0),16777619)>>>0;
+   counts.valid++;counts.sat+=+(want!==null);counts.unsat+=+(want===null);counts.nodes+=n;counts.branches+=+(flatten(t).some((_,i,a)=>a.filter(x=>x.p===i).length>=2));counts.physical+=r.t;counts.logical+=r.logical;counts.checkpoints+=1+ +(want!==null);counts.messageEntries+=2*n;
+  }
+  return r;
+ }
+ const bits=(x,n)=>Array.from({length:n},(_,i)=>(x>>i)&1),leaf=(u,e)=>({u,e,children:[]}),root=(u,children)=>({u,e:[1,1,1,1],children});
+ for(let u=0;u<4;u++)check(root(bits(u,2),[]));
+ for(let u=0;u<4;u++)for(let v=0;v<4;v++)for(let e=0;e<16;e++)check(root(bits(u,2),[leaf(bits(v,2),bits(e,4))]));
+ for(let a=0;a<16;a++)for(let b=0;b<16;b++)check(root([1,1],[leaf([1,1],bits(a,4)),leaf([1,1],bits(b,4))]));
+ let seed=0x52455812;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ for(let i=0;i<64;i++){
+  let n=3+i%6,nodes=Array.from({length:n},()=>leaf(bits(rand()>>>16,2),bits(rand()>>>16,4))),parents=[-1];
+  for(let j=1;j<n;j++){let p=(rand()>>>16)%j;parents.push(p);nodes[p].children.push(nodes[j]);}
+  if(i%2){let a=nodes.map(()=>rand()>>>31);for(let j=0;j<n;j++){nodes[j].u[a[j]]=1;if(j)nodes[j].e[2*a[j]+a[parents[j]]]=1;}}
+  check(nodes[0]);
+ }
+ let conflict=root([1,1],[leaf([1,0],[1,0,0,0]),leaf([0,1],[0,0,0,1])]),forced=root([1,1],[leaf([1,0],[0,1,0,0]),leaf([0,1],[0,0,0,1])]);
+ ok(oracle(conflict)===null&&oracle(forced)==="101","adversarial oracle");check(conflict);check(forced);
+ let malformed=[];for(let n=0;n<=6;n++)for(let x=0;x<2**n;x++)malformed.push(n?x.toString(2).padStart(n,"0"):"");
+ let good=encode(root([1,1],[]));malformed.push(good.slice(0,-1),good.slice(0,-2),good+"0",good+good,"11"+good,good.slice(0,2)+"10"+good.slice(4),good.slice(0,-2)+good,encode(forced).slice(0,-2));
+ for(let raw of malformed){let r=physical(M,raw);ok(r.state===M.q&&!r.tape.has(r.head),"malformed "+raw);counts.malformed++;counts.malformedTransitions+=r.t;}
+ let scaling=[];
+ for(let n of [2,4,8,16,32]){
+  for(let shape of ["star","chain"]){
+   let nodes=Array.from({length:n},()=>leaf([0,1],[0,0,0,1]));for(let j=1;j<n;j++)nodes[shape==="star"?0:j-1].children.push(nodes[j]);
+   let r=check(nodes[0],false,"1".repeat(n));if(n<=8){ok(physical(M,encode(nodes[0]),r.t-1).state!==M.q,"cutoff");counts.cutoffs++;}
+   scaling.push([shape,n,16*n,r.t,r.logical,r.span,r.ph]);
+  }
+ }
+ let pos=3;while(M.desc[pos]==="1")pos++;ok(pos-3===M.q&&M.desc[pos++]==="0","header");let b=M.q.toString(2).length;
+ for(let [q,w,d] of M.T){ok(parseInt(M.desc.slice(pos,pos+b),2)===q&&parseInt(M.desc.slice(pos+b,pos+b+2),2)===w&&parseInt(M.desc.slice(pos+b+2,pos+b+4),2)===d+1,"descriptor");pos+=b+4;}
+ ok(pos===M.desc.length,"length");
+ return {alphabet:J.symbols.length,width:M.width,logicalStates:new Set(J.rules.map(x=>x[0])).size,rules:J.rules.length,states:M.q,bits:M.desc.length,counts,scaling,digest};
+}
+if(process.argv.includes('--description')){let j=treeWorker();console.log(compile(j.rules,j.symbols,j.projection).desc);}else console.log('F038_REX_BRANCHING_TREE_OK '+JSON.stringify(audit()));
