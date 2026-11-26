@@ -1,0 +1,45 @@
+name: MRA-X exact-content proof replay
+on:
+  pull_request:
+    paths:
+      - 'tools/mra_x_*.py'
+      - '.github/workflows/mra-x-replay.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/mra_x_*.py'
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python3 tools/mra_x_replay_audit.py --output replay-audit.json
+      - run: python3 tools/mra_x_replay_audit.py --output replay-repeat.json
+      - name: Check deterministic evidence
+        run: |
+          PYTHONPATH=tools python3 - <<'PY'
+          import json
+          import mra_x_boundproof as p
+          def stable(path):
+              r=json.load(open(path))
+              h=r.pop('evidence_sha256')
+              assert p.digest(r)==h
+              r.pop('timing')
+              r.pop('churn_timing')
+              return r
+          r=stable('replay-audit.json')
+          assert r==stable('replay-repeat.json')
+          assert len(r['rows'])==216 and len(r['controls'])==20
+          assert sum(x['receipt']['optimum'] is not None for x in r['rows'] if x['reads']==1)==54
+          assert sum(x['methods']['cache']['hits'] for x in r['rows'])==1296
+          assert sum(x['methods']['cache']['checks'] for x in r['rows'])==216
+          for row in r['rows']:
+              assert row['methods']['cache']['checks']==1
+              assert row['methods']['cache']['hits']==row['reads']-1
+          assert [(x['capacity'],x['methods']['cache']['hits'],x['methods']['cache']['checks'],x['methods']['cache']['evictions']) for x in r['churn']]==[(4,0,136,132),(16,56,80,64),(128,64,72,0)]
+          PY
