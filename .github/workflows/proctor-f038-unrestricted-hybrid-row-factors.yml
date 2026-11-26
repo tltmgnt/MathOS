@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted hybrid row factors
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-hybrid-row-factors']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_hybrid_row_factors.js
+          node mathos/research/f038_unrestricted_hybrid_row_factors.js | tee /tmp/current.txt
+          grep -Fx 'F038_HYBRID_ROW_FACTORS_OK {"fixtures":16,"stats":[161560,26680,260678,147060,260678,13399,11650,895488,4104,7506,7506],"rankChecks":265654,"encodingChecks":502746,"rebases":116832,"dictChecks":458078,"relabels":62472,"kinds":[63256,32376,34360,17068],"controls":[[4,1,2,3,21],[8,2,4,6,85],[16,2,8,10,341],[32,4,16,20,1365],[64,4,32,36,5461]],"symbolic":[[64,32,15,true,true],[128,64,18,true,true],[256,128,21,true,true],[512,256,24,true,true],[1024,512,27,true,true]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HYBRID_ROW_FACTORS_GATE_OK status=OPEN promotion=NONE')
+          PY
