@@ -1,0 +1,193 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-QUADRATIC-FAMILY-CUTOFF",
+  "base_commit": "b0a5b361f0f5128630543a14757aaef8fff7ce2f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45742483243",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can the exact quadratic adversary family establish cubic-stage failure, or is its surviving-index reconstruction already fast enough to be covered by U?",
+  "route": "negative",
+  "topology": "Ordered forbidden streams and pin reconstruction for the exact quadratic adversary, fixed program clock upper bound.",
+  "adversarial": [
+    "No witness or masks may be supplied separately to the algorithm.",
+    "The original clause order and pin extraction must be exact.",
+    "The one-tape simulation and fixed description must be charged.",
+    "This is a family-specific upper bound, not a general SAT upper bound."
+  ],
+  "scope": "Same U and its weighted stages, entire previous n=11m disjointness-and-pins family with arbitrary forbidden masks and pins; no arbitrary-SAT runtime upper bound.",
+  "cost": "O(L polylog L) fixed multitape bit steps, O(L^2 polylog L) general one-tape transitions; stage 2 ceil(log2 L)+O(log log L) including fixed description length.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of prior quadratic family cutoff"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS full normalized selector construction, stream scan and witness truth checks; not execution of new Python.",
+  "expected": {
+    "controls": 4,
+    "rows": [
+      [
+        3,
+        33,
+        45860,
+        27,
+        24,
+        12,
+        12,
+        201,
+        96,
+        336,
+        117,
+        1099824
+      ],
+      [
+        4,
+        44,
+        109869,
+        64,
+        24,
+        12,
+        12,
+        483,
+        207,
+        795,
+        273,
+        2635776
+      ],
+      [
+        5,
+        55,
+        215986,
+        125,
+        24,
+        12,
+        12,
+        948,
+        390,
+        1554,
+        525,
+        5182320
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_quadratic_family_cutoff.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-QUADRATIC-FAMILY-CUTOFF.md"
+  ],
+  "next": "Develop a different direct adversarial existence argument for unbounded cubic failures, or prove a uniform polynomial SAT cutoff; the previous disjointness family cannot provide it.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can the exact quadratic adversary family establish cubic-stage failure, or is its surviving-index reconstruction already fast enough to be covered by U?",
+      "strategy": "Read actual normalized selector tape in order, extract both forbidden streams and pins, reconstruct a surviving index in a single synchronized scan.",
+      "alternative": "Charge the fixed general program simulation and prove the leading-exponent ceiling for the prior adversary family.",
+      "stop_rule": "No extrapolation of the family upper bound to general SAT and no new lower-bound exponent.",
+      "literature_leads": [
+        "Prior exact quadratic-stage theorem and ordinary polynomial-overhead fixed multitape-to-one-tape simulation; no novelty claim for stream intersection."
+      ]
+    },
+    "construct": {
+      "claim": "Every satisfiable member of the exact previous quadratic adversary family succeeds by stage 2 ceil(log2 L)+O(log log L) for the same U.",
+      "scope": "Same U and its weighted stages, entire previous n=11m disjointness-and-pins family with arbitrary forbidden masks and pins; no arbitrary-SAT runtime upper bound.",
+      "derivation": "Exact stream extraction from actual pool, lockstep surviving-index search, direct prior witness reconstruction; charge fixed multitape and quadratic three-symbol one-tape simulation and fixed description length.",
+      "unresolved_steps": [
+        "Unconditional unbounded cubic failures for arbitrary selectors or a universal cutoff.",
+        "Explicit tape program and numerical constants."
+      ],
+      "candidate_tests": [
+        "Actual parent family encoding, original verifier, independent full-selector stream reference at m=3,4,5."
+      ]
+    },
+    "alternative": {
+      "claim": "For every fixed epsilon>0 the previous family has no failures at stage ceil((2+epsilon)log2 L) eventually, so the previous quadratic lower-bound family is sharp in leading stage exponent.",
+      "scope": "Same U and its weighted stages, entire previous n=11m disjointness-and-pins family with arbitrary forbidden masks and pins; no arbitrary-SAT runtime upper bound.",
+      "derivation": "Absorb additive logarithmic-logarithmic stage overhead into any fixed positive exponent slack. Compare with previous exact stage-two lower bound.",
+      "unresolved_steps": [
+        "Find a genuinely different unbounded cubic adversary or a uniform cutoff."
+      ],
+      "candidate_tests": [
+        "Check complementary and full masks, last surviving index, arbitrary pins, exact reconstructed models."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "No witness or masks may be supplied separately to the algorithm.",
+        "The original clause order and pin extraction must be exact.",
+        "The one-tape simulation and fixed description must be charged.",
+        "This is a family-specific upper bound, not a general SAT upper bound."
+      ],
+      "counterexample_candidates": [
+        "Extra clauses outside the family can invalidate a reconstructed witness; U verifies any proposal.",
+        "Exact quadratic stage may still fail because fixed constants and polylog overhead matter."
+      ],
+      "equivalence_audit": "Actual original selector encoding, prior family clauses, exact output convention and U weighted stage; no changes to competitor algorithms.",
+      "barrier_audit": "No unbounded cubic or all-exponent lower bound; no resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original U and fixed multitape stream algorithm simulated on original general three-symbol one-tape model.",
+      "cost_ledger": {
+        "encoding": "Full original normalized selector with unary header",
+        "preprocessing": "Sequential support and sign counters and exact mask/pin extraction",
+        "inference": "Lockstep mask scans and direct group-index witness generation",
+        "repetitions": "One full selector pass and O(M) synchronized mask reads",
+        "arithmetic_bits": "Binary counters and endpoints, polylog L per operation",
+        "memory": "Fixed work tapes and O(L polylog L) used region, no free random access",
+        "reconstruction": "Emit original n witness bits and position halt head; existing U verifies",
+        "overall": "O(L polylog L) fixed multitape bit steps, O(L^2 polylog L) general one-tape transitions; stage 2 ceil(log2 L)+O(log log L) including fixed description length."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent counterexample existence",
+        "Explicit compiled general machine and numeric stage constants"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Exact prior family index characterization",
+        "Actual stream extraction and witness reconstruction",
+        "Charged fixed machine and stage absorption",
+        "Finite independent reference and parent replay"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No concrete general compiler or measured tape clock."
+      ],
+      "proof_obligations": [
+        "Replay parent family and actual verifier",
+        "Audit sequential parsing and fixed tape simulation",
+        "Check leading-exponent cutoff and exact quadratic distinction"
+      ],
+      "formalization_plan": "Formalize ordered stream extraction and index recovery, fixed tape implementation cost and weighted clock inclusion.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Prove the previous quadratic adversary family cannot yield any fixed exponent improvement beyond two, directing unrestricted research away from that dead end.",
+      "remaining_gaps": [
+        "Unbounded cubic-stage failures",
+        "All-exponent lower bound or cutoff",
+        "Independent review and concrete machine compilation"
+      ],
+      "next_question": "Develop a different direct adversarial existence argument for unbounded cubic failures, or prove a uniform polynomial SAT cutoff; the previous disjointness family cannot provide it.",
+      "human_review_requests": [
+        "Review stream extraction, exact previous family membership and simulation overhead."
+      ]
+    }
+  }
+}
