@@ -1,0 +1,213 @@
+{
+  "attempt_id": "F038-MRAX-PROGRAMMABLE-PARITY",
+  "base_commit": "f246bd8ddab58720d3a8d177ff3311a0beaab274",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45731742826",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can a programmable single-output derivative avoid the previous explicit output amplification cost while preserving SAT decision hardness?",
+  "route": "negative",
+  "topology": "Affine paired-unit selector cube, projected witness support and singleton subcube oracle distinctions.",
+  "adversarial": [
+    "Directional parity is not the ordinary coordinate derivative special case.",
+    "Existential witnesses are not counted individually.",
+    "Explicit outside selectors defeat the hidden-hole oracle premise.",
+    "Completeness for a parity class is not an unconditional lower bound."
+  ],
+  "scope": "Unary n, explicit selector and direction matrix, Boolean source pool of nonempty width-three clauses; projected parity counts z, not witnesses.",
+  "cost": "ParityExistsP-complete single output; exponential pin-oracle query bound; no general decision-preserving transfer",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of projected parity completeness and query lower bounds"
+    },
+    {
+      "key": "attempt_decision_transfer",
+      "label": "Decision-preserving noncircular transfer to ordinary SAT"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted deterministic SAT runtime lower bound"
+    }
+  ],
+  "independent_reference": "Independent scalar JavaScript CNF equality-copy, projected-model and one-hole prefix-OR enumeration; not execution of Python.",
+  "expected": {
+    "projection": [
+      256,
+      1024,
+      447,
+      2304,
+      25600,
+      323,
+      380,
+      6144
+    ],
+    "holes": [
+      [
+        1,
+        2,
+        3,
+        6,
+        12,
+        2,
+        4,
+        8,
+        2
+      ],
+      [
+        2,
+        4,
+        9,
+        36,
+        144,
+        4,
+        32,
+        64,
+        12
+      ],
+      [
+        3,
+        8,
+        27,
+        216,
+        1728,
+        8,
+        208,
+        512,
+        56
+      ],
+      [
+        4,
+        16,
+        81,
+        1296,
+        20736,
+        16,
+        1280,
+        4096,
+        240
+      ],
+      [
+        5,
+        32,
+        243,
+        7776,
+        248832,
+        32,
+        7744,
+        32768,
+        992
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_programmable_parity.py",
+    "docs/research/tga-universal/PNP-F038-MRAX-PROGRAMMABLE-PARITY.md"
+  ],
+  "next": "Investigate decision-preserving selector reparametrization or a direct circuit lower-bound transfer rather than further parity amplification.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can a programmable single-output derivative avoid the previous explicit output amplification cost while preserving SAT decision hardness?",
+      "strategy": "Classify directional selector parity by a projected witness reduction with disjoint paired-unit directions.",
+      "alternative": "Prove adaptive deterministic and randomized pin-oracle lower bounds on compact one-hole formulas.",
+      "stop_rule": "Do not identify projected parity with ordinary SAT or query complexity with unrestricted circuit size.",
+      "literature_leads": [
+        "Prior MathOS derivative rank and universal clause selector; elementary projected parity and oracle adversary arguments. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Programmable directional selector parity is ParityExistsP-complete as explicitly defined, even for disjoint paired-unit directions.",
+      "scope": "Unary n, explicit selector and direction matrix, Boolean source pool of nonempty width-three clauses; projected parity counts z, not witnesses.",
+      "derivation": "Fresh equality copies and paired unit flips pin projected bits exactly; ordinary circuit-to-CNF reduction preserves existence; rank-deficient directions cancel.",
+      "unresolved_steps": [
+        "Decision-preserving lower-bound transfer to ordinary SAT."
+      ],
+      "candidate_tests": [
+        "All two-variable selected formulas and projection subsets; actual selector bitsets and paired directions."
+      ]
+    },
+    "alternative": {
+      "claim": "Computing parity of projected models via partial-pin existence oracles requires 2^h deterministic queries and (1-2epsilon)2^h expected distinct singleton queries with bounded error on full relation.",
+      "scope": "Hidden outside selectors, queries only partial assignments to h address coordinates; full and one-hole compact CNFs.",
+      "derivation": "Each hole differs from full relation only on its own singleton; couple random tapes and sum query probabilities; explicit prefix-OR CNF excludes one address.",
+      "unresolved_steps": [
+        "Unrestricted algorithms with explicit access to formulas; decision lower bound."
+      ],
+      "candidate_tests": [
+        "Actual one-hole CNFs, unique auxiliary extensions and all ternary pin queries."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Directional parity is not the ordinary coordinate derivative special case.",
+        "Existential witnesses are not counted individually.",
+        "Explicit outside selectors defeat the hidden-hole oracle premise.",
+        "Completeness for a parity class is not an unconditional lower bound."
+      ],
+      "counterexample_candidates": [
+        "Rank-deficient directions always cancel; full and one-hole formulas are easy with explicit access."
+      ],
+      "equivalence_audit": "Exact paired selector mapping; Q in P iff P=NP and P=parity-P; oracle distinction and coupling premises explicit.",
+      "barrier_audit": "No unrestricted SAT runtime lower bound or P versus NP resolution.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Explicit selector bitsets, GF2 direction matrix, projected existential predicate and separate partial-pin oracle model.",
+      "cost_ledger": {
+        "encoding": "Polynomial width-three pool, explicit unary n, matrix and projected variable copies",
+        "preprocessing": "Normalize clauses and rank-check directions in polynomial explicit time",
+        "inference": "Parity of SAT evaluations and exact paired pin restriction",
+        "repetitions": "2^k evaluations in direct algorithm; finite regression only",
+        "arithmetic_bits": "Exact GF2 elimination, XOR and bitsets",
+        "memory": "Polynomial explicit query state; no free parity aggregation",
+        "reconstruction": "Fixed equality-copy and prefix-OR gate CNFs preserve projected witness sets",
+        "overall": "ParityExistsP-complete single output; exponential pin-oracle query bound; no general decision-preserving transfer"
+      },
+      "missing_bounds": [
+        "Unrestricted deterministic SAT lower bound",
+        "Decision-preserving structural circuit transfer"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Directional rank cancellation",
+        "Projected parity reduction and class characterization",
+        "Compact one-hole encoding and adaptive query coupling"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "No general circuit-to-CNF compiler or efficient parity solver implemented."
+      ],
+      "proof_obligations": [
+        "Replay exact universal selector directions",
+        "Compare projected models and pin evaluations",
+        "Check one-hole CNFs, unique extensions and oracle distinctions"
+      ],
+      "formalization_plan": "Formalize affine image multiplicities, projection-preserving clauses, singleton transcript adversary and random coupling separately.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Classify the programmable single-output derivative and expose an exponential black-box extraction barrier without confusing parity with ordinary SAT.",
+      "remaining_gaps": [
+        "Universal lower bound",
+        "Decision-preserving transfer",
+        "F037-F040 universal obligations"
+      ],
+      "next_question": "Investigate decision-preserving selector reparametrization or a direct circuit lower-bound transfer rather than further parity amplification.",
+      "human_review_requests": [
+        "Review explicit encoding, parity padding, projected witness quantifiers and oracle model scope."
+      ]
+    }
+  }
+}

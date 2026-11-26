@@ -1,0 +1,40 @@
+name: Proctor F038 MRA-X programmable parity
+on:
+  push:
+    branches: ['research/pnp-f038-mrax-programmable-parity']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_programmable_parity.py
+          python -m mathos.research.f038_multioutput_derivative_rank | tee /tmp/prior.txt
+          grep -Fx 'F038_MRAX_DERIVATIVE_RANK_OK {"controls":4,"products":[[1,16,32,8,8,12],[2,256,2048,512,512,768],[3,65536,1572864,393216,393216,589824]],"ranks":[[2,8,8,8,8,8],[3,128,256,640,768,512],[4,256,768,4352,5120,2816]],"selector":[[1,2,4,4,[1]],[2,8,256,256,[1,9,37,93,163,219,247]]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_programmable_parity | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_MRAX_PROGRAMMABLE_PARITY_OK {"controls":4,"holes":[[1,2,3,6,12,2,4,8,2],[2,4,9,36,144,4,32,64,12],[3,8,27,216,1728,8,208,512,56],[4,16,81,1296,20736,16,1280,4096,240],[5,32,243,7776,248832,32,7744,32768,992]],"projection":[256,1024,447,2304,25600,323,380,6144]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_MRAX_PROGRAMMABLE_PARITY_GATE_OK status=OPEN')
+          PY
