@@ -29,8 +29,8 @@ function audit(Q,P,V,H,A,E,suite="small"){
   if(expected!==null)ok(r.bits===E.witness(m,pins,expected)&&E.valid(raw,r.bits),"witness "+name);
   if(oldClock!==null)ok(r.t===oldClock,"exact inherited clock");
   let original=slot(M.desc.length,r.t,raw.length),reduced=slot(C.desc.length,r.t,raw.length);
-  const exhaustive={ell:3,tExponent:19*m-7,minStage:19*m-4,admitted3:19*m-4<=reduced.stage3};
-  rows.push({name,m,L:raw.length,status:r.status,t:r.t,head:r.head,span:r.span,bits:r.bits,original,reduced,exhaustive});
+  const exhaustive={ell:3,tExponent:19*m-7,minBudgetStage:19*m-4,budgetEligible3:19*m-4<=reduced.stage3};
+  rows.push({name,m,L:raw.length,stageMeaning:r.status==="WITNESS"?"verified_witness_slot":"halt_only_no_witness",status:r.status,t:r.t,head:r.head,span:r.span,bits:r.bits,original,reduced,exhaustive});
   return{raw,r};
  }
  if(suite==="small"){
@@ -44,6 +44,9 @@ function audit(Q,P,V,H,A,E,suite="small"){
   ok(simulate(P,C.desc,"1000",1000).status==="BLANK","n1 refusal");
  }else if(suite==="three"){
   let z=[0,1,2,0,2,1,2,0,1];check("mixed-ranks",3,[1,0,1],force(3,z),z,522655657);
+ }else if(suite==="four-bounded"){
+  let z=[0,1,2,3,0,3,2,1,0],raw=E.encode(4,[1,0,1,1],force(4,z)),r=simulate(P,C.desc,raw,300000000);
+  ok(r.status==="TIMEOUT"&&r.t===300000000,"domain four bounded run");return{suite,stats:C.stats,L:raw.length,...r};
  }else if(suite==="four"){
   let z=[0,1,2,3,0,3,2,1,0];check("four-mixed-ranks",4,[1,0,1,1],force(4,z),z);
  }else throw Error("unknown suite");
