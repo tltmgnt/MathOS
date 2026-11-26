@@ -454,7 +454,7 @@ function run(M,raw,limit=Infinity,observe=null,snapshot=false){
  const accepted=frames[0].status===1;
  if(accepted?(frames.length!==10||frames[9].active!=="000000000"):frames.length!==1)throw Error("terminal stack");
  const graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
- return{status:accepted?"WIDTH_THREE_FACTORS":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,pushes,pops,snapshot:snapshot?Array.from(tape.subarray(lo,hi+1),(v,i)=>lo+i===head?"H":v===2?"_":String(v)).join(""):null,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
+ return{status:accepted?"WIDTH_THREE_FACTORS":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,pushes,pops,snapshot:snapshot?"_"+Array.from(tape.subarray(lo,hi+1),(v,i)=>lo+i===head?"H":v===2?"_":String(v)).join("")+"_":null,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
 
 }
 
