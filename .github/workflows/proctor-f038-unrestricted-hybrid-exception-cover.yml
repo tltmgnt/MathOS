@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted hybrid exception cover
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-hybrid-exception-cover']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_hybrid_exception_cover.js
+          node mathos/research/f038_unrestricted_hybrid_exception_cover.js | tee /tmp/current.txt
+          grep -Fx 'F038_HYBRID_EXCEPTION_COVER_OK {"fixtures":16,"total":[404,0,0,69775,27270,69775,0,0,0,161560],"forced":[280,106,3836,69775,34043,62519,5732,1524,3922,161560],"matrixChecks":81400,"greedyChecks":4920,"blockChecks":9381,"controls":[[4,3,81,15,0],[8,7,2401,8540,1],[16,11,50625,1397700,3],[32,11,923521,95129390,7]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_HYBRID_EXCEPTION_COVER_GATE_OK status=OPEN promotion=NONE')
+          PY
