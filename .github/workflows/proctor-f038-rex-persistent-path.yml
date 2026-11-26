@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X persistent path
+on:
+  push:
+    branches: ['research/pnp-f038-rex-persistent-lifecycle']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_persistent_path.js
+          node mathos/research/f038_rex_persistent_path.js | tee /tmp/path.txt
+          grep -Fx 'F038_REX_PERSISTENT_PATH_OK {"alphabet":30,"states":6426,"bits":334156,"width":5,"logicalStates":147,"rules":4410,"counts":{"valid":342,"sat":133,"unsat":209,"vertices":957,"physical":916477,"logical":6428,"checkpoints":266,"historyEntries":482,"malformed":253,"malformedTransitions":105728,"cutoffs":7},"scaling":[[1,2,196,5,19,[57,61,78]],[2,8,1233,17,54,[507,217,509]],[4,20,5719,41,128,[2703,529,2487]],[8,44,24339,89,276,[12279,1153,10907]],[16,92,100171,185,572,[52167,2401,45603]],[32,188,406203,377,1164,[214887,4897,186419]],[64,380,1635739,761,2348,[872103,9889,753747]]],"adversarial":{"individuallyNonemptyEdges":"11100011000111","forcedNonzeroPredecessor":"11001011"},"digest":2946600415}' /tmp/path.txt
+          sed -n 's/^F038_REX_PERSISTENT_PATH_OK //p' /tmp/path.txt > /tmp/path.json
+          python -m mathos.research.validate_f038_rex_persistent_path /tmp/path.json
+          python -m mathos.research.tga_f038_rex_010 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_PHYSICAL_PATH_GENERAL_LIFECYCLE_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_PERSISTENT_PATH_GATE_OK status=OPEN promotion=NONE')
+          PY
