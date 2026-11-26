@@ -1,0 +1,63 @@
+name: Proctor F038 RE-X ternary handoff
+on:
+  push:
+    branches: ['research/pnp-f038-rex-ternary-handoff']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_ternary_handoff
+          node --check "$p.js"
+          for suite in small three controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/handoff-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/handoff-replay.txt
+          node "$p.js" --descriptor > /tmp/handoff.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(p,tag){const s=fs.readFileSync(p,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const [a,b,c]=['small','three','controls'].map(x=>read('/tmp/handoff-'+x+'.txt','F038_REX_TERNARY_HANDOFF_OK'));
+          assert.ok([a,b,c].every(s=>s.q===254151&&s.descriptorBits===17028121));
+          const rows=[...a.rows,...b.rows];
+          assert.equal(rows.length,5);
+          assert.deepEqual(rows.map(r=>r.status),['WORKER_SAT','WORKER_SAT','WORKER_UNSAT','WORKER_UNSAT','WORKER_SAT']);
+          assert.deepEqual(rows.map(r=>r.t),[44149177,45565572,112649341,54399245,520339871]);
+          assert.deepEqual(rows.map(r=>r.margin),[1218,1337,6141,1821,1533]);
+          assert.equal(rows.reduce((s,r)=>s+r.t,0),777103206);
+          assert.equal(rows.reduce((s,r)=>s+r.handoff,0),41230246);
+          assert.equal(rows.filter(r=>r.witnessVerified).length,3);
+          assert.ok(rows.every(r=>r.handoff===22*r.N*r.N+29*r.N+6));
+          assert.equal(c.controls.length,9);assert.equal(c.rejects.length,3);assert.equal(c.exactBudget,44149177);
+          const replay=read('/tmp/handoff-replay.txt','F038_REX_TERNARY_HANDOFF_REPLAY_OK');
+          assert.equal(replay.transitions,44149177);assert.equal(replay.protectedCells,38091);assert.equal(replay.certificate,'1111111');
+          JS
+          python -m mathos.research.f038_rex_ternary_handoff_codec /tmp/handoff.desc > /tmp/codec.json
+          python -m mathos.research.tga_f038_rex_022b5 > /tmp/gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/codec.json') as f:
+              c=json.load(f)
+          with open('/tmp/gates.json') as f:
+              g=json.load(f)
+          assert c['tested_witness_refused'] and c['transitions']==44149177
+          assert c['certificate']=='1111111'
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-022B5_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
