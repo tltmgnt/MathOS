@@ -92,7 +92,7 @@ function audit(){
   }return false;
  }
 
- const extra={partitions:0,slices:0,staticMessages:0,dynamicMessages:0,keyChecks:0,exactKeys:0,fullTuples:0,models:0,componentChecks:0,selectedWitnesses:0};
+ const extra={partitions:0,slices:0,staticMessages:0,dynamicMessages:0,keyChecks:0,exactKeys:0,fullTuples:0,models:0,componentChecks:0,selectedWitnesses:0,reducedChecks:0};
  function* subsets(a,k){if(k===0){yield [];return;}for(let i=0;i<=a.length-k;i++)for(let b of subsets(a.slice(i+1),k-1))yield [a[i],...b];}
  function setup(a){A=a;V=Array.from({length:9},(_,i)=>i).filter(i=>!a.includes(i));}
  function slicedPlan(C){
@@ -107,12 +107,31 @@ function audit(){
    if(local.every(Boolean))return {Q,local};
   }return null;
  }
+ function reduced(C){
+  let stat=C.map(c=>plan(c.C,c.B,c.factors));
+  if(stat.every(Boolean))return true;
+  for(let a of A){
+   let good=true;
+   for(let i=0;i<C.length;i++)if(!stat[i]){
+    let c=C[i],B=c.B.filter(g=>g!==a);
+    if(B.length>3){good=false;break;}
+    let found=false;
+    for(let order of perm(c.C)){
+     let scopes=c.factors.map(f=>f.h.filter(g=>g!==a)),w=0;
+     for(let v of order){let U=[...new Set(scopes.filter(h=>h.includes(v)).flat())].filter(g=>g!==v);w=Math.max(w,U.length);scopes=scopes.filter(h=>!h.includes(v));scopes.push(U);}
+     if(w<=3){found=true;break;}
+    }
+    if(!found){good=false;break;}
+   }
+   if(good)return true;
+  }return false;
+ }
  function structural(F){
   let old=0,now=0,first=null;
   for(let a of subsets(Array.from({length:9},(_,i)=>i),4)){
    setup(a);extra.partitions++;let C=components(F);
    if(C.every(c=>plan(c.C,c.B,c.factors)))old++;
-   let p=slicedPlan(C);if(p){now++;if(!first)first=[a,p.Q];}
+   let p=slicedPlan(C);ok(!!p===reduced(C),"reduced planner equivalence");extra.reducedChecks++;if(p){now++;if(!first)first=[a,p.Q];}
   }return [old,now,first];
  }
  function solve(m,F,a,reference=true){
@@ -180,7 +199,23 @@ function audit(){
  }
  let sat=denseScopes.map(h=>make(2,h,([a,b])=>a===0&&b===0));
  setup([0,1,2,3]);ok(!slicedPlan(components(sat))&&sat.every(f=>pass(f,Array(9).fill(1))),"ineligible SAT");
- return {n,extra,graph,dense,cases,mixed,hidden};
+ // Test a successful later slice and an actual non-natural partition.
+ let laterF=scopes.map(h=>make(3,h,([a,b])=>a===2&&b===2));laterF.push(make(3,[0],([a])=>a<2));
+ let later=solve(3,laterF,[0,1,2,3]);ok(later.witness[0]===2&&later.Q[0]===0,"regenerate later slice");
+ let alternative=null;
+ for(let a of subsets(Array.from({length:9},(_,i)=>i),4)){
+  if(key(a)==="0,1,2,3")continue;setup(a);
+  let F=scopes.map(h=>make(2,h,([x,y])=>x===1&&y===1));
+  if(slicedPlan(components(F))){let r=solve(2,F,a);alternative=[a,r.Q,r.count,r.witness];break;}
+ }
+ ok(alternative!==null,"alternative partition");
+ // Mixed arbitrary scope graphs for reduced-planner equivalence.
+ for(let j=0;j<24;j++){
+  setup([0,1,2,3]);let F=[...tup(9,2)].filter(([a,b])=>a<b&&(rand()>>>24)<20+j*8).map(h=>({h,S:new Set()}));
+  for(let h of subsets(Array.from({length:9},(_,i)=>i),3))if((rand()>>>24)<j)F.push({h,S:new Set()});
+  let C=components(F);ok(!!slicedPlan(C)===reduced(C),"mixed reduced planner");extra.reducedChecks++;
+ }
+ return {n,extra,graph,dense,cases,mixed,hidden,later:[later.Q,later.count,later.witness],alternative};
 }
 
 console.log('F038_TGA_SLICED_SEPARATORS_OK '+JSON.stringify(audit()));
