@@ -1,0 +1,42 @@
+name: Proctor F038 PCF interval projections
+on:
+  push:
+    branches: ['research/pnp-f038-pcf-interval-projections']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_pcf_interval_projections.js
+          node mathos/research/f038_pcf_interval_projections.js | tee /tmp/pcf-audit.txt
+          grep -Fx 'F038_PCF_INTERVAL_PROJECTIONS_OK {"n":{"fixtures":9,"orientations":18,"projectedRoots":774,"localKeys":12384,"pairTests":32736,"flags":2324,"flagChecks":24768,"treeNodes":19590,"fullNodes":2393094,"fullTuples":1694034,"models":128434,"correctionModels":101030,"extraModels":27404,"zeroRoots":186},"results":[[2,0,4,12,12,24,64,64],[2,0,5,12,8,16,64,64],[2,1,4,10,10,20,60,60],[2,1,5,10,10,20,60,60],[2,2,4,1,1,2,8,8],[2,2,5,1,1,2,8,8],[3,0,4,124,124,248,3081,2355],[3,0,5,124,90,180,2355,2355],[3,1,4,66,66,132,1704,1272],[3,1,5,66,66,132,1650,1272],[3,2,4,33,33,66,648,648],[3,2,5,33,33,66,648,648],[4,0,4,524,524,1048,35816,22856],[4,0,5,524,306,612,22856,22856],[4,1,4,320,320,640,22848,15860],[4,1,5,320,320,640,21780,15860],[4,2,4,200,200,400,7392,7392],[4,2,5,200,200,400,7392,7392]],"fields":[[16,4,4,120,2949120,700416,2127872,2801664,9011200,8810496],[32,8,8,496,195035136,23986176,105267200,191889408,847085568,848019456],[64,8,16,2016,12683575296,786432000,3377922048,6291456000,54652567552,54758342656]]}' /tmp/pcf-audit.txt
+          python -m mathos.research.tga_f038_pcf_001 > /tmp/pcf.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/pcf.json') as f:
+              pcf=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert pcf['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert pcf['PROMOTION']=='NONE'
+          assert pcf['decision']=='RETAIN_RESTRICTED_PCF_REVIEW_BEFORE_EXTENSION'
+          assert pcf['far_mission']=='COMPLETE_BOUNDED_MISSION_REVIEW_OR_REDIRECT'
+          assert all(pcf[k]['status']=='BLOCKED' for k in ('restricted_evidence','uniform_recovery','pcf_restricted_evidence','pcf_uniform_recovery'))
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_PCF_INTERVAL_PROJECTIONS_GATE_OK status=OPEN promotion=NONE')
+          PY
