@@ -1,0 +1,35 @@
+name: Proctor F038 unrestricted recursive tiling
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-recursive-tiling']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_recursive_tiling.py
+          python -m mathos.research.f038_unrestricted_mobile_projection | tee /tmp/prior.txt
+          grep -F 'F038_UNRESTRICTED_MOBILE_PROJECTION_OK' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_recursive_tiling | tee /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_RECURSIVE_TILING_OK {"controls":3,"rows":[[4,2,2,8,8,128,128,119,0,0,25],[4,3,3,8,8,648,648,356,0,0,124],[5,2,2,8,8,256,256,253,0,0,37],[5,3,3,8,8,1944,1944,790,0,0,262],[6,2,2,8,8,512,512,462,0,0,68],[6,3,2,8,512,32768,5832,14176,1536,26936,741],[7,2,2,8,8,1024,1024,767,0,0,132],[7,3,2,8,1024,131072,17496,46096,3584,113576,2197],[8,2,2,8,8,2048,2048,1184,0,0,260],[8,3,2,8,2048,524288,52488,140608,8192,471800,6566],[9,2,2,8,8,4096,4096,1734,0,0,516],[9,3,2,8,4096,2097152,157464,407936,18432,1939688,19688]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_RECURSIVE_TILING_GATE_OK status=OPEN promotion=NONE')
+          PY
