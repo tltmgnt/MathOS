@@ -1,0 +1,311 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-ISOLATION-TRANSFER",
+  "base_commit": "b851e6a7927d00c156fae43ec6ab26d39214756f",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45738606088",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can unrestricted stage failures be transferred to unique-witness selectors with quantified seed mass, without assuming an efficient deterministic isolation oracle?",
+  "route": "negative",
+  "topology": "Injective affine isolation queries, unique auxiliary extensions, residual mass and charged stage trials.",
+  "adversarial": [
+    "NP!=RP is an unproved stronger assumption than P!=NP.",
+    "Hash auxiliary variables must be uniquely determined even in unused rows.",
+    "The algorithm cannot know model count.",
+    "Polynomial advice is not uniform deterministic discovery."
+  ],
+  "scope": "Same U, explicit normalized selector encoding and exact stage clocks on every constructed selector; arbitrary original formulas; conditional isolation transfer.",
+  "cost": "Polynomial explicit encoding and randomized trials for fixed k,d; deterministic seed discovery remains unproved; no all-exponent theorem.",
+  "gap_disposition": "BARRIER_IDENTIFIED",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of exact isolation transfer"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic-stage witnesses or uniform cutoff"
+    },
+    {
+      "key": "attempt_deterministic_discovery",
+      "label": "Deterministic polynomial isolating-list discovery"
+    }
+  ],
+  "independent_reference": "Independent JS affine hash counts, normalized clause evaluation and short built-in stage results; not execution of Python.",
+  "expected": {
+    "census": [
+      [
+        1,
+        4,
+        3,
+        128,
+        85,
+        38,
+        5,
+        48,
+        22
+      ],
+      [
+        2,
+        256,
+        95,
+        393216,
+        342081,
+        45364,
+        5771,
+        57344,
+        22388
+      ]
+    ],
+    "bounds": [
+      [
+        1,
+        16,
+        6,
+        [
+          [
+            2,
+            16,
+            8,
+            8
+          ],
+          [
+            1,
+            6,
+            6,
+            6
+          ]
+        ]
+      ],
+      [
+        2,
+        512,
+        147,
+        [
+          [
+            68,
+            17408,
+            256,
+            256
+          ],
+          [
+            22,
+            4224,
+            192,
+            192
+          ],
+          [
+            5,
+            756,
+            147,
+            168
+          ]
+        ]
+      ]
+    ],
+    "encoding": [
+      [
+        1,
+        128,
+        1344,
+        256,
+        48,
+        1024,
+        4096
+      ],
+      [
+        2,
+        6144,
+        158208,
+        24576,
+        1472,
+        221184,
+        0
+      ]
+    ],
+    "stages": [
+      [
+        0,
+        128,
+        38,
+        0,
+        38,
+        43
+      ],
+      [
+        1,
+        128,
+        38,
+        16,
+        25,
+        27
+      ],
+      [
+        2,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        3,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        4,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        5,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        6,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        7,
+        128,
+        38,
+        22,
+        19,
+        21
+      ],
+      [
+        8,
+        128,
+        38,
+        43,
+        0,
+        0
+      ]
+    ],
+    "controls": 4
+  },
+  "evidence_sources": [
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py",
+    "mathos/research/f038_unrestricted_isolation_transfer.py",
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-ISOLATION-TRANSFER.md"
+  ],
+  "next": "Attack unbounded B_3 and all-exponent failures or a uniform cutoff; distinguish deterministic isolation discovery from randomized transfer and do not assume NP!=RP.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can unrestricted stage failures be transferred to unique-witness selectors with quantified seed mass, without assuming an efficient deterministic isolation oracle?",
+      "strategy": "Injective affine hash encoding with unique auxiliary extension, exact same-U stage calls and charged randomized success analysis.",
+      "alternative": "Derive deterministic conditional isolation-list route and nonuniform list existence, exposing discovery gap.",
+      "stop_rule": "Do not infer P!=NP from a conditional result or replace NP!=RP by P!=NP.",
+      "literature_leads": [
+        "Classical Valiant-Vazirani isolation via pairwise-independent hashing; prior same-U cubic fixture and residual census. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "Under NP!=RP, for each fixed k the uniquely satisfiable B_k(n+(n+1)^2) has at least 2^((n+1)^2-3) members at unbounded n.",
+      "scope": "Same U, explicit normalized selector encoding and exact stage clocks on every constructed selector; arbitrary original formulas; conditional isolation transfer.",
+      "derivation": "Pairwise-independent affine hash yields >=3/16 isolation probability at some r; if all inputs have inverse-polynomial success probability for some r, exact stage trials give RP. Injective encoding converts conditional bad mass to counts.",
+      "unresolved_steps": [
+        "Unconditional cubic-stage infinitude and all-exponent failure."
+      ],
+      "candidate_tests": [
+        "Exact small seed census, normalized CNF extension and actual stage projection."
+      ]
+    },
+    "alternative": {
+      "claim": "Eventual absence of unique residuals at some k implies NP=RP; with an efficient deterministic isolating-list constructor it implies P=NP.",
+      "scope": "Same U, explicit normalized selector encoding and exact stage clocks on every constructed selector; arbitrary original formulas; conditional isolation transfer.",
+      "derivation": "Try all row counts and random seeds, or an explicitly supplied polynomial isolating list; union bound yields nonuniform common list only.",
+      "unresolved_steps": [
+        "Uniform deterministic isolation-list discovery and absence of unique residuals."
+      ],
+      "candidate_tests": [
+        "Pairwise independence, exact rational union bound, fallback controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "NP!=RP is an unproved stronger assumption than P!=NP.",
+        "Hash auxiliary variables must be uniquely determined even in unused rows.",
+        "The algorithm cannot know model count.",
+        "Polynomial advice is not uniform deterministic discovery."
+      ],
+      "counterexample_candidates": [
+        "Finite cubic counterexample has four models; isolation changes input length and stage, so failure need not transfer to that particular isolated formula."
+      ],
+      "equivalence_audit": "Original U and cutoff retained on enlarged selectors, exact injectivity and model projection, no uncharged random trials or seed discovery.",
+      "barrier_audit": "No unconditional unbounded cubic or universal lower bound.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Same deterministic U and explicit selectors, randomized seed sampling explicitly charged.",
+      "cost_ledger": {
+        "encoding": "h=n+(n+1)^2, all clauses in explicit pool, unique row chains",
+        "preprocessing": "Polynomial coefficient and selector construction",
+        "inference": "Actual stage simulation and verified projection",
+        "repetitions": "n+1 row counts and ceil(2 L^d) trials each for fixed k,d",
+        "arithmetic_bits": "Charge seed bits, clause indices and stage clock arithmetic",
+        "memory": "Polynomial in explicit selector length and bounded simulation",
+        "reconstruction": "Drop row auxiliaries from verified model; unique extension given source x",
+        "overall": "Polynomial explicit encoding and randomized trials for fixed k,d; deterministic seed discovery remains unproved; no all-exponent theorem."
+      },
+      "missing_bounds": [
+        "Unconditional unbounded cubic and all-exponent lower bound",
+        "Deterministic isolating-list discovery"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Injective isolation clauses and unique extensions",
+        "Pairwise-independent isolation probability",
+        "Quantified conditional residual mass",
+        "Nonuniform versus uniform discovery distinction"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean formalization not supplied.",
+        "NP!=RP and efficient deterministic isolation not proved."
+      ],
+      "proof_obligations": [
+        "Replay seed census and actual parent stage",
+        "Verify model projection and uniqueness",
+        "Check all conditional quantifiers"
+      ],
+      "formalization_plan": "Formalize affine row chains, pairwise independence, isolation moment bound, exact stage wrapper and conditional density.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Quantify the unique-model residual obstruction under an explicit hypothesis and expose the deterministic discovery gap.",
+      "remaining_gaps": [
+        "Unbounded cubic counterexamples",
+        "All-exponent lower bound or uniform polynomial cutoff",
+        "Independent review"
+      ],
+      "next_question": "Attack unbounded B_3 and all-exponent failures or a uniform cutoff; distinguish deterministic isolation discovery from randomized transfer and do not assume NP!=RP.",
+      "human_review_requests": [
+        "Review injectivity, probability and quantifier transfer, advice versus uniform discovery."
+      ]
+    }
+  }
+}

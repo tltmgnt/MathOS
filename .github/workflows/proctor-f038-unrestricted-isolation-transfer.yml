@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted isolation transfer
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-isolation-transfer']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_isolation_transfer.py
+          python -m mathos.research.f038_unrestricted_cubic_fixture | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_CUBIC_FIXTURE_OK {"geometry":[52,182208,182261,54,5461,5409,200,320255973501901,8,17179869184,4096],"one":[729,135,2453,2155,351,9,8,34531128],"two":[3770339,387420489,1248498321,1305117,652531,156,145013]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_isolation_transfer | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_ISOLATION_OK {"bounds":[[1,16,6,[[2,16,8,8],[1,6,6,6]]],[2,512,147,[[68,17408,256,256],[22,4224,192,192],[5,756,147,168]]]],"census":[[1,4,3,128,85,38,5,48,22],[2,256,95,393216,342081,45364,5771,57344,22388]],"controls":4,"encoding":[[1,128,1344,256,48,1024,4096],[2,6144,158208,24576,1472,221184,0]],"stages":[[0,128,38,0,38,43],[1,128,38,16,25,27],[2,128,38,22,19,21],[3,128,38,22,19,21],[4,128,38,22,19,21],[5,128,38,22,19,21],[6,128,38,22,19,21],[7,128,38,22,19,21],[8,128,38,43,0,0]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_ISOLATION_GATE_OK status=OPEN')
+          PY
