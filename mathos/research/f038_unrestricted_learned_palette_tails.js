@@ -127,7 +127,15 @@ function audit(){
   ok(best.A.length<=q+1&&best.p.every((b,a)=>code[b]===code[a]),"cluster greedy control");
   clusters.push([m,q,checks,best.A.length,best.p.filter((b,a)=>a!==b).length]);
  }
+ // Independent score control: zero wide mass, four equiprobable replacement labels.
+ let mm=4,mp=new Map();for(let c of tup(mm,3))mp.set(key(c),{C:[c[1]],p:Array(mm).fill(c[1])});
+ let qv=[1,2,4].map(k=>{let x=learn(mm,mp,k);return [k,x.bad,BigInt((mm**3+x.bad)*mm*mm)];});
+ let win=qv.reduce((a,b)=>a[2]<=b[2]?a:b);ok(win[0]===4&&win[1]===0,"growing palette selection");
+ // Independent narrow-only failure: a permitted replacement introduces a binary forbidden bit.
+ let original=[0,0,0,0,0,0,0,0,0],replaced=original.slice();replaced[0]=1;
+ let narrow=z=>z[0]===1&&z[1]===0;
+ ok(!narrow(original)&&narrow(replaced),"narrow-only exception");
  ok(n.heavy>0&&n.wide>0,"heavy and light routes");
- return {n,chosen,synthetic,clusters};
+ return {n,chosen,synthetic,clusters,scoreControl:qv.map(([k,b,q])=>[k,b,q.toString()]),narrowControl:1};
 }
 console.log('F038_LEARNED_PALETTE_TAILS_OK '+JSON.stringify(audit()));
