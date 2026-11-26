@@ -1,0 +1,59 @@
+name: Proctor F038 RE-X width-two elimination
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-two-elimination']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_two_elimination
+          node --check "$p.js"
+          for suite in small larger joint controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/elimination-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/elimination-replay.txt
+          node "$p.js" --descriptor > /tmp/elimination.desc
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_TWO_ELIMINATION_OK '){const a=fs.readFileSync('/tmp/elimination-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c,d]=['small','larger','joint','controls'].map(s=>read(s));
+          for(const r of [a,b,c,d]){assert.equal(r.q,650462);assert.equal(r.descriptorBits,47483730);assert.equal(r.workerEntry,533704);}
+          assert.deepEqual(a.totals,{rawBits:303312,transitions:260157434,worker:715106,relationBits:2724,localRows:145,liveRows:134,checks:51,sat:3,unsat:4,refused:1});
+          assert.deepEqual(b.totals,{rawBits:161851,transitions:479993931,worker:1740284,relationBits:1914,localRows:67,liveRows:65,checks:32,sat:1,unsat:0,refused:0});
+          assert.deepEqual(c.totals,{rawBits:37914,transitions:58051426,worker:656107,relationBits:918,localRows:37,liveRows:29,checks:23,sat:0,unsat:1,refused:0});
+          assert.deepEqual(d.controls,[0,1,100,34283826,34283827,34283828,34376350]);
+          assert.equal(d.rejects.length,7);assert.equal(d.exactBudget,34376351);assert.equal(d.workerAt,34283827);
+          const r=read('replay','F038_REX_WIDTH_TWO_ELIMINATION_REPLAY_OK ');
+          assert.equal(r.q,650462);assert.equal(r.descriptorBits,47483730);assert.equal(r.transitions,68841723);
+          assert.deepEqual(r.rows,[{name:'sat',t:34376351,worker:92524,relationBits:480,decision:1},{name:'joint-unsat',t:34465372,worker:124673,relationBits:372,decision:0}]);
+          JS
+          python -m mathos.research.f038_rex_width_two_elimination_codec /tmp/elimination.desc > /tmp/elimination-codec.json
+          python -m mathos.research.tga_f038_rex_023d1 > /tmp/elimination-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/elimination-codec.json') as f:
+              r=json.load(f)
+          with open('/tmp/elimination-gates.json') as f:
+              g=json.load(f)
+          assert r['transitions']==34376351 and r['mask_blocks']==129 and r['mask_bits']==834
+          assert r['parent_records']==9 and r['bag_records']==9 and r['output_bits']==683 and r['relation_bits']==480 and r['not_a_witness'] and r['decision']==1
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-023D1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
