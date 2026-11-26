@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted stationary restriction tree
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-stationary-restriction-tree']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_stationary_restriction_tree.js
+          node mathos/research/f038_unrestricted_stationary_restriction_tree.js | tee /tmp/current.txt
+          grep -Fx 'F038_STATIONARY_RESTRICTION_TREE_OK {"fixtures":13,"totals":[126,30722,3767,111,630887,3079,874503,704257,168544,3302848,871424,25],"factorChecks":582,"controls":[[4,3,24,0,2],[8,4,182,1,12],[16,4,870,3,56],[32,4,3782,7,240]]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_STATIONARY_RESTRICTION_TREE_GATE_OK status=OPEN promotion=NONE')
+          PY
