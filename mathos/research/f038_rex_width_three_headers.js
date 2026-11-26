@@ -5,7 +5,7 @@ function machine(){
  const halt=add("halt",0,0),reject=add("reject",0,0);
  const rd=(t,f)=>add("read",t,alphabet.map(f)),wr=(t,v,d)=>add("write",t,{v,d}),mv=(t,dir,d)=>add("move",t,{dir,d});
  const bit=x=>x==="0"||x==="1",test=(t,p,y,n)=>rd(t,x=>p(x)?y:n),loop=fn=>{let n=label();bind(n,fn(n));return n;};
- const I=0,H=1,B=2,S=3,T=4,W=5,R=6,F=7;
+ const I=0,H=1,B=2,S=3,T=4,W=5,R=6,F=7,Z=8;
  function walk(t,dir,n,d){while(n--)d=mv(t,dir,d);return d;}
  const start=(t,d)=>loop(n=>test(t,x=>x==="L",mv(t,1,d),mv(t,-1,n)));
  const seek=(t,k,d)=>start(t,walk(t,1,k,d));
@@ -30,8 +30,8 @@ function machine(){
  // Reuse the same scope decoder across seven slots, using a slot return
  // marker encoded on W's head? Instead compile each fixed continuation.
  const slotFields=[[],[1],[2],[3],[1,2],[1,3],[2,3]];
- function owned(slot,dest){
-  let d=scopeId(dest);
+ function owned(slot,dest,decode){
+  let d=decode;
   for(let j of [0,...slotFields[slot]].reverse()){
    let next=d;d=seek(W,4*j,readN(W,4,v=>v<9?set(B,v,next):reject));
   }
@@ -45,8 +45,10 @@ function machine(){
  // Second pass: copy each fixed 45-bit header into W. Derive separator
  // masks and emit seven canonical mask IDs, with 255 for absent slots.
  const route=label();
- let scopesDone=route;
- for(let slot=6;slot>=0;slot--)scopesDone=owned(slot,scopesDone);
+ const slotSymbols="01:;|,H",slotLoop=label(),advance=mv(Z,1,slotLoop),decode=scopeId(advance);
+ const slotEntries=Array.from({length:7},(_,i)=>owned(i,advance,decode));
+ bind(slotLoop,rd(Z,x=>x==="_"?route:slotSymbols.includes(x)?slotEntries[slotSymbols.indexOf(x)]:reject));
+ const scopesDone=start(Z,slotLoop);
  const parentDone=app(R,";",scopesDone);
  const parentCoord=coord(parentDone);
  const parentMask=seek(W,16,readN(W,4,v=>v===9?parentDone:v<9?seek(T,9*v,start(B,copy(T,B,9,parentCoord))):reject));
@@ -72,7 +74,7 @@ function machine(){
  }
  function expectZeros(n,d){while(n--)d=expect(I,"0",d);return d;}
  bind(nextFrame,skip(I,54,readN(I,4,v=>owner(v,false))));
- const entry=start(I,expect(I,"H",start(H,start(T,word(T,"0".repeat(81),skip(I,54,readN(I,4,v=>owner(v,true))))))));
- return{alphabet,tapes:8,ins,entry};
+ const entry=start(Z,word(Z,slotSymbols,start(I,expect(I,"H",start(H,start(T,word(T,"0".repeat(81),skip(I,54,readN(I,4,v=>owner(v,true))))))))));
+ return{alphabet,tapes:9,ins,entry};
 }
 module.exports={machine};
