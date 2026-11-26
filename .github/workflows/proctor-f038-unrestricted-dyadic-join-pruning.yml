@@ -1,0 +1,36 @@
+name: Proctor F038 unrestricted dyadic join pruning
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-dyadic-join-pruning']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_dyadic_join_pruning.js
+          node mathos/research/f038_unrestricted_dyadic_join_pruning.js | tee /tmp/current.txt
+          grep -Fx 'F038_DYADIC_JOIN_PRUNING_OK {"fixtures":51,"sums":[13744,108079,2059827,19800,1893267,15484,2040320,6812160,113],"dense":[[8,544,864],[16,7776,13760],[24,37872,69696]],"slack":[[5,5,10],[6,5,12],[7,3,14],[8,1,16]],"deep":[5,5,2,0,1,1,139777,8705,767085,8432,131072,921344,4]}' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_DYADIC_JOIN_PRUNING_GATE_OK status=OPEN promotion=NONE')
+          PY
