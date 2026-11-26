@@ -1,0 +1,46 @@
+name: Proctor F038 RE-X stable record sort
+on:
+  push:
+    branches: ['research/pnp-f038-rex-stable-record-sort']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_stable_record_sort.js
+          node mathos/research/f038_rex_stable_record_sort.js | tee /tmp/sort-audit.txt
+          grep -Fx 'F038_REX_STABLE_RECORD_SORT_OK {"alphabet":21,"logicalStates":125,"logicalRules":2625,"width":5,"states":8959,"bits":492749,"counts":{"cases":132,"records":383,"rawBits":4240,"transitions":37753264,"logical":2738336,"passes":263,"suffixChecks":263,"copySteps":1075790,"restoreSteps":1588976,"cutoffs":5,"malformed":12,"malformedTransitions":87701},"scaling":[[4,2,48,350523,24705,540,[14547,321129,14847]],[8,3,128,3479461,252179,1420,[100227,3278227,101007]],[16,4,320,28137559,2069037,3532,[619203,26897221,621135]]],"grammar":{"cases":511,"valid":11,"rejected":500,"transitions":338894},"U":{"selectorInputs":260,"noCandidate":260}}' /tmp/sort-audit.txt
+          node mathos/research/f038_rex_stable_record_sort.js --description > /tmp/sort.txt
+          python -m mathos.research.f038_rex_sort_replay /tmp/sort.txt
+          python -m mathos.research.tga_f038_rex_004 > /tmp/rex.json
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex.json') as f:
+              rex=json.load(f)
+          with open('/tmp/gap.json') as f:
+              gap=json.load(f)
+          assert rex['PNP_RESOLUTION_STATUS']==gap['PNP_RESOLUTION_STATUS']=='OPEN'
+          assert rex['PROMOTION']=='NONE'
+          assert rex['decision']=='PRESERVE_STABLE_SORT_INTEGRATION_OPEN'
+          assert rex['governance']['decision']=='STOP_NO_AUTHORIZED_AFFORDABLE_TASK'
+          assert all(v['status']=='BLOCKED' for v in rex['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in rex['global_routes'].values())
+          assert len(rex['global_routes']['mathematical_resolution']['minimal_completion_sets'])==4
+          assert gap['selector_route']['status']==gap['mathematical_resolution']['status']=='BLOCKED'
+          print('F038_REX_STABLE_SORT_GATE_OK status=OPEN promotion=NONE')
+          PY
