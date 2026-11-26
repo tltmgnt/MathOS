@@ -275,4 +275,79 @@ function run(M,raw,limit=Infinity,observe=null){
  return{status:"MASKS_PREPARED",t,span:hi-lo+1,checkpoint:{m:vals[0]+1,rankBounds:vals.slice(0,2),ranks:vals.slice(2),groups,selector,workBits,selectorStart:start-origin,selectorEnd:end-origin,head:head-origin,masks:blocks.slice(0,49),pins:blocks[49],maskBits:maskBits-blocks[49].length,leftBoundary:at-origin}};
 }
 
-module.exports={compile,decode,run};
+function audit(P,E,A){
+ const C=compile(),M={...decode(C.desc),events:C.events},ok=(v,s)=>{if(!v)throw Error(s)};
+ // Only the reference producer is instrumented; the physical machine never calls it.
+ const src=P.producer.toString(),anchor='phase="output";';
+ ok(src.includes(anchor),"reference probe anchor");
+ const reference=new Function("return ("+src.replace(anchor,'return {...result("PREPARED"), masks:masks.flat().map(t=>t.cells.slice(1).join(""))};')+")")();
+ function direct(m,raw){
+  const masks=Array.from({length:49},()=>[]);let at=19*m-6,pins=[];
+  for(let c of E.pool(19*m-7)){
+   let bit=raw[at++],gs=c.map(x=>Math.floor((-x-1)/m));
+   if(c.every(x=>x<0&&-x<=9*m)&&new Set(gs).size===c.length){
+    for(let j=0;j<7;j++)if(gs.every(g=>g>=j&&g<=j+2))masks[7*j+gs.reduce((a,g)=>a|(1<<(g-j)),0)-1].push(bit);
+   }
+   let n=19*m-7;
+   if(c.length===3&&c[0]>=n-m-1&&c[0]<=n-2&&c[1]===1-n&&c[2]===-n)pins.push(bit);
+  }
+  return {masks:masks.map(a=>a.join("")),pins:pins.join("")};
+ }
+ function serialize(m,masks){
+  const w=Math.ceil(Math.log2(m));let o="";
+  for(let j=0;j<7;j++){
+   o+=j?"11110":"11111";
+   for(let z of E.tup(m,3)){
+    let allowed=true;for(let mask=1;mask<8;mask++){
+     let rank=0;for(let i=0;i<3;i++)if(mask&(1<<i))rank=rank*m+z[i];
+     if(masks[7*j+mask-1][rank]==="1")allowed=false;
+    }
+    if(allowed)o+="011"+z.map(x=>x.toString(2).padStart(w,"0").split("").map(b=>"00"+b).join("")+"010").join("")+"101";
+   }
+   o+="110";
+  }
+  return o+"010".repeat(7);
+ }
+ const rows=[],controls=[];let seed=0x52455823;const rnd=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+ function fixture(m,mode){
+  let B=[];for(let c of E.pool(19*m-7))if(c.every(x=>x<0&&-x<=9*m)){
+   let gs=c.map(x=>Math.floor((-x-1)/m));
+   if(new Set(gs).size!==c.length||gs[gs.length-1]-gs[0]>2)continue;
+   if(mode===1&&c.length===1&&(-c[0]-1)%m!==m-1||mode===2||mode===3&&(rnd()>>>24)<101)B.push(c);
+  }
+  return B;
+ }
+ function check(m,mode,pins){
+  const B=fixture(m,mode),raw=E.encode(m,pins,B),ref=reference(raw),oracle=direct(m,raw);
+  const r=run(M,raw,3000000000),p=r.checkpoint;
+  ok(r.status==="MASKS_PREPARED"&&ref.status==="PREPARED","prepare "+m+":"+mode+" "+JSON.stringify(r));
+  ok(p.m===m&&p.selector===raw.slice(19*m-6)&&p.pins===pins.join("")&&p.pins===ref.pins&&p.pins===oracle.pins,"payload/pin mismatch");
+  ok(p.masks.length===49&&p.masks.every((b,i)=>b===ref.masks[i]&&b===oracle.masks[i]),"mask differential "+m+":"+mode);
+  const count=x=>((x&1)>0)+((x&2)>0)+((x&4)>0);
+  ok(p.masks.every((b,i)=>b.length===m**count(i%7+1))&&p.maskBits===7*((m+1)**3-1),"mask lengths");
+  ok(p.head===raw.length-1&&p.selectorEnd+p.workBits+1===p.head&&p.leftBoundary===p.selectorStart-1-50-p.maskBits-m,"layout");
+  const prepared=serialize(m,p.masks),old=P.producer(raw);
+  ok(old.status==="PREPARED"&&old.prepared===prepared&&old.pins===p.pins,"downstream serialization oracle");
+  let ones=p.masks.reduce((a,b)=>a+b.split("1").length-1,0);
+  rows.push({m,mode,pins:p.pins,L:raw.length,maskBits:p.maskBits,ones,selected:B.length,duplicateOnes:ones-B.length,preparedBits:prepared.length,t:r.t,span:r.span});
+  return {raw,r,prepared};
+ }
+ for(let mode=0;mode<4;mode++)check(2,mode,[mode&1,(mode>>1)&1]);
+ for(let m of [3,4])check(m,3,Array.from({length:m},(_,i)=>i%2));
+ let forced=check(3,1,[1,0,1]);
+ let raw=E.encode(2,[0,1],[]),n=31,pos=new Map(),at=n+1;for(let c of E.pool(n))pos.set(c.join(","),at++);
+ const flip=(s,i)=>s.slice(0,i)+(s[i]==="1"?"0":"1")+s.slice(i+1);
+ let wide=E.encode(2,[0,1],[[-1,-17]]),wide3=E.encode(2,[0,1],[[-1,-3,-17]]);
+ for(let [name,bad,want] of [["empty","","OUTSIDE_NORMALIZED"],["header","1".repeat(32)+"0","OUTSIDE_NORMALIZED"],["earlyMandatory",flip(raw,pos.get("-31")),"OUTSIDE_NORMALIZED"],["latePin",flip(raw,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"],["truncated",raw.slice(0,-1),"OUTSIDE_NORMALIZED"],["extra",raw+"1","OUTSIDE_NORMALIZED"],["outside",wide,"OUTSIDE_FIXED_PATH"],["outsideTriple",wide3,"OUTSIDE_FIXED_PATH"],["outsideLateMalformed",flip(wide,pos.get("-28,-30,-31")),"OUTSIDE_NORMALIZED"]]){
+  let r=run(M,bad,500000000);ok(r.status===want,"control "+name+" "+JSON.stringify(r));controls.push({name,status:r.status,t:r.t});
+ }
+ let clock=run(M,raw,500000000).t;
+ for(let limit of [0,1,100,clock-1]){let r=run(M,raw,limit);ok(r.status==="TIMEOUT"&&r.t===limit,"cutoff "+limit);}
+ ok(run(M,raw,clock).status==="MASKS_PREPARED","exact clock");
+ // Worker input is reconstructed only by the host oracle; this is not same-machine handoff.
+ const J=A.worker(),Q=A.compile(J.rules,J.symbols,J.projection),worker=A.physical(Q,forced.prepared,120000000);
+ ok(worker.state===Q.q&&worker.tape.has(worker.head),"inherited worker replay");
+ return {q:C.q,descriptorBits:C.desc.length,rows,controls,cutoffs:4,exactBudget:clock,workerTransitions:worker.t,totals:rows.reduce((a,r)=>({rawBits:a.rawBits+r.L,maskBits:a.maskBits+r.maskBits,pinBits:a.pinBits+r.pins.length,preparedBits:a.preparedBits+r.preparedBits,transitions:a.transitions+r.t,blocks:a.blocks+49}),{rawBits:0,maskBits:0,pinBits:0,preparedBits:0,transitions:0,blocks:0})};
+}
+module.exports={compile,decode,run,audit};
+if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--produce'))console.log(JSON.stringify(run(decode(compile().desc),require('fs').readFileSync(0,'utf8'))));else console.log('F038_REX_TERNARY_MASKS_OK '+JSON.stringify(audit(require('./f038_rex_multitape_producer.js'),require('./f038_tga_normalized_integration.js').engine(),require('./f038_rex_nested_variable_overlap.js'))));}
