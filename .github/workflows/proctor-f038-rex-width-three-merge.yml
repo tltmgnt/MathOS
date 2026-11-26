@@ -1,0 +1,53 @@
+name: Proctor F038 RE-X width-three merge
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-merge']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_merge
+          node --check "$p.js"
+          node "${p}_audit.js" kernel > /tmp/w3m-kernel.txt
+          node "${p}_audit.js" scale > /tmp/w3m-scale.txt
+          node "${p}_forest.js" > /tmp/w3m-forest.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_MERGE_OK '){const a=fs.readFileSync('/tmp/w3m-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const a=read('kernel'),b=read('scale'),c=read('forest','F038_REX_WIDTH_THREE_MERGE_FOREST_OK ');
+          assert.equal(a.cases,395);assert.equal(a.cutoffs,6);assert.equal(a.malformed,10);
+          assert.deepEqual(a.totals,{steps:11412018,parentRows:3615,childRows:3498,outputRows:1267,keys:2479,inputSymbols:65279});
+          assert.equal(b.cases,5);assert.deepEqual(b.totals,{steps:157249988,parentRows:5074,childRows:2541,outputRows:2541,keys:369,inputSymbols:119620});
+          assert.deepEqual(b.rows.map(r=>r.steps),[113749,1291030,4501407,17495681,133848121]);
+          assert.deepEqual(b.rows.map(r=>r.span),[1812,13142,40866,130691,850472]);
+          assert.deepEqual(c.totals,{producerTransitions:109510960,kernelSteps:809871,edges:17,rawBits:151656});
+          assert.deepEqual(c.results.map(r=>r.models),[0,128,52,0]);
+          assert.deepEqual(c.results.map(r=>r.sat),[false,true,true,false]);
+          assert.equal(c.results[0].edges[0].separator,3);assert.equal(c.results[0].edges[0].remaining,0);
+          assert.equal(a.totals.steps+b.totals.steps+c.totals.kernelSteps,169471877);
+          JS
+          python -m mathos.research.tga_f038_rex_024c2 > /tmp/w3m-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3m-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024C2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
