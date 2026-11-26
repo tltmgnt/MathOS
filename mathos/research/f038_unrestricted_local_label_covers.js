@@ -98,6 +98,37 @@ function audit(){
  let retained=new Set(R.live.map(r=>key(r.c)));let heavyCheck=0;
  for(let r of rec)if(!retained.has(key(r.c))){ok(r.a!==r.b,"heavy nonself");heavyCheck++;}
  ok(heavyCheck===R.removed,"heavy recount");
- return {n,selected,controls,trimControl:[rec.length,R.live.length,R.removed,R.tail,heavyCheck]};
+ // Independent recovery control: the discarded source zero is allowed, every nonzero
+ // replacement is forbidden on free column (0,0). The source is in the heavy envelope.
+ let envelopeModels=0;
+ for(let r of rec)if(!retained.has(key(r.c))){
+  const F=(a,x,y)=>a!==0&&x===0&&y===0;
+  ok(!F(r.a,0,0)&&F(r.b,0,0)&&r.a!==r.b,"heavy original-model recovery");
+  envelopeModels++;
+ }
+ let growth=[];
+ for(let [d,j] of [[8,4],[12,6],[16,8]]){
+  let m=2**d,t=2**j,features=[];
+  for(let i=0;features.length<d-1;i++){
+   features.push([0,i]);if(i%4===0&&features.length<d-1)features.push([1,i]);
+  }
+  const target=c=>features.reduce((v,[g,i],p)=>v|(((c[g]>>i)&1)<<p),m/2);
+  let labels=new Set();for(let a=0;a<t;a++)for(let b=0;b<t;b++)labels.add(target([a,b,0]));
+  let count=features.filter(([,i])=>i<j).length;
+  ok(labels.size===2**count&&labels.size<=2*t**1.25,"superlinear cap");
+  growth.push([d,t,labels.size,Math.min(1,t/labels.size)]);
+ }
+ // Actual uniform directed difference counts on small fields.
+ let field=[];
+ for(let [m,poly] of [[8,11],[16,19],[32,37]]){
+  let J=m/4,D=J*(m-J),checks=0;
+  function mul(a,b){let r=0;while(b){if(b&1)r^=a;b>>=1;a<<=1;if(a&m)a^=poly;}return r;}
+  for(let a=0;a<m;a++)for(let b=0;b<m;b++)if(a!==b){
+   let v=0;for(let x=0;x<m;x++)for(let y=0;y<m;y++)v+=((mul(a,x)^y)>=J&&(mul(b,x)^y)<J);
+   ok(v===D,"uniform loss");checks++;
+  }
+  field.push([m,J,D,checks]);
+ }
+ return {n,selected,controls,trimControl:[rec.length,R.live.length,R.removed,R.tail,heavyCheck],envelopeModels,growth,field};
 }
 console.log('F038_LOCAL_LABEL_COVERS_OK '+JSON.stringify(audit()));
