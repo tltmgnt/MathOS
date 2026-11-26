@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X width-three direct loader
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-direct-loader']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_direct_loader
+          node --check "$p.js"
+          for suite in small larger controls; do
+            node "${p}_audit.js" "$suite" > "/tmp/w3direct-$suite.txt"
+          done
+          node "${p}_replay.js" > /tmp/w3direct-replay.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_DIRECT_LOADER_OK '){
+            const a=fs.readFileSync('/tmp/w3direct-'+s+'.txt','utf8').trim();
+            assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));
+          }
+          const a=read('small'),b=read('larger'),c=read('controls'),r=read('replay','F038_REX_WIDTH_THREE_DIRECT_LOADER_REPLAY_OK ');
+          for(const x of [a,b,c]){
+            assert.equal(x.q,577883);assert.equal(x.bits,42185463);assert.equal(x.loaderEntry,363075);
+          }
+          assert.deepEqual(a.totals,{raw:189570,transitions:446470052,loader:311138312,maskBits:3336,streamBits:7744});
+          assert.deepEqual(b.totals,{raw:161851,transitions:1191953378,loader:918394340,maskBits:2619,streamBits:5510});
+          assert.deepEqual(a.rows.map(x=>x.t),[104551138,104728446,104759830,104551138,27879500]);
+          assert.deepEqual(a.rows.map(x=>x.status),['MASK_STREAM_LOADED','MASK_STREAM_LOADED','MASK_STREAM_LOADED','MASK_STREAM_LOADED','OUTSIDE_WIDTH_THREE']);
+          assert.equal(b.rows[0].status,'MASK_STREAM_LOADED');
+          assert.equal(b.rows[0].bound,'01');assert.equal(b.rows[0].pins,'101');
+          assert.deepEqual(c.cutoffs,[0,1,100,26776219,26776220,26776221,104551137]);
+          assert.deepEqual(c.rejects,[235,328,3156,23932914,23933883]);assert.equal(c.exactBudget,104551138);
+          assert.deepEqual(r,{q:577883,bits:42185463,entries:1733649,t:104728446,head:37913,streamBits:1936,maskBits:834,fields:131});
+          assert.equal(a.totals.transitions+b.totals.transitions+r.t,1743151876);
+          JS
+          python -m mathos.research.tga_f038_rex_024d2c > /tmp/w3direct-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3direct-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D2C_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
