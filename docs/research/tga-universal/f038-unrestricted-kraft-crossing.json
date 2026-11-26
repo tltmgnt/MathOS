@@ -1,0 +1,310 @@
+{
+  "attempt_id": "F038-UNRESTRICTED-KRAFT-CROSSING",
+  "base_commit": "f63f83d39b12adb186c0d7be6b77fd06480bf836",
+  "base_replay": "https://github.com/tltmgnt/MathOS/actions/runs/45746300784",
+  "targets": [
+    "universal_lower_bound",
+    "machine_cost",
+    "discovery",
+    "short_proofs"
+  ],
+  "hypothesis": "Can incoming-only prefix-free crossing records and directional state counts improve the exact cubic-stage finite existence bound?",
+  "route": "negative",
+  "topology": "Separated pins, prefix-free incoming words, convexity and directional state census.",
+  "adversarial": [
+    "Incoming prefix property needs final local halt, not merely an observed prefix.",
+    "Discard terminal crossings and straddling outputs.",
+    "Clock charge includes all crossings and actual halts.",
+    "Do not fill the uncovered finite gap."
+  ],
+  "scope": "Same original U and exact clocks; mathematical finite existence at n=191..233, not 186..190, not a particular fixed-pattern certificate.",
+  "cost": "Exact crossing charges, integer/rational counts of all eligible descriptions, no exhaustive large execution or uncharged computation.",
+  "gap_disposition": "NARROWED_RESTRICTED_CASE_ONLY",
+  "promotion": "NONE",
+  "local_obligations": [
+    {
+      "key": "attempt_soundness_review",
+      "label": "Independent review of incoming prefix-free counting"
+    },
+    {
+      "key": "attempt_cubic_unbounded",
+      "label": "Unconditional unbounded cubic failures or uniform cutoff"
+    },
+    {
+      "key": "attempt_universal_bound",
+      "label": "Unrestricted SAT lower bound"
+    }
+  ],
+  "independent_reference": "Independent JS transition shapes, exact arithmetic, exhaustive pin truth tables and small incoming trace fixtures; not Python execution.",
+  "expected": {
+    "controls": 3,
+    "geometry": {
+      "boundSum": "1265007954",
+      "endpoints": [
+        [
+          186,
+          93,
+          72,
+          7267633,
+          74,
+          "257807599109"
+        ],
+        [
+          190,
+          96,
+          72,
+          7786961,
+          69,
+          "2636207810"
+        ],
+        [
+          191,
+          96,
+          72,
+          7894121,
+          68,
+          "824878034"
+        ],
+        [
+          192,
+          96,
+          72,
+          8002041,
+          67,
+          "291136182"
+        ],
+        [
+          193,
+          97,
+          72,
+          8147201,
+          66,
+          "95857814"
+        ],
+        [
+          200,
+          100,
+          72,
+          9055993,
+          59,
+          "82276"
+        ],
+        [
+          210,
+          105,
+          72,
+          10498593,
+          51,
+          "9"
+        ],
+        [
+          233,
+          117,
+          72,
+          14407201,
+          37,
+          "1"
+        ],
+        [
+          234,
+          121,
+          75,
+          14776161,
+          291,
+          "23146059971154764633829816583410901939866767586760778507137910407140096"
+        ]
+      ],
+      "lower191": "549629200504464154840598534802029203673962019961848562590",
+      "maxCeil": "824878034",
+      "maxN": 191,
+      "sizes": 43
+    },
+    "pins": [
+      [
+        6,
+        3,
+        64,
+        4096,
+        64,
+        896
+      ],
+      [
+        7,
+        4,
+        128,
+        16384,
+        128,
+        2304
+      ],
+      [
+        8,
+        4,
+        256,
+        65536,
+        256,
+        5632
+      ]
+    ],
+    "shapes": {
+      "dead": 44109603,
+      "high": 54963684,
+      "initial": 129140163,
+      "matrix": [
+        [
+          11029041,
+          30967920,
+          14217687
+        ],
+        [
+          30967920,
+          57806784,
+          24476904
+        ],
+        [
+          14217687,
+          24476904,
+          6009876
+        ]
+      ]
+    },
+    "traces": [
+      [
+        8,
+        256,
+        4096,
+        1544,
+        8992,
+        611,
+        2248,
+        2248
+      ],
+      [
+        16,
+        256,
+        4096,
+        1568,
+        9120,
+        622,
+        2280,
+        2280
+      ],
+      [
+        32,
+        256,
+        4096,
+        1584,
+        9200,
+        627,
+        2300,
+        2300
+      ]
+    ]
+  },
+  "evidence_sources": [
+    "docs/research/tga-universal/PNP-F038-UNRESTRICTED-KRAFT-CROSSING.md",
+    "mathos/research/f038_unrestricted_kraft_crossing.py",
+    "mathos/research/f038_unrestricted_cubic_crossing_census.py",
+    "mathos/research/f038_mrax_cycle.py",
+    "mathos/research/f038_tectx_cycle.py"
+  ],
+  "next": "Seek unbounded cubic-stage failures or a uniform cutoff; finite pin families and finite Kraft bounds do not resolve the asymptotic exponent.",
+  "mrax": {
+    "planner": {
+      "target_id": "universal_lower_bound",
+      "question": "Can incoming-only prefix-free crossing records and directional state counts improve the exact cubic-stage finite existence bound?",
+      "strategy": "Use local incoming-only replay and Kraft inequality, discrete convexity over retained cuts, and exact directional state census.",
+      "alternative": "Use all n independent pin bits and distinguish low alphabet cases from binary alphabet cases.",
+      "stop_rule": "No inference of unbounded cubic failures or a missed explicit pattern from finite census.",
+      "literature_leads": [
+        "Classical Kraft inequality and crossing-sequence reasoning; prior exact U cubic crossing census. No novelty claim."
+      ]
+    },
+    "construct": {
+      "claim": "For every 191<=n<=233, |B_3^uniq(n)|>=2^(n-3).",
+      "scope": "Same original U and exact clocks; mathematical finite existence at n=191..233, not 186..190, not a particular fixed-pattern certificate.",
+      "derivation": "Pin all n bits in separated supports; incoming words prefix-free; exact convex lower bound on summed weights; weighted union bound over actual programs.",
+      "unresolved_steps": [
+        "Unbounded cubic failures and sizes 186..190.",
+        "Independent mathematical review."
+      ],
+      "candidate_tests": [
+        "All two-state shapes, exact bounds, exhaustive small pin family and incoming transcript regression."
+      ]
+    },
+    "alternative": {
+      "claim": "Directional state census eliminates immediate halt and unreachable halt cases, and reduces the binary Kraft class to 54963684 tables.",
+      "scope": "Same original U and exact clocks; mathematical finite existence at n=191..233, not 186..190, not a particular fixed-pattern certificate.",
+      "derivation": "Enumerate nine transition shapes per entry and charge 729 write completions; unary and absent-direction cases need only local counts.",
+      "unresolved_steps": [
+        "Actual larger-size hardness and improved asymptotic information bound."
+      ],
+      "candidate_tests": [
+        "Exact shape partition and original decoder controls."
+      ]
+    },
+    "critic": {
+      "objections": [
+        "Incoming prefix property needs final local halt, not merely an observed prefix.",
+        "Discard terminal crossings and straddling outputs.",
+        "Clock charge includes all crossings and actual halts.",
+        "Do not fill the uncovered finite gap."
+      ],
+      "counterexample_candidates": [
+        "Longer clocks at 234 make the bound vacuous.",
+        "Easy pin recovery eventually defeats this method."
+      ],
+      "equivalence_audit": "Unchanged selector pool, actual decoder and clocks; all programs covered by prefix locality, graph or weighted counting.",
+      "barrier_audit": "Finite existence only; no unrestricted exponent promotion.",
+      "recommended_disposition": "restricted_result"
+    },
+    "cost": {
+      "computational_model": "Original deterministic three-symbol tape programs and weighted stage clocks.",
+      "cost_ledger": {
+        "encoding": "Complete original selector tape, independently pinned left and right assignments",
+        "preprocessing": "Exact clause support positions and transition shape census",
+        "inference": "Incoming local replay, Kraft and discrete convexity",
+        "repetitions": "All table counts and finite exact inequalities",
+        "arithmetic_bits": "Integer powers and exact rational arithmetic",
+        "memory": "Symbolic counts; small explicit trace fixtures",
+        "reconstruction": "Unique model identifies each pair; no explicit missed pair found",
+        "overall": "Exact crossing charges, integer/rational counts of all eligible descriptions, no exhaustive large execution or uncharged computation."
+      },
+      "missing_bounds": [
+        "Unbounded cubic and all-exponent lower bound",
+        "Explicit missed patterns"
+      ],
+      "conclusion": "restricted_bound_only"
+    },
+    "verify": {
+      "supported_steps": [
+        "Unique pin geometry",
+        "Prefix-free incoming replay and convexity",
+        "Exact shape counts and finite union bound"
+      ],
+      "unsupported_steps": [
+        "Independent mathematical review and Lean not supplied.",
+        "No explicit missed pattern or unbounded theorem."
+      ],
+      "proof_obligations": [
+        "Audit local prefix property",
+        "Check all exact clocks and counts",
+        "Replay finite checks"
+      ],
+      "formalization_plan": "Formalize local incoming sequence replay, Kraft cylinders, discrete convexity and selector geometry.",
+      "verdict": "ready_for_finite_check"
+    },
+    "impact": {
+      "disposition": "restricted_result",
+      "claimed_impact": "Prove finite cubic residual existence at 43 additional sizes, with five-size gap explicit.",
+      "remaining_gaps": [
+        "Unbounded cubic failure",
+        "All-exponent lower bound or cutoff",
+        "Independent review"
+      ],
+      "next_question": "Seek unbounded cubic-stage failures or a uniform cutoff; finite pin families and finite Kraft bounds do not resolve the asymptotic exponent.",
+      "human_review_requests": [
+        "Review prefix-free replay, convexity, table partition and union bound."
+      ]
+    }
+  }
+}

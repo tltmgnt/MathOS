@@ -1,0 +1,40 @@
+name: Proctor F038 unrestricted Kraft crossing
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-kraft-crossing']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m py_compile mathos/research/f038_unrestricted_kraft_crossing.py
+          python -m mathos.research.f038_unrestricted_cubic_crossing_census | tee /tmp/prior.txt
+          grep -Fx 'F038_UNRESTRICTED_CUBIC_CROSSING_CENSUS_OK {"controls":4,"geometry":{"boundSum":"1372090884","endpoints":[[93,47,1055520,63,50880,934080,883201,3,"542058"],[116,58,2054709,63,79469,1807861,1728393,1,"42"],[117,59,2108536,66,80856,1861688,1780833,9,"63402"],[147,74,4192686,66,128046,3695118,3567073,5,"1"],[148,74,4279125,69,129805,3760533,3630729,37,"830928636"],[185,93,8374396,69,203324,7369756,7166433,19,"1"],[186,93,8511299,72,205539,7473171,7267633,148,"13276668332841577085576814444703222597"]],"gSum":311575573,"lower93":"618634502047598618803566102","maxCeil":"830928636","maxN":148,"rSum":1284,"sizes":93,"stages":[[63,24],[66,31],[69,38]]},"pins":[[8,4,16,4096,16,512],[9,5,32,16384,32,1152],[10,5,64,65536,64,2560]],"traces":[[8,256,4096,1200,1352,1544,109,272,0,8992,2444],[16,256,4096,1120,1408,1568,111,288,0,9120,2488],[32,256,4096,1060,1452,1584,112,304,0,9200,2508]]}' /tmp/prior.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/prior.txt
+          python -m mathos.research.f038_unrestricted_kraft_crossing | tee /tmp/current.txt
+          grep -Fx 'MRAX_STAGE_GATE PROCEED_RESTRICTED' /tmp/current.txt
+          grep -Fx 'TECTX_PRE_GAP_OK targets=universal_lower_bound,machine_cost,discovery,short_proofs status=OPEN' /tmp/current.txt
+          grep -Fx 'F038_UNRESTRICTED_KRAFT_CROSSING_OK {"controls":3,"geometry":{"boundSum":"1265007954","endpoints":[[186,93,72,7267633,74,"257807599109"],[190,96,72,7786961,69,"2636207810"],[191,96,72,7894121,68,"824878034"],[192,96,72,8002041,67,"291136182"],[193,97,72,8147201,66,"95857814"],[200,100,72,9055993,59,"82276"],[210,105,72,10498593,51,"9"],[233,117,72,14407201,37,"1"],[234,121,75,14776161,291,"23146059971154764633829816583410901939866767586760778507137910407140096"]],"lower191":"549629200504464154840598534802029203673962019961848562590","maxCeil":"824878034","maxN":191,"sizes":43},"pins":[[6,3,64,4096,64,896],[7,4,128,16384,128,2304],[8,4,256,65536,256,5632]],"shapes":{"dead":44109603,"high":54963684,"initial":129140163,"matrix":[[11029041,30967920,14217687],[30967920,57806784,24476904],[14217687,24476904,6009876]]},"traces":[[8,256,4096,1544,8992,611,2248,2248],[16,256,4096,1568,9120,622,2280,2280],[32,256,4096,1584,9200,627,2300,2300]]}' /tmp/current.txt
+          grep -Fx 'TECTX_POST_GAP_OK status=OPEN promotion=NONE' /tmp/current.txt
+          grep -Fx 'MRAX_POST_GATE_OK status=OPEN promotion=NONE' /tmp/current.txt
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_UNRESTRICTED_KRAFT_CROSSING_GATE_OK status=OPEN')
+          PY
