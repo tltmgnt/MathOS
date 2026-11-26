@@ -1,0 +1,79 @@
+# F038 — Aligned dense separator messages cover every noncomplete nine-group support graph
+
+PNP_RESOLUTION_STATUS = OPEN. Mathematical machine-existence derivation and executed standalone semantic regression; not a compiled original-U machine, Lean proof or independent review. Parent 1b34caf9354ef5f052e1ffc76dbd2445d4dbacf2 (streamed five-coordinate separators); combined statuses and PR-triggered workflow runs were empty when inspected. Push-triggered CI unconfirmed.
+
+## 1. New cutoff
+
+Use the full nine-group distributed normalized family, n=19m-7, L=n+1+2n^2+8 binom(n,3)=Theta(m^3), arbitrary negative cross-group clauses of widths 1..3 and inherited fixed one-hot/OR/pin/guard clauses. The primal graph contains an edge iff a selected cross clause contains both groups.
+
+If this graph is not complete, a fixed deterministic original three-symbol single-tape program finds a witness on every SAT selector in the promise in
+
+    O(m^(62/7) polylog(m+2)) = O(L^(62/21) polylog(L+2))
+
+physical transitions, with visited span O(m^3 polylog m). The exponent is strictly below three in L. This covers six- and seven-coordinate vertex separators as well as all smaller ones. A single missing edge suffices, with no requirement on other edges, contextual width or global fanout.
+
+The improvement is a new INTERNAL output interface: dense aligned separator-key slots on an encoded track, with a relocatable input/work anchor. It avoids quadratic full-message raw conversion and quadratic cross-message lookup. The actual U still receives its original raw normalized selector and outputs its original raw witness. Neither full outer m^7-key message is stored.
+
+## 2. Missing-edge partition and exact dense message semantics
+
+Choose the lexicographically first missing edge (u,v), detectable during actual selector parsing. S is the other seven groups in increasing order, G_u=S union {u}, G_v=S union {v}. No selected cross clause can contain both u,v. Assign every selected support to a containing bag, choosing G_u on ties (including constraints wholly in S). A global tuple is feasible iff both bag projections pass their owned constraints and agree on S.
+
+Split every domain into intervals of b consecutive digits, last possibly short. For each common separator block-index vector, independently enumerate the private-coordinate block on each side. For each bag tile restrict every forbidden tuple list to the tile, subtract offsets, and add negative unary restrictions forbidding padded digits. Uniform local domain [0,b) then gives exactly the restricted bag relation. The number of lists is bounded by a fixed constant, with at most O(b^3) records at local scale b. Union the side's tile messages by separator key, retaining one representative per key. A common key on both sides gives two compatible representatives and hence a valid original tuple. Every global solution produces such a common key. This argument applies equally to unique and multiple solutions.
+
+Use a dense aligned output interface, including invalid keys. At scale t choose an inner width d depending only on t. Enumerate seven block indices J in [0,ceil(t/d))^7 in lex order, then seven within-block digits X in [0,d)^7 in lex order. The implicit key is d*J+X; padded keys are invalid. Each slot has a validity flag and nine fixed-width digit fields indexed by original group label (unused fields zero). Use common width w=ceil(log2(m+1)) throughout all levels, which is O(log m). Total slot count (d ceil(t/d))^7=O(t^7). Mark origin and extent. Both sides have identical key order and slot addresses because S,t,d,w are identical. At the base scale d use plain lexical order of d^7 keys. Accumulation is a slotwise OR of validity flags keeping a valid representative if any, with fields translated by tile offsets. No indexed lookup or sparse key compression is required. At outer scale both accumulators cover only the current common block; intersect validity flags by one aligned scan and discard both on failure. The external U sees no message output.
+
+## 3. Physical interface and movement
+
+Use a fixed finite collection of logical tracks on one physical tape, one head. Encode each finite product symbol in constant-width binary blocks using actual symbols 0,1,2, with all-2 blocks for completely unoccupied logical cells. A logical read/write/move of one block takes a constant number of original transitions. A finite number of simulated multitape heads, used below in the base routine, are marker components visited by physical sweeps, not extra heads. The two tiling levels are fixed; no input-dependent alphabet or recursion depth. Mark origins, boundaries and visited extents on components.
+
+A contiguous marked mobile component of length N logical blocks shifts right one block by sweeping left-to-right with a one-symbol carry initially blank, writing into the blank fringe and returning to its new beginning; shift left by reverse sweep. Other stationary components are preserved. Cost O(N) per shift. A fixed number of components can move together, including binary headers and counters. Moving them distance D costs O(ND), with counters and field operations absorbing polylogarithmic factors. The mobile extraction list can thus follow a scan head along stationary input and return to its anchor without carrying larger stationary accumulators. This is the inherited carry-shift convention.
+
+A local routine accepts a marked origin on its own components, writes its dense message beginning at that origin, and returns the physical head there. It shares the same logical coordinates with the caller; scratch and output components are disjoint from the caller's preserved data. No conversion of a whole internal message into a separate raw binary region is necessary. Setup and cleanup are charged over the stated visited spans. Only the original input and final witness use the external raw tape interface.
+
+## 4. Local complete eight-group message in O(t^10 polylog m)
+
+Base at scale d: on a fixed multitape bit machine enumerate all d^8 bag tuples in chunks of C=d^7 records. Sort projection/ID queries for every forbidden relation and merge with its sorted list to flag violations. Sort flags by ID and combine them, deduplicate passing tuples by separator key and merge into a running list of at most C representatives. All relation lists have O(d^3) records and there are constantly many. A chunk costs O(C polylog m), including the final short chunk. Total bit time O(d^8 polylog m), visited span O(d^7 polylog m). Generate the dense output by sequential merge with enumeration of all d^7 lexical keys, inserting an invalid slot for each missing key. Charge the fixed-track one-tape sweep simulation O(d^7 polylog m) per bit step. Copy its dense result to the designated output component at the work origin even by a shuttle per bit in O(d^14 polylog m) moves. Setup, copying and cleanup are included in
+
+    time O(d^15 polylog m), span O(d^7 polylog m).
+
+No random access is needed for sorting, scanning or dense conversion.
+
+At scale t choose d=Theta(t^(1/4)), least integer >=2 with d^4>=t capped at t. Copy the width<=3 input lists and counters into a relocatable component of O(t^3 polylog m) blocks at the local output origin (quadratic setup O(t^6 polylog m) suffices). Its beginning is the work anchor. The dense output component remains stationary at the original origin. Process separator blocks in the prescribed order. For each block keep the anchor fixed and initialize a stationary accumulator of d^7 dense slots there.
+
+For every private block, scan the input lists, restrict/translate tuples and add padding. Only O(d^3 polylog m) translated records and counters travel with the scan head by carry shifts; neither the whole input nor the accumulator moves during this scan. Return to the anchor in O(t^3 d^3 polylog m) moves including extraction, scanning and rewind. Run the base at scale d using disjoint local simulated tracks, writing d^7 dense slots at the same logical addresses as the accumulator. Union slotwise with translated representative fields; carry O(log m)-bit offsets and counters along the scan. Even quadratic local cleanup or merging O(d^14 polylog m) is dominated by the base time. Clear the base components, leaving accumulator and input intact.
+
+After all private blocks for this separator block, copy the accumulator in place onto the stationary output component. The current anchor is exactly the next output-block start. This copy is linear in the block span. Clear accumulator. Move the ENTIRE relocatable input component (including loop state and origin marker) right by the just-written block length to the next append anchor. This is possible on distinct product components even across already-written output. Total displacement over all separator blocks is O(t^7 polylog m), and input length O(t^3 polylog m). All anchor translations therefore cost O(t^10 polylog m). There is no per-output-bit shuttle over the full message. After completion clear input/scratch and return to the original output marker. The visited interval is O(t^7 polylog m): anchors advance over the dense output extent and active scratch lies within O((t^3+d^7) polylog m) of the current anchor. Fixed field widths make the slot layout identical across calls. Output is already on the caller-aligned component, so no extra raw conversion.
+
+There are O((t/d)^8) local tiles. The complete local message bound is
+
+    T_local(t) = O((t^10 + (t/d)^8*(t^3*d^3+d^15)) polylog m)
+               = O((t^10+t^11/d^5+t^8*d^7) polylog m).
+
+At d=Theta(t^(1/4)), both tile exponents are 39/4<10. Thus local time O(t^10 polylog m) and span O(t^7 polylog m). These bounds include the full dense output, with invalid and padded slots, and arbitrary width<=3 forbidden lists. The single inner tiling level is fixed. Integer arithmetic to choose widths and counters is dominated by the displayed bounds.
+
+## 5. Outer cost and exact clock
+
+Parse the actual normalized unary header, canonical selector positions, and guarded pin bits. Preserve original selector and sorted owned forbidden records on stationary components of O(m^3 polylog m) span. Detect missing edge; if none, halt on blank (outside promise). The fixed sequential multitape extraction/sorting and charged sweep simulation, including initial raw expansion, cost O(m^6 polylog m) physical steps.
+
+Choose b=Theta(m^(3/7)), least integer >=2 with b^7>=m^3 capped at m. Both outer accumulators and the entire local routine fit O(b^7 polylog m)=O(m^3 polylog m). Hold the two accumulators at a fixed work origin. For each common separator block and each private tile scan the relevant owned list with mobile O(b^3 polylog m) records and counters, restricting, translating and padding, then return to the origin. Charge O(m^3 b^3 polylog m) per tile. Invoke the local routine at t=b with output component aligned with both accumulators; its input/work anchor moves on its own component only. Local setup, time and cleanup cost O(b^10 polylog m). Merge its dense output into the corresponding stationary side accumulator by one aligned scan with translated fields, O(b^7 polylog m). Erase scratch, not the original data or accumulators. After both sides finish, intersect their flags in one scan; if a common slot is found, read both representatives, combine the digits and reconstruct the original one-hot/OR/pin/guard assignment. Otherwise clear both accumulators and proceed. Intersection and clearing are charged once per block, no more than the tile count. On success emit the original n raw witness bits contiguously at a fresh region and halt at their first bit; per-bit shuttles O(n m^3 polylog m) suffice. On exhaustion halt on blank.
+
+Both bags have eight groups. Total physical time is
+
+    O((m^6 + (m/b)^8*(m^3*b^3+b^10)) polylog m)
+      = O((m^6+m^11/b^5+m^8*b^2) polylog m).
+
+At b=Theta(m^(3/7)), both tile terms have exponent 62/7. Span O(m^3 polylog m) includes all preserved data and reusable scratch. All control is fixed independently of m, pins, masks and missing edge. The original syntax admits this finite machine with a fixed description length ell. With j=ceil(log2 L), budget 2^(3j-ell)>=L^3/2^ell once eligible. Since 62/21<3, it eventually dominates this runtime uniformly on the promise. No numerical threshold or compiled table is asserted.
+
+## 6. Consequence and separation control
+
+Any noncomplete nine-vertex primal graph has a missing pair, so this theorem covers every noncomplete graph. Consequently any unbounded sequence of actual exact-cubic SAT misses in this nine-group family must eventually have COMPLETE support graph, in addition to the earlier independently derived necessary structural conditions. This does not prove any misses exist.
+
+For a strict graph-promise separation, take K9 minus edge (0,8) by forbidding (1,1) on every other pair. Add the four parity triples on groups 0..3 and the five cyclic consecutive triples on groups 4..8 from the earlier separator control: allow even parity of nonzero indicators, requiring distinct nonzero digits if two occur. For m>=3, pair restrictions are redundant within those triples. The parity systems force every indicator zero (sum all four equations in the first region; period three and five in the second), so the unique tuple is all zero. Each digit has local support, signatures are pairwise incomparable in each group by the previous parity contexts, and every direction has max fanout >=m-2 (constrained triples use a nonzero and zero parent, other tables use all-zero parents). Thus both contextual widths are m and W>=(m-2)^9. The graph has minimum vertex separator seven: deleting fewer than seven vertices leaves at least three vertices, and any induced subgraph with >=3 is connected. Deleting the other seven leaves the missing pair. This is an easy unique control, not a computational hardness example. The standalone tests below include dense pair controls but do not exhaustively test this asymptotic parity construction.
+
+## 7. Executed standalone finite verification
+
+The standalone Python reference was compiled and executed locally. It tests dense padded slot layout, aligned representative unions and intersection, two missing-edge locations, exact local messages and global projected model sets against direct enumeration at m=2,3. Across 12 fixtures: 3181 selected cross clauses, 23154 full models, 2903 extendible global separator keys, 774 common separator blocks, 3084 outer tiles, 789504 base tuple checks, 9325 duplicate-key union events and 789504 slot merge checks (including outer merges). The separate nested t=3,d=2 local control checks 1458 valid keys among 16384 padded slots, 256 inner tiles and 65536 base tuple checks. A total of 372 abstract carry shifts checked work movement and stationary-track preservation. Exact rational exponent checks give 10, 62/7, 62/21. All passed. The semantic reference uses Python data structures, not a physical tape implementation; it does not measure or verify the claimed asymptotic timing. The executed file's Git blob hash is f3e2530fde6e25d2ae6d55a40e7b17f16a0a6b30. No repository-integrated verifier run, actual stage execution, compiled transition table, Lean formalization or independent review. Exact-head CI unconfirmed at writing.
+
+## 8. Disposition
+
+The previous five-coordinate frontier is replaced by a complete-graph frontier for this fixed nine-group family. Next target the genuinely complete support graph, where every pair appears in some selected ternary/binary constraint. A promising direction is value-dependent sparsity or restrictions that remove an edge without creating m branches; no such general theorem is claimed here. The unrestricted nine-group cubic cutoff, unbounded B_3 and P vs NP resolution remain OPEN. Prior finite cubic interval 52..233 and reported Lean census unchanged, not recounted. Promotion NONE.
