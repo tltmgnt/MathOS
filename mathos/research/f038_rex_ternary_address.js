@@ -1,5 +1,5 @@
 // F038-REX-022B1 — compiled ternary single-tape raw pool-shape and address cursor; not a normalized validator or SAT solver.
-function compile(){
+function compile({checkpoint=false}={}){
  const defs=new Map(),events=new Map(),add=(s,f)=>{if(defs.has(s))throw Error("duplicate "+s);defs.set(s,f);return s;};
  const r=(s,a)=>[s,a,1],l=(s,a)=>[s,a,-1],z=(s,a)=>[s,a,0],stop=a=>z("HALT",a),bad=()=>stop(0);
  // Cleanup starts at the blank separating workspace from raw suffix.
@@ -7,7 +7,8 @@ function compile(){
   add("clean"+v,a=>a===2?r("tail"+v,a):bad());
   add("tail"+v,a=>a===2?l("eraseTail"+v,a):r("tail"+v,a));
   add("eraseTail"+v,a=>a===2?l("eraseWork"+v,a):l("eraseTail"+v,2));
-  add("eraseWork"+v,a=>a===2?stop(v):l("eraseWork"+v,2));
+  add("eraseWork"+v,a=>a===2?(checkpoint?l("erasePrefix"+v,2):stop(v)):l("eraseWork"+v,2));
+  if(checkpoint)add("erasePrefix"+v,a=>a===2?stop(v):l("erasePrefix"+v,2));
  }
  // Columns contain n,a,b,c; least significant column on the right.
  function scan(name,init,fn,finish,{readonly=false,extend=false}={}){
@@ -45,10 +46,10 @@ function compile(){
  function equal(name,i,yes,no){return scan(name,1,(eq,b)=>({out:b,next:+(eq&&b[0]===b[i])}),c=>c?yes:no,{readonly:true});}
  function set(name,k,dest){return scan(name,0,(j,b)=>{let vals=[0,1,k>=2?2:0,k===3?3:0];for(let i=1;i<4;i++)b[i]=(vals[i]>>j)&1;return {out:b,next:Math.min(2,j+1)};},()=>dest);}
  // Consume raw bit and shift workspace one cell right, preserving every work bit.
- function shift(name,dest){
+ function shift(name,dest,retained=2){
   add(name,a=>a===2?l(name+"Gap",2):bad());
   add(name+"Gap",a=>a===2?l(name+"Read",a):bad());
-  add(name+"Read",a=>a===2?r(name+"Clear",a):r(name+"Write"+a,a));
+  add(name+"Read",a=>a===2?r(name+"Clear",retained):r(name+"Write"+a,a));
   for(let b of [0,1])add(name+"Write"+b,a=>l(name+"Skip",b));
   add(name+"Skip",a=>l(name+"Read",a));add(name+"Clear",a=>r(name+"Return",2));
   add(name+"Return",a=>a===2?z(dest,a):r(name+"Return",a));return name;
@@ -68,7 +69,8 @@ function compile(){
   for(let s=0;s<(1<<k);s++){
    let name="read"+k+"s"+s,sh="shift"+k+"s"+s,dest=s+1<(1<<k)?"read"+k+"s"+(s+1):"advance"+k;
    events.set(name,{k,s});add(name,a=>a===2?r(name+"Raw",a):bad());
-   add(name+"Raw",a=>a===2?l("clean0",a):z(sh,2));shift(sh,dest);
+   add(name+"Raw",a=>a===2?l("clean0",a):z(checkpoint?sh+"v"+a:sh,2));
+   if(checkpoint){shift(sh+"v0",dest,0);shift(sh+"v1",dest,1);}else shift(sh,dest);
   }
  }
  equal("advance1",1,"init2","inc1");inc("inc1",1,"read1s0");
@@ -77,14 +79,15 @@ function compile(){
  equal("advance3",3,"inc3b","inc3c");inc("inc3c",3,"read3s0");inc("inc3b",2,"test3b");
  equal("test3b",2,"inc3a","set3c");inc("inc3a",1,"set3b");copyPlus("set3b",1,2,"test3end");
  equal("test3end",2,"done","set3c");copyPlus("set3c",2,3,"read3s0");
- add("done",a=>a===2?r("doneRaw",a):bad());add("doneRaw",a=>l(a===2?"clean1":"clean0",a));
+ add("done",a=>a===2?r("doneRaw",a):bad());add("doneRaw",a=>l(a===2?(checkpoint?"checkpointDone":"clean1"):"clean0",a));
+ if(checkpoint)add("checkpointDone",a=>a===2?stop(2):bad());
  const names=[],ids=new Map(),rows=[];
  function id(s){if(s==="HALT")return -1;if(!ids.has(s)){ids.set(s,names.length);names.push(s);}return ids.get(s);}
  id("begin");
  for(let i=0;i<names.length;i++){let f=defs.get(names[i]);if(!f)throw Error("missing "+names[i]);for(let a=0;a<3;a++){let [s,w,d]=f(a);rows.push([id(s),w,d]);}}
  let q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
  const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
- return {q,desc,names,events:[...events].map(([s,e])=>({state:ids.get(s),...e}))};
+ return {q,desc,names,checkpoint,events:[...events].map(([s,e])=>({state:ids.get(s),...e}))};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
@@ -109,8 +112,19 @@ function run(M,raw,limit=Infinity,observe=null){
   if(head<0||head>=tape.length)throw Error("simulation buffer");
   if(head<lo)lo=head;if(head>hi)hi=head;
  }
- let out=null;if(state===q){let nonblank=0;for(let a of tape)if(a!==2)nonblank++;if(nonblank!==1||tape[head]>1)throw Error("noncanonical output");out=tape[head];}
- return {status:state!==q?"TIMEOUT":out?"POOL_SHAPE_OK":"OUTSIDE_POOL_SHAPE",t,span:hi-lo+1,head:head-origin};
+ let out=null,checkpoint=null;
+ if(state===q){
+  let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
+  if(M.checkpoint&&tape[head]===2){
+   let vals=[0,0,0,0],scale=1,p=head-1;
+   while(tape[p]!==2){for(let i=3;i>=0;i--){if(tape[p]>1)throw Error("checkpoint alignment");vals[i]+=scale*tape[p--];}scale*=2;}
+   const workBits=head-p-1,end=p;let begin=end-1;while(tape[begin]!==2)begin--;begin++;
+   let selector=Array.from(tape.subarray(begin,end)).join("");
+   if(nonblank!==selector.length+workBits)throw Error("checkpoint garbage");
+   checkpoint={n:vals[0],a:vals[1],b:vals[2],c:vals[3],workBits,selector,selectorStart:begin-origin,selectorEnd:end-origin};
+  }else{if(nonblank!==1||tape[head]>1)throw Error("noncanonical output");out=tape[head];}
+ }
+ return {status:state!==q?"TIMEOUT":checkpoint?"POOL_CHECKPOINT":out?"POOL_SHAPE_OK":"OUTSIDE_POOL_SHAPE",t,span:hi-lo+1,head:head-origin,...(checkpoint?{checkpoint}:{})};
 }
 function audit(E){
  let C=compile(),M={...decode(C.desc),events:C.events},ok=(v,s)=>{if(!v)throw Error(s)};
@@ -141,5 +155,22 @@ function audit(E){
  ok(E.decode(invalid)===null&&r.status==="POOL_SHAPE_OK","scope boundary");
  return {q:C.q,descriptorBits:C.desc.length,results,controls,cutoffs:4,normalizationCounterexample:{L:invalid.length,...r},totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,addresses:a.addresses+r.count,transitions:a.transitions+r.t}),{rawBits:0,addresses:0,transitions:0})};
 }
-module.exports={compile,decode,run,audit};
-if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile().desc);else if(process.argv.includes('--shape')){const C=compile();console.log(JSON.stringify(run(decode(C.desc),require('fs').readFileSync(0,'utf8'))));}else console.log('F038_REX_TERNARY_ADDRESS_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
+function checkpointAudit(E){
+ const C=compile({checkpoint:true}),M={...decode(C.desc),checkpoint:true},ok=(v,s)=>{if(!v)throw Error(s)},results=[];
+ for(let m of [2,3,4]){
+  let n=19*m-7,raw=E.encode(m,Array.from({length:m},(_,i)=>i%2),[[-1],[-m-1,-2*m-1],[-1,-m-1,-2*m-1]]);
+  let r=run(M,raw,300000000),p=r.checkpoint;
+  ok(r.status==="POOL_CHECKPOINT"&&p.n===n&&p.selector===raw.slice(n+1)&&p.a===n-1&&p.b===n&&p.c===n&&p.workBits===4*n.toString(2).length,"checkpoint equality");
+  ok(r.head===raw.length-1&&p.selectorEnd+p.workBits+1===r.head&&p.selectorEnd-p.selectorStart===p.selector.length,"checkpoint layout");
+  results.push({m,n,L:raw.length,selectorBits:p.selector.length,t:r.t,span:r.span,workBits:p.workBits});
+ }
+ let n=31,raw=E.encode(2,[0,1],[]),invalid=raw.slice(0,n+1)+"0".repeat(raw.length-n-1),r=run(M,invalid,300000000);
+ ok(E.decode(invalid)===null&&r.status==="POOL_CHECKPOINT"&&r.checkpoint.selector===invalid.slice(n+1),"shape-only negative control");
+ let controls=[];
+ for(let [name,bad] of [["empty",""],["wrongDimension","1".repeat(32)+"0"],["truncated",raw.slice(0,-1)],["extra",raw+"1"]]){
+  let r=run(M,bad,300000000);ok(r.status==="OUTSIDE_POOL_SHAPE"&&!r.checkpoint,"checkpoint malformed "+name);controls.push({name,t:r.t});
+ }
+ return {q:C.q,descriptorBits:C.desc.length,results,controls,shapeOnlyControl:true,totals:results.reduce((a,r)=>({rawBits:a.rawBits+r.L,selectorBits:a.selectorBits+r.selectorBits,transitions:a.transitions+r.t}),{rawBits:0,selectorBits:0,transitions:0})};
+}
+module.exports={compile,decode,run,audit,checkpointAudit};
+if(require.main===module){if(process.argv.includes('--descriptor'))process.stdout.write(compile({checkpoint:process.argv.includes('--checkpoint')}).desc);else if(process.argv.includes('--shape')){const C=compile();console.log(JSON.stringify(run(decode(C.desc),require('fs').readFileSync(0,'utf8'))));}else if(process.argv.includes('--checkpoint'))console.log('F038_REX_TERNARY_CHECKPOINT_OK '+JSON.stringify(checkpointAudit(require('./f038_tga_normalized_integration.js').engine())));else console.log('F038_REX_TERNARY_ADDRESS_OK '+JSON.stringify(audit(require('./f038_tga_normalized_integration.js').engine())));}
