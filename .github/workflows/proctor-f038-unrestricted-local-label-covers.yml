@@ -1,0 +1,50 @@
+name: Proctor F038 unrestricted local label covers
+on:
+  push:
+    branches: ['research/pnp-f038-unrestricted-local-label-covers']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_unrestricted_local_label_covers.js
+          node mathos/research/f038_unrestricted_local_label_covers.js | tee /tmp/current.txt
+          python - <<'PY'
+          import json
+          prefix = 'F038_LOCAL_LABEL_COVERS_OK '
+          with open('/tmp/current.txt') as f:
+              rows = [json.loads(line[len(prefix):]) for line in f if line.startswith(prefix)]
+          assert len(rows) == 1
+          r = rows[0]
+          assert r['n'] == {"fixtures":12,"passes":24,"scoreChecks":144,"tailChecks":314,"capChecks":348525,"full":242340,"recovery":134750,"heavy":0,"wide":26592,"narrow":1522,"local":1464844,"membership":1852672,"relabels":330752,"children":1458688,"models":27110,"roots":6156}
+          assert r['selected'] == {"1,1":24}
+          assert r['controls'] == [[8,585,1,8,[2,4,2],0],[16,4681,1,16,[2,8,4],0],[32,37449,1,32,[4,16,4],0],[64,299593,1,64,[4,32,8],0]]
+          assert r['trimControl'] == [512,168,344,536,344]
+          assert r['envelopeModels'] == 344
+          assert r['growth'] == [[8,16,32,0.5],[12,64,256,0.25],[16,256,1024,0.25]]
+          assert r['field'] == [[8,2,12,56],[16,4,48,240],[32,8,192,992]]
+          PY
+          python -m mathos.research.tga_pnp_resolution_gap > /tmp/gap.json
+          python - <<'PY'
+          import json
+          with open('/tmp/gap.json') as f:
+              gap = json.load(f)
+          assert gap['PNP_RESOLUTION_STATUS'] == 'OPEN'
+          assert gap['selector_route']['status'] == 'BLOCKED'
+          assert gap['mathematical_resolution']['status'] == 'BLOCKED'
+          print('F038_LOCAL_LABEL_COVERS_GATE_OK status=OPEN promotion=NONE')
+          PY
