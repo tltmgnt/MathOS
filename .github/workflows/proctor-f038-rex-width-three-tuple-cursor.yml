@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X width-three tuple cursor
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-tuple-cursor']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_tuple_cursor
+          node --check "$p.js"
+          for suite in physical physical3 larger; do
+            node --max-old-space-size=4096 "${p}_audit.js" "$suite" > "/tmp/w3cursor-$suite.txt"
+          done
+          node --max-old-space-size=4096 "${p}_replay.js" > /tmp/w3cursor-replay.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_TUPLE_CURSOR_OK '){
+            const a=fs.readFileSync('/tmp/w3cursor-'+s+'.txt','utf8').trim();
+            assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));
+          }
+          const a=read('physical'),b=read('physical3'),c=read('larger'),r=read('replay','F038_REX_WIDTH_THREE_TUPLE_CURSOR_REPLAY_OK ');
+          for(const x of [a,b,c])assert.deepEqual(x.ir,{raw:4521,reachable:2972,compact:1883,rounds:45,checked:2972});
+          for(const x of [a,b]){assert.equal(x.q,4142702);assert.equal(x.logical,41250);assert.equal(x.bits,327273462);}
+          assert.equal(a.rows.length,18);assert.equal(b.rows.length,9);assert.equal(c.rows.length,49);
+          assert.deepEqual(a.totals,{candidates:138,allowed:92,cursorChecks:966,backward:80,primitives:66282,transitions:68935926});
+          assert.deepEqual(b.totals,{candidates:135,allowed:98,cursorChecks:945,backward:60,primitives:69872,transitions:108813121});
+          assert.deepEqual(c.totals,{candidates:4841,allowed:1926,cursorChecks:33887,backward:2150,primitives:2597630,transitions:0});
+          assert.deepEqual(a.runs.map(x=>x.producer),[104728446,104759830]);assert.equal(b.runs[0].producer,1191953378);
+          assert.equal(b.rows[0].arity,4);assert.equal(b.rows[0].candidates,81);assert.equal(b.rows[0].allowed,48);assert.equal(b.rows[0].t,83059371);
+          assert.deepEqual(b.rows.map(({name,m,arity,owner,ids,candidates,allowed,cursorChecks,backward,primitives})=>({name,m,arity,owner,ids,candidates,allowed,cursorChecks,backward,primitives})),c.rows.slice(0,9).map(({name,m,arity,owner,ids,candidates,allowed,cursorChecks,backward,primitives})=>({name,m,arity,owner,ids,candidates,allowed,cursorChecks,backward,primitives})));
+          assert.equal(r.q,4142702);assert.equal(r.bits,327273462);assert.equal(r.entries,12428106);
+          assert.equal(r.t,1195509);assert.equal(r.output,'0,1;1,0;1,1;');
+          assert.deepEqual(r.cutoffs,[0,1,100,1195508]);assert.equal(r.emptyClock,990443);
+          assert.equal(a.totals.transitions+b.totals.transitions+r.t,178944556);
+          JS
+          python -m mathos.research.tga_f038_rex_024d3a1 > /tmp/w3cursor-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3cursor-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D3A1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
