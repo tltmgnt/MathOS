@@ -1,0 +1,39 @@
+name: Proctor F038 RE-X charged multitape producer
+on:
+  push:
+    branches: ['research/pnp-f038-rex-physical-producer']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          set -euo pipefail
+          node --check mathos/research/f038_rex_multitape_producer.js
+          node mathos/research/f038_rex_multitape_producer.js > /tmp/rex-producer.txt
+          node mathos/research/f038_rex_multitape_producer.js --integration > /tmp/rex-integration.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(path,tag){const s=fs.readFileSync(path,'utf8').trim();assert.ok(s.startsWith(tag+' '));return JSON.parse(s.slice(tag.length+1));}
+          const p=read('/tmp/rex-producer.txt','F038_REX_MULTITAPE_PRODUCER_OK');
+          assert.equal(p.results.length,12);
+          assert.deepEqual(p.totals,{rawBits:4565922,preparedBits:69342,steps:33931134});
+          assert.equal(p.controls,30);assert.equal(p.unsupported,1);assert.equal(p.timeout,1);
+          for(const r of p.results)assert.equal(Object.values(r.ledger).reduce((a,b)=>a+b,0),r.steps);
+          const i=read('/tmp/rex-integration.txt','F038_REX_MULTITAPE_INTEGRATION_OK');
+          assert.equal(i.results.length,6);assert.equal(i.earlyCutoffs,5);assert.equal(i.descriptorBits,8127684);
+          assert.equal(i.results.filter(r=>r.status==='SAT'&&r.witnessVerified).length,3);
+          assert.equal(i.results.filter(r=>r.status==='UNSAT'&&!r.witnessVerified).length,3);
+          assert.equal(i.results.reduce((a,r)=>a+r.workerTransitions,0),8512362);
+          assert.equal(i.results.reduce((a,r)=>a+r.producerSteps,0),9402892);
+          console.log('REX-022A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE');
+          JS
