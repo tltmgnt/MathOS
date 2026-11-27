@@ -30,7 +30,10 @@ function machine(){
  function next(t,carry,normal){return mv(t,1,rd(t,x=>x==="_"?start(t,carry):bit(x)?normal:reject));}
  const end=rd(Q,x=>x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,dispatch),reject)):reject);
  bind(advance0,next(R[0],end,row));bind(advance1,next(R[1],advance0,row));bind(advance2,next(R[2],advance1,row));
- const token=forbidden=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?(forbidden&&y==="1"?retry:mv(Q,1,advance2)):reject)):reject);
+ // Exactly one row can match a one-hot candidate. On a passing match,
+ // consume the remaining field tokens without rank-cursor updates.
+ const suffix=field(null,dispatch);
+ const token=forbidden=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?(forbidden?(y==="1"?retry:mv(Q,1,suffix)):mv(Q,1,advance2)):reject)):reject);
  const any=token(false),all=token(true);
  bind(row,rd(R[0],x=>x==="0"?any:x==="1"?rd(R[1],y=>y==="0"?any:y==="1"?rd(R[2],z=>z==="0"?any:z==="1"?all:reject):reject):reject));
  const beginRows=start(R[0],start(R[1],start(R[2],row)));
