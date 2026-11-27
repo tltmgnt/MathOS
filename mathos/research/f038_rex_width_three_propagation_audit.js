@@ -14,7 +14,7 @@ function oracle(E,raw){
 
 function envelope(V,m){
  const e=V.envelope(m),S=e.S,N=S+34n*BigInt(m)+504n,T=8192n*S,W=(26n*N+16n)*T+8n,total=e.P+128n*S*S+W+256n*S*S;
- if(N>2n*S||W>524288n*S*S||total>65536n*e.L*e.L)throw Error("bound");return {N,T,W,total,H0:159266304n};
+ if(N>2n*S||W>524288n*S*S||total>65536n*e.L*e.L)throw Error("bound");return {N,T,W,total,H0:165869289n};
 }
 
 function audit(U,E,F,V,Old){
