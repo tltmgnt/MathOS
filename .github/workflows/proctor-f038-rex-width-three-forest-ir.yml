@@ -1,0 +1,61 @@
+name: Proctor F038 RE-X width-three retained forest
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-forest-ir']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_forest_ir
+          node --check "$p.js"
+          for suite in ir larger physicalEmpty physicalEdge physicalEdgeSAT; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3forest-$suite.txt"
+          done
+          node mathos/research/f038_rex_width_three_row_compiler_audit.js > /tmp/w3forest-compiler.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_FOREST_OK '){
+            const a=fs.readFileSync('/tmp/w3forest-'+s+'.txt','utf8').trim();
+            assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));
+          }
+          const a=read('ir'),b=read('larger'),c=read('physicalEmpty'),d=read('physicalEdge'),e=read('physicalEdgeSAT'),r=read('compiler','F038_REX_WIDTH_THREE_ROW_COMPILER_OK ');
+          for(const x of [a,b,c,d,e])assert.deepEqual(x.ir,{raw:21809,reachable:19274,compact:8553,rounds:612,checked:19274});
+          for(const x of [c,d,e]){assert.equal(x.q,8620167);assert.equal(x.logical,293318);assert.equal(x.roots,293318);assert.equal(x.interned,8326849);assert.equal(x.bits,732714199);}
+          assert.deepEqual(a.totals,{producer:734503174,primitives:1647785,edges:20,candidates:294,localRows:196,liveRows:176,transitions:0});
+          assert.deepEqual(b.totals,{producer:2383579350,primitives:10071913,edges:11,candidates:588,localRows:478,liveRows:478,transitions:0});
+          assert.deepEqual(a.rows.map(x=>x.decision),['1','1','1','0','1','0','0']);
+          assert.deepEqual(b.rows.map(x=>x.models),[9720,6816]);
+          assert.deepEqual(a.rows[3].edgeRows[0],{child:0,parent:3,separator:3,keys:4,retained:0});
+          assert.deepEqual(c.totals,{producer:104551138,primitives:45872,edges:0,candidates:18,localRows:18,liveRows:18,transitions:376457458});
+          assert.deepEqual(d.totals,{producer:104556548,primitives:50100,edges:1,candidates:20,localRows:16,liveRows:14,transitions:511845408});
+          assert.deepEqual(e.totals,{producer:104556548,primitives:55502,edges:1,candidates:20,localRows:19,liveRows:19,transitions:830825918});
+          assert.deepEqual([c.rows[0].decision,d.rows[0].decision,e.rows[0].decision],['1','0','1']);
+          assert.deepEqual([c.rows[0].span,d.rows[0].span,e.rows[0].span],[16670,16965,17635]);
+          assert.deepEqual(r,{original:752081,interned:365657,checks:2256243,covered:365658,logical:12320});
+          assert.equal(c.totals.transitions+d.totals.transitions+e.totals.transitions,1719128784);
+          JS
+          python -m mathos.research.tga_f038_rex_024d3b1 > /tmp/w3forest-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3forest-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D3B1_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
