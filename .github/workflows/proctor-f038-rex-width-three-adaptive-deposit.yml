@@ -1,0 +1,83 @@
+name: Proctor F038 RE-X compact blocks and joint packed deposition
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-adaptive-deposit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Online packing and batched workspace relocation audit
+        run: |
+          node mathos/research/f038_rex_width_three_joint_audit.js > /tmp/d5q.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5q.json');a.equal(r.patterns,8190);a.equal(r.arithmetic,40068);a.equal(r.cases,7);a.equal(r.batchGain,7);a.equal(r.packedGain+r.packedLoss+r.packedEqual,7);a(r.malformed>=3);a.deepEqual(r.thresholds,['144230844','216149838','144424950','216440997']);console.log('D5Q_COMPACT_ORACLE_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5Q_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [compact_batch, joint]
+        mode: [bounded, full]
+        fixture: [all-active, ternary-chain, ternary-empty, reverse-chain-cap, radius-three-refusal, ternary-three-rank]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_joint_replay.js ${{ matrix.kind }} ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [compact_batch, joint]
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          kind=${{ matrix.kind }}
+          mode=${{ matrix.mode }}
+          node "${p}_joint_replay.js" "$kind" "$mode" descriptor > /tmp/d5q.desc
+          node "${p}_joint_replay.js" "$kind" "$mode" fixtures > /tmp/d5q.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5q-native
+          /tmp/d5q-native /tmp/d5q.desc /tmp/d5q.fixtures > /tmp/d5q-native.out
+          python -m mathos.research.f038_rex_width_three_joint_native_verify /tmp/d5q.fixtures /tmp/d5q-native.out "$kind" "$mode"
