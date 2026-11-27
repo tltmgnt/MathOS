@@ -20,7 +20,7 @@ function bridge(J){
   const seek=scan(n+"Seek",1,n+"Put0");return add(n,a=>a===2?r(seek,a):bad());
  }
  const tail=encode(["u_","D",...Array.from({length:J.tapes-21},(_,i)=>empty(i===J.tapes-22)).flat()]);
- const finish=add("finish",a=>a===2?r("HALT",a):bad()),finishAppend=append("tail",tail,finish);
+ const finish=add("finish",a=>a===2?r("SUCCESS",a):bad()),finishAppend=append("tail",tail,finish);
  // Copy the contiguous raw mask stream, marking one cell blank temporarily.
  add("streamRead",a=>a===2?z(finishAppend,a):r("streamSeek"+a,2));
  for(let b=0;b<2;b++){
@@ -51,9 +51,9 @@ function bridge(J){
  const pre=encode(["G",...Array.from({length:19},()=>empty()).flat(),"hL","uH"]);
  const put=append("initialAppend",pre,ret),entry=toBoundary("initialGo",-1,put);
  const names=[entry],ids=new Map([[entry,0]]),rows=[];
- function id(n){if(n==="HALT")return -1;if(!ids.has(n)){ids.set(n,names.length);names.push(n);}return ids.get(n);}
+ function id(n){if(n==="HALT")return -1;if(n==="SUCCESS")return -2;if(!ids.has(n)){ids.set(n,names.length);names.push(n);}return ids.get(n);}
  for(let i=0;i<names.length;i++)for(let a=0;a<3;a++){const [n,v,d]=defs.get(names[i])(a);rows.push((id(n)<<4)|(v<<2)|(d+1));}
- const q=names.length,T=Uint32Array.from(rows,v=>v<0?(q<<4)|(v&15):v);
+ const q=names.length,T=Uint32Array.from(rows,v=>v<0?((q+(v>>>4===0xffffffe?1:0))<<4)|(v&15):v);
  return{q,T,w,codes};
 }
 function compose(producer,J,worker=null){
@@ -63,7 +63,7 @@ function compose(producer,J,worker=null){
  for(let i=0;i<P.T.length;i++)T[i]=relocate(P.T[i],P.q,0,q);
  if(C.bridgeReady===undefined||P.T[3*C.bridgeReady+2]>>>4!==P.q)throw Error("producer entry");
  T[3*C.bridgeReady+2]=(offset<<4)|(2<<2)|1;
- for(let i=0;i<B.T.length;i++)T[3*offset+i]=relocate(B.T[i],B.q,offset,worker?workerAt:q);
+ for(let i=0;i<B.T.length;i++){let v=B.T[i],n=v>>>4;T[3*offset+i]=((n===B.q?q:n===B.q+1?(worker?workerAt:q):offset+n)<<4)|(v&15);}
  if(worker)for(let i=0;i<worker.T.length;i++)T[3*workerAt+i]=relocate(worker.T[i],worker.q,workerAt,q);
  return{q,T,bridgeAt:offset,workerAt,producerStates:P.q,bridgeStates:B.q,workerStates:worker?.q??0,w:B.w,codes:worker?.codes??{...B.codes,"~":"2".repeat(B.w)}};
 }
