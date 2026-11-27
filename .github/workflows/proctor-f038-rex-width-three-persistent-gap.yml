@@ -1,0 +1,34 @@
+name: Proctor F038 RE-X persistent sparse support projection
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-persistent-gap']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exhaustive local support and composed physical audit
+        run: |
+          node mathos/research/f038_rex_width_three_persistent_support_audit.js > /tmp/d5v.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5v.json');a.equal(r.direct,16736);a.equal(r.composed,624);a.equal(r.physical,12);a.equal(r.malformed,8);a.equal(r.sparse,8638);a.equal(r.dense,8098);a.deepEqual(r.instructions,[552,862]);a.deepEqual(r.states,[111644,153098]);console.log('D5V_PERSISTENT_SUPPORT_OK')"
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5V_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
