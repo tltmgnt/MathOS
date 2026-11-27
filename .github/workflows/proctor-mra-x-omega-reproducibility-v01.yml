@@ -1,0 +1,48 @@
+name: MRA-X Omega RE-X reproducibility v0.1
+on:
+  push:
+    branches: ['research/mra-x-omega-reproducibility-v0.1']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent host reference, encoding and arithmetic checks
+        run: |
+          set -euo pipefail
+          node mathos/research/f038_rex_reproducibility_v01.js > /tmp/rex-reference.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex-reference.json') as f:
+              r=json.load(f)
+          assert (r['cases'],r['assignments'],r['sat'],r['unsat'],r['refused'],r['malformed'],r['arithmeticCases']) == (30,296163,8,21,1,4,10018)
+          assert r['scope']=='HOST_REFERENCE_AND_FINITE_ARITHMETIC_ONLY'
+          assert r['PNP_RESOLUTION_STATUS']=='OPEN' and r['PROMOTION']=='NONE'
+          k=next(x for x in r['rows'] if x['name']=='K5-refusal')
+          assert k['status']=='STRUCTURAL_REFUSAL' and k['models']==96
+          print('REX_REPRODUCIBILITY_REFERENCE_OK')
+          PY
+      - name: Inherited evidence gates
+        run: |
+          set -euo pipefail
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/rex-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/rex-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          PY
