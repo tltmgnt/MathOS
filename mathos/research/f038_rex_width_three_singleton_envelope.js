@@ -45,5 +45,10 @@ function experiment(U,E,Fast,Ad){
  for(const f of Ad.fixtures(E,"all"))if(f.name!=="K5-refusal")test(f.name,f.m,f.pins,f.B);
  return {checked,strictChecked,accepted,refused,falseNegative,rows};
 }
-module.exports={envelope,arithmetic,experiment};
-if(require.main===module){const U=require('./f038_rex_width_three_adaptive_ir.js'),E=require('./f038_tga_normalized_integration.js').engine(),F=require('./f038_rex_width_three_fast_clock.js'),Ad=require('./f038_rex_width_three_admission.js');console.log(JSON.stringify({arithmetic:arithmetic(),experiment:experiment(U,E,F,Ad)}));}
+function parentLedger(){
+ // D5G completed physical CI run 45938789950; transition counts, not fresh execution.
+ const rows=[[2,104551138,127995984,288770504,289549660],[3,1191370586,1376249438,2149443850,2152510163],[4,6899458662,7805874734,10990889184,10999810416]];
+ return rows.map(([m,p,i,w,t])=>{const B=envelope(m),a=[p,i-p,w-i,t-w];if(a.some((v,j)=>BigInt(v)>[B.P,B.I,B.W,B.O][j])||BigInt(t)>B.total)throw Error("parent phase ledger");return {m,phases:a,total:t};});
+}
+module.exports={envelope,arithmetic,experiment,parentLedger};
+if(require.main===module){const U=require('./f038_rex_width_three_adaptive_ir.js'),E=require('./f038_tga_normalized_integration.js').engine(),F=require('./f038_rex_width_three_fast_clock.js'),Ad=require('./f038_rex_width_three_admission.js');console.log(JSON.stringify({arithmetic:arithmetic(),experiment:experiment(U,E,F,Ad),parentLedger:parentLedger()}));}
