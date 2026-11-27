@@ -88,11 +88,22 @@ function scanner(M,owners,macros,labels){
  for(let u of queue)if(raw.has(u)){cuts++;let a=1;for(let v of edges.get(u))a=Math.max(a,1+visit(v));between=Math.max(between,a);}
  return{nodes:seen.size,cuts,startup,between,checkedNodes:memo.size};
 }
+function controls(){
+ const M=(next,move)=>({q:next.length,T:Uint32Array.from(next.flatMap((n,i)=>[0,1,2].map(a=>(n<<4)|(a<<2)|(move[i]+1))))}),tags=n=>new Int32Array(n),macro=[{kind:"control",name:"scan"}];
+ const good=certify(M([1,2,0],[1,-1,-1]),tags(3),macro);
+ if(good.maxA>4||good.cyclic!==1)throw Error("drift control");
+ let rejected=0;
+ for(let x of [M([0],[0]),M([1,0],[1,-1])]){
+  try{certify(x,tags(x.q),macro);}catch(e){if(!String(e).includes("non-drifting SCC"))throw e;rejected++;}
+ }
+ if(rejected!==2)throw Error("zero displacement cycle accepted");
+ return{accepted:1,rejected};
+}
 function audit(source){
  const old={exports:{}};new Function("module","require",source)(old,()=>{throw Error("dependency")});
  const I=instrument(source),a=old.exports.compile(),b=I.compile();
  if(a.desc!==b.desc)throw Error("instrumentation changed descriptor");
- const M=I.decode(b.desc);return {...certify(M,b.macroOwner,b.macros),scanner:scanner(M,b.macroOwner,b.macros,b.labels)};
+ const M=I.decode(b.desc);return {...certify(M,b.macroOwner,b.macros),scanner:scanner(M,b.macroOwner,b.macros,b.labels),controls:controls()};
 }
 module.exports={audit,instrument,certify};
 if(require.main===module){const fs=require('node:fs'),path=require('node:path');console.log('F038_REX_MACRO_CERTIFICATE_OK '+JSON.stringify(audit(fs.readFileSync(path.join(__dirname,'f038_rex_width_three_bridge_producer.js'),'utf8'))));}
