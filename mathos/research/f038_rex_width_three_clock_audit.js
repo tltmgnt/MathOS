@@ -39,6 +39,9 @@ function count(J,inputs,limit=100000000){
  }
  const upper=4*left*(N+2)*steps+stay;
  ok(Number.isSafeInteger(clock)&&Number.isSafeInteger(upper)&&clock<=upper&&N===N0+growth,"total bound");
- return{clock,upper,steps,N0,N,growth,equalCarries,changedCarries,reads,writes,movesL,movesR,peakStep,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};
+ const syms=["G","D","E","~",...J.alphabet.flatMap(x=>["u"+x,"h"+x])],codes=Object.fromEntries(syms.filter(x=>x!=="~").map((x,i)=>[x,i.toString(2).padStart(w,"0")]));
+ const encoded=["G",...T.flatMap((t,k)=>[...t.map((x,j)=>(h[k]===j?"h":"u")+x),k===T.length-1?"E":"D"])].map(x=>codes[x]).join("");
+ ok(encoded.length===w*N,"terminal encoding");
+ return{encoded,clock,upper,steps,N0,N,growth,equalCarries,changedCarries,reads,writes,movesL,movesR,peakStep,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};
 }
 module.exports={count};
