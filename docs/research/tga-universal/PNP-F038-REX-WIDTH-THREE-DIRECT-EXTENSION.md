@@ -4,7 +4,7 @@ Parent 749a4747436947e4f98f859d593e08be2a9d7ba0. Research only. PNP_RESOLUTION_S
 
 ## Verification checkpoints
 
-D6B exact-head [Proctor 46017461932](https://github.com/tltmgnt/MathOS/actions/runs/46017461932): all fifteen jobs passed, including the previously outstanding two-root physical executions. D6C executable checkpoint 6215456fbcb047cb4dff5646e9f2422bf8023c8d [Proctor 46022026974](https://github.com/tltmgnt/MathOS/actions/runs/46022026974): all fifteen jobs passed (audit/governance, twelve physical replays and two independent native descriptor jobs). This documentation commit does not alter the executable checkpoint; do not assume its own exact-head CI has finished.
+D6B exact-head [Proctor 46017461932](https://github.com/tltmgnt/MathOS/actions/runs/46017461932): all fifteen jobs passed, including the previously outstanding two-root physical executions. D6C executable checkpoint 6215456fbcb047cb4dff5646e9f2422bf8023c8d [Proctor 46022026974](https://github.com/tltmgnt/MathOS/actions/runs/46022026974): all fifteen jobs passed (audit/governance, twelve physical replays and two independent native descriptor jobs). The subsequent replay-only checkpoint 092d7b70edc4f1f2fda99c9bcb2a15628ab703b4 pins the full SAT ledger too; exact-head Proctor 46023334824 was in progress at inspection. This documentation update makes no new CI completion claim.
 
 ## Physical direct extension
 
@@ -53,7 +53,7 @@ These are exact worker source-accounted clocks, not complete physical replays of
 
 ## Physical and independent native evidence
 
-Original raw selectors, zero pins. The bounded m3 one-root SAT original/quotient/cutoff were directly executed; full original also directly executed, with full quotient/cutoff confirmed by CI. Both modes of one-root m2 UNSAT original/quotient/cutoff directly executed. The executable checkpoint's CI confirms both modes and all twelve physical matrix jobs; bounded native includes SAT and UNSAT exact ledgers, full native includes the pinned UNSAT ledger (the full SAT ledger was not pinned in its native fixture generation). Full-mode logs independently confirm the following physical clocks:
+Original raw selectors, zero pins. Both modes of the m3 one-root SAT original/quotient/cutoff were directly executed. Both modes of one-root m2 UNSAT original/quotient/cutoff directly executed. The executable checkpoint's CI confirms both modes and all twelve physical matrix jobs; bounded native includes SAT and UNSAT exact ledgers, full native at that checkpoint includes the pinned UNSAT ledger; the subsequent replay-only update pins both ledgers in both modes. Full-mode logs independently confirm the following physical clocks:
 
 | fixture | transitions | halt head | span | result |
 |---|---:|---:|---:|---|
