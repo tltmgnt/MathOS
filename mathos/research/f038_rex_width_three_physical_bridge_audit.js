@@ -1,5 +1,5 @@
 // REX-024D4A: exact bridge and in-place worker differential audit.
-function audit(B,P,W,F,R,C,V,K,L,E,suite){
+function audit(B,P,W,F,R,C,V,K,L,E,suite,replay=true){
  const J=V.compact(W.machine(F,R,C,V)),worker=suite==="bridge"?null:K.compile(J),M=B.compose(P,J,worker),G=L.compile(),D={...L.decode(G.desc),loaderEntry:G.loaderEntry,plannerEntry:G.plannerEntry,pushEntry:G.pushEntry,popEntry:G.popEntry},ok=(v,s)=>{if(!v)throw Error(s)},rows=[];
  function decode(word){const inv=Object.fromEntries(Object.entries(M.codes).map(([s,c])=>[c,s])),out=[],heads=[];let buf="",head=null,cell=0;
   ok(word.slice(0,M.w)===M.codes.G,"global sentinel");
@@ -23,8 +23,10 @@ function audit(B,P,W,F,R,C,V,K,L,E,suite){
    ok(a.out[19]===suffix&&a.out[20]===stream,"input preservation");
    // Independently execute the exact worker on host-encoded initial
    // tapes only as a differential oracle; not part of composed execution.
-   const v=K.run(worker,expected,10000000000);
-   ok(v.status==="COMPLETE"&&v.t===r.t-r.workerClock&&v.tapes.join("|")===a.out.join("|")&&v.heads.join()===a.heads.join(),"worker exact replay");
+   if(replay){const v=K.run(worker,expected,10000000000);
+   ok(v.status==="COMPLETE"&&v.t===r.t-r.workerClock&&v.tapes.join("|")===a.out.join("|")&&v.heads.join()===a.heads.join(),"worker exact replay");}
+   const clocks={"empty":672161844,"nonempty-child-edge":1144561610,"empty-child-edge":512737138};
+   ok(r.t-r.workerClock===clocks[name],"prior exact standalone clock");
    decision=a.out[44];ok(decision===String(+want),"decision");
    if(want){witness=a.out[57];ok(witness.length===19*m-7&&E.valid(raw,witness)&&a.heads[57]===1,"witness");}else ok(a.out[57]==="","no witness");
   }
@@ -44,7 +46,7 @@ function audit(B,P,W,F,R,C,V,K,L,E,suite){
  else if(suite==="sat")check("nonempty-child-edge",2,[0,1],[[-1,-3]]);
  else if(suite==="unsat")check("empty-child-edge",2,[1,0],[[-1],[-2],[-1,-3]],true,false);
  else throw Error("suite");
- return{suite,q:M.q,bridgeStates:M.bridgeStates,producerStates:M.producerStates,workerStates:M.workerStates,rows};
+ return{suite,q:M.q,bridgeStates:M.bridgeStates,producerStates:M.producerStates,workerStates:M.workerStates,replay,rows};
 }
 module.exports={audit};
 if(require.main===module){const B=require('./f038_rex_width_three_physical_bridge.js'),P=require('./f038_rex_width_three_bridge_producer.js'),W=require('./f038_rex_width_three_witness_ir.js'),F=require('./f038_rex_width_three_forest_ir.js'),R=require('./f038_rex_width_three_mask_router.js'),C=require('./f038_rex_width_three_tuple_cursor.js'),V=require('./f038_rex_width_three_projection.js'),K={...require('./f038_rex_width_three_compiler.js'),...require('./f038_rex_width_three_row_compiler.js')},L=require('./f038_rex_width_three_direct_loader.js'),E=require('./f038_tga_normalized_integration.js').engine();console.log('F038_REX_WIDTH_THREE_PHYSICAL_BRIDGE_OK '+JSON.stringify(audit(B,P,W,F,R,C,V,K,L,E,process.argv[2]||'bridge')));}
