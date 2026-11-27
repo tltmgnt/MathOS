@@ -1,0 +1,80 @@
+name: Proctor F038 RE-X compressed bounded and full GAC
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-compressed-stream']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Physical compressed producer, dense equivalence, full GAC and bounds
+        run: |
+          node mathos/research/f038_rex_width_three_compressed_audit.js > /tmp/d5m.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5m.json');a.equal(r.cases,68);a.equal(r.arith,20034);a.equal(r.clockChecks,78);a.equal(r.accepted,78);a.equal(r.refused,58);a.equal(r.streamChecks,68);a.equal(r.producerChecks,5);a.equal(r.producerRefusals,3);a.equal(r.savings,78);a.equal(r.losses,0);a.deepEqual(r.thresholds,['141198368','211601124']);console.log('D5M_COMPRESSED_ORACLE_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5M_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [all-active, ternary-chain, ternary-empty, reverse-chain-cap, radius-three-refusal, ternary-three-rank]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_compressed_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_compressed_replay.js" "$mode" descriptor > /tmp/d5m.desc
+          node "${p}_compressed_replay.js" "$mode" fixtures > /tmp/d5m.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5m-native
+          /tmp/d5m-native /tmp/d5m.desc /tmp/d5m.fixtures > /tmp/d5m-native.out
+          python -m mathos.research.f038_rex_width_three_compressed_native_verify /tmp/d5m.fixtures /tmp/d5m-native.out "$mode"
