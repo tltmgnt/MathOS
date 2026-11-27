@@ -30,11 +30,20 @@ function envelope(V,m,full=false){
  const e=V.envelope(m),k=BigInt(m),S=e.S,C=3n*k**3n,N=S+35n*k+1479n,T=131072n*S*(C+(full?k:1n)+1n),W=(20n*N+12n)*T+6n,total=4n*e.P+32n*e.L+384n*S*S+W;
  if(N>2n*S||total>2097152n*k**3n*e.L*e.L||total>512n*e.L**3n)throw Error("envelope");return {C,N,T,W,total};
 }
+// D6C first-factor certificates restricted to each admitted component.
+// Every component has three coordinates; the trial bound adds across
+// components rather than multiplying their root assignments.
+function rootEnvelope(V,m,full=false,r=3){
+ const e=V.envelope(m),k=BigInt(m),S=e.S,rr=BigInt(Math.max(1,r)),bound=3n+27n*k**rr,C=bound<3n*k**3n?bound:3n*k**3n,N=S+35n*k+1479n,T=131072n*S*(C+(full?k:1n)+1n),W=(20n*N+12n)*T+6n,total=4n*e.P+32n*e.L+384n*S*S+W;
+ if(N>2n*S||total>2097152n*k**rr*e.L*e.L)throw Error("root envelope");
+ if(r<=1&&total**3n>131072n**3n*e.L**7n||r===2&&total**3n>8192n**3n*e.L**8n||r===3&&total>512n*e.L**3n)throw Error("root class");
+ return {C,N,T,W,total};
+}
 function audit(U,E,Barrier,Prev,Prior,Direct,F,V){
  const J=[U.machine(false),U.machine(true)],O=[Prev.machine(false),Prev.machine(true)],ok=(x,s)=>{if(!x)throw Error(s)};
- let cases=0,accepted=0,outside=0,sat=0,unsat=0,trials=0,conflicts=0,arith=0,improved=0,regressed=0,tied=0;const rows=[];
- for(let m=2;m<=10000;m++)for(const full of [false,true]){envelope(V,m,full);arith++;}
- for(const k of [20n,30n,40n,50n,100n,1024n])for(const d of [-1n,0n,1n])for(const full of [false,true]){envelope(V,(1n<<k)+d,full);arith++;}
+ let rootChecks=0,rootClasses=[0,0,0,0],cases=0,accepted=0,outside=0,sat=0,unsat=0,trials=0,conflicts=0,arith=0,improved=0,regressed=0,tied=0;const rows=[];
+ for(let m=2;m<=10000;m++)for(const full of [false,true]){envelope(V,m,full);for(const r of [1,2,3])rootEnvelope(V,m,full,r);arith++;}
+ for(const k of [20n,30n,40n,50n,100n,1024n])for(const d of [-1n,0n,1n])for(const full of [false,true]){envelope(V,(1n<<k)+d,full);for(const r of [1,2,3])rootEnvelope(V,(1n<<k)+d,full,r);arith++;}
  function test(name,m,B,detail=false,compare=true){
   const raw=E.encode(m,Array.from({length:m},(_,i)=>i%2),B),d=admitted(E,raw),exact=Barrier.exact(E,raw),co=exactComponents(E,raw),s=U.stream(E,raw),I=[...Array(19).fill(""),s];
   ok(co.count===exact.count&&co.bits===exact.bits,"component exact "+name);cases++;
@@ -45,11 +54,14 @@ function audit(U,E,Barrier,Prev,Prior,Direct,F,V){
    });
    if(!d){outside++;ok(a.status==="reject"&&a.tapes[0]===""&&ts.length===0&&a.tapes.slice(1,10).every(x=>x===""),"cross guard "+name);continue;}
    accepted++;const e=envelope(V,m,full),o=traceOracle(E,raw,Prior.propagate(E,raw,full));
+   const cert=Direct.certificate(E,raw),rs=partition.map(c=>c.filter(g=>!cert.determined[g]).length),r=Math.max(...rs),re=rootEnvelope(V,m,full,r);
+   for(let c=0;c<3;c++)ok(BigInt(o.per[c])<=1n+9n*BigInt(m)**BigInt(rs[c]),"component root bound");
+   ok(BigInt(ts.length)<=re.C&&BigInt(a.steps)<=re.T,"max-root bound");rootChecks++;rootClasses[r]++;
    ok(JSON.stringify(ts)===JSON.stringify(o.trials)&&JSON.stringify(cs)===JSON.stringify(o.conflicts),"trace "+name);
    ok((a.status==="halt")===(exact.status==="SAT")&&a.tapes[0]===(exact.bits||"")&&a.tapes[19]===s&&BigInt(a.steps)<=e.T&&BigInt(ts.length)<=e.C,"exact "+name);trials+=ts.length;conflicts+=cs.length;
    let old=null,oldTrials=0,clock=null,prior=null;if(compare){old=Prev.executeIR(O[i],I,pc=>{if(pc===O[i].candidateEntry)oldTrials++;});ok(old.status===a.status&&old.tapes[0]===a.tapes[0],"prior");}
-   if(a.status==="halt"){sat++;ok(E.valid(raw,a.tapes[0]),"witness");const b=F.count(J[i],I);ok(BigInt(b.N)<=e.N&&BigInt(b.clock)<=e.W&&b.steps===a.steps,"clock");clock=b.clock;if(old){prior=F.count(O[i],I).clock;if(clock<prior)improved++;else if(clock===prior)tied++;else regressed++;}}else unsat++;
-   if(detail&&i===0)rows.push({name,m,count:co.count,components:co.sizes,trials:ts.length,per:o.per,oldTrials:compare?oldTrials:null,steps:a.steps,oldSteps:old?.steps??null,clock,prior});
+   if(a.status==="halt"){sat++;ok(E.valid(raw,a.tapes[0]),"witness");const b=F.count(J[i],I);ok(BigInt(b.N)<=e.N&&BigInt(b.clock)<=e.W&&b.steps===a.steps,"clock");ok(BigInt(b.clock)<=re.W&&BigInt(b.N)<=re.N,"max-root clock");clock=b.clock;if(old){prior=F.count(O[i],I).clock;if(clock<prior)improved++;else if(clock===prior)tied++;else regressed++;}}else unsat++;
+   if(detail&&i===0)rows.push({name,m,count:co.count,components:co.sizes,roots:rs,trials:ts.length,per:o.per,oldTrials:compare?oldTrials:null,steps:a.steps,oldSteps:old?.steps??null,clock,prior});
   }
  }
  test("empty",2,[],true);test("empty-domain",2,[[-1],[-2]],true);
@@ -58,7 +70,7 @@ function audit(U,E,Barrier,Prev,Prior,Direct,F,V){
  for(const k of [2,3])for(const h of E.subsets(Array.from({length:9},(_,i)=>i),k))if(h.some(g=>g%3!==h[0]%3))test("cross-"+h.join("-"),2,[h.map(g=>-(2*g+1))],false,false);
  let seed=0xD6D0;function rand(n){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return (seed>>>8)%n;}
  for(let i=0;i<60;i++){const m=2+i%3,B=[];for(let j=0;j<20;j++){const c=partition[rand(3)],k=1+rand(3),gs=[];while(gs.length<k){const g=c[rand(3)];if(!gs.includes(g))gs.push(g);}B.push(gs.sort((a,b)=>a-b).map(g=>-(g*m+rand(m)+1)));}test("random-"+i,m,B);}
- return {cases,accepted,outside,sat,unsat,trials,conflicts,arith,improved,regressed,tied,rows};
+ return {rootChecks,rootClasses,cases,accepted,outside,sat,unsat,trials,conflicts,arith,improved,regressed,tied,rows};
 }
-module.exports={partition,admitted,exactComponents,traceOracle,envelope,audit};
+module.exports={partition,admitted,exactComponents,traceOracle,envelope,rootEnvelope,audit};
 if(require.main===module){const p='./f038_rex_width_three_';console.log(JSON.stringify(audit(require(p+'component_ir.js'),require('./f038_tga_normalized_integration.js').engine(),require(p+'completeness_barrier.js'),require(p+'direct_extension_ir.js'),require(p+'prefix_order_audit.js'),require(p+'direct_extension_audit.js'),require(p+'fast_clock.js'),require(p+'singleton_envelope.js'))));}
