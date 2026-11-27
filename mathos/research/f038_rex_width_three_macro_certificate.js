@@ -55,7 +55,7 @@ function certify(M,owners,macros){
  return{q,taggedStates,untagged,taggedEntries,internalEdges,cyclic,potentialChecks,maxA,maxC,maxima,worst:worst.sort((a,b)=>b.A-a.A||b.C-a.C).slice(0,3)};
 }
 function audit(source){
- const old={exports:{}};new Function("module",source)(old);
+ const old={exports:{}};new Function("module","require",source)(old,()=>{throw Error("dependency")});
  const I=instrument(source),a=old.exports.compile(),b=I.compile();
  if(a.desc!==b.desc)throw Error("instrumentation changed descriptor");
  return certify(I.decode(b.desc),b.macroOwner,b.macros);
