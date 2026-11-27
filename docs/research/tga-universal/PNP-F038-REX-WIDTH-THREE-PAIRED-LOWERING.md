@@ -47,3 +47,6 @@ Original and quotient agree on exact halt, head, span and witness; one-short quo
 
 ## Next D6P
 Explore direct physical scanner implementation for paired codebook, preserving valid layout and exact macro semantics. Optimize actual quotient rather than source IR. No promotion.
+
+## Follow-up boundary checks
+Zero-primitive halt and reject have exact clocks and bounds 6 and 7. The reject-inclusive total upper bound now includes its additional terminal rewrite step. Three additional bounded original physical runs match exact reference and worker accounting: empty SAT t422005138 head45644 span46433 worker389356786; empty-domain UNSAT t71528860 head38219 span46117 worker39345277; cross SAT t518547020 head45812 span46603 worker485702046. These three new ledger pins await dedicated quotient and cutoff CI verification.

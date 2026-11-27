@@ -3,9 +3,9 @@ const U=require('./f038_rex_width_three_lazy_interval_ir.js'),P=require('./f038_
 const mode=process.argv[2]||'bounded',full=mode==='full',fixture=process.argv[3]||'cross-sat',ok=(v,s)=>{if(!v)throw Error(s)};
 ok(full||mode==='bounded','mode');
 const cases=[
- {name:'empty',m:2,B:[]},
- {name:'empty-domain',m:2,B:[[-1],[-2]]},
- {name:'cross-sat',m:2,B:[[-1,-3]]},
+ {name:'empty',m:2,B:[],...(!full?{t:422005138,head:45644,span:46433}:{})},
+ {name:'empty-domain',m:2,B:[[-1],[-2]],...(!full?{t:71528860,head:38219,span:46117}:{})},
+ {name:'cross-sat',m:2,B:[[-1,-3]],...(!full?{t:518547020,head:45812,span:46603}:{})},
  {name:'two-prefix-unsat',m:2,B:Direct.family(E,2,2,true)},
  {name:'two-prefix-sat',m:2,B:Direct.family(E,2,2,false)},
  {name:'one-prefix-sat',m:2,B:Direct.family(E,2,1,false),...(!full?{t:1710183122,head:47122,span:47937}:{})},

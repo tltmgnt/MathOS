@@ -42,7 +42,7 @@ function count(J,inputs,codes,limit=100000000){
   steps++;clock+=cost;peakStep=Math.max(peakStep,cost);
   ok(cost<=2*left*old+2*stay,"per-primitive bound");
  }
- const upper=(2*left*N+2*stay)*steps+stay;
+ const upper=(2*left*N+2*stay)*steps+stay+(status==='reject'?1:0);
  ok(Number.isSafeInteger(clock)&&Number.isSafeInteger(upper)&&clock<=upper&&N===N0+growth,"total bound");
  const encoded=[status==="reject"?"~":"G",...T.flatMap((t,k)=>[...t.map((x,j)=>(h[k]===j?"h":"u")+x),k===T.length-1?"E":"D"])].map(x=>codes[x]).join("");
  ok(encoded.length===w*N,"terminal encoding");

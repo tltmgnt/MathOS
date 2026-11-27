@@ -36,6 +36,8 @@ function audit(K,F){
    ok(a.t===c.clock&&a.q===1&&a.h===0&&Array.from(a.tape.slice(32,32+c.encoded.length)).join("")===c.encoded,"exact clock");clockChecks++;
   }
  }
+ // Zero-primitive terminals must include the extra reject rewrite step.
+ for(const op of ["halt","reject"]){const J={alphabet,tapes:1,entry:0,ins:[{op,t:0,next:0}]},M=K.compile(J),c=F.count(J,[""],M.codes),v=run(M,encode([["L","_"]],[0],M.codes));ok(c.clock===c.upper&&c.clock===v.t&&v.q===(op==="halt"?1:0),"zero primitive terminal");}
  return {cases,reads,writes,lefts,rights,growth,rejects,clockChecks};
 }
 module.exports={audit};
