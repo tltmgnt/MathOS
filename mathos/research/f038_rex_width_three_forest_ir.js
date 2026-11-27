@@ -24,7 +24,7 @@ function machine(router,cursor,projection){
  const mergeEntry=off+J2.entry;
  // Intercept only the router's original successful exit to scratch cleanup.
  const hook=label();
- for(let i=0;i<J.ins.length;i++){let a=ins[i];const dest=d=>d===J.cleanupEntry?hook:d===halt?localDone:d;
+ for(let i=0;i<J.ins.length;i++){let a=ins[i];const dest=d=>i===J.ins[J.slotLoop].next&&d===J.cleanupEntry?hook:d===halt?localDone:d;
   if(a.op==="read")a.next=a.next.map(dest);
   else if(a.op==="write"||a.op==="move")a.next.d=dest(a.next.d);
   else if(a.op==="jump")a.next=dest(a.next);
