@@ -22,7 +22,9 @@ jobs:
       - name: Online packing and batched workspace relocation audit
         run: |
           node mathos/research/f038_rex_width_three_joint_audit.js > /tmp/d5q.json
-          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5q.json');a.equal(r.patterns,8190);a.equal(r.arithmetic,40068);a.equal(r.cases,7);a.equal(r.batchGain,7);a.equal(r.packedGain+r.packedLoss+r.packedEqual,7);a(r.malformed>=3);a.deepEqual(r.thresholds,['144230844','216149838','144424950','216440997']);console.log('D5Q_COMPACT_ORACLE_OK')"
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5q.json');a.equal(r.patterns,8190);a.equal(r.arithmetic,40068);a.equal(r.cases,7);a.equal(r.batchGain,7);a.equal(r.packedGain,6);a.equal(r.packedLoss,1);a.equal(r.packedEqual,0);a.equal(r.malformed,5);a.deepEqual(r.thresholds,['144230844','216149838','144424950','216440997']);console.log('D5Q_COMPACT_ORACLE_OK')"
+          node mathos/research/f038_rex_width_three_joint_carry_audit.js > /tmp/d5q-carry.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5q-carry.json');a.equal(r.entries,120);a.equal(r.cases,10080);a.equal(r.maxSteps,240);console.log('D5Q_COMPILED_CARRY_OK')"
       - name: Inherited governance gates
         run: |
           python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
