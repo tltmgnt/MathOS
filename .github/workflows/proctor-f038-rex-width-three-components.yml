@@ -1,0 +1,80 @@
+name: Proctor F038 RE-X independent component search
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-components']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent graph decomposition, partition admission, traces and conditional resources
+        run: |
+          node mathos/research/f038_rex_width_three_component_audit.js > /tmp/d6d.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6d.json');a.equal(r.cases,434);a.equal(r.accepted,652);a.equal(r.outside,216);a.equal(r.sat,606);a.equal(r.unsat,46);a.equal(r.trials,2736);a.equal(r.conflicts,902);a.equal(r.improved,10);a.equal(r.regressed,594);a.equal(r.tied,0);a.equal(r.arith,20034);a.equal(r.rootChecks,652);a.deepEqual(r.rootClasses,[0,24,26,602]);console.log('D6D_COMPONENT_SEARCH_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6D_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, empty-domain, triple-2-sat, triple-2-unsat, triple-3-sat, cross-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_component_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_component_replay.js" "$mode" descriptor > /tmp/d6d.desc
+          node "${p}_component_replay.js" "$mode" fixtures > /tmp/d6d.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6d-native
+          /tmp/d6d-native /tmp/d6d.desc /tmp/d6d.fixtures > /tmp/d6d-native.out
+          python -m mathos.research.f038_rex_width_three_component_native_verify /tmp/d6d.fixtures /tmp/d6d-native.out "$mode"
