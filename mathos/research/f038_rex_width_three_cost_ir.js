@@ -1,4 +1,4 @@
-// D5O: reduced-cost reversible run decoding, direct inactive delimiter consumption.
+// D5O: finite-control run decoding, read-only mask stream, direct inactive delimiter consumption.
 function machine(full=false){
  const alphabet=["L","0","_","1","x"],ins=[];
  const add=(op,t,next)=>{let n=ins.length;ins.push({op,t,next});return n;},label=()=>add("jump",0,-1),bind=(n,d)=>{if(ins[n].op!=="jump"||ins[n].next!==-1)throw Error("label");ins[n].next=d;};
@@ -36,19 +36,17 @@ function machine(full=false){
  // are restored before entering this routine, including an interrupted run.
  function skipMask(d){return loop(n=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,n):reject)):x==="1"?mv(Q,1,rd(Q,y=>y==="0"?mv(Q,1,d):y==="1"?mv(Q,1,n):reject)):reject));}
  const suffix=skipMask(dispatch);
- // Run progress: 11 -> x1 -> x0 -> 1x -> 11. The last
- // phase restores only the second cell and advances directly.
- function maskToken(zero,one,early=false){
-  const finish=wr(Q,"1",mv(Q,1,zero));
-  const restoreFirst=mv(Q,-1,wr(Q,"1",mv(Q,1,mv(Q,1,zero))));
-  const restoreBoth=wr(Q,"1",restoreFirst);
-  const phase=y=>early?(y==="1"?restoreFirst:y==="0"?restoreBoth:reject):y==="1"?wr(Q,"0",mv(Q,-1,zero)):y==="0"?wr(Q,"x",mv(Q,-1,wr(Q,"1",zero))):reject;
-  const first=early?mv(Q,1,zero):mv(Q,-1,wr(Q,"x",zero));
-  return rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>y==="0"?mv(Q,1,zero):y==="1"?mv(Q,1,one):reject)):x==="1"?mv(Q,1,rd(Q,y=>y==="1"?first:y==="x"?finish:reject)):x==="x"?mv(Q,1,rd(Q,phase)):reject);
+ // Run tokens advance Q immediately. Three virtual zero rows are
+ // represented in finite control, with no tape mutation or decompression.
+ function candidateRow(d,any,all){bind(d,rd(R[0],x=>x==="0"?any:x==="1"?rd(R[1],y=>y==="0"?any:y==="1"?rd(R[2],z=>z==="0"?any:z==="1"?all:reject):reject):reject));}
+ let runAdvance=advance2;
+ for(let k=3;k>=1;k--){
+  const virtual=label();
+  candidateRow(virtual,runAdvance,suffix);
+  runAdvance=next(R[2],next(R[1],next(R[0],reject,virtual),virtual),virtual);
  }
- const token=forbidden=>forbidden?maskToken(suffix,retry,true):maskToken(advance2,advance2);
- const any=token(false),all=token(true);
- bind(row,rd(R[0],x=>x==="0"?any:x==="1"?rd(R[1],y=>y==="0"?any:y==="1"?rd(R[2],z=>z==="0"?any:z==="1"?all:reject):reject):reject));
+ const token=selected=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>y==="0"?mv(Q,1,selected?suffix:advance2):y==="1"?mv(Q,1,selected?retry:advance2):reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,selected?suffix:runAdvance),reject)):reject);
+ candidateRow(row,token(false),token(true));
  const beginRows=start(R[0],start(R[1],start(R[2],row)));
  const load3=label(),load2=label(),load1=label(),kind=label();
  // Fixed-width binary scope IDs consume exactly four tape cells.
@@ -79,10 +77,17 @@ function machine(full=false){
  let prepared=rewinds;for(let i=2;i>=0;i--)prepared=clear(V[i],zeros(R[i],V[i],prepared));
  function adv(i,carry){return mv(R[i],1,mv(V[i],1,rd(R[i],x=>x==="_"?start(R[i],start(V[i],carry)):bit(x)?pRow:reject)));}
  bind(pNext,adv(2,pCarry1));bind(pCarry1,adv(1,pCarry0));bind(pCarry0,adv(0,pEnd));
- const supported=wr(V[0],"1",wr(V[1],"1",wr(V[2],"1",pNext)));
- const tokenP=allowed=>maskToken(allowed?supported:pNext,pNext);
- const pt0=tokenP(false),pt1=tokenP(true);
- bind(pRow,rd(R[0],x=>x==="0"?pt0:x==="1"?rd(R[1],y=>y==="0"?pt0:y==="1"?rd(R[2],z=>z==="0"?pt0:z==="1"?pt1:reject):reject):reject));
+ function support(d){return wr(V[0],"1",wr(V[1],"1",wr(V[2],"1",d)));}
+ function propRow(d,pt0,pt1){bind(d,rd(R[0],x=>x==="0"?pt0:x==="1"?rd(R[1],y=>y==="0"?pt0:y==="1"?rd(R[2],z=>z==="0"?pt0:z==="1"?pt1:reject):reject):reject));}
+ function virtualAdv(i,carry,d){return mv(R[i],1,mv(V[i],1,rd(R[i],x=>x==="_"?start(R[i],start(V[i],carry)):bit(x)?d:reject)));}
+ let runNext=pNext;
+ for(let k=3;k>=1;k--){
+  const virtual=label();
+  propRow(virtual,runNext,support(runNext));
+  runNext=virtualAdv(2,virtualAdv(1,virtualAdv(0,reject,virtual),virtual),virtual);
+ }
+ const tokenP=allowed=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,allowed&&y==="0"?support(pNext):pNext):reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,allowed?support(runNext):runNext),reject)):reject);
+ propRow(pRow,tokenP(false),tokenP(true));
  function back(t,k,d){while(k--)d=mv(t,-1,d);return d;}
  // At record end, the third scratch length distinguishes pair and triple.
  const pairBack=back(D,9,writeFirst),tripleBack=back(D,13,writeFirst);
