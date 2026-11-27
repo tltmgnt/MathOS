@@ -181,7 +181,7 @@ function compile(trace=false){
  add("BROKEN",a=>z("HALT",0)); // unreachable on well-formed internal layouts; audited by canonical halt.
  add("begin",a=>l("setupGap",a));add("setupGap",a=>a===2?l("setup"+(G+W-1),2):bad());
  for(let i=G+W-1;i>=0;i--)add("setup"+i,a=>a===2?(i?l("setup"+(i-1),0):r("setupReturn",0)):bad());
- back("setupReturn","initMarkerStart");
+ back("setupReturn","h0");
  add("initMarkerStart",a=>a===2?l("initMarkerWork",a):bad());
  add("initMarkerWork",a=>a===2?l("initMarkerPrefix",a):l("initMarkerWork",a));
  add("initMarkerPrefix",a=>a===2?l("initMarkerSkip10",a):bad());
@@ -192,7 +192,7 @@ function compile(trace=false){
  }
  for(let j=1;j<=130;j++)add("initMarkerReturn"+j,a=>a===2?r(j===1?"initMarkerBackPrefix":"initMarkerReturn"+(j-1),a):r("initMarkerReturn"+j,a));
  add("initMarkerBackPrefix",a=>a===2?r("initMarkerBackWork",a):r("initMarkerBackPrefix",a));
- back("initMarkerBackWork","h0");
+ back("initMarkerBackWork","class1");
  // n=19m-7: increment M on count 12,31,50,...; M=m until header end.
  for(let h=0;h<50;h++){
   const next=h===49?31:h+1,hit=next===12||next===31;
@@ -201,7 +201,7 @@ function compile(trace=false){
   add("h"+h,a=>a===2?r("hRaw"+h,a):bad());
   add("hRaw"+h,a=>a===1?z("hShift"+h,2):a===0&&h===31?z("headerEnd",2):l("clean0",a));
  }
- shift("headerEnd","makeM");minus("makeM",0,0,"makeY");minus("makeY",0,1,"class1");
+ shift("headerEnd","makeM");minus("makeM",0,0,"makeY");minus("makeY",0,1,"initMarkerStart");
  // Coordinate order: X0..X8 (m), Y0..Y8 (m-1), P (m), G1,G2 (1).
  function nextCoord(name,i,normal,overflow){
   const rank=2+i,groupEnd=name+"End",limitM=name+"M",limitY=name+"Y",incRank=name+"Rank";
