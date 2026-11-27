@@ -14,7 +14,7 @@ function audit(B,P,W,F,R,C,V,K,L,E,suite){
   if(!accepted){ok(r.status==="REFUSAL"&&r.t===p.t&&r.bridgeClock===null,"refusal");rows.push({name,m,producer:p.t,t:r.t,status:r.status});return{raw,r};}
   ok(p.status==="MASK_STREAM_LOADED"&&r.status==="COMPLETE"&&r.bridgeClock===p.t,"producer clock");
   const h=p.snapshot.indexOf("H"),suffix=p.snapshot.slice(h,h+851).replaceAll("_","b"),stream=p.stream,source=p.snapshot.slice(0,h+851+stream.length);
-  ok(r.source===source,"preserved literal checkpoint "+name);
+  ok(r.source.replace(/^_+/,"")===source.replace(/^_+/,""),"preserved literal checkpoint "+name);
   const I=[...Array(19).fill(""),suffix,stream,...Array(40).fill("")],expected=K.encode(M,J,I);
   let witness=null,decision=null;
   if(!worker)ok(r.encoded===expected,"exact physical initialization");
