@@ -1,0 +1,47 @@
+name: Proctor F038 RE-X bounded candidate repair
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-bounded-repair']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Candidate oracle and actual producer stream
+        run: |
+          node mathos/research/f038_rex_width_three_repair_audit.js > /tmp/d5i.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5i.json');a.equal(r.checked,50);a.equal(r.repaired,45);a.equal(r.accepted,48);a.equal(r.refused,2);a.equal(r.malformed,3);console.log('D5I_REPAIR_ORACLE_OK')"
+      - name: Physical replay and quotient cutoff
+        run: node mathos/research/f038_rex_width_three_repair_replay.js all
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          node "${p}_repair_replay.js" descriptor > /tmp/d5i.desc
+          node "${p}_repair_replay.js" fixtures > /tmp/d5i.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5i-native
+          /tmp/d5i-native /tmp/d5i.desc /tmp/d5i.fixtures > /tmp/d5i-native.out
+          python -m mathos.research.f038_rex_width_three_repair_native_verify /tmp/d5i.fixtures /tmp/d5i-native.out
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5I_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
