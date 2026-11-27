@@ -34,7 +34,7 @@ function machine(router,cursor,projection){
  const saveTable=start(W,readN(W,4,v=>v<9?seek(T,9*v,start(B,copyN(B,T,9,J.cleanupEntry))):reject));
  bind(hook,start(W,copyN(W,H,20,start(W,start(V,copyN(W,V,4,saveTable))))));
  // Local loop: write O to its owner-indexed retained relation.
- const edgesStart=start(H,start(decision,word(decision,"1",edge)));
+ const edgesStart=clear(W,clear(B,clear(S,start(H,start(decision,word(decision,"1",edge))))));
  let nextBag=J.entry;for(let t of [...Array(19).keys(),V].reverse())nextBag=clear(t,nextBag);
  function ordinal(n){return rd(K,x=>x==="_"&&n<9?nextBag:x==="_"&&n===9?edgesStart:x==="1"&&n<9?mv(K,1,ordinal(n+1)):reject);}
  const increment=start(K,loop(n=>rd(K,x=>x==="_"?app(K,"1",start(K,ordinal(0))):x==="1"?mv(K,1,n):reject)));
