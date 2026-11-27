@@ -10,7 +10,7 @@ function compile(J,paired=true){
   const I=ins[i],n="i"+i;if(I.op==="jump")continue;
   if(I.op==="halt"||I.op==="reject"){add(n,a=>a==="G"?z(I.op==="halt"?"SUCCESS":"HALT",I.op==="halt"?a:blank):bad());continue;}
   add(n,a=>a==="G"?r(n+"s"+I.t,a):bad());
-  for(let t=I.t;t>=0;t--)add(n+"s"+t,a=>a==="D"&&t>0?r(n+"s"+(t-1),a):a.startsWith("h")&&t===0?z(n+"act",a):a==="E"||a===blank?bad():r(n+"s"+t,a));
+  for(let t=I.t;t>=0;t--)add(n+"s"+t,a=>a==="D"&&t>0?r(n+"s"+(t-1),a):a.startsWith("h")&&t===0?logical.get(n+"act")(a):a==="E"||a===blank?bad():r(n+"s"+t,a));
   function ret(d){const s="ret"+resolve(d);if(!logical.has(s))add(s,a=>a==="G"?z(dest(d),a):a===blank?bad():l(s,a));return s;}
   if(I.op==="read")add(n+"act",a=>a.startsWith("h")?l(ret(I.next[alphabet.indexOf(a.slice(1))]),a):bad());
   else if(I.op==="write")add(n+"act",a=>a.startsWith("h")&&a!=="hL"&&I.next.v!=="L"?l(ret(I.next.d),"h"+I.next.v):bad());
