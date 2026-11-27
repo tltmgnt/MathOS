@@ -1,0 +1,58 @@
+name: Proctor F038 RE-X width-three cubic bound
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-cubic-bound']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Explicit envelope and threshold arithmetic
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_cubic_bound_audit.js
+          node "$p" arithmetic > /tmp/w3-cubic-arithmetic.json
+          for case in empty edge-SAT edge-UNSAT m3-forced; do
+            node "$p" "$case" > "/tmp/w3-cubic-$case.json"
+          done
+          node mathos/research/f038_rex_width_three_domain_four.js direct > /tmp/w3-cubic-four.json
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),U=require('./mathos/research/f038_rex_width_three_cubic_bound.js');
+          const read=p=>JSON.parse(fs.readFileSync('/tmp/w3-cubic-'+p+'.json','utf8').split(' ').slice(1).join(' '));
+          const a=read('arithmetic');
+          assert.equal(a.count,10017);assert.equal(a.checks,195);
+          assert.equal(a.threshold.H0,'2785338390');assert.equal(a.threshold.LstrictExponent,'2785338389');
+          const rows=['empty','edge-SAT','edge-UNSAT','m3-forced'].map(read);
+          const f=read('four');
+          const [m4]=U.check([{name:'m4-forced',m:f.m,t:f.direct.t,head:f.direct.head,span:f.direct.span,witness:f.witness,producer:f.direct.producer,bridge:f.direct.bridge,worker:f.workerClock,projection:f.projection}]);
+          rows.push(m4);
+          assert.deepEqual(rows.map(x=>x.t),[825112955,1297519076,665681141,72540199790,299944027294]);
+          assert.deepEqual(rows.map(x=>x.slot),['928446024','928446025',null,'928446031','928446033']);
+          assert.deepEqual(rows.map(x=>x.bounds.total),['4234702112423936','4234702112423936','4234702112423936','154040819887177728','1370325896581349376']);
+          assert.equal(m4.head,568801);assert.equal(m4.span,574997);
+          assert.equal(m4.witness,'000100100100100000010010010010000001001011111111001011111111001101000');
+          console.log('REX-024D5E_CUBIC_BOUND_OK',a.threshold);
+          JS
+      - name: Governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5E_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
