@@ -1,0 +1,55 @@
+name: Proctor F038 RE-X width-three halt witness
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-halt-witness']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_halt_witness
+          node --check "$p.js"
+          for suite in projection empty sat unsat refusal codec; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3halt-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_HALT_WITNESS_OK ',a=fs.readFileSync('/tmp/w3halt-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [p,a,b,c,d,e]=['projection','empty','sat','unsat','refusal','codec'].map(read);
+          assert.equal(p.q,1893);assert.deepEqual(p.rows.map(r=>r.t),[923,1061,1061,10781,22523]);
+          for(const x of [a,b,c,d]){assert.equal(x.q,11349426);assert.equal(x.worker,10767880);assert.equal(x.output,1893);assert.equal(x.bits,964701214);}
+          const rows=[a.rows[0],b.rows[0],c.rows[0]];
+          assert.deepEqual(rows.map(x=>x.t),[825112955,1297519076,665681141]);
+          assert.deepEqual(rows.map(x=>x.head),[57932,58877,57907]);
+          assert.deepEqual(rows.map(x=>x.span),[58961,59907,58907]);
+          assert.deepEqual(rows.map(x=>x.t-x.clocks.outputAt),[29726,30671,17208]);
+          assert.deepEqual(rows.map(x=>x.witness),['1010101010101010101111111110000','0110101010101010101111111110100',null]);
+          assert.equal(rows.reduce((n,x)=>n+x.t,0),2788313172);
+          assert.deepEqual(d.rows.map(x=>x.t),[236,329,3157,27879501]);
+          assert.ok(d.rows.every(x=>x.headSymbol===2&&x.witness===null));
+          assert.deepEqual(e,{suite:'codec',q:11349426,bits:964701214,entries:34048278});
+          JS
+          python -m mathos.research.tga_f038_rex_024d4b > /tmp/w3halt-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3halt-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D4B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
