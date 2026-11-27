@@ -35,9 +35,9 @@ function count(J,inputs,limit=100000000){
    pc=I.next.d;
   }else throw Error("instruction");
   steps++;clock+=cost;peakStep=Math.max(peakStep,cost);
-  ok(cost<=4*left*(old+2),"per-primitive bound");
+  ok(cost<=2*left*old+2*stay,"per-primitive bound");
  }
- const upper=4*left*(N+2)*steps+stay;
+ const upper=(2*left*N+2*stay)*steps+stay;
  ok(Number.isSafeInteger(clock)&&Number.isSafeInteger(upper)&&clock<=upper&&N===N0+growth,"total bound");
  const syms=["G","D","E","~",...J.alphabet.flatMap(x=>["u"+x,"h"+x])],codes=Object.fromEntries(syms.filter(x=>x!=="~").map((x,i)=>[x,i.toString(2).padStart(w,"0")]));
  const encoded=["G",...T.flatMap((t,k)=>[...t.map((x,j)=>(h[k]===j?"h":"u")+x),k===T.length-1?"E":"D"])].map(x=>codes[x]).join("");
