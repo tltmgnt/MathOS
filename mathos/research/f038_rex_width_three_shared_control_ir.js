@@ -1,7 +1,7 @@
 // D6M: shared boundary rewind and canonical token skipping.
 // Demand-driven append-only cache, exact D6L candidate traces.
 // Genuine normalized canonical stream only. No host partition certificate.
-function machine(full=false){
+function uncompressedMachine(full=false){
  const alphabet=["L","0","_","1","x"],ins=[];
  const add=(op,t,next)=>{let n=ins.length;ins.push({op,t,next});return n;},label=()=>add("jump",0,-1),bind=(n,d)=>{if(ins[n].op!=="jump"||ins[n].next!==-1)throw Error("label");ins[n].next=d;};
  const halt=add("halt",0,0),reject=add("reject",0,0),rd=(t,f)=>add("read",t,alphabet.map(f)),wr=(t,v,d)=>add("write",t,{v,d}),mv=(t,dir,d)=>add("move",t,{dir,d}),bit=x=>x==="0"||x==="1",test=(t,p,y,n)=>rd(t,x=>p(x)?y:n),loop=fn=>{let n=label();bind(n,fn(n));return n;};
@@ -337,4 +337,35 @@ function stream(E,raw){
  for(const h of order){const k=h.length;const f=d.F.find(x=>x.h.join()===h.join());fields.push([...E.tup(d.m,k)].map(z=>f&&!f.S.has(z.join())?"1":"0").join(""));}
  return fields.map((s,i)=>{if(i>=11&&!s.includes("1"))return "10";let out="";for(let k=0;k<s.length;){if(i>=11&&s.slice(k,k+4)==="0000"){out+="11";k+=4;}else out+="0"+s[k++];}return out+"10";}).join("");
 }
-module.exports={machine,executeIR,stream};
+
+// Contract unobservable jumps and refine the deterministic instruction
+// graph by opcode, tape, action, trace tag and successor classes.
+// Trace entries are unique observable barriers; no primitive is removed
+// by this pass. Each retained instruction has identical local semantics.
+function compactIR(J){
+ const eventKeys=["candidateEntry","conflictEntry","componentDone","componentEntry","separatorEntry","probeEntry","probeAbort","resumeDirect","cachePrep","cacheEntry","cacheReady"];
+ const tags=new Map();for(const k of eventKeys){const i=J[k];tags.set(i,(tags.get(i)||[]).concat(k));}
+ const resolve=i=>{let n=0;while(J.ins[i].op==="jump"&&!tags.has(i)){i=J.ins[i].next;if(++n>J.ins.length||i<0)throw Error("jump cycle");}return i;};
+ const dest=I=>I.op==="read"?I.next:I.op==="jump"?[I.next]:I.op==="write"||I.op==="move"?[I.next.d]:[];
+ const ids=[],pos=new Map(),visit=i=>{i=resolve(i);if(!pos.has(i)){pos.set(i,ids.length);ids.push(i);}return pos.get(i);};
+ visit(J.entry);for(const k of eventKeys)visit(J[k]);
+ for(let i=0;i<ids.length;i++)for(const d of dest(J.ins[ids[i]]))visit(d);
+ const rows=ids.map(i=>{const I=J.ins[i];return {base:JSON.stringify([I.op,I.t,I.op==="write"?I.next.v:I.op==="move"?I.next.dir:null,tags.get(i)||[]]),dest:dest(I).map(d=>pos.get(resolve(d)))};});
+ function partition(prev){const map=new Map();const cls=rows.map((r,i)=>{const key=r.base+"|"+(prev?r.dest.map(d=>prev.cls[d]).join(","):"");if(!map.has(key))map.set(key,map.size);return map.get(key);});return {cls,n:map.size};}
+ let old=partition(null),rounds=0;
+ for(;;){const now=partition(old);rounds++;if(now.n===old.n){old=now;break;}if(now.n<old.n||rounds>rows.length)throw Error("refinement");old=now;}
+ const map=i=>old.cls[pos.get(resolve(i))],ins=new Array(old.n);
+ for(const i of ids){const j=map(i),I=J.ins[i];if(ins[j])continue;let next=I.next;
+  if(I.op==="read")next=next.map(map);else if(I.op==="jump")next=map(next);else if(I.op==="write"||I.op==="move")next={...next,d:map(next.d)};
+  ins[j]={...I,next};
+ }
+ // Verify every original reachable/observable instruction against its
+ // representative, including the exact order of all five read branches.
+ for(const i of ids){const I=J.ins[i],K=ins[map(i)],a=dest(I).map(map),b=dest(K);if(I.op!==K.op||I.t!==K.t||JSON.stringify(a)!==JSON.stringify(b)||I.op==="write"&&I.next.v!==K.next.v||I.op==="move"&&I.next.dir!==K.next.dir)throw Error("quotient simulation");}
+ const out={...J,ins,entry:map(J.entry),compaction:{original:J.ins.length,retained:ids.length,compact:ins.length,rounds,checks:ids.length}};
+ for(const k of eventKeys)out[k]=map(J[k]);
+ return out;
+}
+
+function machine(full=false){return compactIR(uncompressedMachine(full));}
+module.exports={machine,uncompressedMachine,compactIR,executeIR,stream};
