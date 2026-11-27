@@ -1,0 +1,55 @@
+name: Proctor F038 RE-X width-three physical bridge
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-physical-bridge']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_physical_bridge
+          node --check "$p.js"
+          for suite in bridge empty sat unsat; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3bridge-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_PHYSICAL_BRIDGE_OK ',a=fs.readFileSync('/tmp/w3bridge-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,c,d]=['bridge','empty','sat','unsat'].map(read);
+          assert.equal(a.q,579652);assert.equal(a.bridgeStates,1768);assert.equal(a.producerStates,577884);
+          assert.deepEqual(a.rows.map(x=>x.t),[152921385,153098693,27879500]);
+          assert.deepEqual(a.cutoffs,[0,1,100,104551137,104551138,152921384]);
+          for(const x of [b,c,d]){assert.equal(x.q,11347529);assert.equal(x.bridgeStates,1768);assert.equal(x.producerStates,577884);assert.equal(x.workerStates,10767877);assert.equal(x.replay,true);}
+          const rows=[b.rows[0],c.rows[0],d.rows[0]];
+          assert.deepEqual(rows.map(x=>x.t),[825083229,1297488405,665663933]);
+          assert.deepEqual(rows.map(x=>x.worker),[672161844,1144561610,512737138]);
+          assert.deepEqual(rows.map(x=>x.bridge),[48370247,48370247,48370247]);
+          assert.deepEqual(rows.map(x=>x.span),[58929,59875,58905]);
+          assert.deepEqual(rows.map(x=>x.witness),['1010101010101010101111111110000','0110101010101010101111111110100',null]);
+          assert.deepEqual(rows.map(x=>x.decision),['1','1','0']);
+          assert.equal(rows.reduce((n,x)=>n+x.t,0),2788235567);
+          JS
+          python -m mathos.research.tga_f038_rex_024d4a > /tmp/w3bridge-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3bridge-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D4A_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
