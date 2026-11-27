@@ -1,0 +1,49 @@
+name: Proctor F038 RE-X width-three macro certificate
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-macro-certificate']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Static producer macro certificate
+        run: |
+          set -euo pipefail
+          node --max-old-space-size=6144 mathos/research/f038_rex_width_three_macro_certificate.js | tee /tmp/w3-macro.json
+          python - <<'PY'
+          import json
+          tag, data=open('/tmp/w3-macro.json').read().split(' ',1)
+          assert tag=='F038_REX_MACRO_CERTIFICATE_OK'
+          r=json.loads(data)
+          assert (r['q'],r['taggedStates'],r['untagged'])==(577884,439429,138455)
+          assert (r['taggedEntries'],r['internalEdges'],r['cyclic'],r['potentialChecks'])==(1318287,1296436,294400,2034648)
+          assert (r['maxA'],r['maxC'])==(12,503)
+          assert sum(v['groups'] for v in r['maxima'].values())==2354
+          assert r['scanner']=={'nodes':2094,'cuts':240,'startup':24,'between':31,'checkedNodes':1851}
+          assert r['controls']=={'accepted':1,'rejected':2}
+          print('REX-024D5F_STATIC_MACRO_OK')
+          PY
+      - name: Governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5f > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5F_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
