@@ -26,7 +26,7 @@ function certify(M,owners,macros){
    if(low[i]===idx[i]){let p=[],j;do{j=stack.pop();part[j]=parts.length;p.push(j);}while(j!==i);parts.push(p);}
   }
   for(let i=0;i<n;i++)if(idx[i]<0)visit(i);
-  const aBound=[],cBound=[];
+  const aBound=[],cBound=[],signs=[],localPhi=new Int32Array(n),runs=[];
   for(let p=0;p<parts.length;p++){
    const vs=parts[p],loop=vs.length>1||edges[vs[0]].some(([j])=>j===vs[0]);let a=0,c=1;
    if(loop){
@@ -41,13 +41,26 @@ function certify(M,owners,macros){
     }
     ok(proof,"non-drifting SCC "+JSON.stringify(macros[k])+" size="+vs.length);
     let lo=Infinity,hi=-Infinity;for(let i of vs){lo=Math.min(lo,proof.phi[i]);hi=Math.max(hi,proof.phi[i]);for(let [j,d] of edges[i])if(part[j]===p){ok(1<=4*proof.sign*d+proof.phi[j]-proof.phi[i],"potential");potentialChecks++;}}
-    a=4;c+=hi-lo;
+    a=4;c+=hi-lo;signs[p]=proof.sign;for(let i of vs)localPhi[i]=proof.phi[i];
    }
-   let aa=0,cc=0;
-   for(let i of vs)for(let [j] of edges[i])if(part[j]!==p){ok(part[j]<p,"SCC ordering");aa=Math.max(aa,aBound[part[j]]);cc=Math.max(cc,cBound[part[j]]);}
-   aBound[p]=a+aa;cBound[p]=c+cc;
+   if(!loop){const i=vs[0],d=edges[i].find(([j,d])=>d!==0);signs[p]=d?Math.sign(d[1]):edges[i].length?signs[part[edges[i][0][0]]]:1;}
+   let aa=0,cc=0,rr=1;
+   for(let i of vs)for(let [j] of edges[i])if(part[j]!==p){ok(part[j]<p,"SCC ordering");aa=Math.max(aa,aBound[part[j]]);cc=Math.max(cc,cBound[part[j]]);rr=Math.max(rr,runs[part[j]]+ +(signs[p]!==signs[part[j]]));}
+   aBound[p]=a+aa;cBound[p]=c+cc;runs[p]=rr;
   }
-  const A=Math.max(...aBound),C=Math.max(...cBound),kind=macros[k].kind;
+  // Lift local potentials to all same-sign edges using condensation order.
+  const offset=new Int32Array(parts.length);
+  for(let p=parts.length-1;p>=0;p--)for(let i of parts[p])for(let [j,d] of edges[i]){
+   let z=part[j];if(z!==p&&signs[p]===signs[z])offset[z]=Math.max(offset[z],offset[p]+localPhi[i]+1-4*signs[p]*d-localPhi[j]);
+  }
+  let lo=[Infinity,Infinity],hi=[-Infinity,-Infinity];
+  for(let i=0;i<n;i++){let p=part[i],f=offset[p]+localPhi[i],k=+(signs[p]>0);lo[k]=Math.min(lo[k],f);hi[k]=Math.max(hi[k],f);
+   for(let [j,d] of edges[i])if(signs[p]===signs[part[j]]){ok(1<=4*signs[p]*d+offset[part[j]]+localPhi[j]-f,"lifted potential");potentialChecks++;}
+  }
+  const rmax=Math.max(...runs),range=Math.max(0,...lo.map((v,k)=>hi[k]-v));
+  // Split at sign changes. Internal runs telescope; charge crossing
+  // transitions and the final transition out of the macro separately.
+  const A=Math.min(Math.max(...aBound),4*rmax),C=Math.max(Math.max(...cBound),rmax*(range+1)),kind=macros[k].kind;
   maxA=Math.max(maxA,A);maxC=Math.max(maxC,C);
   let r=maxima[kind]??={groups:0,states:0,A:0,C:0};r.groups++;r.states+=n;r.A=Math.max(r.A,A);r.C=Math.max(r.C,C);
   worst.push({kind,name:macros[k].name,A,C,states:n});
