@@ -46,3 +46,6 @@ Canonical RREF, orthogonal decomposition of linear spaces and connected componen
 - Local consistency as a reduction between constraint satisfaction problems, https://arxiv.org/abs/2301.05084 .
 - SAT Solving Using XOR-OR-AND Normal Forms, https://doi.org/10.1007/s11786-024-00594-x .
 These sources establish related local consistency, projection, and affine-solving research. The strict hierarchy is for the specified affine-hull operator only; the witness family is classical easy 2-SAT. No exhaustive novelty investigation or priority claim.
+
+## Theorem L scope
+The monotonicity and greatest-fixed-point argument is standard finite-lattice reasoning; affine hulls and nullspace bases are standard linear algebra. Compare the variable-order threshold complexity to local-consistency rank/width decision problems and proof-system complexity. The coNP-hardness at full order is a direct consequence of B, not a new general SAT lower bound. The exact unrestricted threshold complexity remains unresolved here. No new external literature search or priority claim in this cycle.
