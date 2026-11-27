@@ -31,7 +31,7 @@ function machine(full=false){
  const exhausted=label(),restart=label(),separatorEntry=label(),graphStart=label(),graphDone=label(),probeDone=label(),actualComponent=label();
  const retry=label(),attempt=label(),dispatch=label(),row=label(),advance0=label(),advance1=label(),advance2=label();
  const probeEntry=label(),probeAbort=label(),conflictDispatch=label(),resumeAdmission=label(),resumeDirect=label();
- const cachePrep=label(),cacheEntry=label(),cacheReady=label(),cacheAppend=label(),cacheSelect=label();
+ const cachePrep=label(),cacheEntry=label(),cacheReady=label(),cacheAppend=label(),cacheSelect=label(),candidateEntry=label();
  // A pair uses a one-symbol third rank word. All other words are nonempty one-hot.
  function next(t,carry,normal){return mv(t,1,rd(t,x=>x==="_"?start(t,carry):bit(x)?normal:reject));}
  const end=rd(CQ,x=>x==="1"?mv(CQ,1,test(CQ,y=>y==="0",mv(CQ,1,dispatch),reject)):reject);
@@ -176,14 +176,16 @@ function machine(full=false){
  const budget=loop(n=>rd(A,x=>x==="1"?mv(A,1,n):x==="0"?wr(A,"1",mv(A,1,rd(A,y=>y==="_"?probeAbort:y==="0"?conflictDispatch:reject))):reject));
  bind(retry,atA(20,rd(A,x=>x==="1"?mv(A,1,budget):x==="0"?conflictDispatch:reject)));
  // A26=1 during cache construction, 0 during cached execution.
- // A25 stays blank (probe-budget terminator). A27..35 is one-hot block ordinal.
+ // A25 stays blank (probe-budget terminator).
  // Every cached block begins with x on both tapes; internal tokens are binary.
- function cacheSeek(t,d){
-  const skip=loop(n=>rd(t,x=>bit(x)?mv(t,1,n):x==="x"?mv(A,1,mv(t,1,rd(A,y=>y==="x"?d:y==="0"?n:reject))):reject));
-  return atA(27,start(t,rd(t,x=>x==="x"?mv(t,1,rd(A,y=>y==="x"?d:y==="0"?skip:reject)):reject)));
- }
- bind(cacheSelect,cacheSeek(CQ,cacheSeek(CD,dispatch)));
- bind(attempt,atA(17,rd(A,x=>x==="1"?cacheSelect:x==="0"?start(CQ,start(CD,dispatch)):reject)));
+ // On retry, the failed field has been consumed at least partly. Move
+ // left once (CD may be at the next boundary), then seek the nearest x.
+ function rewindBlock(t,d){return mv(t,-1,loop(n=>rd(t,x=>x==="x"?mv(t,1,d):bit(x)?mv(t,-1,n):reject)));}
+ function firstBlock(t,d){return start(t,rd(t,x=>x==="x"?mv(t,1,d):reject));}
+ const nextBlock=test(CQ,x=>x==="x",test(CD,x=>x==="x",mv(CQ,1,mv(CD,1,candidateEntry)),reject),reject);
+ bind(cacheSelect,firstBlock(CQ,firstBlock(CD,candidateEntry)));
+ bind(candidateEntry,dispatch);
+ bind(attempt,atA(17,rd(A,x=>x==="1"?rewindBlock(CQ,rewindBlock(CD,candidateEntry)):x==="0"?start(CQ,start(CD,candidateEntry)):reject)));
  let initCandidate=selectComponent;for(const t of G.slice().reverse())initCandidate=first(t,initCandidate);
  // Prefix separator is the first original coordinate: the first feasible
  // surviving separator rank gives the global lexicographic minimum.
@@ -201,14 +203,12 @@ function machine(full=false){
  const resetBranch=atA(18,rd(A,x=>x==="1"?resetResidual:x==="0"?reset(G[1],resetResidual):reject));
  bind(restart,atA(19,rd(A,x=>x==="1"?wr(A,"x",resetBranch):x==="0"?resetBranch:reject)));
  const freshBranch=atA(18,rd(A,x=>x==="1"?atA(7,word(A,"xx0000000",selectComponent)):x==="0"?atA(7,word(A,"x00000000",selectComponent)):reject));
- const resetIndex=d=>atA(27,word(A,"x00000000",d));
- bind(separatorEntry,resetIndex(atA(19,rd(A,x=>x==="x"?componentEntry:x==="0"?wr(A,"1",freshBranch):reject))));
+ bind(separatorEntry,atA(19,rd(A,x=>x==="x"?componentEntry:x==="0"?wr(A,"1",freshBranch):reject)));
  // candidateStart is bound below, after constructing the edge-list producer.
  // Mark one solved component and choose the smallest still-unseen group.
  let mark=selectComponent;
  for(let g=8;g>=0;g--){const d=mark;mark=atA(7+g,rd(A,x=>x==="1"?wr(A,"x",d):x==="0"||x==="x"?d:reject));}
- const advanceIndex=atA(27,loop(n=>rd(A,x=>x==="0"?mv(A,1,n):x==="x"?wr(A,"0",mv(A,1,wr(A,"x",mark))):reject)));
- bind(componentDone,atA(17,rd(A,x=>x==="1"?atA(19,wr(A,"0",atA(26,rd(A,y=>y==="1"?mark:y==="0"?advanceIndex:reject)))):x==="0"?mark:reject)));
+ bind(componentDone,atA(17,rd(A,x=>x==="1"?atA(19,wr(A,"0",mark)):x==="0"?mark:reject)));
  let seed=atA(17,rd(A,x=>x==="1"?atA(26,rd(A,y=>y==="1"?cacheReady:y==="0"?emit:reject)):x==="0"?emit:reject));
  for(let g=8;g>=0;g--){const d=seed;seed=atA(7+g,rd(A,x=>x==="0"?wr(A,"1",closure):x==="x"?d:reject));}
  bind(selectComponent,seed);
@@ -229,7 +229,7 @@ function machine(full=false){
  // first surviving unary rank already solves them, so skip candidate scans.
  const buildLocal=label();let zero=reject,one=componentDone;
  for(let g=8;g>=0;g--){const z=zero,o=one;zero=member(g,o,z);one=member(g,buildLocal,o);}
- const conditionedComponent=atA(19,rd(A,x=>x==="x"?wr(A,"1",attempt):x==="0"||x==="1"?attempt:reject));
+ const conditionedComponent=atA(19,rd(A,x=>x==="x"?wr(A,"1",cacheSelect):x==="1"?cacheSelect:x==="0"?nextBlock:reject));
  bind(actualComponent,atA(17,rd(A,x=>x==="1"?conditionedComponent:x==="0"?zero:reject)));
  // Probe events are not candidate/component trace events.
  bind(componentEntry,actualComponent);
@@ -258,7 +258,7 @@ function machine(full=false){
  function appendBlock(t,d){return start(t,loop(n=>rd(t,x=>x==="_"?app(t,"x",d):domain(x)?mv(t,1,n):reject)));}
  bind(cacheEntry,cacheAppend);
  bind(cacheAppend,appendBlock(CQ,appendBlock(CD,start(Q,localScan))));
- bind(cachePrep,clearCache(CQ,clearCache(CD,atA(26,word(A,"1x00000000",atA(19,wr(A,"1",freshBranch)))))));
+ bind(cachePrep,clearCache(CQ,clearCache(CD,atA(26,wr(A,"1",atA(19,wr(A,"1",freshBranch)))))));
  bind(cacheReady,atA(26,wr(A,"0",atA(19,wr(A,"0",separatorEntry)))));
  // Load unary domains once; pass and candidate scans never alter Q.
  function unary(t,d){const seen=[label(),label()];for(let k=0;k<=1;k++)bind(seen[k],rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?app(t,y==="0"?"1":"0",mv(Q,1,seen[k||+(y==="0")])):reject)):x==="1"&&k===1?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject));return start(t,seen[0]);}
@@ -313,7 +313,7 @@ function machine(full=false){
  for(let g=8;g>=0;g--){allOriginal=member(g,allOriginal,directInit);if(g>0)allResidual=member(g,allResidual,admit);if(g>1)allTwo=member(g,allTwo,admit);}
  bind(probeDone,atA(16,rd(A,x=>x==="1"?allOriginal:x==="x"?atA(18,rd(A,y=>y==="1"?allTwo:y==="0"?allResidual:reject)):reject)));
  const entry=start(D,word(D,scopes.join(""),initEntry));
- return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone,componentEntry,separatorEntry,probeEntry,probeAbort,resumeDirect,cachePrep,cacheEntry,cacheReady};
+ return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry,conflictEntry:retry,componentDone,componentEntry,separatorEntry,probeEntry,probeAbort,resumeDirect,cachePrep,cacheEntry,cacheReady};
 }
 
 function executeIR(J,inputs,trace=null){
