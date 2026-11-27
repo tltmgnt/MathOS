@@ -91,6 +91,7 @@ function audit(F,R,C,P,K,L,E,suite="ir"){
   check("m3-greedy-trap",3,[1,1,0],trap.map(h=>h.map(v=>-(3*v+1))),true);
  }else if(suite==="physicalEmpty")check("empty",2,[0,0],[],true);
  else if(suite==="physicalEdge")check("empty-child-edge",2,[1,0],[[-1],[-2],[-1,-3]],false);
+ else if(suite==="physicalEdgeSAT")check("nonempty-child-edge",2,[0,1],[[-1,-3]],true);
  else if(suite==="physicalParity")check("joint-three-UNSAT",2,[0,1],parity(false),false);
  else if(suite==="physicalSAT")check("four-bag-triples",2,[1,0],B,true);
  else throw Error("suite");
