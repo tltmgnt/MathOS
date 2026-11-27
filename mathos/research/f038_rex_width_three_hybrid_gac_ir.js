@@ -23,7 +23,7 @@ function machine(full=false){
  function consumeRow(zero,one,run){
   const dec=start(C,loop(n=>rd(C,x=>x==="0"?app(C,"1",n):x==="1"?wr(C,"0",mv(C,1,rd(C,y=>y==="_"?mv(C,-1,wr(C,"_",empty(one,zero))):bit(y)?zero:reject))):reject)));
   const gap=rd(Q,x=>x==="0"?parse(dec):x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,-1,zero),reject)):reject);
-  return start(M,rd(M,x=>x==="0"?run:x==="1"?empty(gap,dec):reject));
+  return rd(M,x=>x==="0"?run:x==="1"?empty(gap,dec):reject);
  }
  const fieldEnd=d=>empty(rd(Q,x=>x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject),reject);
  // Generate original witness only after every mask passes.
@@ -49,8 +49,7 @@ function machine(full=false){
  function candidateRow(d,any,all){bind(d,rd(R[0],x=>x==="0"?any:x==="1"?rd(R[1],y=>y==="0"?any:y==="1"?rd(R[2],z=>z==="0"?any:z==="1"?all:reject):reject):reject));}
  let runAdvance=advance2;
  for(let k=3;k>=1;k--){
-  const virtual=label();
-  candidateRow(virtual,runAdvance,runAdvance);
+  const virtual=runAdvance;
   runAdvance=next(R[2],next(R[1],next(R[0],reject,virtual),virtual),virtual);
  }
  const runToken=selected=>rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,selected&&y==="1"?retry:advance2):reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,runAdvance),reject)):reject);
@@ -69,7 +68,7 @@ function machine(full=false){
  }
  function walkD(k,d){while(k--)d=mv(D,1,d);return d;}
  function indexed(d,active,end){
-  const mode=mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,clear(C,start(M,wr(M,y,active)))):reject));
+  const mode=mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,clear(C,wr(M,y,active))):reject));
   return rd(Q,x=>x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,skipScope(d)),reject)):x==="0"?mode:x==="_"?test(D,y=>y==="_",end,reject):reject);
  }
  bind(dispatch,indexed(dispatch,load1,finish));
@@ -144,7 +143,7 @@ function machine(full=false){
  // Load unary domains once; pass and candidate scans never alter Q.
  function unary(t,d){const seen=[label(),label()];for(let k=0;k<=1;k++)bind(seen[k],rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?app(t,y==="0"?"1":"0",mv(Q,1,seen[k||+(y==="0")])):reject)):x==="1"&&k===1?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject));return start(t,seen[0]);}
  let init=start(A,word(A,"00000",pass));for(let t of G.slice().reverse())init=unary(t,init);
- const entry=start(D,word(D,scopes.join(""),start(Q,field(null,start(P,field(P,init))))));
+ const entry=start(M,start(D,word(D,scopes.join(""),start(Q,field(null,start(P,field(P,init)))))));
  return {alphabet,ins,tapes:22,entry,witnessTape:X,streamTape:Q};
 }
 
