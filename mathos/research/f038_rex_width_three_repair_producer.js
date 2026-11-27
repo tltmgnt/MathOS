@@ -483,53 +483,21 @@ function decode(desc){
  for(let i=0;i<T.length;i++){let s=parseInt(desc.slice(p,p+b),2),w=parseInt(desc.slice(p+b,p+b+2),2),d=parseInt(desc.slice(p+b+2,p+b+4),2);p+=b+4;if(s>q||w>2||d>2)throw Error("descriptor field");T[i]=(s<<4)|(w<<2)|d;}
  return{q,T};
 }
-function run(M,raw,limit=Infinity,observe=null,snapshot=false){
+function run(M,raw,limit=Infinity){
  if(!/^[01]*$/.test(raw))throw Error("binary raw required");
- if(limit!==Infinity&&(!Number.isSafeInteger(limit)||limit<0))throw Error("invalid limit");
- const origin=3*raw.length+1024,tape=new Uint8Array(origin+2*raw.length+2048);tape.fill(2);
- for(let i=0;i<raw.length;i++)tape[origin+i]=raw.charCodeAt(i)-48;
- let state=0,head=origin,t=0,lo=head,hi=head,plannerAt=null,loaderAt=null,pushes=0,pops=0;const {q,T}=M;
- const event=observe?new Int32Array(q):null;if(event)for(let i=0;i<M.events.length;i++)event[M.events[i].state]=i+1;
- while(state!==q&&t<limit){
-  if(state===M.plannerEntry&&plannerAt===null)plannerAt=t;
-  if(state===M.loaderEntry&&loaderAt===null)loaderAt=t;
-  if(state===M.pushEntry)pushes++;if(state===M.popEntry)pops++;
-  if(event&&event[state])observe(M.events[event[state]-1],tape,head,origin);
-  let v=T[3*state+tape[head]];tape[head]=(v>>2)&3;head+=(v&3)-1;state=v>>>4;t++;
-  if(head<0||head>=tape.length)throw Error("simulation buffer");if(head<lo)lo=head;if(head>hi)hi=head;
+ const origin=3*raw.length+1024;let tape=new Uint8Array(origin+2*raw.length+2048);tape.fill(2);for(let i=0;i<raw.length;i++)tape[origin+i]=+raw[i];
+ let s=0,h=origin,t=0,lo=h,hi=h,loaded=false;
+ while(s!==M.q&&t<limit){if(s===M.bridgeReady&&tape[h]===2)loaded=true;
+  const v=M.T[3*s+tape[h]];tape[h]=v>>2&3;h+=(v&3)-1;s=v>>>4;t++;
+  if(h<0)throw Error("left buffer");if(h===tape.length){const a=new Uint8Array(tape.length*2);a.fill(2);a.set(tape);tape=a;}
+  lo=Math.min(lo,h);hi=Math.max(hi,h);
  }
- if(state!==q)return{status:"TIMEOUT",t,head:head-origin,span:hi-lo+1,plannerAt,loaderAt,pushes,pops};
- let nonblank=0;for(let a of tape)if(a!==2)nonblank++;
- if(tape[head]<2){if(nonblank!==1)throw Error("noncanonical rejection head="+(head-origin)+" nonblank="+nonblank+" at "+t);return{status:tape[head]?"OUTSIDE_FIXED_PATH":"OUTSIDE_NORMALIZED",t,span:hi-lo+1};}
- let p=head-16,vals=[0,0,0,0,0],scale=1;
- while(tape[p]!==2){for(let i=4;i>=0;i--){if(tape[p]>1)throw Error("alignment");vals[i]+=scale*tape[p--];}scale*=2;}
- let end=p,start=p-1;while(tape[start]!==2)start--;start++;
- let selector=Array.from(tape.subarray(start,end)).join(""),workBits=head-end-1;
- const blocks=[];let at=start-1;
- for(let j=0;j<166;j++){if(tape[at]!==2)throw Error("block delimiter");at--;let bits=[];while(tape[at]!==2){bits.push(tape[at--]);if(at<0)throw Error("block buffer");}blocks.push(bits.join(""));}
- const blockBits=blocks.reduce((a,b)=>a+b.length,0);
- const frames=[];let cursor=head;
- while(tape[cursor+1]!==2&&frames.length<10){
-  if(tape[cursor]!==2||tape[cursor+85]!==2)throw Error("frame delimiter");
-  let word=Array.from(tape.subarray(cursor+1,cursor+85)).join("");if(!/^[01]{84}$/.test(word))throw Error("frame grammar");
-  frames.push({graph:word.slice(0,36),active:word.slice(36,45),tried:word.slice(45,54),choice:parseInt(word.slice(54,58),2),root:+word[58],status:+word[59],neighbors:[60,64,68].map(j=>parseInt(word.slice(j,j+4),2)),parent:parseInt(word.slice(72,76),2),owned:word.slice(76,83),pending:+word[83]});
-  cursor+=85;if(frames.length>10)throw Error("frame count");
- }
- let stream="",fields=[],field="";
- if(frames[0]?.status===1){
-  let e=cursor+1;while(tape[e]!==2){stream+=String(tape[e]);e++;}
-  if(stream.length%2)throw Error("stream alignment");
-  for(let i=0;i<stream.length;i+=2){let token=stream.slice(i,i+2);if(token==="10"){fields.push(field);field="";}else if(token==="00"||token==="01")field+=token[1];else throw Error("stream token");}
-  if(field||fields.length!==131)throw Error("stream fields");
- }
- if(!frames.length||frames[0].root!==1||frames.slice(1).some(f=>f.root||f.status)||nonblank!==selector.length+workBits+blockBits+84*frames.length+stream.length)throw Error("checkpoint shape");
- const accepted=frames[0].status===1;
- if(accepted?(frames.length!==10||frames[9].active!=="000000000"):frames.length!==1)throw Error("terminal stack");
- const graph=blocks.slice(0,36).map(b=>b===""?0:b==="1"?1:NaN);if(graph.some(Number.isNaN))throw Error("edge block");
- return{status:accepted?"MASK_STREAM_LOADED":"OUTSIDE_WIDTH_THREE",t,span:hi-lo+1,plannerAt,loaderAt,pushes,pops,stream,fields,snapshot:snapshot?"_"+Array.from(tape.subarray(lo,hi+1),(v,i)=>lo+i===head?"H":v===2?"_":String(v)).join("")+"_":null,checkpoint:{m:vals[0]+1,ranks:vals.slice(2),selector,workBits,head:head-origin,graph,pins:blocks[36],masks:blocks.slice(37),frames,order:accepted?frames.slice(0,9).map(f=>f.choice):null}};
-
+ if(s!==M.q)return{status:"TIMEOUT",t,head:h-origin,span:hi-lo+1};
+ if(!loaded)return{status:"REFUSAL",t,head:h-origin,span:hi-lo+1,headSymbol:tape[h]};
+ let e=h+1;while(tape[e]!==2)e++;const stream=Array.from(tape.subarray(h+1,e)).join("");
+ let fields=[],field="";for(let i=0;i<stream.length;i+=2){const tok=stream.slice(i,i+2);if(tok==="10"){fields.push(field);field="";}else if(tok==="00"||tok==="01")field+=tok[1];else throw Error("stream token");}
+ if(field||fields.length!==131||tape[h]!==2)throw Error("stream shape");
+ return{status:"MASK_STREAM_LOADED",t,head:h-origin,span:hi-lo+1,stream,fields};
 }
-
-
 module.exports={compile,decode,run};
-if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),plannerEntry:C.plannerEntry,pushEntry:C.pushEntry,popEntry:C.popEntry,loaderEntry:C.loaderEntry},require('fs').readFileSync(0,'utf8'))));}
+if(require.main===module){const C=compile();if(process.argv.includes('--descriptor'))process.stdout.write(C.desc);else console.log(JSON.stringify(run({...decode(C.desc),bridgeReady:C.bridgeReady},require('fs').readFileSync(0,'utf8'))));}
