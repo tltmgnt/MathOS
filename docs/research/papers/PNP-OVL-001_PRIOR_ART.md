@@ -38,3 +38,11 @@ Connected-component decomposition is established: Bayardo and Pehoushek, Countin
 
 ## Theorem J scope and prior art
 Canonical RREF, orthogonal decomposition of linear spaces and connected components are classical. Compare with direct-sum decompositions of linear codes/matroids and parity-aware SAT preprocessing. The exact block-group formulation and proof-carrying integration are candidates for comparison only; no new external literature search or novelty determination was performed in this cycle.
+
+## Theorem K targeted screening
+- Dechter and van Beek, Local and global relational consistency, Theoretical Computer Science 173 (1997), https://doi.org/10.1016/S0304-3975(97)86737-0 .
+- Hooker, Projection, Inference, and Consistency, IJCAI 2016, https://ijcai.org/proceedings/2016/625 .
+- Jeavons and Petke, Local Consistency and SAT-Solvers, https://arxiv.org/abs/1401.4613 .
+- Local consistency as a reduction between constraint satisfaction problems, https://arxiv.org/abs/2301.05084 .
+- SAT Solving Using XOR-OR-AND Normal Forms, https://doi.org/10.1007/s11786-024-00594-x .
+These sources establish related local consistency, projection, and affine-solving research. The strict hierarchy is for the specified affine-hull operator only; the witness family is classical easy 2-SAT. No exhaustive novelty investigation or priority claim.

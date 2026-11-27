@@ -8,11 +8,13 @@ on:
       - 'mathos/research/pnp_overlap_adaptive.py'
       - 'mathos/research/pnp_overlap_obstructions.py'
       - 'mathos/research/pnp_overlap_semantic.py'
+      - 'mathos/research/pnp_overlap_recovery.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
       - 'tests/test_pnp_overlap_obstructions.py'
       - 'tests/test_pnp_overlap_semantic.py'
+      - 'tests/test_pnp_overlap_recovery.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   pull_request:
@@ -23,11 +25,13 @@ on:
       - 'mathos/research/pnp_overlap_adaptive.py'
       - 'mathos/research/pnp_overlap_obstructions.py'
       - 'mathos/research/pnp_overlap_semantic.py'
+      - 'mathos/research/pnp_overlap_recovery.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
       - 'tests/test_pnp_overlap_obstructions.py'
       - 'tests/test_pnp_overlap_semantic.py'
+      - 'tests/test_pnp_overlap_recovery.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   workflow_dispatch:
@@ -57,6 +61,8 @@ jobs:
           python -m mathos.research.pnp_overlap_obstructions > artifacts/pnp-overlap/obstructions.json
           python -m unittest discover -s tests -p 'test_pnp_overlap_semantic.py' -v 2>&1 | tee artifacts/pnp-overlap/semantic-tests.txt
           python -m mathos.research.pnp_overlap_semantic > artifacts/pnp-overlap/semantic.json
+          python -m unittest discover -s tests -p 'test_pnp_overlap_recovery.py' -v 2>&1 | tee artifacts/pnp-overlap/recovery-tests.txt
+          python -m mathos.research.pnp_overlap_recovery > artifacts/pnp-overlap/recovery.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
