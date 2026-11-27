@@ -1,5 +1,6 @@
 // D6S: paired directional head marking with shared return continuations.
-function compile(J,paired=true,special=true,serial=paired&&special,fused=serial){
+function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,blind=fused){
+ if(blind&&!fused)throw Error("blind requires fused");
  if(fused&&!serial)throw Error('fused requires serial paired layout');
  if(serial&&(!paired||!special))throw Error('serial requires paired specialized layout');
  const {alphabet,ins,tapes}=J,syms=["G","D","E","~",...alphabet.flatMap(x=>["u"+x,"h"+x])],w=Math.ceil(Math.log2(syms.length-1)),blank="~";
@@ -52,6 +53,23 @@ function compile(J,paired=true,special=true,serial=paired&&special,fused=serial)
  const invalid=pack(H,2,0);
  function transition(i,p,a){
   const returning=roots[i].startsWith("ret"),bits=returning?a+p:p+a;
+  if(blind&&/^i[0-9]+s0$/.test(roots[i])){
+   const name=roots[i].slice(0,-2),I=ins[+name.slice(1)];
+   if(I.op==="move"||I.op==="write"){
+    // Valid IR never writes L or moves left from L. At the target
+    // tape the last bit alone identifies the head.
+    const act=logical.get(name+"act")("h0"),d=rootId.get(act[0]);
+    let last;
+    if(I.op==="move")last=I.next.dir===1?pack(d,0,1):pack(moveTail(d,-1,w-1),0,-1);
+    else{
+     const c=codes["h"+I.next.v];let tail=d;
+     for(let j=0;j<w-1;j++){const a=pack(tail,+c[j],-1);tail=intern(a,a,a);}
+     last=pack(tail,1,-1);
+    }
+    const end=intern(pack(i,0,1),last,invalid);
+    if(p==="")return a<2?pack(moveTail(end,1,w-2),a,1):invalid;
+   }
+  }
   if(fused){
    const mark=/^mark([LR])(ret[0-9]+)$/.exec(roots[i]);
    if(mark){
