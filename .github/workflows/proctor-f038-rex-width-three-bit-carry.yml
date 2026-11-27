@@ -1,0 +1,94 @@
+name: Proctor F038 RE-X bit-serial suffix FIFO
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-bit-carry']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent physical macro and clock audit
+        run: |
+          node mathos/research/f038_rex_width_three_bit_carry_macro_audit.js > /tmp/d6r-macro.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6r-macro.json');a.deepEqual(r,{cases:2808,reads:1440,writes:864,lefts:216,rights:288,growth:72,rejects:1152,clockChecks:72,exactScannerParity:960,exactDeltaChecks:936,strictSavings:16});"
+      - name: Hard-family paired clock and exact logical parity
+        run: node mathos/research/f038_rex_width_three_bit_carry_clock_audit.js
+      - name: Independent graph, edge-list, traces and candidate ceilings
+        run: |
+          node mathos/research/f038_rex_width_three_lazy_interval_audit.js > /tmp/d6r.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6r.json');for(const [k,v] of Object.entries({cases:679,modes:1358,predecessorChecks:1358,predecessorEvents:15550,compactChecks:1358,eventChecks:15550,deferredBlocks:40,appendChecks:320,earlyUnsatCaches:8,cacheBuilds:72,cacheBlocks:320,cacheMaskBits:17188,cacheDirBits:8502,cacheChecks:3060,cachedCandidates:2174,cachedComponents:886,firstEntries:288,laterEntries:598,localRewinds:1288,oldISteps:55342459,sat:1116,unsat:242,probeStarts:256,probeAborts:78,directResumes:6,probeTrials:658,probeSat:178,probeUnsat:0,conditioned:72,one:16,two:56,twoSat:40,twoUnsat:16,prefixConflicts:22,cacheHits:84,conditionedSat:52,conditionedUnsat:20,fallback:1068,early:218,visits:4520,conflicts:2668,components:7022,separators:288,localChecks:4520,graphChecks:7022,improved:750,regressed:0,tied:608,oldSteps:50328209,newSteps:50242835}))a.equal(r[k],v,k);a.deepEqual(r.ir,[9423,9418]);a.deepEqual(r.compaction,[{original:13793,retained:12635,compact:9423,rounds:119,checks:12635},{original:13792,retained:12629,compact:9418,rounds:119,checks:12629}]);const h=r.rows.find(x=>x.name==='hard-two-4-sat');a.equal(h.clock,8432474098);a.equal(h.oldClock,8503585206);console.log('D6R_LAZY_INTERVAL_OK')"
+      - name: Independent separator-conditioned host reference
+        run: |
+          node mathos/research/f038_rex_width_three_separator_reference.js > /tmp/d6r-separator.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6r-separator.json');for(const [k,v] of Object.entries({cases:513,sat:451,unsat:62,selected:73,one:49,two:24,assignments:280,candidates:5661}))a.equal(r[k],v,k);console.log('D6R_SEPARATOR_REFERENCE_OK')"
+      - name: Hard connected separator family
+        run: |
+          node mathos/research/f038_rex_width_three_two_prefix_hard.js > /tmp/d6r-hard.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6r-hard.json');a.equal(r.cases,4);a.equal(r.modes,8);const s=r.rows.find(x=>x.m===3&&!x.unsat&&!x.full);a.equal(s.visits,82);a.equal(s.oldVisits,1489);a.equal(s.clock,9450537036);a.equal(s.oldClock,53785925578);console.log('D6R_HARD_SEPARATOR_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6R_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, empty-domain, cross-sat, one-prefix-sat, one-prefix-unsat, two-prefix-unsat, two-prefix-sat, prefix-pair, easy-two-center, direct-resume, hard-2-sat, hard-3-sat, hard-4-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector replay, quotient and cutoff
+        run: node --max-old-space-size=4096 mathos/research/f038_rex_width_three_bit_carry_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native original-format replay and one-short cutoff
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node --max-old-space-size=4096 "${p}_bit_carry_replay.js" "$mode" descriptor > /tmp/d6r.desc
+          node "${p}_bit_carry_replay.js" "$mode" fixtures > /tmp/d6r.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6r-native
+          /tmp/d6r-native /tmp/d6r.desc /tmp/d6r.fixtures > /tmp/d6r-native.out
+          python -m mathos.research.f038_rex_width_three_bit_carry_native_verify /tmp/d6r.fixtures /tmp/d6r-native.out "$mode"
