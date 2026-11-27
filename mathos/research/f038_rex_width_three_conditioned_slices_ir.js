@@ -55,10 +55,10 @@ function machine(full=false){
  const beginRows=start(R[0],start(R[1],start(R[2],row)));
  const load3=label(),load2=label(),load1=label(),kind=label();
  // Fixed-width binary scope IDs consume exactly four tape cells.
- function idRead(choose,p="",t=D){return p.length===4?(parseInt(p,2)<9?choose(parseInt(p,2)):reject):rd(t,x=>bit(x)?mv(t,1,idRead(choose,p+x,t)):reject);}
- // Fixed prefix coordinates use a singleton one-hot word in the sliced mask.
- const fixed0=label(),fixed1=label();
- function load(slot,d){return clear(R[slot],idRead(g=>g===0?atA(17,rd(A,x=>x==="1"?app(R[slot],"1",d):x==="0"?chosen(G[g],R[slot],d):reject)):g===1?atA(18,rd(A,x=>x==="1"?app(R[slot],"1",d):x==="0"?chosen(G[g],R[slot],d):reject)):chosen(G[g],R[slot],d),"",CD));}
+ function idRead(choose,p="",t=D){return p.length===4?(parseInt(p,2)<(t===CD?11:9)?choose(parseInt(p,2)):reject):rd(t,x=>bit(x)?mv(t,1,idRead(choose,p+x,t)):reject);}
+ // Compact aliases 9,10 encode fixed original IDs 0,1. They load
+ // singleton rank words without repeated mode-flag reads.
+ function load(slot,d){return clear(R[slot],idRead(g=>g>=9?app(R[slot],"1",d):chosen(G[g],R[slot],d),"",CD));}
 
  // A positions 1..5 retain the GAC budget, position 6 is a blank
  // delimiter, 7..15 are membership (0 unseen, 1 current, x solved).
@@ -71,7 +71,6 @@ function machine(full=false){
   const q=start(A,advance(pos-1));starts.set(k,q);return q;
  }
  function member(g,yes,no){return atA(7+g,rd(A,x=>x==="1"?yes:x==="0"||x==="x"?no:reject));}
- bind(fixed0,reject);bind(fixed1,reject);
  bind(load3,load(2,beginRows));bind(load2,load(1,kind));bind(load1,load(0,load2));
  bind(kind,rd(CD,x=>x==="0"?mv(CD,1,clear(R[2],app(R[2],"1",beginRows))):x==="1"?mv(CD,1,load3):reject));
  // A flag is consumed at each scope dispatch. Skip only masks proved all-zero.
@@ -171,7 +170,7 @@ function machine(full=false){
  }
  const targets=G.map((t,g)=>G.reduceRight((next,u,j)=>j>g?member(j,reset(u,next),next):next,extend(g)));
  // A conflict entirely in the two-coordinate prefix rejects that branch.
- const selectConflict=idRead(g=>g===1?atA(18,rd(A,x=>x==="1"?exhausted:x==="0"?targets[g]:reject)):targets[g],"",CD);
+ const selectConflict=idRead(g=>g===10?exhausted:g===9?reject:targets[g],"",CD);
  bind(conflictDispatch,start(R[2],mv(R[2],1,rd(R[2],x=>x==="_"?back(CD,5,selectConflict):bit(x)?back(CD,4,selectConflict):reject))));
  // A20=1 during direct probe, 0 otherwise. A21..24 count failed
  // complete candidates; the fourth failed validation triggers restart.
@@ -238,17 +237,29 @@ function machine(full=false){
  // the residual graph ensures that all remaining IDs are in that block.
  // Decode every input token into one or four logical rows. The rank
  // odometer selects exactly the contiguous prefix interval. Output selected
- // rows as literal tokens, including partial input runs. Original arity and
- // directory are retained; candidate fixed dimensions have length one.
+ // rows, retaining complete runs and literalizing partial runs. Original arity
+ // and scope identity retained through fixed-coordinate aliases.
  function sliceRows(h){
-  const row=label(),end=rd(Q,x=>x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,word(CQ,"10",local)),reject)):reject);
+  const before=label(),inside=label(),end=rd(Q,x=>x==="1"?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,word(CQ,"10",local)),reject)):reject);
+  const finishSlice=word(CQ,"10",skipMask(local));
   const advance=(normal,overflow)=>next(R[2],next(R[1],next(R[0],overflow,normal),normal),normal);
   function select(yes,no){return rd(R[0],x=>x==="0"?no:x==="1"?(h===1?yes:rd(R[1],y=>y==="0"?no:y==="1"?yes:reject)):reject);}
-  const step=advance(row,end);
-  let run=step;for(let k=0;k<3;k++){const v=select(word(CQ,"00",run),run);run=advance(v,reject);}
-  const literal=rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,word(CQ,"0"+y,step)):reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,word(CQ,"00",run)),reject)):reject);
-  const skip=rd(Q,x=>x==="0"?mv(Q,1,test(Q,bit,mv(Q,1,step),reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,run),reject)):reject);
-  bind(row,select(literal,skip));return start(R[0],start(R[1],start(R[2],row)));
+  const steps=[advance(before,end),advance(inside,end)];
+  // For an input 11 token, count the selected rows out of its four.
+  // Emit 11 if all four are selected, otherwise 0..3 literal zeros.
+  // Once the contiguous slice ends, skip the remaining source tokens.
+  const out=(n,d)=>word(CQ,n===4?"11":"00".repeat(n),d),memo=new Map();
+  function virtual(k,n){
+   const key=k+":"+n;if(memo.has(key))return memo.get(key);
+   const endRun=c=>out(c,steps[c?1:0]);
+   const yes=k===1?endRun(n+1):advance(virtual(k-1,n+1),reject);
+   const no=n?out(n,finishSlice):k===1?endRun(0):advance(virtual(k-1,0),reject);
+   const v=select(yes,no);memo.set(key,v);return v;
+  }
+  const literal=rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?mv(Q,1,word(CQ,"0"+y,steps[1])):reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,advance(virtual(3,1),reject)),reject)):reject);
+  const skip=rd(Q,x=>x==="0"?mv(Q,1,test(Q,bit,mv(Q,1,steps[0]),reject)):x==="1"?mv(Q,1,test(Q,y=>y==="1",mv(Q,1,advance(virtual(3,0),reject)),reject)):reject);
+  bind(before,select(literal,skip));bind(inside,select(literal,finishSlice));
+  return start(R[0],start(R[1],start(R[2],before)));
  }
  const s1=sliceRows(1),s2=sliceRows(2);
  function sliceStart(h,k,root){
@@ -257,9 +268,10 @@ function machine(full=false){
   return clear(R[0],chosen(G[root],R[0],r1));
  }
  function sliceKind(h,root){return rd(D,x=>x==="0"?app(CD,x,mv(D,1,sliceStart(h,2,root))):x==="1"?app(CD,x,mv(D,1,copyDir(4,sliceStart(h,3,root)))):reject);}
- const oneRoot0=back(D,8,copyDir(8,sliceKind(1,0))),oneRoot1=back(D,8,copyDir(8,sliceKind(1,1)));
- const bothKind=sliceKind(2,0),bothRootRecord=back(D,8,copyDir(8,bothKind)),omitRoot=rd(D,x=>x==="0"?mv(D,1,skipMask(local)):x==="1"?mv(D,1,walkD(4,skipMask(local))):reject);
- const rootOnlyThird=idRead(g=>member(g,back(D,13,copyDir(8,bothKind)),skipMask(local)));
+ function fixedDir(root,d){return walkD(4,word(CD,code(9+root),d));}
+ const oneRoot0=back(D,8,fixedDir(0,copyDir(4,sliceKind(1,0)))),oneRoot1=back(D,8,fixedDir(1,copyDir(4,sliceKind(1,1))));
+ const bothKind=sliceKind(2,0),bothDir=fixedDir(0,fixedDir(1,bothKind)),bothRootRecord=back(D,8,bothDir),omitRoot=rd(D,x=>x==="0"?mv(D,1,skipMask(local)):x==="1"?mv(D,1,walkD(4,skipMask(local))):reject);
+ const rootOnlyThird=idRead(g=>member(g,back(D,13,bothDir),skipMask(local)));
  const prefixPair=atA(19,rd(A,x=>x==="1"?bothRootRecord:x==="0"?mv(D,1,skipMask(local)):reject));
  const bothRootLocal=rd(D,x=>x==="0"?prefixPair:x==="1"?mv(D,1,rootOnlyThird):reject);
  const rootLocal0=idRead(g=>g===1?atA(18,rd(A,x=>x==="1"?bothRootLocal:x==="0"?member(g,oneRoot0,omitRoot):reject)):member(g,oneRoot0,omitRoot));
