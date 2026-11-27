@@ -1,5 +1,6 @@
 // D6S: paired directional head marking with shared return continuations.
-function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,blind=fused){
+function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,blind=fused,local=blind){
+ if(local&&!blind)throw Error('local requires blind');
  if(blind&&!fused)throw Error("blind requires fused");
  if(fused&&!serial)throw Error('fused requires serial paired layout');
  if(serial&&(!paired||!special))throw Error('serial requires paired specialized layout');
@@ -15,8 +16,11 @@ function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,
   add(n,a=>a==="G"?r(n+"s"+I.t,a):bad());
   for(let t=I.t;t>=0;t--)add(n+"s"+t,a=>a==="D"&&t>0?r(n+"s"+(t-1),a):a.startsWith("h")&&t===0?logical.get(n+"act")(a):a==="E"||a===blank?bad():r(n+"s"+t,a));
   function ret(d){const s="ret"+resolve(d);if(!logical.has(s))add(s,a=>a==="G"?z(dest(d),a):a===blank?bad():l(s,a));return s;}
-  if(I.op==="read")add(n+"act",a=>a.startsWith("h")?l(ret(I.next[alphabet.indexOf(a.slice(1))]),a):bad());
-  else if(I.op==="write")add(n+"act",a=>a.startsWith("h")&&a!=="hL"&&I.next.v!=="L"?l(ret(I.next.d),"h"+I.next.v):bad());
+  // Read/write preserve the marked cell and its index. A successor
+  // on the same tape can enter at that cell's first digit.
+  function after(d,a){const k=resolve(d),J2=ins[k];return local&&J2.t===I.t&&["read","write","move"].includes(J2.op)?z("i"+k+"act",a):l(ret(d),a);}
+  if(I.op==="read")add(n+"act",a=>a.startsWith("h")?after(I.next[alphabet.indexOf(a.slice(1))],a):bad());
+  else if(I.op==="write")add(n+"act",a=>a.startsWith("h")&&a!=="hL"&&I.next.v!=="L"?after(I.next.d,"h"+I.next.v):bad());
   else if(I.op==="move"){
    const next=ret(I.next.d),dir=I.next.dir;
    const mark=fused?(dir===1?"markR":"markL")+next:n+"mark";
@@ -53,8 +57,8 @@ function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,
  const invalid=pack(H,2,0);
  function transition(i,p,a){
   const returning=roots[i].startsWith("ret"),bits=returning?a+p:p+a;
-  if(blind&&/^i[0-9]+s0$/.test(roots[i])){
-   const name=roots[i].slice(0,-2),I=ins[+name.slice(1)];
+  if(blind&&/^i[0-9]+(s0|act)$/.test(roots[i])){
+   const name=roots[i].replace(/(s0|act)$/,""),I=ins[+name.slice(1)],atAct=roots[i].endsWith("act");
    if(I.op==="move"||I.op==="write"){
     // Valid IR never writes L or moves left from L. At the target
     // tape the last bit alone identifies the head.
@@ -63,10 +67,10 @@ function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,
     if(I.op==="move")last=I.next.dir===1?pack(d,0,1):pack(moveTail(d,-1,w-1),0,-1);
     else{
      const c=codes["h"+I.next.v];let tail=d;
-     for(let j=0;j<w-1;j++){const a=pack(tail,+c[j],-1);tail=intern(a,a,a);}
+     for(let j=0;j<w-1;j++){const a=pack(tail,+c[j],j===0&&act[2]===0?0:-1);tail=intern(a,a,a);}
      last=pack(tail,1,-1);
     }
-    const end=intern(pack(i,0,1),last,invalid);
+    const end=intern(atAct?invalid:pack(i,0,1),last,invalid);
     if(p==="")return a<2?pack(moveTail(end,1,w-2),a,1):invalid;
    }
   }
