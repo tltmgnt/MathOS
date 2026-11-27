@@ -39,6 +39,12 @@ theorem parity_slice_reverse (u v : Bool) :
     valid v u = (!(Bool.xor u v) || v) := by
   cases u <;> cases v <;> rfl
 
+/-- Two equal evaluated rows cannot have differing right-hand sides. -/
+theorem conflicting_equal_rows (v a b : Bool)
+    (h1 : v = a) (h2 : v = b) (h3 : Bool.xor a b = true) : False := by
+  cases v <;> cases a <;> cases b <;>
+    first | exact Bool.noConfusion h1 | exact Bool.noConfusion h2 | exact Bool.noConfusion h3
+
 end PnpOverlapBoundary
 
 #print axioms PnpOverlapBoundary.gadget_forward
@@ -48,3 +54,5 @@ end PnpOverlapBoundary
 
 #print axioms PnpOverlapBoundary.parity_slice_forward
 #print axioms PnpOverlapBoundary.parity_slice_reverse
+
+#print axioms PnpOverlapBoundary.conflicting_equal_rows

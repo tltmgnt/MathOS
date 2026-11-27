@@ -29,3 +29,6 @@ Targeted external screening (27 November 2026):
 - SAT Solving Using XOR-OR-AND Normal Forms, https://doi.org/10.1007/s11786-024-00594-x . Existing linear Boolean forms in SAT solving.
 - Tradeoffs in the complexity of backdoors to satisfiability, https://www.cs.cornell.edu/gomes/pdf/2014_dilkina_amai_dynamic.pdf . Existing XOR-backdoor considerations.
 The exact graph optimum preservation argument and the coordinate-vs-parity exponential pattern gap are concrete candidates for comparison, not a claim of priority. Full-text theorem-by-theorem novelty review is still required.
+
+## Proof-carrying decomposition (Theorem G)
+The budget-refutation tree uses standard exhaustive branching and the leaf certificate is classical Gaussian-elimination provenance (see PNP-F004). Compare proof logging for SAT/XOR solvers, proof complexity, and certifying optimization before asserting novelty. The contribution here is a scoped explicit format and separate checker for the chosen local-form model. No new external literature verification is claimed in this cycle.
