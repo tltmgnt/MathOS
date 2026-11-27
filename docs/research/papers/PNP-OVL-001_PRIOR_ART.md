@@ -35,3 +35,6 @@ The budget-refutation tree uses standard exhaustive branching and the leaf certi
 
 ## Theorem I prior art and scope
 Connected-component decomposition is established: Bayardo and Pehoushek, Counting Models Using Connected Components (AAAI 2000), https://cdn.aaai.org/AAAI/2000/AAAI00-024.pdf ; Decomposing SAT Problems into Connected Components (AAAI 2006), https://cs.uwaterloo.ca/~vanbeek/Publications/aaai06.pdf ; AllSATCC (IJCAI 2022), https://ijcai.org/proceedings/2022/259 . External search confirms prior use of component decomposition and caching. Compare exact rank additivity and the order-specific example to existing SAT/CSP work before any originality claim. A connected rank obstruction does not prove a search lower bound. No literature priority is established.
+
+## Theorem J scope and prior art
+Canonical RREF, orthogonal decomposition of linear spaces and connected components are classical. Compare with direct-sum decompositions of linear codes/matroids and parity-aware SAT preprocessing. The exact block-group formulation and proof-carrying integration are candidates for comparison only; no new external literature search or novelty determination was performed in this cycle.

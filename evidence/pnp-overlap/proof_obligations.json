@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "28_GROUPS_PASSED_AT_541410f4_6_OBSTRUCTION_GROUPS_AWAITING_CI",
+    "python_tests": "34_GROUPS_PASSED_AT_7d811647_6_SEMANTIC_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -36,8 +36,12 @@
     "adaptive_formalization": "OPEN",
     "connected_rank_obstruction": "ARGUMENT_DRAFT",
     "ordered_search_lower_bound": "ARGUMENT_DRAFT",
-    "factorized_recovery": "IMPLEMENTED_AWAITING_CI",
-    "factor_formalization": "OPEN"
+    "factorized_recovery": "SCOPED_CI_PASSED_AT_7d811647",
+    "factor_formalization": "OPEN",
+    "canonical_affine_partition": "ARGUMENT_DRAFT",
+    "derived_row_provenance": "IMPLEMENTED_AWAITING_CI",
+    "hidden_factor_control": "AWAITING_CI",
+    "semantic_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
