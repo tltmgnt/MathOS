@@ -74,8 +74,8 @@ jobs:
           set -euo pipefail
           p=mathos/research/f038_rex_width_three
           mode=${{ matrix.mode }}
-          node "${p}_hybrid_replay.js" "$mode" descriptor > /tmp/d5y.desc
-          node "${p}_hybrid_replay.js" "$mode" fixtures > /tmp/d5y.fixtures
+          node "${p}_inplace_hybrid_replay.js" "$mode" descriptor > /tmp/d5y.desc
+          node "${p}_inplace_hybrid_replay.js" "$mode" fixtures > /tmp/d5y.fixtures
           g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5y-native
           /tmp/d5y-native /tmp/d5y.desc /tmp/d5y.fixtures > /tmp/d5y-native.out
           python -m mathos.research.f038_rex_width_three_inplace_hybrid_native_verify /tmp/d5y.fixtures /tmp/d5y-native.out "$mode"
