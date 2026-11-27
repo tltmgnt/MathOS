@@ -76,17 +76,17 @@ function oracle(d,domains,Ref){
 function audit(U,E,Barrier,Prior,Direct,OldAudit,Local,F,Ref){
  const J=[U.machine(false),U.machine(true)],O=[Local.machine(false),Local.machine(true)];
  const eq=(a,b,s)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw Error(s+" "+JSON.stringify({a,b}));},ok=(v,s)=>{if(!v)throw Error(s)};
- let sat=0,unsat=0,conditioned=0,one=0,two=0,twoSat=0,twoUnsat=0,prefixConflicts=0,conditionedSat=0,conditionedUnsat=0,fallback=0,early=0,visits=0,conflicts=0,components=0,separators=0,localChecks=0,graphChecks=0,improved=0,regressed=0,tied=0,oldSteps=0,newSteps=0;const rows=[];
+ let sat=0,unsat=0,conditioned=0,one=0,two=0,twoSat=0,twoUnsat=0,prefixConflicts=0,cacheHits=0,conditionedSat=0,conditionedUnsat=0,fallback=0,early=0,visits=0,conflicts=0,components=0,separators=0,localChecks=0,graphChecks=0,improved=0,regressed=0,tied=0,oldSteps=0,newSteps=0;const rows=[];
  const fs=fixtures(E,Direct,OldAudit);
  for(const f of fs){const raw=E.encode(f.m,Array(f.m).fill(0),f.B),d=E.decode(raw),ref=Barrier.exact(E,raw),stream=U.stream(E,raw),I=[...Array(19).fill(""),stream],original=Ref.residual(d,Array.from({length:9},(_,i)=>i),[]),residual=Ref.residual(d,Array.from({length:9},(_,i)=>i),[0]),residual2=Ref.residual(d,Array.from({length:9},(_,i)=>i),[0,1]);
   for(let i=0;i<2;i++){const j=J[i],domains=Prior.propagate(E,raw,!!i),expected=oracle(d,domains,Ref),actual={seps:[],components:[],trials:[],conflicts:[],conditioned:0};
    const a=U.executeIR(j,I,(pc,T,h)=>{
     if(pc===j.separatorEntry){actual.conditioned=T[15][18]==="1"?2:1;actual.seps.push(T.slice(1,1+actual.conditioned).map(t=>t.indexOf("x")-1));}
-    else if(pc===j.componentEntry){const c=T[15].slice(7,16).map((x,g)=>x==="1"?g:-1).filter(g=>g>=0);actual.components.push(c);
+    else if(pc===j.componentEntry){const c=T[15].slice(7,16).map((x,g)=>x==="1"?g:-1).filter(g=>g>=0);actual.components.push(c);if(T[15][19]==="x")cacheHits++;
      const edges=d.F.filter(f=>f.h.length>1).sort(order).flatMap(f=>{const h=f.h.filter(g=>g>=actual.conditioned);return h.slice(1).map(g=>[h[0],g]);}).flat().map(g=>g.toString(2).padStart(4,"0")).join("");
      eq(T[16].slice(1).join("").replace(/_+$/,""),edges,"edge list "+f.name);graphChecks++;}
     else if(pc===j.candidateEntry){actual.trials.push(T.slice(1,10).map(t=>t.indexOf("x")-1));
-     const c=actual.components.at(-1),fs=d.F.filter(f=>f.h.length>1&&(f.h.some(g=>c.includes(g))||actual.conditioned===2&&f.h.every(g=>g<2))).sort(order);
+     const c=actual.components.at(-1),fs=d.F.filter(f=>f.h.length>1&&(f.h.some(g=>c.includes(g))||actual.conditioned===2&&T[15][19]==="1"&&f.h.every(g=>g<2))).sort(order);
      const dir=fs.map(f=>f.h.slice(0,2).map(g=>g.toString(2).padStart(4,"0")).join("")+(f.h.length===2?"0":"1"+f.h[2].toString(2).padStart(4,"0"))).join("");
      const mask=fs.map(f=>{const s=[...E.tup(d.m,f.h.length)].map(z=>f.S.has(z.join())?"0":"1").join("");let out="";for(let k=0;k<s.length;){if(s.slice(k,k+4)==="0000"){out+="11";k+=4;}else out+="0"+s[k++];}return out+"10";}).join("");
      eq(T[18].slice(1).join("").replace(/_+$/,""),dir,"local directory "+f.name);eq(T[17].slice(1).join("").replace(/_+$/,""),mask,"local stream "+f.name);localChecks++;
@@ -105,7 +105,7 @@ function audit(U,E,Barrier,Prior,Direct,OldAudit,Local,F,Ref){
    }
   }
  }
- return {cases:fs.length,modes:2*fs.length,sat,unsat,conditioned,one,two,twoSat,twoUnsat,prefixConflicts,conditionedSat,conditionedUnsat,fallback,early,visits,conflicts,components,separators,localChecks,graphChecks,improved,regressed,tied,oldSteps,newSteps,ir:J.map(j=>j.ins.length),rows};
+ return {cases:fs.length,modes:2*fs.length,sat,unsat,conditioned,one,two,twoSat,twoUnsat,prefixConflicts,cacheHits,conditionedSat,conditionedUnsat,fallback,early,visits,conflicts,components,separators,localChecks,graphChecks,improved,regressed,tied,oldSteps,newSteps,ir:J.map(j=>j.ins.length),rows};
 }
 module.exports={fixtures,oracle,audit};
 if(require.main===module){const p="./f038_rex_width_three_";console.log(JSON.stringify(audit(require(p+"two_prefix_ir.js"),require("./f038_tga_normalized_integration.js").engine(),require(p+"completeness_barrier.js"),require(p+"prefix_order_audit.js"),require(p+"direct_extension_audit.js"),require(p+"auto_component_audit.js"),require(p+"prefix_separator_ir.js"),require(p+"fast_clock.js"),require(p+"separator_reference.js"))));}

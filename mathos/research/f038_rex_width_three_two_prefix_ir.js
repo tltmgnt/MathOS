@@ -181,13 +181,18 @@ function machine(full=false){
  const advance0Root=advanceRoot(G[0],reject),advance1Root=advanceRoot(G[1],first(G[1],advance0Root));
  bind(exhausted,atA(17,rd(A,x=>x==="1"?atA(18,rd(A,y=>y==="0"?advance0Root:y==="1"?advance1Root:reject)):reject)));
  let resetResidual=separatorEntry;for(const t of G.slice(2).reverse())resetResidual=reset(t,resetResidual);
- bind(restart,atA(18,rd(A,x=>x==="1"?resetResidual:x==="0"?reset(G[1],resetResidual):reject)));
- bind(separatorEntry,atA(18,rd(A,x=>x==="1"?atA(7,word(A,"xx0000000",selectComponent)):x==="0"?atA(7,word(A,"x00000000",selectComponent)):reject)));
+ // A19: 1 first residual block, 0 later/direct, x reuse pending.
+ // A failure in the first block leaves the same membership and compact
+ // stream; after advancing the prefix, reset ranks but retain those tapes.
+ const resetBranch=atA(18,rd(A,x=>x==="1"?resetResidual:x==="0"?reset(G[1],resetResidual):reject));
+ bind(restart,atA(19,rd(A,x=>x==="1"?wr(A,"x",resetBranch):x==="0"?resetBranch:reject)));
+ const freshBranch=atA(18,rd(A,x=>x==="1"?atA(7,word(A,"xx0000000",selectComponent)):x==="0"?atA(7,word(A,"x00000000",selectComponent)):reject));
+ bind(separatorEntry,atA(19,rd(A,x=>x==="x"?componentEntry:x==="0"?wr(A,"1",freshBranch):reject)));
  // candidateStart is bound below, after constructing the edge-list producer.
  // Mark one solved component and choose the smallest still-unseen group.
  let mark=selectComponent;
  for(let g=8;g>=0;g--){const d=mark;mark=atA(7+g,rd(A,x=>x==="1"?wr(A,"x",d):x==="0"||x==="x"?d:reject));}
- bind(componentDone,mark);
+ bind(componentDone,atA(17,rd(A,x=>x==="1"?atA(19,wr(A,"0",mark)):x==="0"?mark:reject)));
  let seed=emit;
  for(let g=8;g>=0;g--){const d=seed;seed=atA(7+g,rd(A,x=>x==="0"?wr(A,"1",closure):x==="x"?d:reject));}
  bind(selectComponent,seed);
@@ -208,7 +213,8 @@ function machine(full=false){
  // first surviving unary rank already solves them, so skip candidate scans.
  const buildLocal=label();let zero=reject,one=componentDone;
  for(let g=8;g>=0;g--){const z=zero,o=one;zero=member(g,o,z);one=member(g,buildLocal,o);}
- bind(actualComponent,atA(17,rd(A,x=>x==="1"?buildLocal:x==="0"?zero:reject)));
+ const conditionedComponent=atA(19,rd(A,x=>x==="x"?wr(A,"1",attempt):x==="0"||x==="1"?buildLocal:reject));
+ bind(actualComponent,atA(17,rd(A,x=>x==="1"?conditionedComponent:x==="0"?zero:reject)));
  // Probe events are not candidate/component trace events.
  bind(componentEntry,actualComponent);
  const componentOrProbe=atA(17,rd(A,x=>x==="1"?componentEntry:x==="0"?atA(16,rd(A,y=>y==="0"?componentEntry:y==="1"||y==="x"?probeDone:reject)):reject));
@@ -223,9 +229,10 @@ function machine(full=false){
  // the residual graph ensures that all remaining IDs are in that block.
  const copyRootRecord=back(D,8,copyDir(8,copyKind)),omitRoot=rd(D,x=>x==="0"?mv(D,1,skipMask(local)):x==="1"?mv(D,1,walkD(4,skipMask(local))):reject);
  const rootOnlyThird=idRead(g=>member(g,back(D,13,copyDir(8,copyKind)),skipMask(local)));
- // Prefix-only pair is copied into each residual block. On failure its
- // conflict advances the prefix, not a residual coordinate.
- const bothRootLocal=rd(D,x=>x==="0"?copyRootRecord:x==="1"?mv(D,1,rootOnlyThird):reject);
+ // Prefix-only pair is checked in the first residual block only.
+ // It remains true for all later blocks in the same prefix branch.
+ const prefixPair=atA(19,rd(A,x=>x==="1"?copyRootRecord:x==="0"?mv(D,1,skipMask(local)):reject));
+ const bothRootLocal=rd(D,x=>x==="0"?prefixPair:x==="1"?mv(D,1,rootOnlyThird):reject);
  const rootLocal=idRead(g=>g===1?atA(18,rd(A,x=>x==="1"?bothRootLocal:x==="0"?member(g,copyRootRecord,omitRoot):reject)):member(g,copyRootRecord,omitRoot));
  const localActive=idRead(g=>g===0?atA(17,rd(A,x=>x==="1"?rootLocal:x==="0"?member(g,copyRecord,omit):reject)):g===1?atA(18,rd(A,x=>x==="1"?rootLocal:x==="0"?member(g,copyRecord,omit):reject)):member(g,copyRecord,omit));
  bind(local,indexed(local,localActive,localEnd));
@@ -255,8 +262,8 @@ function machine(full=false){
  // Probe original connectedness first. A16=1 original probe,
  // x residual probe/conditioned, 0 direct. A17=1 actual conditioning.
  bind(graphStart,clear(graphTape,start(Q,scanGraph)));
- bind(candidateStart,atA(7,word(A,"000000000100",graphStart)));
- const directInit=atA(7,word(A,"000000000000",initCandidate));
+ bind(candidateStart,atA(7,word(A,"0000000001000",graphStart)));
+ const directInit=atA(7,word(A,"0000000000000",initCandidate));
  const rootProbe=atA(7,word(A,"100000000",closure));
  const residualProbe=atA(18,rd(A,x=>x==="1"?atA(7,word(A,"xx1000000",closure)):x==="0"?atA(7,word(A,"x10000000",closure)):reject));
  bind(graphDone,atA(16,rd(A,x=>x==="0"?directInit:x==="1"?rootProbe:x==="x"?residualProbe:reject)));
