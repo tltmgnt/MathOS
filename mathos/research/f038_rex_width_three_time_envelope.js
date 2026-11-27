@@ -14,6 +14,8 @@ function countPhases(J,I,Space,m){
  let pc=J.entry,steps=0,phase="local",at=0,jumps=0;
  function flush(next){if(phase==="translate")ledger.translate+=steps-at;else if(steps>at)ledger[phase].push(steps-at);at=steps;phase=next;}
  while(true){
+  if(pc===J.localDone)flush("local");
+  if(pc===J.selected)flush("select");
   if(pc===J.edge)flush("edge");
   if(pc===J.selectEntry)flush("select");
   if(pc===J.translateEntry)flush("translate");
@@ -27,8 +29,6 @@ function countPhases(J,I,Space,m){
   else if(a.op==="move"){h[k]+=a.next.dir;ok(h[k]>=0,"left");if(h[k]===T[k].length)T[k].push("_");}
   else throw Error("opcode");
   pc=a.next.d;
-  if(pc===J.localDone)flush("local");
-  if(pc===J.selected)flush("select");
  }
  // Bound total per-phase costs rather than requiring the observer
  // boundary to coincide with every source-level iteration.
