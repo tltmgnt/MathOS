@@ -1,0 +1,28 @@
+// D5J original-format replay, quotient cutoff, independent candidate/domain oracle.
+const U=require('./f038_rex_width_three_propagation_ir.js'),P=require('./f038_rex_width_three_repair_producer.js'),B=require('./f038_rex_width_three_repair_physical.js'),K=require('./f038_rex_width_three_exit_compiler.js'),Q=require('./f038_rex_width_two_quotient.js'),A=require('./f038_rex_width_three_halt_witness.js'),E=require('./f038_tga_normalized_integration.js').engine(),F=require('./f038_rex_width_three_fast_clock.js'),V=require('./f038_rex_width_three_singleton_envelope.js'),Audit=require('./f038_rex_width_three_propagation_audit.js');
+const J=U.machine(),M=B.compose(P,J,K.compile(J),0),N=Q.refine(M),ok=(v,s)=>{if(!v)throw Error(s)};
+ok(N.stats.quotientBits===165869273&&N.stats.transitionChecks===10444842,'quotient');
+const cases=[
+ {name:'chain',m:2,B:[[-1],[-2,-3],[-4,-5],[-6,-7]],t:425690086,head:52392,span:53421},
+ {name:'two-disjoint',m:2,B:[[-1,-3],[-5,-7]],t:401408188,head:52392,span:53421},
+ {name:'binary-empty',m:2,B:[[-1],[-2,-3],[-2,-4]]},
+ {name:'radius-three-refusal',m:2,B:[[-1,-3],[-5,-7],[-9,-11]]},
+ {name:'third-rank-required',m:3,B:[[-1],[-2],[-3,-4],[-3,-5]]}
+];
+const mode=process.argv[2]||'chain';
+function expected(f){const pins=Array(f.m).fill(0),raw=E.encode(f.m,pins,f.B),I=[...Array(18).fill(''),U.stream(E,raw)],a=Audit.oracle(E,raw);return {raw,I,w:a.z?E.witness(f.m,pins,a.z):null};}
+if(mode==='descriptor'){
+ const C=require('./f038_rex_width_three_compiler.js');
+ (async()=>{for(const s of C.descriptorChunks(N))if(!process.stdout.write(s))await require('node:events').once(process.stdout,'drain');})().catch(e=>{console.error(e);process.exitCode=1;});
+}else if(mode==='fixtures'){
+ for(const f of cases.filter(f=>f.t!==undefined)){const a=expected(f);console.log([f.name,19*f.m-7,f.t,a.raw,a.w??'-',f.head,f.span].join(' '));}
+}else{
+ for(const f of cases.filter(f=>mode==='all'||mode===f.name)){
+  const {raw,I,w}=expected(f),n=19*f.m-7,r=A.run(M,raw,n,30000000000),q=A.run(N,raw,n,r.t),cut=A.run(N,raw,n,r.t-1),e=Audit.envelope(V,f.m);
+  ok(r.status==='HALT'&&r.witness===w&&q.status==='HALT'&&q.t===r.t&&q.head===r.head&&q.span===r.span&&q.witness===w&&q.headSymbol===r.headSymbol&&q.nextSymbol===r.nextSymbol&&cut.status==='TIMEOUT'&&cut.t===r.t-1&&cut.witness===null,'physical '+f.name);
+  if(f.t!==undefined)ok(r.t===f.t&&r.head===f.head&&r.span===f.span,'exact ledger');
+  if(w!==null){const a=F.count(J,I);ok(E.valid(raw,w)&&r.nextSymbol===2&&a.clock===r.clocks.outputAt-r.clocks.workerAt&&BigInt(a.clock)<=e.W&&BigInt(a.N)<=e.N&&BigInt(a.steps)<=e.T,'worker');}else ok(r.headSymbol===2,'blank');
+  ok(BigInt(r.t)<=e.total,'total');console.log(JSON.stringify({name:f.name,physical:r,quotient:N.stats}));
+ }
+ ok(mode==='all'||cases.some(f=>f.name===mode),'fixture');
+}
