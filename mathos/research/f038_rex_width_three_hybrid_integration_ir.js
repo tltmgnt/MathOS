@@ -13,9 +13,9 @@ function machine(W,Gap,full=false){
    if(i.op==="halt")d=done;else if(i.op==="reject")d=reject;else if(i.op==="jump")d=ids[i.next];else if(i.op==="read")d=add("read",map[i.t],i.next.map(k=>ids[k]));else if(i.op==="move")d=mv(map[i.t],i.next.dir,ids[i.next.d]);else if(i.op==="write")d=wr(map[i.t],i.next.v,ids[i.next.d]);else throw Error("op");bind(ids[j],d);
   });return ids[J.entry];
  }
- const field=label(),load=label(),finish=clears([R,C,N,G,K,S],clearToken(worker.entry));
+ const field=label(),load=label(),finish=clear(S,worker.entry);
  function clearToken(d){return start(T,loop(n=>rd(T,x=>x==="_"?start(T,d):bit(x)||x==="x"?app(T,"_",n):reject)));}
- const cleanup=clears([R,C,N,G,K],clearToken(field));
+ const cleanup=clears([R,C,G,K],clearToken(field));
  const runEnd=word(Q,"10",cleanup);
  const runEmit=loop(n=>rd(T,x=>x==="_"?runEnd:x==="x"?word(Q,"11",mv(T,1,n)):bit(x)?word(Q,"0"+x,mv(T,1,n)):reject));
  const fallback=word(Q,"00",start(T,runEmit));
