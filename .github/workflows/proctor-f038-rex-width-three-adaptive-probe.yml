@@ -1,0 +1,88 @@
+name: Proctor F038 RE-X adaptive direct-probe separator search
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-adaptive-probe']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent graph, edge-list, traces and candidate ceilings
+        run: |
+          node mathos/research/f038_rex_width_three_adaptive_probe_audit.js > /tmp/d6i.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6i.json');for(const [k,v] of Object.entries({cases:677,modes:1354,sat:1114,unsat:240,probeStarts:252,probeAborts:74,directResumes:6,probeTrials:642,probeSat:178,probeUnsat:0,conditioned:68,one:16,two:52,twoSat:38,twoUnsat:14,prefixConflicts:22,cacheHits:84,conditionedSat:50,conditionedUnsat:18,fallback:1068,early:218,visits:3698,conflicts:2040,components:6762,separators:224,localChecks:3698,graphChecks:6762,improved:184,regressed:952,tied:218,oldSteps:58250531,newSteps:50437375}))a.equal(r[k],v,k);a.deepEqual(r.ir,[13777,13776]);console.log('D6I_ADAPTIVE_PROBE_OK')"
+      - name: Independent separator-conditioned host reference
+        run: |
+          node mathos/research/f038_rex_width_three_separator_reference.js > /tmp/d6i-separator.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6i-separator.json');for(const [k,v] of Object.entries({cases:513,sat:451,unsat:62,selected:73,one:49,two:24,assignments:280,candidates:5661}))a.equal(r[k],v,k);console.log('D6I_SEPARATOR_REFERENCE_OK')"
+      - name: Hard connected separator family
+        run: |
+          node mathos/research/f038_rex_width_three_two_prefix_hard.js > /tmp/d6i-hard.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6i-hard.json');a.equal(r.cases,4);a.equal(r.modes,8);const s=r.rows.find(x=>x.m===3&&!x.unsat&&!x.full);a.equal(s.visits,82);a.equal(s.oldVisits,1489);a.equal(s.clock,9450537036);a.equal(s.oldClock,53785925578);console.log('D6I_HARD_SEPARATOR_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6I_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, empty-domain, cross-sat, one-prefix-sat, two-prefix-unsat, two-prefix-sat, prefix-pair, easy-two-center, direct-resume, hard-3-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector replay, quotient and cutoff
+        run: node --max-old-space-size=4096 mathos/research/f038_rex_width_three_adaptive_probe_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native original-format replay and one-short cutoff
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node --max-old-space-size=4096 "${p}_adaptive_probe_replay.js" "$mode" descriptor > /tmp/d6i.desc
+          node "${p}_adaptive_probe_replay.js" "$mode" fixtures > /tmp/d6i.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6i-native
+          /tmp/d6i-native /tmp/d6i.desc /tmp/d6i.fixtures > /tmp/d6i-native.out
+          python -m mathos.research.f038_rex_width_three_adaptive_probe_native_verify /tmp/d6i.fixtures /tmp/d6i-native.out "$mode"
