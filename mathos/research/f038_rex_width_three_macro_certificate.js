@@ -6,7 +6,7 @@ function instrument(source){
  if(!source.includes(old))throw Error("add signature");
  let s=source.replace(old,pre+`const add=(s,f)=>{if(defs.has(s))throw Error("duplicate "+s);const owner=active;owners.set(s,owner);defs.set(s,a=>{const old=active;active=owner;try{return f(a);}finally{active=old;}});return s;};`);
  for(let k of kinds){const needle="function "+k+"(";if(!s.includes(needle))throw Error("helper "+k);s=s.replace(needle,`function ${k}(...args){return tagged("${k}",String(args[0]),()=>original_${k}(...args));}\n function original_${k}(`);}
- s=s.replace("return{q,desc,events,plannerEntry:","return{macroOwner:Int32Array.from(names,([n])=>owners.get(n)),macros,q,desc,events,plannerEntry:");
+ s=s.replace("return{q,desc,events,plannerEntry:","return{macroOwner:Int32Array.from(names,([n])=>owners.get(n)),labels:names.map(([n])=>n),macros,q,desc,events,plannerEntry:");
  if(!s.includes("macroOwner:"))throw Error("return");
  const module={exports:{}};new Function("module","require",s)(module,()=>{throw Error("dependency");});return module.exports;
 }
@@ -67,11 +67,32 @@ function certify(M,owners,macros){
  }
  return{q,taggedStates,untagged,taggedEntries,internalEdges,cyclic,potentialChecks,maxA,maxC,maxima,worst:worst.sort((a,b)=>b.A-a.A||b.C-a.C).slice(0,3)};
 }
+function scanner(M,owners,macros,labels){
+ const q=M.q,T=M.T,g=macros.length,group=s=>owners[s]<0?g+s:owners[s],edges=new Map(),raw=new Set(),exit=new Set(),ok=(x,s)=>{if(!x)throw Error(s)};
+ for(let s=0;s<q;s++){
+  const u=group(s),name=labels[s];if(/^(hRaw\d+|bits.*Raw|covered.*Raw|pin.*Raw|doneRaw)$/.test(name)){ok(owners[s]<0,"raw tag");raw.add(u);}
+  if(/^(SUCCESS|BROKEN|clean[01])$/.test(name)){ok(owners[s]<0,"exit tag");exit.add(u);}
+  if(!edges.has(u))edges.set(u,new Set());
+  if(exit.has(u))continue;
+  for(let a=0;a<3;a++){let v=T[3*s+a]>>>4;if(v!==q&&group(v)!==u)edges.get(u).add(group(v));else if(v===s&&owners[s]<0)edges.get(u).add(u);}
+ }
+ const seen=new Set(),queue=[group(0)];seen.add(queue[0]);
+ for(let i=0;i<queue.length;i++)for(let v of edges.get(queue[i]))if(!seen.has(v)){seen.add(v);queue.push(v);}
+ const memo=new Map(),active=new Set();
+ function visit(u){
+  if(exit.has(u)||raw.has(u))return 0;
+  if(memo.has(u))return memo.get(u);ok(!active.has(u),"scanner cycle outside raw cuts "+(u<g?JSON.stringify(macros[u]):labels[u-g]));
+  active.add(u);let best=0;for(let v of edges.get(u))best=Math.max(best,visit(v));active.delete(u);memo.set(u,best+1);return best+1;
+ }
+ let startup=visit(group(0)),between=0,cuts=0;
+ for(let u of queue)if(raw.has(u)){cuts++;let a=1;for(let v of edges.get(u))a=Math.max(a,1+visit(v));between=Math.max(between,a);}
+ return{nodes:seen.size,cuts,startup,between,checkedNodes:memo.size};
+}
 function audit(source){
  const old={exports:{}};new Function("module","require",source)(old,()=>{throw Error("dependency")});
  const I=instrument(source),a=old.exports.compile(),b=I.compile();
  if(a.desc!==b.desc)throw Error("instrumentation changed descriptor");
- return certify(I.decode(b.desc),b.macroOwner,b.macros);
+ const M=I.decode(b.desc);return {...certify(M,b.macroOwner,b.macros),scanner:scanner(M,b.macroOwner,b.macros,b.labels)};
 }
 module.exports={audit,instrument,certify};
 if(require.main===module){const fs=require('node:fs'),path=require('node:path');console.log('F038_REX_MACRO_CERTIFICATE_OK '+JSON.stringify(audit(fs.readFileSync(path.join(__dirname,'f038_rex_width_three_bridge_producer.js'),'utf8'))));}
