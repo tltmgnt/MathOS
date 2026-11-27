@@ -117,7 +117,102 @@ def independent_coordinates(width, rows, coordinates):
             basis.append(j)
     return tuple(basis)
 
-def solve_ranked(domains, rows, *, stats=None):
+
+def minimum_rank_coordinates(width, rows, pairs):
+    """Exact minimum rank increase selecting one coordinate per pair.
+
+    Iterative deepening over the extra dimension, not over the number of
+    pairs. A depth-first stack stores at most one sibling per level.
+    """
+    rows,pairs=tuple(rows),tuple(tuple(p) for p in pairs)
+    if not isinstance(width,int) or width<0:
+        raise ValueError("invalid width")
+    if any(len(p)!=2 or any(not isinstance(j,int) or not 0<=j<width for j in p)
+           for p in pairs):
+        raise ValueError("invalid coordinate pair")
+
+    def residual(mask, pivots):
+        while mask:
+            p=mask.bit_length()-1
+            if p not in pivots:
+                break
+            mask ^= pivots[p]
+        return mask
+
+    initial={}
+    for m,b in rows:
+        if not isinstance(m,int) or not 0<=m<(1<<width) or b not in (0,1):
+            raise ValueError("invalid affine row")
+        v=residual(m,initial)
+        if v:
+            initial[v.bit_length()-1]=v
+
+    nodes=0
+    for budget in range(len(pairs)+1):
+        stack=[(initial,0)]
+        while stack:
+            pivots,depth=stack.pop()
+            nodes+=1
+            choice=[]
+            uncovered=None
+            for a,b in pairs:
+                u,v=residual(1<<a,pivots),residual(1<<b,pivots)
+                if not u:
+                    choice.append(a)
+                elif not v:
+                    choice.append(b)
+                else:
+                    uncovered=(u,v)
+                    break
+            if uncovered is None:
+                # Minimum budget certifies optimality by exhaustive failure
+                # of all preceding budgets; this is not a succinct certificate.
+                actual=len(independent_coordinates(width,rows,choice))
+                if actual!=budget:
+                    raise AssertionError("rank search invariant")
+                return {"coordinates":tuple(choice),"d":actual,"search_nodes":nodes}
+            if depth==budget:
+                continue
+            # Each uncovered alternative increases the rank by exactly one.
+            # Duplicate residuals may describe the same extension, but need
+            # not be deduplicated for correctness or the binary-tree bound.
+            for v in reversed(uncovered):
+                child=pivots.copy()
+                child[v.bit_length()-1]=v
+                stack.append((child,depth+1))
+    raise AssertionError("choosing every first endpoint is always possible")
+
+def graph_rank_instance(edges):
+    """Embed vertex cover: one component per edge, equality rows per vertex."""
+    edges=tuple(tuple(e) for e in edges)
+    reps={}
+    rows=[]
+    for i,e in enumerate(edges):
+        if len(e)!=2 or e[0]==e[1]:
+            raise ValueError("expected loop-free graph edges")
+        for j,v in enumerate(e):
+            coord=2*i+j
+            if v in reps:
+                rows.append(((1<<coord)|(1<<reps[v]),0))
+            else:
+                reps[v]=coord
+    return [(10,15)]*len(edges),rows
+
+def optimum_demo(k=21):
+    if k<1:
+        raise ValueError("expected positive edge count")
+    ds,rows=graph_rank_instance((i+1,0) for i in range(k))
+    fixed,optimized={},{}
+    assert solve_ranked(ds,rows,stats=fixed) is not None
+    assert solve_ranked(ds,rows,stats=optimized,optimize=True) is not None
+    return {"k":k,"fixed_d":fixed["d"],"optimal_d":optimized["d"],
+            "fixed_patterns":fixed["affine_feasible_patterns"],
+            "optimal_patterns":optimized["affine_feasible_patterns"],
+            "optimizer_nodes":optimized["optimizer_nodes"],
+            "fixed_visited":fixed["visited"],"optimal_visited":optimized["visited"],
+            "scope":"star-graph structured SAT control; pattern count, not runtime"}
+
+def solve_ranked(domains, rows, *, stats=None, optimize=False):
     """Solve by enumerating only affine-feasible split patterns.
 
     For consistent affine relaxation, the number of patterns is exactly 2**d
@@ -144,7 +239,14 @@ def solve_ranked(domains, rows, *, stats=None):
             fixed.extend((m<<(2*i),b) for m,b in affine_rows(r))
     if affine_solve(width,fixed) is None:
         return None
-    basis=independent_coordinates(width,fixed,[2*i for i in triple])
+    if optimize:
+        opt=minimum_rank_coordinates(width,fixed,[(2*i,2*i+1) for i in triple])
+        coords=opt["coordinates"]
+        report["optimizer_nodes"]=opt["search_nodes"]
+    else:
+        coords=tuple(2*i for i in triple)
+    report["split_coordinates"]=coords
+    basis=independent_coordinates(width,fixed,coords)
     report["d"]=len(basis)
     report["affine_feasible_patterns"]=1<<len(basis)
     for bits in product(range(2),repeat=len(basis)):
@@ -153,10 +255,11 @@ def solve_ranked(domains, rows, *, stats=None):
         if representative is None:
             raise AssertionError("independent coordinate assignment infeasible")
         report["visited"]+=1
-        for i in triple:
-            bit=(representative>>(2*i))&1
+        for i,j in zip(triple,coords):
+            bit=(representative>>j)&1
+            local=j-2*i
             branch.extend((m<<(2*i),b) for m,b in affine_rows(
-                {v for v in relations[i] if v&1 == bit}))
+                {v for v in relations[i] if ((v>>local)&1) == bit}))
         ans=affine_solve(width,branch)
         if ans is not None:
             witness=tuple(r[(ans>>(2*i))&3] for i,r in enumerate(relations))
@@ -215,4 +318,4 @@ def audit():
             "independent_review":"NOT_PERFORMED","global_promotion":"NONE"}
 
 if __name__=="__main__":
-    print(json.dumps({**audit(), 'rank_demo': rank_demo()},indent=2,sort_keys=True))
+    print(json.dumps({**audit(), 'rank_demo': rank_demo(), 'optimum_demo': optimum_demo()},indent=2,sort_keys=True))

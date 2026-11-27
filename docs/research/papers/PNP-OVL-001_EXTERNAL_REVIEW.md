@@ -16,3 +16,5 @@ Reviewer response (to be filled by reviewer):
 Do not equate CI, AI review or self-review with independent expert acceptance. If prior art subsumes the results, retain the artifact as exposition/formalization and open a new, stronger research question. No P versus NP promotion is permitted by this packet.
 
 Additional review: assess Theorem D separately, including rank-nullity, exact feasible-pattern count, bit-cost accounting, comparison with affine backdoor algorithms, and the structured 21-component control. Do not interpret this as an evaluation of the 21-bit state identifier.
+
+Theorem E review: check quotient-space kernel proof, Vertex Cover reduction, exact depth budget, end-to-end optimizer accounting, and distinction between predicted pattern counts and measured visited leaves. Compare with submodular vertex cover and matroid-rank minimization before any priority claim. Full formalization remains open.

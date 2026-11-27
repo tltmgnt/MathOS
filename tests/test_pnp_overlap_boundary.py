@@ -2,7 +2,8 @@ import unittest
 from itertools import product
 from mathos.research.pnp_overlap_boundary import (
     project, affine_rows, affine_solve, solve, verify, reduce_3sat, audit,
-    independent_coordinates, solve_ranked, rank_demo)
+    independent_coordinates, solve_ranked, rank_demo,
+    minimum_rank_coordinates, graph_rank_instance, optimum_demo)
 
 class OverlapTests(unittest.TestCase):
     def test_all_domains(self):
@@ -81,6 +82,46 @@ class OverlapTests(unittest.TestCase):
         self.assertEqual(r["unfiltered_patterns"],2097152)
         self.assertIsNone(solve_ranked([],[(0,1)]))
         self.assertEqual(solve_ranked([],[]),())
+
+    def test_minimum_rank_exhaustive(self):
+        pairs=((0,1),(2,3))
+        for rows in product([(m,b) for m in range(16) for b in range(2)],repeat=2):
+            opt=minimum_rank_coordinates(4,rows,pairs)
+            expected=min(len(independent_coordinates(4,rows,s))
+                         for s in product(*pairs))
+            self.assertEqual(opt["d"],expected)
+            self.assertTrue(all(j in p for j,p in zip(opt["coordinates"],pairs)))
+            self.assertEqual(len(independent_coordinates(4,rows,opt["coordinates"])),expected)
+
+    def test_vertex_cover_embedding(self):
+        from itertools import combinations
+        edges=list(combinations(range(4),2))
+        for mask in range(1<<len(edges)):
+            es=[e for j,e in enumerate(edges) if (mask>>j)&1]
+            ds,rows=graph_rank_instance(es)
+            opt=minimum_rank_coordinates(2*len(ds),rows,[(2*i,2*i+1) for i in range(len(ds))])
+            expected=min(s.bit_count() for s in range(16)
+                         if all((s>>a)&1 or (s>>b)&1 for a,b in es))
+            self.assertEqual(opt["d"],expected)
+
+    def test_optimized_solver_against_exhaustive(self):
+        for ds in ([(10,15),(15,10)],[(15,15),(10,15)]):
+            for rows in product([(m,b) for m in range(16) for b in range(2)],repeat=2):
+                expected=any(all(((u|(v<<2))&m).bit_count()%2==b for m,b in rows)
+                             for u,v in product(project(*ds[0]),project(*ds[1])))
+                w=solve_ranked(ds,rows,optimize=True)
+                self.assertEqual(w is not None,expected)
+                if w is not None:
+                    self.assertTrue(verify(ds,rows,w))
+
+    def test_optimum_demo_and_degenerate(self):
+        demo=optimum_demo()
+        self.assertEqual((demo["fixed_d"],demo["optimal_d"]),(21,1))
+        self.assertEqual((demo["fixed_patterns"],demo["optimal_patterns"]),(2097152,2))
+        self.assertEqual(minimum_rank_coordinates(0,[],[])["d"],0)
+        self.assertEqual(minimum_rank_coordinates(2,[(1,1)],[(0,1)])["d"],0)
+        with self.assertRaises(ValueError):
+            minimum_rank_coordinates(2,[],[(0,2)])
 
     def test_invalid_and_empty(self):
         self.assertEqual(solve([],[]),())
