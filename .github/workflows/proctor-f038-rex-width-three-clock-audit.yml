@@ -1,0 +1,102 @@
+name: Proctor F038 RE-X width-three clock audit
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-clock-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native decoder and original Python interpreter control
+        run: |
+          set -euo pipefail
+          g++ -std=c++17 -O3 -Wall -Wextra mathos/research/f038_rex_width_three_native.cpp -o /tmp/w3-native
+          python - <<'PY'
+          from mathos.research.f038_unrestricted_universal_search import encode_tm,decode_tm,tape_run,encoded,pool
+          C=pool(2)
+          T=[(1,0,1)]*3+[(2,0,1)]*3+[(3,2,-1)]*3+[(4,0,-1)]*3+[(5,0,0)]*3
+          d=encode_tm(T,5)
+          assert decode_tm(d)==(5,T)
+          assert tape_run(C,2,0,d,4) is None and tape_run(C,2,0,d,5)==0
+          open('/tmp/w3-small.desc','w').write(d)
+          open('/tmp/w3-small.fixtures','w').write(f'control 2 5 {encoded(2,0,C)} 00 0 3\n')
+          PY
+          /tmp/w3-native /tmp/w3-small.desc /tmp/w3-small.fixtures | tee /tmp/w3-small.out
+          grep -Fx 'RUN control 5 0 3 00 0 2' /tmp/w3-small.out
+          cp /tmp/w3-small.desc /tmp/w3-bad.desc
+          printf '0' >> /tmp/w3-bad.desc
+          if /tmp/w3-native /tmp/w3-bad.desc /tmp/w3-small.fixtures; then exit 1; fi
+          head -c -1 /tmp/w3-small.desc > /tmp/w3-bad.desc
+          if /tmp/w3-native /tmp/w3-bad.desc /tmp/w3-small.fixtures; then exit 1; fi
+      - name: Compile and verify exact quotient; stream original descriptor
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          node --max-old-space-size=6144 "${p}_admission.js" descriptor > /tmp/w3.desc 2> /tmp/w3-stats.json
+          node "${p}_admission.js" fixtures > /tmp/w3.fixtures
+          node <<'JS'
+          const a=require('node:assert/strict'),fs=require('node:fs');
+          const r=JSON.parse(fs.readFileSync('/tmp/w3-stats.json','utf8'));
+          a.deepEqual(r,{originalStates:11349426,reachableStates:11349426,unreachableStates:0,quotientStates:10922894,initialBlocks:71,splits:10922824,processed:32768685,predecessors:158682584,transitionChecks:34048278,originalBits:964701214,quotientBits:928445994,reachedHalt:true});
+          a.equal(fs.statSync('/tmp/w3.desc').size,928445994);
+          JS
+      - name: Native domain-two original-selector executions
+        run: |
+          set -euo pipefail
+          grep -v '^m3-forced ' /tmp/w3.fixtures > /tmp/w3-m2.fixtures
+          /tmp/w3-native /tmp/w3.desc /tmp/w3-m2.fixtures | tee /tmp/w3-m2.out
+          python -m mathos.research.f038_rex_width_three_native_verify /tmp/w3-m2.fixtures /tmp/w3-m2.out | tee /tmp/w3-m2.json
+          python - <<'PY'
+          import json
+          r=json.loads(open('/tmp/w3-m2.json').read().split(' ',1)[1])
+          assert [x['t'] for x in r['rows']]==[825112955,1297519076,665681141,27879501]
+          assert [x['slot']['stage'] if x['slot'] else None for x in r['rows']]==[928446024,928446025,None,None]
+          assert [x['slot']['min_k'] if x['slot'] else None for x in r['rows']]==[58027877,58027877,None,None]
+          PY
+      - name: Independent exact phase-clock accounting
+        run: |
+          set -euo pipefail
+          for case in empty edge-SAT edge-UNSAT m3-forced; do
+            node mathos/research/f038_rex_width_three_phase_audit.js "$case" > "/tmp/w3-clock-$case.json"
+          done
+          python - <<'PY'
+          import json
+          cases=['empty','edge-SAT','edge-UNSAT','m3-forced']
+          r=[json.loads(open('/tmp/w3-clock-'+c+'.json').read().split(' ',1)[1]) for c in cases]
+          assert [x['t'] for x in r]==[825112955,1297519076,665681141,72540199790]
+          assert [x['worker'] for x in r]==[672161844,1144561610,512737138,71101906698]
+          assert [x['steps'] for x in r]==[53728,63657,50105,589937]
+          assert [x['N'] for x in r]==[3446,3635,3441,12252]
+          assert [x['upper'] for x in r]==[4814673544,6017241590,4483495618,187935050224]
+          assert r[-1]['head']==229473 and r[-1]['span']==232294
+          print('REX-024D5B_CLOCK_MODEL_OK')
+          PY
+      - name: Native forced domain-three physical coverage
+        run: |
+          set -euo pipefail
+          grep '^m3-forced ' /tmp/w3.fixtures > /tmp/w3-m3.fixtures
+          /tmp/w3-native /tmp/w3.desc /tmp/w3-m3.fixtures | tee /tmp/w3-m3.out
+          python -m mathos.research.f038_rex_width_three_native_verify /tmp/w3-m3.fixtures /tmp/w3-m3.out
+      - name: Governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5b > /tmp/w3-admission-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-admission-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5B_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
