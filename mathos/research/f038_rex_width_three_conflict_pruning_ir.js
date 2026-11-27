@@ -145,12 +145,12 @@ function machine(full=false){
  function unary(t,d){const seen=[label(),label()];for(let k=0;k<=1;k++)bind(seen[k],rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?app(t,y==="0"?"1":"0",mv(Q,1,seen[k||+(y==="0")])):reject)):x==="1"&&k===1?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject));return start(t,seen[0]);}
  let init=start(A,word(A,"00000",pass));for(let t of G.slice().reverse())init=unary(t,init);
  const entry=start(D,word(D,scopes.join(""),start(Q,field(null,start(P,field(P,init))))));
- return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q};
+ return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry};
 }
 
-function executeIR(J,inputs){
+function executeIR(J,inputs,trace=null){
  const T=inputs.map(s=>["L",...s,"_"]),h=T.map(()=>0);let pc=J.entry,steps=0,jumps=0;
- while(true){const a=J.ins[pc];if(a.op==="halt"||a.op==="reject")return {status:a.op,steps,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};if(a.op==="jump"){if(++jumps>10000000)throw Error("jump limit");pc=a.next;continue;}if(++steps>10000000)throw Error("step limit");const k=a.t,x=T[k][h[k]];
+ while(true){if(trace&&(pc===J.candidateEntry||pc===J.conflictEntry))trace(pc,T,h);const a=J.ins[pc];if(a.op==="halt"||a.op==="reject")return {status:a.op,steps,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};if(a.op==="jump"){if(++jumps>10000000)throw Error("jump limit");pc=a.next;continue;}if(++steps>10000000)throw Error("step limit");const k=a.t,x=T[k][h[k]];
   if(a.op==="read"){pc=a.next[J.alphabet.indexOf(x)];continue;}
   if(a.op==="write"){if(x==="L")throw Error("sentinel");T[k][h[k]]=a.next.v;}
   else if(a.op==="move"){h[k]+=a.next.dir;if(h[k]<0)throw Error("left");if(h[k]===T[k].length)T[k].push("_");}else throw Error("op");pc=a.next.d;
