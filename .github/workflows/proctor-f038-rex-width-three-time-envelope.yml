@@ -1,0 +1,84 @@
+name: Proctor F038 RE-X width-three time envelope
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-time-envelope']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Explicit worker envelope and exact phase regression
+        run: |
+          set -euo pipefail
+          for case in empty edge-SAT edge-UNSAT m3-forced m4-forced; do
+            node mathos/research/f038_rex_width_three_time_envelope_audit.js "$case" > "/tmp/w3-time-$case.json"
+          done
+          node <<'JS'
+          const T=require('./mathos/research/f038_rex_width_three_time_envelope.js'),S=require('./mathos/research/f038_rex_width_three_space_bound.js');
+          for(let m=2;m<=10000;m++)T.envelope(m,S);
+          for(let m of [2**20,2**30,2**40,2**50,Number.MAX_SAFE_INTEGER])T.envelope(m,S);
+          JS
+          python - <<'PY'
+          import json
+          cases=['empty','edge-SAT','edge-UNSAT','m3-forced','m4-forced']
+          r=[json.loads(open('/tmp/w3-time-'+c+'.json').read().split(' ',1)[1]) for c in cases]
+          assert [x['steps'] for x in r]==[53728,63657,50105,589937,1182966]
+          assert [x['worker'] for x in r]==[672161844,1144561610,512737138,71101906698,292006191202]
+          assert [x['N'] for x in r]==[3446,3635,3441,12252,25391]
+          assert [list(x['totals'].values()) for x in r]==[[43845,2027,6089,1767],[45763,9739,6388,1767],[45471,4629,5,0],[178415,394564,14131,2827],[351482,812339,15798,3347]]
+          assert [int(x['bounds']['T']) for x in r]==[75908400,75908400,75908400,466730040,1375737760]
+          assert [int(x['bounds']['physical']) for x in r]==[16609213370408,16609213370408,16609213370408,527745658129208,4604982240768328]
+          assert all(len(x['ledger']['local'])==10 for x in r)
+          assert [len(x['ledger']['select']) for x in r]==[10,10,1,10,10]
+          print('REX-024D5D_TIME_ENVELOPE_OK')
+          PY
+      - name: Governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5d > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5D_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+      - name: Compile exact quotient and native original-format interpreter
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          node --max-old-space-size=6144 "${p}_admission.js" descriptor > /tmp/w3.desc 2> /tmp/w3-stats.json
+          node "${p}_admission.js" fixtures | grep '^m4-forced ' > /tmp/w3-four.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/w3-native
+          python - <<'PY'
+          import json,os
+          r=json.load(open('/tmp/w3-stats.json'))
+          assert r['quotientStates']==10922894 and r['quotientBits']==928445994 and r['transitionChecks']==34048278
+          assert os.path.getsize('/tmp/w3.desc')==928445994
+          PY
+      - name: Native domain-four exact halt and cutoff
+        run: |
+          set -euo pipefail
+          /tmp/w3-native /tmp/w3.desc /tmp/w3-four.fixtures | tee /tmp/w3-four.out
+          python -m mathos.research.f038_rex_width_three_native_verify /tmp/w3-four.fixtures /tmp/w3-four.out | tee /tmp/w3-four-native.json
+          python - <<'PY'
+          import json
+          r=json.loads(open('/tmp/w3-four-native.json').read().split(' ',1)[1])
+          x=r['rows'][0]
+          assert len(r['rows'])==1 and x['name']=='m4-forced'
+          assert (x['t'],x['head'],x['span'])==(299944027294,568801,574997)
+          assert x['witness']=='000100100100100000010010010010000001001011111111001011111111001101000'
+          assert x['slot']=={'stage':928446033,'min_k':48865581,'s3':57}
+          PY
