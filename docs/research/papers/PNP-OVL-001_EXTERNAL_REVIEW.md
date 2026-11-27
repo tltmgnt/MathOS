@@ -1,0 +1,16 @@
+# Independent review packet — PNP-OVL-001
+
+Review requested in principle only; no reviewer contacted and no review completed.
+Provide the exact commit, PNP-OVL-001.md, prior-art note, Python test log, Lean log and any counterexamples to a researcher in Boolean CSP or complexity theory.
+
+Reviewer response (to be filled by reviewer):
+- Identity/affiliation and consent to attribution:
+- Commit and exact theorem statements reviewed:
+- Correctness of Theorems A/B/C (each separately):
+- Missing assumptions, counterexamples or complexity accounting issues:
+- Prior-art citations and novelty determination (each theorem):
+- Reproducibility commands and observed results:
+- Publication significance and requested revisions:
+- Date and independent review disposition:
+
+Do not equate CI, AI review or self-review with independent expert acceptance. If prior art subsumes the results, retain the artifact as exposition/formalization and open a new, stronger research question. No P versus NP promotion is permitted by this packet.

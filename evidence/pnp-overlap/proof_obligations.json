@@ -1,0 +1,21 @@
+{
+  "id": "PNP-OVL-001",
+  "classification": "SCOPED_CANDIDATE",
+  "global_promotion": "NONE",
+  "novelty": "NOT_ESTABLISHED",
+  "independent_review": "NOT_PERFORMED",
+  "obligations": {
+    "local_classification": "ARGUMENT_DRAFT",
+    "affine_tractability": "ARGUMENT_DRAFT",
+    "gadget_and_selector": "LEAN_SOURCE_AWAITING_REPLAY",
+    "reduction_correctness": "ARGUMENT_DRAFT",
+    "encoding_complexity": "ARGUMENT_DRAFT",
+    "np_membership": "ARGUMENT_DRAFT",
+    "parameterized_bound": "ARGUMENT_DRAFT",
+    "python_tests": "AWAITING_CI",
+    "full_lean_proof": "OPEN",
+    "prior_art": "PRELIMINARY",
+    "external_review": "OPEN"
+  },
+  "canonical_pnp_status": "OPEN"
+}

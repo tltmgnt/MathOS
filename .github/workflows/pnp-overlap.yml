@@ -1,0 +1,52 @@
+name: PNP overlap boundary scoped checks
+on:
+  push:
+    paths:
+      - 'formal/PnpOverlapBoundary.lean'
+      - 'mathos/research/pnp_overlap_boundary.py'
+      - 'tests/test_pnp_overlap_boundary.py'
+      - 'docs/research/papers/PNP-OVL-001*'
+      - '.github/workflows/pnp-overlap.yml'
+  pull_request:
+    paths:
+      - 'formal/PnpOverlapBoundary.lean'
+      - 'mathos/research/pnp_overlap_boundary.py'
+      - 'tests/test_pnp_overlap_boundary.py'
+      - 'docs/research/papers/PNP-OVL-001*'
+      - '.github/workflows/pnp-overlap.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          mkdir -p artifacts/pnp-overlap
+          set -o pipefail
+          python -m unittest discover -s tests -p 'test_pnp_overlap_boundary.py' -v 2>&1 | tee artifacts/pnp-overlap/python.txt
+          python -m mathos.research.pnp_overlap_boundary > artifacts/pnp-overlap/enumeration.json
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean --version | tee artifacts/pnp-overlap/lean-version.txt
+          lean -DwarningAsError=true formal/PnpOverlapBoundary.lean 2>&1 | tee artifacts/pnp-overlap/lean.txt
+          for theorem in gadget_forward gadget_lift selector_sound selector_complete; do
+            grep -Fx "'PnpOverlapBoundary.$theorem' does not depend on any axioms" artifacts/pnp-overlap/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-overlap-scoped-evidence
+          path: artifacts/pnp-overlap/
+          if-no-files-found: error
