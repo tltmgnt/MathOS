@@ -6,9 +6,11 @@ on:
       - 'mathos/research/pnp_overlap_boundary.py'
       - 'mathos/research/pnp_overlap_certificates.py'
       - 'mathos/research/pnp_overlap_adaptive.py'
+      - 'mathos/research/pnp_overlap_obstructions.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
+      - 'tests/test_pnp_overlap_obstructions.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   pull_request:
@@ -17,9 +19,11 @@ on:
       - 'mathos/research/pnp_overlap_boundary.py'
       - 'mathos/research/pnp_overlap_certificates.py'
       - 'mathos/research/pnp_overlap_adaptive.py'
+      - 'mathos/research/pnp_overlap_obstructions.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
+      - 'tests/test_pnp_overlap_obstructions.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   workflow_dispatch:
@@ -45,6 +49,8 @@ jobs:
           python -m mathos.research.pnp_overlap_certificates > artifacts/pnp-overlap/certificates.json
           python -m unittest discover -s tests -p 'test_pnp_overlap_adaptive.py' -v 2>&1 | tee artifacts/pnp-overlap/adaptive-tests.txt
           python -m mathos.research.pnp_overlap_adaptive > artifacts/pnp-overlap/adaptive.json
+          python -m unittest discover -s tests -p 'test_pnp_overlap_obstructions.py' -v 2>&1 | tee artifacts/pnp-overlap/obstruction-tests.txt
+          python -m mathos.research.pnp_overlap_obstructions > artifacts/pnp-overlap/obstructions.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
