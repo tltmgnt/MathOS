@@ -1,0 +1,88 @@
+name: Proctor F038 RE-X adaptive two-prefix separator search
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-two-prefix']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent graph, edge-list, traces and candidate ceilings
+        run: |
+          node mathos/research/f038_rex_width_three_two_prefix_audit.js > /tmp/d6h.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6h.json');for(const [k,v] of Object.entries({cases:673,modes:1346,sat:1110,unsat:236,conditioned:230,one:40,two:190,twoSat:180,twoUnsat:10,prefixConflicts:42,cacheHits:112,conditionedSat:216,conditionedUnsat:14,fallback:898,early:218,visits:3534,conflicts:1486,components:7064,separators:370,localChecks:3534,graphChecks:7064,improved:22,regressed:1106,tied:218,oldSteps:50065447,newSteps:55131083}))a.equal(r[k],v,k);a.deepEqual(r.ir,[13483,13482]);console.log('D6H_TWO_PREFIX_OK')"
+      - name: Independent separator-conditioned host reference
+        run: |
+          node mathos/research/f038_rex_width_three_separator_reference.js > /tmp/d6h-separator.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6h-separator.json');for(const [k,v] of Object.entries({cases:513,sat:451,unsat:62,selected:73,one:49,two:24,assignments:280,candidates:5661}))a.equal(r[k],v,k);console.log('D6H_SEPARATOR_REFERENCE_OK')"
+      - name: Hard connected separator family
+        run: |
+          node mathos/research/f038_rex_width_three_two_prefix_hard.js > /tmp/d6h-hard.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6h-hard.json');a.equal(r.cases,4);a.equal(r.modes,8);const s=r.rows.find(x=>x.m===3&&!x.unsat&&!x.full);a.equal(s.visits,82);a.equal(s.oldVisits,1489);a.equal(s.clock,9450537036);a.equal(s.oldClock,53785925578);console.log('D6H_HARD_SEPARATOR_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6H_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, empty-domain, cross-sat, one-prefix-sat, two-prefix-unsat, two-prefix-sat, prefix-pair, hard-3-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector replay, quotient and cutoff
+        run: node --max-old-space-size=4096 mathos/research/f038_rex_width_three_two_prefix_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native original-format replay and one-short cutoff
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node --max-old-space-size=4096 "${p}_two_prefix_replay.js" "$mode" descriptor > /tmp/d6h.desc
+          node "${p}_two_prefix_replay.js" "$mode" fixtures > /tmp/d6h.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6h-native
+          /tmp/d6h-native /tmp/d6h.desc /tmp/d6h.fixtures > /tmp/d6h-native.out
+          python -m mathos.research.f038_rex_width_three_two_prefix_native_verify /tmp/d6h.fixtures /tmp/d6h-native.out "$mode"

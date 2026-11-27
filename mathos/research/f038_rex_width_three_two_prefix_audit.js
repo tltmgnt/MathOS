@@ -97,7 +97,7 @@ function audit(U,E,Barrier,Prior,Direct,OldAudit,Local,F,Ref){
    if(ref.bits){sat++;ok(E.valid(raw,a.tapes[0]),"witness");}else unsat++;
    if(actual.conditioned){conditioned++;if(actual.conditioned===1)one++;else{two++;if(ref.bits)twoSat++;else twoUnsat++;}if(ref.bits)conditionedSat++;else conditionedUnsat++;const r=actual.conditioned===2?residual2:residual,m=f.m**actual.conditioned;ok(actual.seps.length<=m&&actual.trials.length<=m*r.reduce((n,c)=>n+f.m**c.length,0),"separator ceiling");}else if(domains){fallback++;ok(actual.trials.length<=original.reduce((n,c)=>n+f.m**c.length,0),"fallback ceiling");}else early++;
    visits+=actual.trials.length;conflicts+=actual.conflicts.length;components+=actual.components.length;separators+=actual.seps.length;
-   const old=Local.executeIR(O[i],I);ok(old.status===a.status&&old.tapes[0]===a.tapes[0],"D6F parity");
+   const old=Local.executeIR(O[i],I);ok(old.status===a.status&&old.tapes[0]===a.tapes[0],"D6G parity");
    oldSteps+=old.steps;newSteps+=a.steps;if(a.steps<old.steps)improved++;else if(a.steps>old.steps)regressed++;else tied++;
    if(i===0&&(f.name.startsWith("family-")||f.name.startsWith("prefix-star")||f.name.startsWith("residual-")||f.name==="late-center-trap"||f.name.startsWith("two-"))){
     let clock=null,oldClock=null;if(ref.bits){clock=F.count(j,I).clock;oldClock=F.count(O[i],I).clock;}
