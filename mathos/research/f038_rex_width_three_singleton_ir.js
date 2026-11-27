@@ -4,7 +4,7 @@ function machine(){
  const alphabet=["L","0","1",":",";","|","_",",","x","H","b"],ins=[],symbols=alphabet.filter(x=>x!=="L"&&x!=="_");
  const add=(op,t,next)=>{let n=ins.length;ins.push({op,t,next});return n;},label=()=>add("jump",0,-1),bind=(n,d)=>{if(ins[n].op!=="jump"||ins[n].next!==-1)throw Error("label");ins[n].next=d;};
  const halt=add("halt",0,0),reject=add("reject",0,0),rd=(t,f)=>add("read",t,alphabet.map(f)),wr=(t,v,d)=>add("write",t,{v,d}),mv=(t,dir,d)=>add("move",t,{dir,d}),bit=x=>x==="0"||x==="1",test=(t,p,y,n)=>rd(t,x=>p(x)?y:n),loop=fn=>{let n=label();bind(n,fn(n));return n;};
- const Q=0,G=Array.from({length:9},(_,i)=>i+1),R=[10,11,12],D=13,P=14,X=15;
+ const Q=15,G=Array.from({length:9},(_,i)=>i+1),R=[10,11,12],D=13,P=14,X=0;
  const start=(t,d)=>loop(n=>test(t,x=>x==="L",mv(t,1,d),mv(t,-1,n)));
  const app=(t,v,d)=>wr(t,v,mv(t,1,d));
  function word(t,s,d){for(let i=s.length-1;i>=0;i--)d=app(t,s[i],d);return d;}
@@ -49,7 +49,7 @@ function machine(){
  }
  for(let t of G.slice().reverse())entry=unary(t,entry);
  entry=start(Q,field(null,start(P,field(P,entry))));
- return {alphabet,ins,tapes:16,entry,witnessTape:X};
+ return {alphabet,ins,tapes:16,entry,witnessTape:X,streamTape:Q};
 }
 
 function executeIR(J,inputs){
