@@ -1,0 +1,58 @@
+name: Proctor F038 RE-X width-three mask router
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-mask-router']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_mask_router
+          node --check "$p.js"
+          for suite in ir physical physical3 physicalTrap; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3router-$suite.txt"
+          done
+          node --max-old-space-size=6144 "${p}_replay.js" > /tmp/w3router-replay.txt
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s,tag='F038_REX_WIDTH_THREE_MASK_ROUTER_OK '){
+            const a=fs.readFileSync('/tmp/w3router-'+s+'.txt','utf8').trim();
+            assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));
+          }
+          const a=read('ir'),b=read('physical'),c=read('physical3'),d=read('physicalTrap'),r=read('replay','F038_REX_WIDTH_THREE_MASK_ROUTER_REPLAY_OK ');
+          for(const x of [a,b,c,d])assert.deepEqual(x.ir,{raw:11941,reachable:10120,compact:5217,rounds:612,checked:10120});
+          for(const x of [b,c,d]){assert.equal(x.q,11765353);assert.equal(x.logical,155490);assert.equal(x.bits,1000055009);}
+          assert.equal(a.rows.length,27);
+          assert.deepEqual(a.totals,{maskBits:485,candidates:273,allowed:190,primitives:362684,transitions:0});
+          assert.deepEqual(b.totals,{maskBits:40,candidates:18,allowed:3,primitives:24557,transitions:177219338});
+          assert.deepEqual(c.totals,{maskBits:111,candidates:81,allowed:48,primitives:63710,transitions:479586556});
+          assert.deepEqual(d.totals,{maskBits:38,candidates:16,allowed:12,primitives:34835,transitions:446806226});
+          assert.deepEqual(b.rows.map(x=>x.t),[158315656,18903682]);
+          assert.deepEqual(d.rows[0].ids,[5,13,40,41,68,69,127]);
+          assert.deepEqual(r,{q:11765353,entries:35296059,t:18903682,span:14810,output:'0;1;',cutoffs:[0,1,100,18903681],rejects:[333479,218779,6946871]});
+          assert.equal(b.totals.transitions+c.totals.transitions+d.totals.transitions+r.t,1122515802);
+          JS
+          python -m mathos.research.tga_f038_rex_024d3a2 > /tmp/w3router-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3router-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D3A2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
