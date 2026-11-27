@@ -1,0 +1,80 @@
+name: Proctor F038 RE-X integrated physical gap roundtrip
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-gap-integration']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Integrated gap stream, independent decoder budget and conditional resources
+        run: |
+          node mathos/research/f038_rex_width_three_gap_integration_audit.js > /tmp/d5u.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5u.json');a.equal(r.cases,262);a.equal(r.accepted,518);a.equal(r.refused,6);a.equal(r.regressions,518);a.equal(r.arith,20034);a.equal(r.budgetChecks,1536);a.equal(r.budgetRefusals,1024);a.equal(r.physicalFaults,4);console.log('D5U_INTEGRATED_GAP_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5U_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [all-active, ternary-chain, ternary-empty, reverse-chain-cap, radius-three-refusal, ternary-three-rank]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_gap_integration_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_gap_integration_replay.js" "$mode" descriptor > /tmp/d5u.desc
+          node "${p}_gap_integration_replay.js" "$mode" fixtures > /tmp/d5u.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5u-native
+          /tmp/d5u-native /tmp/d5u.desc /tmp/d5u.fixtures > /tmp/d5u-native.out
+          python -m mathos.research.f038_rex_width_three_gap_integration_native_verify /tmp/d5u.fixtures /tmp/d5u-native.out "$mode"
