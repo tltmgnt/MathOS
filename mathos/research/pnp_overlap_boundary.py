@@ -89,6 +89,95 @@ def solve(domains, rows):
             return witness
     return None
 
+
+def independent_coordinates(width, rows, coordinates):
+    """Greedy basis of coordinate rows modulo the affine coefficient row space.
+
+    Returned coordinate indices are independent modulo that space.
+    RHS values play no role in rank; consistency must be checked separately.
+    """
+    pivots = {}
+    def insert(mask):
+        while mask:
+            p=mask.bit_length()-1
+            if p not in pivots:
+                pivots[p]=mask
+                return True
+            mask ^= pivots[p]
+        return False
+    for m,b in rows:
+        if not isinstance(m,int) or not 0 <= m < (1<<width) or b not in (0,1):
+            raise ValueError("invalid affine row")
+        insert(m)
+    basis=[]
+    for j in coordinates:
+        if not isinstance(j,int) or not 0 <= j < width:
+            raise ValueError("invalid coordinate")
+        if insert(1<<j):
+            basis.append(j)
+    return tuple(basis)
+
+def solve_ranked(domains, rows, *, stats=None):
+    """Solve by enumerating only affine-feasible split patterns.
+
+    For consistent affine relaxation, the number of patterns is exactly 2**d
+    where d is the rank increase from adding all chosen split coordinates.
+    stats, if supplied, receives counters; an early SAT exit may visit fewer.
+    """
+    domains, rows = tuple(domains), tuple(rows)
+    width=2*len(domains)
+    if any(not isinstance(m,int) or not 0 <= m < (1<<width) or b not in (0,1)
+           for m,b in rows):
+        raise ValueError("invalid affine row")
+    relations=[project(*d) for d in domains]
+    triple=[i for i,r in enumerate(relations) if len(r)==3]
+    report={"k":len(triple),"d":None,"affine_feasible_patterns":0,"visited":0}
+    if stats is not None:
+        stats.clear()
+        stats.update(report)
+        report=stats
+    if any(not r for r in relations):
+        return None
+    fixed=list(rows)
+    for i,r in enumerate(relations):
+        if len(r)!=3:
+            fixed.extend((m<<(2*i),b) for m,b in affine_rows(r))
+    if affine_solve(width,fixed) is None:
+        return None
+    basis=independent_coordinates(width,fixed,[2*i for i in triple])
+    report["d"]=len(basis)
+    report["affine_feasible_patterns"]=1<<len(basis)
+    for bits in product(range(2),repeat=len(basis)):
+        branch=fixed+[(1<<j,b) for j,b in zip(basis,bits)]
+        representative=affine_solve(width,branch)
+        if representative is None:
+            raise AssertionError("independent coordinate assignment infeasible")
+        report["visited"]+=1
+        for i in triple:
+            bit=(representative>>(2*i))&1
+            branch.extend((m<<(2*i),b) for m,b in affine_rows(
+                {v for v in relations[i] if v&1 == bit}))
+        ans=affine_solve(width,branch)
+        if ans is not None:
+            witness=tuple(r[(ans>>(2*i))&3] for i,r in enumerate(relations))
+            if not verify(domains,rows,witness):
+                raise AssertionError("invalid lifted witness")
+            return witness
+    return None
+
+def rank_demo(k=21):
+    """Structured UNSAT family: all u equal; both global u choices fail."""
+    if k<2:
+        raise ValueError("k must be at least two")
+    ds=[(10,15),(15,10)]+[(10,15)]*(k-2)
+    # First relation v implies u; second u implies v.
+    # Set v0=1, v1=0, forcing conflicting u values, while all u are equal.
+    rows=[(2,1),(8,0)]+[(1|(1<<(2*i)),0) for i in range(1,k)]
+    stats={}
+    assert solve_ranked(ds,rows,stats=stats) is None
+    return {**stats,"unfiltered_patterns":1<<k,"result":"UNSAT",
+            "scope":"structured control, not an unrestricted SAT benchmark"}
+
 def reduce_3sat(clauses):
     """Signed nonzero literal IDs; exactly three literals per clause.
     One isolated two-block component per occurrence. u is literal truth,
@@ -126,4 +215,4 @@ def audit():
             "independent_review":"NOT_PERFORMED","global_promotion":"NONE"}
 
 if __name__=="__main__":
-    print(json.dumps(audit(),indent=2,sort_keys=True))
+    print(json.dumps({**audit(), 'rank_demo': rank_demo()},indent=2,sort_keys=True))

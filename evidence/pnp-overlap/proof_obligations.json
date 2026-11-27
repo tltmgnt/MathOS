@@ -7,15 +7,17 @@
   "obligations": {
     "local_classification": "ARGUMENT_DRAFT",
     "affine_tractability": "ARGUMENT_DRAFT",
-    "gadget_and_selector": "LEAN_SOURCE_AWAITING_REPLAY",
+    "gadget_and_selector": "LEAN_CORRECTED_AWAITING_REPLAY",
     "reduction_correctness": "ARGUMENT_DRAFT",
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "AWAITING_CI",
+    "python_tests": "BASELINE_5_GROUPS_PASSED_RANK_EXTENSION_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "PRELIMINARY",
-    "external_review": "OPEN"
+    "external_review": "OPEN",
+    "rank_sensitive_bound": "ARGUMENT_DRAFT",
+    "rank_projection_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }

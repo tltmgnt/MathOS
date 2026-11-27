@@ -1,7 +1,8 @@
 import unittest
 from itertools import product
 from mathos.research.pnp_overlap_boundary import (
-    project, affine_rows, affine_solve, solve, verify, reduce_3sat, audit)
+    project, affine_rows, affine_solve, solve, verify, reduce_3sat, audit,
+    independent_coordinates, solve_ranked, rank_demo)
 
 class OverlapTests(unittest.TestCase):
     def test_all_domains(self):
@@ -45,6 +46,41 @@ class OverlapTests(unittest.TestCase):
             self.assertEqual(w is not None,expected)
             if w is not None:
                 self.assertTrue(verify(ds,rows,w))
+
+    def test_rank_projection_exact(self):
+        for rows in product([(m,b) for m in range(16) for b in range(2)],repeat=2):
+            xs=[v for v in range(16) if all((v&m).bit_count()%2==b for m,b in rows)]
+            if not xs:
+                continue
+            coords=(0,2)
+            basis=independent_coordinates(4,rows,coords)
+            patterns={tuple((v>>j)&1 for j in coords) for v in xs}
+            images={tuple((v>>j)&1 for j in basis) for v in xs}
+            self.assertEqual(len(patterns),1<<len(basis))
+            self.assertEqual(len(images),len(patterns))
+
+    def test_rank_solver_against_exhaustive(self):
+        for ds in ([(10,15),(15,10)],[(10,15),(0,15)],[(15,15),(10,15)]):
+            for rows in product([(m,b) for m in range(16) for b in range(2)],repeat=2):
+                expected=any(all(((u|(v<<2))&m).bit_count()%2==b for m,b in rows)
+                             for u,v in product(project(*ds[0]),project(*ds[1])))
+                stats={}
+                w=solve_ranked(ds,rows,stats=stats)
+                self.assertEqual(w is not None,expected)
+                if w is not None:
+                    self.assertTrue(verify(ds,rows,w))
+                else:
+                    self.assertEqual(stats["visited"],stats["affine_feasible_patterns"])
+                if stats["d"] is not None:
+                    self.assertLessEqual(stats["d"],stats["k"])
+
+    def test_rank_demo(self):
+        r=rank_demo()
+        self.assertEqual((r["k"],r["d"],r["visited"],r["affine_feasible_patterns"]),
+                         (21,1,2,2))
+        self.assertEqual(r["unfiltered_patterns"],2097152)
+        self.assertIsNone(solve_ranked([],[(0,1)]))
+        self.assertEqual(solve_ranked([],[]),())
 
     def test_invalid_and_empty(self):
         self.assertEqual(solve([],[]),())

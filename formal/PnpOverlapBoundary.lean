@@ -8,7 +8,7 @@ theorem gadget_forward (x b : Bool) : valid x (x && b) = true := by
   cases x <;> cases b <;> decide
 
 theorem gadget_lift (u v : Bool) (h : valid u v = true) :
-    u && v = v := by
+    (u && v) = v := by
   cases u <;> cases v <;> first | rfl | exact False.elim (Bool.noConfusion h)
 
 def parity (a b c : Bool) : Bool := Bool.xor (Bool.xor a b) c

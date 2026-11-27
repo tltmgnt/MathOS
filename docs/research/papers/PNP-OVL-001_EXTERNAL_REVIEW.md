@@ -14,3 +14,5 @@ Reviewer response (to be filled by reviewer):
 - Date and independent review disposition:
 
 Do not equate CI, AI review or self-review with independent expert acceptance. If prior art subsumes the results, retain the artifact as exposition/formalization and open a new, stronger research question. No P versus NP promotion is permitted by this packet.
+
+Additional review: assess Theorem D separately, including rank-nullity, exact feasible-pattern count, bit-cost accounting, comparison with affine backdoor algorithms, and the structured 21-component control. Do not interpret this as an evaluation of the 21-bit state identifier.
