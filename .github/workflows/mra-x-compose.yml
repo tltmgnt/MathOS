@@ -19,7 +19,15 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - run: sudo apt-get update && sudo apt-get install -y libz3-4
+      - name: Install Z3 from Ubuntu package sources
+        run: |
+          apt_options=(
+            -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources
+            -o Dir::Etc::sourceparts=-
+            -o Acquire::Retries=3
+          )
+          sudo apt-get "${apt_options[@]}" update
+          sudo apt-get "${apt_options[@]}" install -y libz3-4
       - run: python3 tools/mra_x_compose.py --output compose-evidence.json
       - name: Replay certificates
         run: |
