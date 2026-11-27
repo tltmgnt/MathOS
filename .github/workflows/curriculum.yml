@@ -12,8 +12,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: curriculum-${{ github.ref }}
-  cancel-in-progress: true
+  group: curriculum-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 jobs:
   worked-examples:
     runs-on: ubuntu-latest
