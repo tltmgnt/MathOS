@@ -54,6 +54,6 @@ function machine(cursor){
  const selectStart=start(I,expect(I,"H",start(K,select(0))));
  const accepted=start(I,expect(I,"H",walk(I,1,59,test(I,x=>x==="1",selectStart,reject))));
  const entry=start(Z,word(Z,slots,start(C,start(A,start(M,start(Q,field(M,accepted)))))));
- return{alphabet,tapes:22,ins,entry,tupleEntry:J.tupleEntry,cursorEntry:J.entry,cleanupEntry:cleanup};
+ return{alphabet,tapes:22,ins,entry,tupleEntry:J.tupleEntry,cursorEntry:J.entry,cleanupEntry:cleanup,slotLoop};
 }
 module.exports={machine};
