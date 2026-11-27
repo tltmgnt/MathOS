@@ -1,0 +1,84 @@
+name: Proctor F038 RE-X FIFO normalization and macro verification
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-normalization-proof']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: FIFO normalization, compiled relocation and classification, sparse reference codec
+        run: |
+          node mathos/research/f038_rex_width_three_fifo_audit.js > /tmp/d5s.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5s.json');a.equal(r.arithmetic,20034);a.equal(r.cases,7);a.equal(r.malformed,5);a.equal(r.batchGain,7);a.equal(r.batchLoss,0);a.equal(r.jointGain,7);a.equal(r.jointLoss,0);a.deepEqual(r.thresholds,['144500646','216554541']);console.log('D5S_FIFO_ORACLE_OK')"
+          node mathos/research/f038_rex_width_three_fifo_macro_audit.js > /tmp/d5s-macro.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5s-macro.json');a.equal(r.batchEntries,12);a.equal(r.relocations,3840);a.equal(r.invalid,580);a.equal(r.maxExtra,28);a.equal(r.classifications,80675);a.equal(r.advances,80675);a.equal(r.maxClass,222);a.equal(r.maxAdvance,1146);console.log('D5S_COMPILED_NORMALIZATION_OK')"
+          node mathos/research/f038_rex_width_three_gap_reference.js > /tmp/d5s-gap.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5s-gap.json');a.equal(r.patterns,8215);a.equal(r.sparse,3569);a.equal(r.dense,4646);a.equal(r.strict,2125);a.equal(r.malformed,7);console.log('D5S_HOST_GAP_REFERENCE_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5S_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [all-active, ternary-chain, ternary-empty, reverse-chain-cap, radius-three-refusal, ternary-three-rank]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_fifo_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_fifo_replay.js" "$mode" descriptor > /tmp/d5s.desc
+          node "${p}_fifo_replay.js" "$mode" fixtures > /tmp/d5s.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5s-native
+          /tmp/d5s-native /tmp/d5s.desc /tmp/d5s.fixtures > /tmp/d5s-native.out
+          python -m mathos.research.f038_rex_width_three_fifo_native_verify /tmp/d5s.fixtures /tmp/d5s-native.out "$mode"
