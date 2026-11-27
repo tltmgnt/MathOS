@@ -15,7 +15,7 @@ function phaseAudit(U,A,B,W,F,R,C,V,L,E,Admission,name){
  const t=p.t+init.t+a.clock+out.t,head=p.checkpoint.head+init.head+out.head;
  const lo=p.checkpoint.head-at+1,span=head+Math.max(0,(f.witness?.length??0)-1)-lo+1;
  ok(f.clock===null||(t===f.clock&&head===f.head&&span===f.span),"original total");
- const bound=52*(a.N+2)*a.steps+8;ok(bound===a.upper,"explicit worker bound");
+ const bound=(26*a.N+16)*a.steps+8;ok(bound===a.upper,"explicit worker bound");
  return {name,m:f.m,t,head,span,witness:out.witness,producer:p.t,bridge:init.t,worker:a.clock,projection:out.t,steps:a.steps,N0:a.N0,N:a.N,growth:a.growth,equalCarries:a.equalCarries,changedCarries:a.changedCarries,upper:bound,slot:out.witness===null?null:Admission.slot(f.n,928445994,t)};
 }
 module.exports={phaseAudit};
