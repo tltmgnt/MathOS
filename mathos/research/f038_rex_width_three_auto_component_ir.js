@@ -56,9 +56,8 @@ function machine(full=false){
  bind(load3,load(2,beginRows));bind(load2,load(1,kind));const skipOther=walkD(4,rd(D,y=>y==="0"?mv(D,1,suffix):y==="1"?mv(D,1,walkD(4,suffix)):reject));
  // A positions 1..5 retain the GAC budget, position 6 is a blank
  // delimiter, 7..15 are membership (0 unseen, 1 current, x solved).
- // 16..51 hold the 36 undirected edge bits, built from active scopes.
- const edges=[];for(let i=0;i<9;i++)for(let j=i+1;j<9;j++)edges.push([i,j]);
- const edgePos=(i,j)=>16+edges.findIndex(e=>e[0]===Math.min(i,j)&&e[1]===Math.max(i,j));
+ // After GAC, support scratch V0 is reused for a compact edge list.
+ const graphTape=V[0];
  const offsets=new Map(),starts=new Map();
  function atA(pos,d){
   const k=pos+":"+d;if(starts.has(k))return starts.get(k);
@@ -170,7 +169,7 @@ function machine(full=false){
  let scan=start(D,dispatch);for(let j=0;j<11;j++)scan=field(null,scan);
  bind(attempt,start(Q,scan));
  let initCandidate=selectComponent;for(const t of G.slice().reverse())initCandidate=first(t,initCandidate);
- bind(candidateStart,initCandidate);
+ // candidateStart is bound below, after constructing the edge-list producer.
  // Mark one solved component and choose the smallest still-unseen group.
  let mark=selectComponent;
  for(let g=8;g>=0;g--){const d=mark;mark=atA(7+g,rd(A,x=>x==="1"?wr(A,"x",d):x==="0"||x==="x"?d:reject));}
@@ -178,15 +177,19 @@ function machine(full=false){
  let seed=emit;
  for(let g=8;g>=0;g--){const d=seed;seed=atA(7+g,rd(A,x=>x==="0"?wr(A,"1",closure):x==="x"?d:reject));}
  bind(selectComponent,seed);
- // Closure of the seed over active-scope edges. A1 records whether
- // another pass is needed; no reread of the constraint stream here.
- let sweep=atA(1,rd(A,x=>x==="1"?closure:x==="0"?componentEntry:reject));
+ // Closure scans only the scratch edge list, never the source stream.
+ // A1 is the change flag. An 8-bit edge consists of two 4-bit IDs.
+ const edgeLoop=label();
  function addMember(g,d){return atA(7+g,rd(A,x=>x==="0"?wr(A,"1",atA(1,wr(A,"1",d))):x==="1"?d:reject));}
- for(let k=edges.length-1;k>=0;k--){const [i,j]=edges[k],d=sweep;
-  const active=member(i,addMember(j,d),member(j,addMember(i,d),d));
-  sweep=atA(16+k,rd(A,x=>x==="0"?d:x==="1"?active:reject));
- }
- bind(closure,atA(1,wr(A,"0",sweep)));
+ function graphId(choose,p=""){return p.length===4?(parseInt(p,2)<9?choose(parseInt(p,2)):reject):rd(graphTape,x=>bit(x)?mv(graphTape,1,graphId(choose,p+x)):reject);}
+ function walk(t,k,d){while(k--)d=mv(t,1,d);return d;}
+ const backwards=back(graphTape,8,graphId(g=>addMember(g,walk(graphTape,4,edgeLoop))));
+ const secondNo=graphId(g=>member(g,backwards,edgeLoop));
+ const secondYes=graphId(g=>addMember(g,edgeLoop));
+ const edgeFirst=graphId(g=>member(g,secondYes,secondNo));
+ const sweepEnd=atA(1,rd(A,x=>x==="1"?closure:x==="0"?componentEntry:reject));
+ bind(edgeLoop,rd(graphTape,x=>bit(x)?edgeFirst:x==="_"?sweepEnd:reject));
+ bind(closure,atA(1,wr(A,"0",start(graphTape,edgeLoop))));
  // Singleton components have no active higher-arity factors: their
  // first surviving unary rank already solves them, so skip candidate scans.
  let zero=reject,one=componentDone;
@@ -196,20 +199,17 @@ function machine(full=false){
  function unary(t,d){const seen=[label(),label()];for(let k=0;k<=1;k++)bind(seen[k],rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?app(t,y==="0"?"1":"0",mv(Q,1,seen[k||+(y==="0")])):reject)):x==="1"&&k===1?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject));return start(t,seen[0]);}
  let init=start(A,word(A,"00000",pass));for(let t of G.slice().reverse())init=unary(t,init);
  const initEntry=start(Q,field(null,start(P,field(P,init))));
- // Scan the actual producer stream once to build the graph. Every
- // non-universal scope joins its first coordinate to the other coordinates.
- // The universal 10 marker adds no edge. No host graph is consulted.
+ // Scan the actual producer stream once after GAC. Append one edge
+ // for a pair and two star edges for a triple. D is the genuine
+ // fixed scope directory; no host graph or partition is supplied.
  const graph=label(),afterField=skipMask(graph);
- function setEdge(i,j,d){return i===j?reject:atA(edgePos(i,j),wr(A,"1",d));}
- const graphFirst=idRead(i=>{
-  const third=idRead(j=>setEdge(i,j,afterField));
-  const kind=rd(D,x=>x==="0"?mv(D,1,afterField):x==="1"?mv(D,1,third):reject);
-  return idRead(j=>setEdge(i,j,kind));
- });
- bind(graph,indexed(graph,graphFirst,initEntry));
+ function copyId(n,d){if(!n)return d;const next=copyId(n-1,d);return rd(D,x=>bit(x)?app(graphTape,x,mv(D,1,next)):reject);}
+ const third=back(D,8,copyId(4,walkD(5,copyId(4,afterField))));
+ const kindEdge=rd(D,x=>x==="0"?mv(D,1,afterField):x==="1"?third:reject);
+ bind(graph,indexed(graph,copyId(8,kindEdge),initCandidate));
  let scanGraph=start(D,graph);for(let j=0;j<11;j++)scanGraph=field(null,scanGraph);
- const graphInit=start(A,word(A,"00000",mv(A,1,word(A,"0".repeat(45),start(Q,scanGraph)))));
- const entry=start(D,word(D,scopes.join(""),graphInit));
+ bind(candidateStart,atA(7,word(A,"0".repeat(9),clear(graphTape,start(Q,scanGraph)))));
+ const entry=start(D,word(D,scopes.join(""),initEntry));
  return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone,componentEntry};
 }
 
