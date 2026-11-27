@@ -162,19 +162,18 @@ function machine(full=false){
  // Load unary domains once; pass and candidate scans never alter Q.
  function unary(t,d){const seen=[label(),label()];for(let k=0;k<=1;k++)bind(seen[k],rd(Q,x=>x==="0"?mv(Q,1,rd(Q,y=>bit(y)?app(t,y==="0"?"1":"0",mv(Q,1,seen[k||+(y==="0")])):reject)):x==="1"&&k===1?mv(Q,1,test(Q,y=>y==="0",mv(Q,1,d),reject)):reject));return start(t,seen[0]);}
  let init=start(A,word(A,"00000",pass));for(let t of G.slice().reverse())init=unary(t,init);
- const initEntry=start(D,word(D,scopes.join(""),start(Q,field(null,start(P,field(P,init))))));
- // Physical admission: every crossing factor must be universal.
- // Cross-field failure is a refusal outside the specialized precondition,
- // not a proof of UNSAT. The generic D6C solver remains separate.
- const flags=scopes.map(record=>{
-  const ids=[parseInt(record.slice(0,4),2),parseInt(record.slice(4,8),2)];
-  if(record.length===13)ids.push(parseInt(record.slice(9),2));
-  return ids.every(g=>g%3===ids[0]%3)?"1":"0";
- }).join("");
- const guard=label(),guardNext=mv(D,1,guard);
- bind(guard,rd(D,x=>x==="0"?test(Q,x=>x==="1",mv(Q,1,test(Q,x=>x==="0",mv(Q,1,guardNext),reject)),reject):x==="1"?skipMask(guardNext):x==="_"?test(Q,x=>x==="_",clear(D,initEntry),reject):reject));
+ // Physical admission reads the same fixed scope directory used by GAC.
+ // No separate admission table or host certificate is needed.
+ const initEntry=start(Q,field(null,start(P,field(P,init))));
+ const guard=label(),inside=skipMask(guard),outside=test(Q,x=>x==="1",mv(Q,1,test(Q,x=>x==="0",mv(Q,1,guard),reject)),reject);
+ const crossKind=rd(D,x=>x==="0"?mv(D,1,outside):x==="1"?mv(D,1,walkD(4,outside)):reject);
+ const third=[0,1,2].map(c=>idRead(g=>g%3===c?inside:outside));
+ const sameKind=third.map(d=>rd(D,x=>x==="0"?mv(D,1,inside):x==="1"?mv(D,1,d):reject));
+ const second=[0,1,2].map(c=>idRead(g=>g%3===c?sameKind[c]:crossKind));
+ const classify=idRead(g=>second[g%3]);
+ bind(guard,rd(D,x=>bit(x)?classify:x==="_"?test(Q,x=>x==="_",initEntry,reject):reject));
  let scanGuard=start(D,guard);for(let j=0;j<11;j++)scanGuard=field(null,scanGuard);
- const entry=start(D,word(D,flags,start(Q,scanGuard)));
+ const entry=start(D,word(D,scopes.join(""),start(Q,scanGuard)));
  return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone};
 }
 
