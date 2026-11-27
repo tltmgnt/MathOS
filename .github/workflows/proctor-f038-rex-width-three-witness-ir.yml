@@ -1,0 +1,60 @@
+name: Proctor F038 RE-X width-three constructive witness
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-witness-ir']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_witness_ir
+          node --check "$p.js"
+          for suite in ir larger forced physicalEmpty physicalEdge physicalEdgeSAT; do
+            node --max-old-space-size=6144 "${p}_audit.js" "$suite" > "/tmp/w3wit-$suite.txt"
+          done
+          node <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          function read(s){const tag='F038_REX_WIDTH_THREE_WITNESS_IR_OK ',a=fs.readFileSync('/tmp/w3wit-'+s+'.txt','utf8').trim();assert.ok(a.startsWith(tag));return JSON.parse(a.slice(tag.length));}
+          const [a,b,f,c,d,e]=['ir','larger','forced','physicalEmpty','physicalEdge','physicalEdgeSAT'].map(read);
+          for(const x of [a,b,f,c,d,e])assert.deepEqual(x.ir,{raw:25109,reachable:22344,compact:10531,rounds:612,checked:22344});
+          for(const x of [c,d,e]){assert.equal(x.q,10767877);assert.equal(x.logical,382962);assert.equal(x.roots,382962);assert.equal(x.interned,10384915);assert.equal(x.bits,915269549);}
+          assert.deepEqual(a.totals,{producer:734503174,primitives:1690056,edges:20,candidates:294,localRows:196,liveRows:176,transitions:0});
+          assert.deepEqual(b.totals,{producer:2383579350,primitives:10161649,edges:11,candidates:588,localRows:478,liveRows:478,transitions:0});
+          assert.deepEqual(f.totals,{producer:1191370586,primitives:589937,edges:3,candidates:135,localRows:45,liveRows:45,transitions:0});
+          assert.deepEqual(f.rows[0].ranks,[2,1,0,2,0,1,2,1,0]);assert.equal(f.rows[0].models,1);
+          assert.equal(f.rows[0].witness,'00101010000110001000101010001111101111101111110100');
+          assert.deepEqual(c.totals,{producer:104551138,primitives:53728,edges:0,candidates:18,localRows:18,liveRows:18,transitions:672161844});
+          assert.deepEqual(d.totals,{producer:104556548,primitives:50105,edges:1,candidates:20,localRows:16,liveRows:14,transitions:512737138});
+          assert.deepEqual(e.totals,{producer:104556548,primitives:63657,edges:1,candidates:20,localRows:19,liveRows:19,transitions:1144561610});
+          assert.deepEqual([c.rows[0].span,d.rows[0].span,e.rows[0].span],[17230,17205,18175]);
+          assert.deepEqual(e.rows[0].ranks,[1,0,0,0,0,0,0,0,0]);assert.equal(e.rows[0].witness,'0110101010101010101111111110100');assert.equal(d.rows[0].witness,null);
+          const rows=[...a.rows,...b.rows,...f.rows,...d.rows,...e.rows];
+          assert.equal(rows.length,12);assert.equal(rows.filter(x=>x.witness).length,8);
+          assert.equal(rows.reduce((s,x)=>s+(x.witness?.length??0),0),305);
+          assert.equal(rows.reduce((s,x)=>s+x.primitives,0),12555404);
+          assert.equal(c.totals.transitions+d.totals.transitions+e.totals.transitions,2329460592);
+          JS
+          python -m mathos.research.tga_f038_rex_024d3b2 > /tmp/w3wit-gates.json
+          python - <<'PY'
+          import json
+          with open('/tmp/w3wit-gates.json') as f:
+              g=json.load(f)
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D3B2_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
