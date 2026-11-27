@@ -1,0 +1,65 @@
+name: Proctor F038 RE-X width-three independent audit
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-independent-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent arithmetic and host experiment
+        run: |
+          set -euo pipefail
+          node mathos/research/f038_rex_width_three_independent_audit.js > /tmp/d5f.json
+          node <<'JS'
+          const a=require('node:assert/strict'),r=require('/tmp/d5f.json');
+          a.equal(r.algebra,10000);a.equal(r.boundary,196);a.equal(r.threshold,'2785338385');
+          a.equal(r.sharpened.count,10018);a.equal(r.sharpened.boundary,195);
+          a.equal(r.sharpened.H0,'2785338274');a.equal(r.sharpened.improvement,'116');
+          a.equal(r.shortcut.cases,12);a.equal(r.shortcut.tuples,1129356);
+          console.log('REX-024D5F_INDEPENDENT_ARITHMETIC_OK');
+          JS
+      - name: Original selector host cross-check (not physical replay)
+        run: |
+          node <<'JS'
+          const a=require('node:assert/strict');
+          const E=require('./mathos/research/f038_tga_normalized_integration.js').engine();
+          const A=require('./mathos/research/f038_rex_width_three_admission.js');
+          const U=require('./mathos/research/f038_rex_width_three_independent_audit.js');
+          for(const f of A.fixtures(E,'all')){
+            const D=E.decode(f.raw);a.ok(D);const B=[];
+            for(const x of D.F)for(const z of E.tup(D.m,x.h.length)){
+              if(!x.S.has(z.join(',')))B.push(x.h.map((g,i)=>-(g*D.m+z[i]+1)));
+            }
+            const r=U.singleton(D.m,B);
+            if(f.name==='m3-forced'||f.name==='m4-forced'){
+              a.equal(r.status,'SAT');
+              const w=E.witness(D.m,D.pins,r.z);a.equal(w,f.witness);a.ok(E.valid(f.raw,w));
+            }else if(f.name==='edge-UNSAT')a.equal(r.status,'UNSAT');
+            else a.equal(r.status,'FALLBACK');
+            console.log('HOST_ONLY',f.name,r.status);
+          }
+          JS
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5F_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
