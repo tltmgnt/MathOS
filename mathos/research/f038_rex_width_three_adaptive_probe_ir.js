@@ -1,5 +1,5 @@
 // D6I: bounded direct probe before separator conditioning.
-// After four failed joint candidates, restore domains and use D6H admission.
+// After four failed joint candidates, probe separators or resume the exact conflict.
 // Genuine normalized canonical stream only. No host partition certificate.
 function machine(full=false){
  const alphabet=["L","0","_","1","x"],ins=[];
@@ -30,7 +30,7 @@ function machine(full=false){
  const componentDone=label(),componentEntry=label(),selectComponent=label(),closure=label(),finish=test(CQ,x=>x==="_",componentDone,reject);
  const exhausted=label(),restart=label(),separatorEntry=label(),graphStart=label(),graphDone=label(),probeDone=label(),actualComponent=label();
  const retry=label(),attempt=label(),dispatch=label(),row=label(),advance0=label(),advance1=label(),advance2=label();
- const probeEntry=label(),probeAbort=label(),conflictDispatch=label(),resumeAdmission=label();
+ const probeEntry=label(),probeAbort=label(),conflictDispatch=label(),resumeAdmission=label(),resumeDirect=label();
  // A pair uses a one-symbol third rank word. All other words are nonempty one-hot.
  function next(t,carry,normal){return mv(t,1,rd(t,x=>x==="_"?start(t,carry):bit(x)?normal:reject));}
  const end=rd(CQ,x=>x==="1"?mv(CQ,1,test(CQ,y=>y==="0",mv(CQ,1,dispatch),reject)):reject);
@@ -271,7 +271,7 @@ function machine(full=false){
  const directInit=atA(7,word(A,"000000000000000000",initCandidate));
  const rootProbe=atA(7,word(A,"100000000",closure));
  const residualProbe=atA(18,rd(A,x=>x==="1"?atA(7,word(A,"xx1000000",closure)):x==="0"?atA(7,word(A,"x10000000",closure)):reject));
- bind(graphDone,atA(16,rd(A,x=>x==="0"?directInit:x==="1"?rootProbe:x==="x"?residualProbe:reject)));
+ bind(graphDone,atA(16,rd(A,x=>x==="0"?atA(7,word(A,"111111111",resumeDirect)):x==="1"?rootProbe:x==="x"?residualProbe:reject)));
  const directRebuild=atA(18,wr(A,"0",atA(16,wr(A,"0",graphStart))));
  const twoRebuild=atA(18,wr(A,"1",graphStart));
  const residualRebuild=atA(16,wr(A,"x",graphStart));
@@ -283,20 +283,25 @@ function machine(full=false){
  // exactly the chosen marker in each rank word, so first() remains valid.
  function unchoose(t,d){return start(t,loop(n=>rd(t,x=>bit(x)?mv(t,1,n):x==="x"?wr(t,"1",d):reject)));}
  let uninit=resumeAdmission;for(const t of G.slice().reverse())uninit=unchoose(t,uninit);
- bind(probeAbort,atA(20,wr(A,"0",uninit)));
- bind(resumeAdmission,residualRebuild);
+ // Preserve the fourth conflict checkpoint while probing residual graphs.
+ // Q/D/graphTape/A are the only tapes touched by the graph probes.
+ // If neither separator splits, resume the exact failed tuple extension.
+ // Only an admitted separator discards the joint enumeration checkpoint.
+ bind(probeAbort,atA(20,wr(A,"0",residualRebuild)));
+ bind(resumeDirect,conflictDispatch);
  let conditionedInit=separatorEntry;for(const t of G.slice().reverse())conditionedInit=first(t,conditionedInit);
- const admit=atA(17,wr(A,"1",conditionedInit));
+ bind(resumeAdmission,conditionedInit);
+ const admit=atA(17,wr(A,"1",uninit));
  let allOriginal=probeInit,allResidual=twoRebuild,allTwo=directRebuild;
  for(let g=8;g>=0;g--){allOriginal=member(g,allOriginal,directInit);if(g>0)allResidual=member(g,allResidual,admit);if(g>1)allTwo=member(g,allTwo,admit);}
  bind(probeDone,atA(16,rd(A,x=>x==="1"?allOriginal:x==="x"?atA(18,rd(A,y=>y==="1"?allTwo:y==="0"?allResidual:reject)):reject)));
  const entry=start(D,word(D,scopes.join(""),initEntry));
- return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone,componentEntry,separatorEntry,probeEntry,probeAbort};
+ return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone,componentEntry,separatorEntry,probeEntry,probeAbort,resumeDirect};
 }
 
 function executeIR(J,inputs,trace=null){
  const T=inputs.map(s=>["L",...s,"_"]),h=T.map(()=>0);let pc=J.entry,steps=0,jumps=0;
- while(true){if(trace&&(pc===J.candidateEntry||pc===J.conflictEntry||pc===J.componentEntry||pc===J.separatorEntry||pc===J.probeEntry||pc===J.probeAbort))trace(pc,T,h);const a=J.ins[pc];if(a.op==="halt"||a.op==="reject")return {status:a.op,steps,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};if(a.op==="jump"){if(++jumps>10000000)throw Error("jump limit");pc=a.next;continue;}if(++steps>10000000)throw Error("step limit");const k=a.t,x=T[k][h[k]];
+ while(true){if(trace&&(pc===J.candidateEntry||pc===J.conflictEntry||pc===J.componentEntry||pc===J.separatorEntry||pc===J.probeEntry||pc===J.probeAbort||pc===J.resumeDirect))trace(pc,T,h);const a=J.ins[pc];if(a.op==="halt"||a.op==="reject")return {status:a.op,steps,tapes:T.map(t=>t.slice(1).join("").replace(/_+$/,"")),heads:h};if(a.op==="jump"){if(++jumps>10000000)throw Error("jump limit");pc=a.next;continue;}if(++steps>10000000)throw Error("step limit");const k=a.t,x=T[k][h[k]];
   if(a.op==="read"){pc=a.next[J.alphabet.indexOf(x)];continue;}
   if(a.op==="write"){if(x==="L")throw Error("sentinel");T[k][h[k]]=a.next.v;}
   else if(a.op==="move"){h[k]+=a.next.dir;if(h[k]<0)throw Error("left");if(h[k]===T[k].length)T[k].push("_");}else throw Error("op");pc=a.next.d;

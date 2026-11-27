@@ -51,7 +51,7 @@ function fixtures(E,Direct,OldAudit){
  return fs;
 }
 function oracle(d,domains,Ref){
- const out={seps:[],components:[],trials:[],conflicts:[],conditioned:0,probeStart:0,probeAbort:0,probeVisits:0};if(!domains)return out;
+ const out={seps:[],components:[],trials:[],conflicts:[],conditioned:0,probeStart:0,probeAbort:0,probeVisits:0,directResume:0};if(!domains)return out;
  const vertices=Array.from({length:9},(_,i)=>i),cs=Ref.residual(d,vertices,[]),r1=Ref.residual(d,vertices,[0]),r2=Ref.residual(d,vertices,[0,1]),conditioned=cs.length===1?(r1.length>1?1:r2.length>1?2:0):0,rs=conditioned===2?r2:r1;
  const z=domains.map(a=>a[0]),fs=d.F.filter(f=>f.h.length>1).sort(order);
  const blocks=conditioned?rs:cs;
@@ -62,14 +62,14 @@ function oracle(d,domains,Ref){
    const factors=fs.filter(f=>f.h.some(v=>c.includes(v))||h===2&&f.h.every(v=>v<2));
    function carry(i){for(;i>=0;i--){const g=c[i],a=domains[g],k=a.indexOf(z[g]);if(k+1<a.length){z[g]=a[k+1];return true;}z[g]=a[0];}return false;}
    for(;;){out.trials.push(z.slice());if(probe)out.probeVisits++;const f=factors.find(f=>!f.S.has(f.h.map(g=>z[g]).join()));if(!f)break;
-    out.conflicts.push(f.h.slice());if(probe&&out.probeVisits===4){out.probeAbort=1;return false;}const g=f.h.at(-1),old=z[g];if(g<h)return false;
+    out.conflicts.push(f.h.slice());if(probe&&out.probeVisits===4){out.probeAbort=1;if(conditioned)return false;probe=false;out.directResume=1;}const g=f.h.at(-1),old=z[g];if(g<h)return false;
     for(const j of c)if(j>g)z[j]=domains[j][0];
     const next=domains[g].find(a=>a>old&&f.S.has(f.h.map(j=>j===g?a:z[j]).join()));
     if(next!==undefined)z[g]=next;else{z[g]=domains[g][0];if(!carry(c.indexOf(g)-1))return false;}
    }
   }return true;
  }
- if(cs.length===1){out.probeStart=1;run(cs,0,true);if(!out.probeAbort)return out;for(let j=0;j<9;j++)z[j]=domains[j][0];}
+ if(cs.length===1){out.probeStart=1;run(cs,0,true);if(!out.probeAbort||!conditioned)return out;for(let j=0;j<9;j++)z[j]=domains[j][0];}
  out.conditioned=conditioned;
  if(conditioned){outer:for(const root of domains[0])for(const r1 of conditioned===2?domains[1]:[domains[1][0]]){z[0]=root;z[1]=r1;for(let j=conditioned;j<9;j++)z[j]=domains[j][0];out.seps.push(z.slice(0,conditioned));if(run(blocks,conditioned))break outer;}}
  else run(blocks,0);
@@ -78,13 +78,15 @@ function oracle(d,domains,Ref){
 function audit(U,E,Barrier,Prior,Direct,OldAudit,Local,F,Ref,Hard){
  const J=[U.machine(false),U.machine(true)],O=[Local.machine(false),Local.machine(true)];
  const eq=(a,b,s)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw Error(s+" "+JSON.stringify({a,b}));},ok=(v,s)=>{if(!v)throw Error(s)};
- let sat=0,unsat=0,probeStarts=0,probeAborts=0,probeTrials=0,probeSat=0,probeUnsat=0,conditioned=0,one=0,two=0,twoSat=0,twoUnsat=0,prefixConflicts=0,cacheHits=0,conditionedSat=0,conditionedUnsat=0,fallback=0,early=0,visits=0,conflicts=0,components=0,separators=0,localChecks=0,graphChecks=0,improved=0,regressed=0,tied=0,oldSteps=0,newSteps=0;const rows=[];
+ let sat=0,unsat=0,probeStarts=0,probeAborts=0,directResumes=0,probeTrials=0,probeSat=0,probeUnsat=0,conditioned=0,one=0,two=0,twoSat=0,twoUnsat=0,prefixConflicts=0,cacheHits=0,conditionedSat=0,conditionedUnsat=0,fallback=0,early=0,visits=0,conflicts=0,components=0,separators=0,localChecks=0,graphChecks=0,improved=0,regressed=0,tied=0,oldSteps=0,newSteps=0;const rows=[];
  const fs=fixtures(E,Direct,OldAudit);for(const m of [2,3])for(const unsat of [false,true])fs.push({name:"hard-two-"+m+"-"+(unsat?"unsat":"sat"),m,B:Hard.family(E,m,unsat)});
  for(const f of fs){const raw=E.encode(f.m,Array(f.m).fill(0),f.B),d=E.decode(raw),ref=Barrier.exact(E,raw),stream=U.stream(E,raw),I=[...Array(19).fill(""),stream],original=Ref.residual(d,Array.from({length:9},(_,i)=>i),[]),residual=Ref.residual(d,Array.from({length:9},(_,i)=>i),[0]),residual2=Ref.residual(d,Array.from({length:9},(_,i)=>i),[0,1]);
-  for(let i=0;i<2;i++){const j=J[i],domains=Prior.propagate(E,raw,!!i),expected=oracle(d,domains,Ref),actual={seps:[],components:[],trials:[],conflicts:[],conditioned:0,probeStart:0,probeAbort:0,probeVisits:0};
+  for(let i=0;i<2;i++){const j=J[i],domains=Prior.propagate(E,raw,!!i),expected=oracle(d,domains,Ref),actual={seps:[],components:[],trials:[],conflicts:[],conditioned:0,probeStart:0,probeAbort:0,probeVisits:0,directResume:0};
+   let checkpoint=null;const saved=(T,h)=>[...Array.from({length:12},(_,k)=>k+1),17,18].map(k=>[T[k].join(''),h[k]]);
    const a=U.executeIR(j,I,(pc,T,h)=>{
     if(pc===j.probeEntry){actual.probeStart++;}
-    else if(pc===j.probeAbort){actual.probeAbort++;}
+    else if(pc===j.probeAbort){actual.probeAbort++;checkpoint=saved(T,h);}
+    else if(pc===j.resumeDirect){actual.directResume++;eq(saved(T,h),checkpoint,'direct checkpoint '+f.name);eq(T[15].slice(7,16).join(''),'111111111','direct membership');}
     else if(pc===j.separatorEntry){actual.conditioned=T[15][18]==="1"?2:1;actual.seps.push(T.slice(1,1+actual.conditioned).map(t=>t.indexOf("x")-1));}
     else if(pc===j.componentEntry){const c=T[15].slice(7,16).map((x,g)=>x==="1"?g:-1).filter(g=>g>=0);actual.components.push(c);if(T[15][19]==="x")cacheHits++;
      const edges=d.F.filter(f=>f.h.length>1).sort(order).flatMap(f=>{const h=f.h.filter(g=>g>=actual.conditioned);return h.slice(1).map(g=>[h[0],g]);}).flat().map(g=>g.toString(2).padStart(4,"0")).join("");
@@ -99,18 +101,18 @@ function audit(U,E,Barrier,Prior,Direct,OldAudit,Local,F,Ref,Hard){
    eq(actual,expected,"trace "+f.name+"/"+i);
    ok(a.status===(ref.bits?"halt":"reject")&&a.tapes[0]===(ref.bits||"")&&a.tapes[19]===stream,"oracle "+f.name);
    if(ref.bits){sat++;ok(E.valid(raw,a.tapes[0]),"witness");}else unsat++;
-   probeStarts+=actual.probeStart;probeAborts+=actual.probeAbort;probeTrials+=actual.probeVisits;ok(actual.probeVisits<=4,"probe budget");if(actual.probeStart&&!actual.probeAbort){if(ref.bits)probeSat++;else probeUnsat++;}
-   if(actual.conditioned){conditioned++;if(actual.conditioned===1)one++;else{two++;if(ref.bits)twoSat++;else twoUnsat++;}if(ref.bits)conditionedSat++;else conditionedUnsat++;const r=actual.conditioned===2?residual2:residual,m=f.m**actual.conditioned;ok(actual.seps.length<=m&&actual.trials.length-actual.probeVisits<=m*r.reduce((n,c)=>n+f.m**c.length,0),"separator ceiling");}else if(domains){fallback++;ok(actual.trials.length-(actual.probeAbort?actual.probeVisits:0)<=original.reduce((n,c)=>n+f.m**c.length,0),"fallback ceiling");}else early++;
+   probeStarts+=actual.probeStart;probeAborts+=actual.probeAbort;directResumes+=actual.directResume;probeTrials+=actual.probeVisits;ok(actual.probeVisits<=4,"probe budget");if(actual.probeStart&&!actual.probeAbort){if(ref.bits)probeSat++;else probeUnsat++;}
+   if(actual.conditioned){conditioned++;if(actual.conditioned===1)one++;else{two++;if(ref.bits)twoSat++;else twoUnsat++;}if(ref.bits)conditionedSat++;else conditionedUnsat++;const r=actual.conditioned===2?residual2:residual,m=f.m**actual.conditioned;ok(actual.seps.length<=m&&actual.trials.length-actual.probeVisits<=m*r.reduce((n,c)=>n+f.m**c.length,0),"separator ceiling");}else if(domains){fallback++;ok(actual.trials.length<=original.reduce((n,c)=>n+f.m**c.length,0),"fallback ceiling");}else early++;
    visits+=actual.trials.length;conflicts+=actual.conflicts.length;components+=actual.components.length;separators+=actual.seps.length;
    const old=Local.executeIR(O[i],I);ok(old.status===a.status&&old.tapes[0]===a.tapes[0],"D6H parity");
    oldSteps+=old.steps;newSteps+=a.steps;if(a.steps<old.steps)improved++;else if(a.steps>old.steps)regressed++;else tied++;
    if(i===0&&(f.name.startsWith("family-")||f.name.startsWith("prefix-star")||f.name.startsWith("residual-")||f.name==="late-center-trap"||f.name.startsWith("two-")||f.name.startsWith("hard-two-"))){
     let clock=null,oldClock=null;if(ref.bits){clock=F.count(j,I).clock;oldClock=F.count(O[i],I).clock;}
-    rows.push({name:f.name,status:ref.status,conditioned:actual.conditioned,probe:actual.probeStart,abort:actual.probeAbort,probeVisits:actual.probeVisits,rootVisits:actual.seps.length,visits:actual.trials.length,steps:a.steps,oldSteps:old.steps,clock,oldClock,residual:(actual.conditioned===2?residual2:residual).map(c=>c.length)});
+    rows.push({name:f.name,status:ref.status,conditioned:actual.conditioned,probe:actual.probeStart,abort:actual.probeAbort,directResume:actual.directResume,probeVisits:actual.probeVisits,rootVisits:actual.seps.length,visits:actual.trials.length,steps:a.steps,oldSteps:old.steps,clock,oldClock,residual:(actual.conditioned===2?residual2:residual).map(c=>c.length)});
    }
   }
  }
- return {cases:fs.length,modes:2*fs.length,sat,unsat,probeStarts,probeAborts,probeTrials,probeSat,probeUnsat,conditioned,one,two,twoSat,twoUnsat,prefixConflicts,cacheHits,conditionedSat,conditionedUnsat,fallback,early,visits,conflicts,components,separators,localChecks,graphChecks,improved,regressed,tied,oldSteps,newSteps,ir:J.map(j=>j.ins.length),rows};
+ return {cases:fs.length,modes:2*fs.length,sat,unsat,probeStarts,probeAborts,directResumes,probeTrials,probeSat,probeUnsat,conditioned,one,two,twoSat,twoUnsat,prefixConflicts,cacheHits,conditionedSat,conditionedUnsat,fallback,early,visits,conflicts,components,separators,localChecks,graphChecks,improved,regressed,tied,oldSteps,newSteps,ir:J.map(j=>j.ins.length),rows};
 }
 module.exports={fixtures,oracle,audit};
 if(require.main===module){const p="./f038_rex_width_three_";console.log(JSON.stringify(audit(require(p+"adaptive_probe_ir.js"),require("./f038_tga_normalized_integration.js").engine(),require(p+"completeness_barrier.js"),require(p+"prefix_order_audit.js"),require(p+"direct_extension_audit.js"),require(p+"auto_component_audit.js"),require(p+"two_prefix_ir.js"),require(p+"fast_clock.js"),require(p+"separator_reference.js"),require(p+"two_prefix_hard.js"))));}
