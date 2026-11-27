@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "40_GROUPS_PASSED_AT_ae0cdb4c_7_RECOVERY_GROUPS_AWAITING_CI",
+    "python_tests": "47_GROUPS_PASSED_AT_185ba73c_6_ORDER_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -42,10 +42,15 @@
     "derived_row_provenance": "SCOPED_CI_PASSED_AT_ae0cdb4c",
     "hidden_factor_control": "SCOPED_CI_PASSED_AT_ae0cdb4c",
     "semantic_formalization": "OPEN",
-    "joint_affine_recovery": "IMPLEMENTED_AWAITING_CI",
+    "joint_affine_recovery": "SCOPED_CI_PASSED_AT_185ba73c",
     "strict_order_hierarchy": "ARGUMENT_DRAFT",
-    "recovery_certificate": "IMPLEMENTED_AWAITING_CI",
-    "recovery_formalization": "OPEN"
+    "recovery_certificate": "SCOPED_CI_PASSED_AT_185ba73c",
+    "recovery_formalization": "OPEN",
+    "minimum_order_monotonicity": "ARGUMENT_DRAFT",
+    "minimum_order_complexity": "CO_NP_HARD_SIGMA2_UPPER_ARGUMENT_DRAFT_EXACT_CLASS_OPEN",
+    "streaming_hull": "IMPLEMENTED_AWAITING_CI",
+    "minimum_order_certificates": "IMPLEMENTED_AWAITING_CI",
+    "minimum_order_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
