@@ -1,7 +1,7 @@
 // D5M compressed stream equivalence, actual producer, sparse-mode comparison and resource arithmetic.
 function envelope(V,m,full=false){
- const e=V.envelope(m),S=e.S,k=BigInt(m),N=S+35n*k+1479n,T=32768n*S*(full?k:1n),W=(20n*N+12n)*T+6n,total=e.P+128n*S*S+W+256n*S*S,ell=full?141067404n:141198352n;
- if(N>2n*S||W>2097152n*S*S*(full?k:1n)||total>65536n*e.L*e.L*(full?k:1n))throw Error("envelope");
+ const e=V.envelope(m),S=e.S,k=BigInt(m),N=S+35n*k+1479n,T=32768n*S*(full?k:1n),W=(20n*N+12n)*T+6n,P=e.P+e.L,total=P+128n*S*S+W+256n*S*S,ell=full?141067404n:141198352n;
+ if(P>35000n*e.L*e.L||N>2n*S||W>2097152n*S*S*(full?k:1n)||total>65536n*e.L*e.L*(full?k:1n))throw Error("envelope");
  return {N,T,W,total,H0:full?(3n*(ell+12n)+1n)/2n:ell+16n};
 }
 
