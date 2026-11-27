@@ -41,7 +41,7 @@ jobs:
           set -o pipefail
           lean --version | tee artifacts/pnp-overlap/lean-version.txt
           lean -DwarningAsError=true formal/PnpOverlapBoundary.lean 2>&1 | tee artifacts/pnp-overlap/lean.txt
-          for theorem in gadget_forward gadget_lift selector_sound selector_complete; do
+          for theorem in gadget_forward gadget_lift selector_sound selector_complete parity_slice_forward parity_slice_reverse; do
             grep -Fx "'PnpOverlapBoundary.$theorem' does not depend on any axioms" artifacts/pnp-overlap/lean.txt
           done
       - uses: actions/upload-artifact@v4

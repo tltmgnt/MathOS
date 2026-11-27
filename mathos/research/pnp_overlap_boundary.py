@@ -90,10 +90,10 @@ def solve(domains, rows):
     return None
 
 
-def independent_coordinates(width, rows, coordinates):
-    """Greedy basis of coordinate rows modulo the affine coefficient row space.
+def independent_forms(width, rows, forms):
+    """Greedy basis of linear forms modulo the affine coefficient row space.
 
-    Returned coordinate indices are independent modulo that space.
+    Returned masks are independent modulo that space.
     RHS values play no role in rank; consistency must be checked separately.
     """
     pivots = {}
@@ -110,26 +110,34 @@ def independent_coordinates(width, rows, coordinates):
             raise ValueError("invalid affine row")
         insert(m)
     basis=[]
-    for j in coordinates:
-        if not isinstance(j,int) or not 0 <= j < width:
-            raise ValueError("invalid coordinate")
-        if insert(1<<j):
-            basis.append(j)
+    for mask in forms:
+        if not isinstance(mask,int) or not 0 < mask < (1<<width):
+            raise ValueError("invalid form")
+        if insert(mask):
+            basis.append(mask)
     return tuple(basis)
 
+def independent_coordinates(width, rows, coordinates):
+    coordinates=tuple(coordinates)
+    if any(not isinstance(j,int) or not 0<=j<width for j in coordinates):
+        raise ValueError("invalid coordinate")
+    return tuple(mask.bit_length()-1 for mask in
+                 independent_forms(width,rows,(1<<j for j in coordinates)))
 
-def minimum_rank_coordinates(width, rows, pairs):
-    """Exact minimum rank increase selecting one coordinate per pair.
 
-    Iterative deepening over the extra dimension, not over the number of
-    pairs. A depth-first stack stores at most one sibling per level.
+def minimum_rank_forms(width, rows, groups):
+    """Exact minimum rank increase selecting one nonzero mask per group.
+
+    Each group contains two or three alternatives. Depth-first iterative
+    deepening bounds the added dimension rather than the number of groups.
+    The coefficient objective is independent of affine right-hand sides.
     """
-    rows,pairs=tuple(rows),tuple(tuple(p) for p in pairs)
+    rows,groups=tuple(rows),tuple(tuple(g) for g in groups)
     if not isinstance(width,int) or width<0:
         raise ValueError("invalid width")
-    if any(len(p)!=2 or any(not isinstance(j,int) or not 0<=j<width for j in p)
-           for p in pairs):
-        raise ValueError("invalid coordinate pair")
+    if any(len(g) not in (2,3) or any(not isinstance(m,int) or not 0<m<(1<<width) for m in g)
+           for g in groups):
+        raise ValueError("invalid form group")
 
     def residual(mask, pivots):
         while mask:
@@ -148,39 +156,45 @@ def minimum_rank_coordinates(width, rows, pairs):
             initial[v.bit_length()-1]=v
 
     nodes=0
-    for budget in range(len(pairs)+1):
+    for budget in range(len(groups)+1):
         stack=[(initial,0)]
         while stack:
             pivots,depth=stack.pop()
             nodes+=1
             choice=[]
             uncovered=None
-            for a,b in pairs:
-                u,v=residual(1<<a,pivots),residual(1<<b,pivots)
-                if not u:
-                    choice.append(a)
-                elif not v:
-                    choice.append(b)
+            for group in groups:
+                reduced=[residual(m,pivots) for m in group]
+                if 0 in reduced:
+                    choice.append(group[reduced.index(0)])
                 else:
-                    uncovered=(u,v)
+                    uncovered=tuple(dict.fromkeys(reduced))
                     break
             if uncovered is None:
                 # Minimum budget certifies optimality by exhaustive failure
                 # of all preceding budgets; this is not a succinct certificate.
-                actual=len(independent_coordinates(width,rows,choice))
+                actual=len(independent_forms(width,rows,choice))
                 if actual!=budget:
                     raise AssertionError("rank search invariant")
-                return {"coordinates":tuple(choice),"d":actual,"search_nodes":nodes}
+                return {"forms":tuple(choice),"d":actual,"search_nodes":nodes}
             if depth==budget:
                 continue
-            # Each uncovered alternative increases the rank by exactly one.
-            # Duplicate residuals may describe the same extension, but need
-            # not be deduplicated for correctness or the binary-tree bound.
+            # Each uncovered alternative raises the rank by exactly one.
+            # Equal residuals give identical extensions and can be deduplicated.
             for v in reversed(uncovered):
                 child=pivots.copy()
                 child[v.bit_length()-1]=v
                 stack.append((child,depth+1))
-    raise AssertionError("choosing every first endpoint is always possible")
+    raise AssertionError("choosing every first form is always possible")
+
+def minimum_rank_coordinates(width, rows, pairs):
+    pairs=tuple(tuple(p) for p in pairs)
+    if not isinstance(width,int) or width<0 or any(len(p)!=2 or any(
+            not isinstance(j,int) or not 0<=j<width for j in p) for p in pairs):
+        raise ValueError("invalid coordinate pair")
+    opt=minimum_rank_forms(width,rows,[(1<<a,1<<b) for a,b in pairs])
+    return {"coordinates":tuple(m.bit_length()-1 for m in opt["forms"]),
+            "d":opt["d"],"search_nodes":opt["search_nodes"]}
 
 def graph_rank_instance(edges):
     """Embed vertex cover: one component per edge, equality rows per vertex."""
@@ -212,7 +226,7 @@ def optimum_demo(k=21):
             "fixed_visited":fixed["visited"],"optimal_visited":optimized["visited"],
             "scope":"star-graph structured SAT control; pattern count, not runtime"}
 
-def solve_ranked(domains, rows, *, stats=None, optimize=False):
+def solve_ranked(domains, rows, *, stats=None, optimize=False, linear=False):
     """Solve by enumerating only affine-feasible split patterns.
 
     For consistent affine relaxation, the number of patterns is exactly 2**d
@@ -239,27 +253,33 @@ def solve_ranked(domains, rows, *, stats=None, optimize=False):
             fixed.extend((m<<(2*i),b) for m,b in affine_rows(r))
     if affine_solve(width,fixed) is None:
         return None
-    if optimize:
+    if linear:
+        opt=minimum_rank_forms(width,fixed,[(1<<(2*i),2<<(2*i),3<<(2*i)) for i in triple])
+        forms=opt["forms"]
+        report["optimizer_nodes"]=opt["search_nodes"]
+    elif optimize:
         opt=minimum_rank_coordinates(width,fixed,[(2*i,2*i+1) for i in triple])
-        coords=opt["coordinates"]
+        forms=tuple(1<<j for j in opt["coordinates"])
         report["optimizer_nodes"]=opt["search_nodes"]
     else:
-        coords=tuple(2*i for i in triple)
-    report["split_coordinates"]=coords
-    basis=independent_coordinates(width,fixed,coords)
+        forms=tuple(1<<(2*i) for i in triple)
+    if not linear:
+        report["split_coordinates"]=tuple(m.bit_length()-1 for m in forms)
+    report["split_forms"]=forms
+    basis=independent_forms(width,fixed,forms)
     report["d"]=len(basis)
     report["affine_feasible_patterns"]=1<<len(basis)
     for bits in product(range(2),repeat=len(basis)):
-        branch=fixed+[(1<<j,b) for j,b in zip(basis,bits)]
+        branch=fixed+list(zip(basis,bits))
         representative=affine_solve(width,branch)
         if representative is None:
             raise AssertionError("independent coordinate assignment infeasible")
         report["visited"]+=1
-        for i,j in zip(triple,coords):
-            bit=(representative>>j)&1
-            local=j-2*i
+        for i,form in zip(triple,forms):
+            bit=(representative&form).bit_count()%2
+            local=form>>(2*i)
             branch.extend((m<<(2*i),b) for m,b in affine_rows(
-                {v for v in relations[i] if ((v>>local)&1) == bit}))
+                {v for v in relations[i] if (v&local).bit_count()%2 == bit}))
         ans=affine_solve(width,branch)
         if ans is not None:
             witness=tuple(r[(ans>>(2*i))&3] for i,r in enumerate(relations))
@@ -267,6 +287,26 @@ def solve_ranked(domains, rows, *, stats=None, optimize=False):
                 raise AssertionError("invalid lifted witness")
             return witness
     return None
+
+def parity_gap_instance(k):
+    """All local parities equal; quotient has independent u_i and common t."""
+    if not isinstance(k,int) or k<1:
+        raise ValueError("expected positive component count")
+    return [(10,15)]*k,[(3|(3<<(2*i)),0) for i in range(1,k)]
+
+def parity_gap_demo(k=21):
+    ds,rows=parity_gap_instance(k)
+    stats={}
+    witness=solve_ranked(ds,rows,stats=stats,linear=True)
+    assert witness is not None and verify(ds,rows,witness)
+    assert stats["d"]==1
+    # Coordinate minimum k is proved analytically; do not run the exponential
+    # coordinate optimizer on this large family. Small k is tested separately.
+    return {"k":k,"coordinate_d_analytic":k,"linear_d":stats["d"],
+            "coordinate_patterns_analytic":1<<k,
+            "linear_patterns":stats["affine_feasible_patterns"],
+            "linear_visited":stats["visited"],"optimizer_nodes":stats["optimizer_nodes"],
+            "scope":"structured SAT control; pattern count, not measured speedup"}
 
 def rank_demo(k=21):
     """Structured UNSAT family: all u equal; both global u choices fail."""
@@ -318,4 +358,4 @@ def audit():
             "independent_review":"NOT_PERFORMED","global_promotion":"NONE"}
 
 if __name__=="__main__":
-    print(json.dumps({**audit(), 'rank_demo': rank_demo(), 'optimum_demo': optimum_demo()},indent=2,sort_keys=True))
+    print(json.dumps({**audit(), 'rank_demo': rank_demo(), 'optimum_demo': optimum_demo(), 'parity_gap_demo': parity_gap_demo()},indent=2,sort_keys=True))

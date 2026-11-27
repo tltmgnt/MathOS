@@ -29,9 +29,22 @@ theorem selector_complete (a b c : Bool) (h : (a || b || c) = true) :
   cases a <;> cases b <;> cases c <;>
     first | rfl | exact False.elim (Bool.noConfusion h)
 
+/-- Under a parity split, the implication accepts the parity-zero fiber
+    and the single parity-one point whose first coordinate is true. -/
+theorem parity_slice_forward (u v : Bool) :
+    valid u v = (!(Bool.xor u v) || u) := by
+  cases u <;> cases v <;> rfl
+
+theorem parity_slice_reverse (u v : Bool) :
+    valid v u = (!(Bool.xor u v) || v) := by
+  cases u <;> cases v <;> rfl
+
 end PnpOverlapBoundary
 
 #print axioms PnpOverlapBoundary.gadget_forward
 #print axioms PnpOverlapBoundary.gadget_lift
 #print axioms PnpOverlapBoundary.selector_sound
 #print axioms PnpOverlapBoundary.selector_complete
+
+#print axioms PnpOverlapBoundary.parity_slice_forward
+#print axioms PnpOverlapBoundary.parity_slice_reverse

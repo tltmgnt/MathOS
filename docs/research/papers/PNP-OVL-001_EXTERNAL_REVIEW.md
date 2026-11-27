@@ -18,3 +18,5 @@ Do not equate CI, AI review or self-review with independent expert acceptance. I
 Additional review: assess Theorem D separately, including rank-nullity, exact feasible-pattern count, bit-cost accounting, comparison with affine backdoor algorithms, and the structured 21-component control. Do not interpret this as an evaluation of the 21-bit state identifier.
 
 Theorem E review: check quotient-space kernel proof, Vertex Cover reduction, exact depth budget, end-to-end optimizer accounting, and distinction between predicted pattern counts and measured visited leaves. Compare with submodular vertex cover and matroid-rank minimization before any priority claim. Full formalization remains open.
+
+Theorem F review: check graph rank-to-cover conversion including singleton components, iterative-deepening node bound, quotient-basis independence for the parity-gap family, and the distinction between 3^delta* optimization and 2^delta* split enumeration. Compare with subspace-transversal and XNF SAT literature; assess actual novelty independently.

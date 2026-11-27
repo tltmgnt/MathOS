@@ -20,3 +20,12 @@ The rank difference itself is standard rank-nullity. These references do not est
 
 ## Optimal coordinate selection (Theorem E)
 A closer prior-art match than generic affine backdoors is submodular vertex cover: the cost of a set of occurrence coordinates is its quotient-matroid rank, a monotone submodular function. See Satoru Iwata and Kiyohito Nagano, Submodular Function Minimization under Covering Constraints (FOCS 2009), and related discussion at https://lsec.cc.ac.cn/~sjom/SJOMInvitedTalks/ProfSIwata.pdf . Also compare Fomin et al., Covering Vectors by Spaces: Regular Matroids (ICALP 2017), https://doi.org/10.4230/LIPIcs.ICALP.2017.56 ; their Space Cover problem requires spanning all target vectors from a disjoint candidate set and is not identical to this pair-hitting formulation. A preliminary search found these connections; full theorem-level comparison remains open. The proof uses classical Vertex Cover hardness and a standard bounded search-tree argument. Do not promote novelty, even if regression and scoped Lean checks pass.
+
+## Generalized linear forms (Theorem F)
+Targeted external screening (27 November 2026):
+- An inequality for polymatroid functions and its applications, Discrete Applied Mathematics, DOI https://doi.org/10.1016%2FS0166-218X%2802%2900455-9 . Discusses space covering / subspace transversals; compare exact problem definitions, including quotient groups that may contain the zero vector.
+- Hitting Subspace Problem, https://cgad.ski/math/hitting_subspace.pdf . Related affine-space hitting objective; source status and exact overlap require further review.
+- Fomin et al., Covering Vectors by Spaces: Regular Matroids, https://doi.org/10.4230/LIPIcs.ICALP.2017.56 . Different target-span problem; do not conflate its parameterized complexity with pair/triple hitting.
+- SAT Solving Using XOR-OR-AND Normal Forms, https://doi.org/10.1007/s11786-024-00594-x . Existing linear Boolean forms in SAT solving.
+- Tradeoffs in the complexity of backdoors to satisfiability, https://www.cs.cornell.edu/gomes/pdf/2014_dilkina_amai_dynamic.pdf . Existing XOR-backdoor considerations.
+The exact graph optimum preservation argument and the coordinate-vs-parity exponential pattern gap are concrete candidates for comparison, not a claim of priority. Full-text theorem-by-theorem novelty review is still required.

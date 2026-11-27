@@ -7,20 +7,24 @@
   "obligations": {
     "local_classification": "ARGUMENT_DRAFT",
     "affine_tractability": "ARGUMENT_DRAFT",
-    "gadget_and_selector": "SCOPED_CI_PASSED_AT_6b4bdc67",
+    "gadget_and_selector": "SCOPED_CI_PASSED_AT_c2ecdab7",
     "reduction_correctness": "ARGUMENT_DRAFT",
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "8_GROUPS_PASSED_AT_6b4bdc67_4_NEW_GROUPS_AWAITING_CI",
+    "python_tests": "12_GROUPS_PASSED_AT_c2ecdab7_5_NEW_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
-    "prior_art": "SUBMODULAR_VERTEX_COVER_CONNECTION_IDENTIFIED",
+    "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
     "rank_sensitive_bound": "ARGUMENT_DRAFT",
     "rank_projection_formalization": "OPEN",
     "optimal_coordinate_complexity": "ARGUMENT_DRAFT",
     "optimal_coordinate_fpt": "ARGUMENT_DRAFT",
-    "optimal_coordinate_formalization": "OPEN"
+    "optimal_coordinate_formalization": "OPEN",
+    "generalized_form_complexity": "ARGUMENT_DRAFT",
+    "generalized_form_fpt": "ARGUMENT_DRAFT",
+    "exact_parity_gap": "ARGUMENT_DRAFT",
+    "parity_slice_lean": "SOURCE_AWAITING_REPLAY"
   },
   "canonical_pnp_status": "OPEN"
 }
