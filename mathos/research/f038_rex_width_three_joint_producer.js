@@ -1,5 +1,5 @@
 // D5Q: compact packed blocks with a single two-cell carry insertion of forbidden tokens.
-function compile(){
+function compile(trace=false){
  // Fixed finite-state compiler. Tape workspace: binary columns (M,Y,A,B,C)
  // followed by three fixed-width group words. M=m-1, Y=m-2 after header.
  const defs=new Map(),r=(s,a)=>[s,a,1],l=(s,a)=>[s,a,-1],z=(s,a)=>[s,a,0];
@@ -379,7 +379,7 @@ function compile(){
  const q=names.length,b=q.toString(2).length;for(let t of rows)if(t[0]===-1)t[0]=q;
  const desc="111"+"1".repeat(q)+"0"+rows.map(([s,w,d])=>s.toString(2).padStart(b,"0")+w.toString(2).padStart(2,"0")+(d+1).toString(2).padStart(2,"0")).join("");
  const events=[];for(let i=0;i<q;i++){let [name,flag]=names[i];if(expected.has(name))events.push({state:i,flag,...expected.get(name)});}
- return{q,desc,events,plannerEntry:ids.get("search0_0|0"),pushEntry:ids.get("push|0"),popEntry:ids.get("pop|0"),loaderEntry:ids.get("loadStart|0"),bridgeReady:ids.get("bridgeReady|0")};
+ return{q,desc,events,...(trace?{names}:{}),plannerEntry:ids.get("search0_0|0"),pushEntry:ids.get("push|0"),popEntry:ids.get("pop|0"),loaderEntry:ids.get("loadStart|0"),bridgeReady:ids.get("bridgeReady|0")};
 }
 function decode(desc){
  if(!/^1111+0[01]+$/.test(desc))throw Error("descriptor grammar");
