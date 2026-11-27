@@ -13,7 +13,7 @@ function phaseAudit(U,A,B,W,F,R,C,V,L,E,Admission,name){
  ok(out.status==="HALT"&&out.witness===f.witness&&out.head===a.encoded.length+1,"projector");
  if(f.witness!==null)ok(E.valid(f.raw,out.witness)&&out.nextSymbol===2,"witness");else ok(out.headSymbol===2,"blank");
  const t=p.t+init.t+a.clock+out.t,head=p.checkpoint.head+init.head+out.head;
- const lo=p.checkpoint.head-at+1,span=head+(f.witness?.length??0)-lo+1;
+ const lo=p.checkpoint.head-at+1,span=head+Math.max(0,(f.witness?.length??0)-1)-lo+1;
  ok(f.clock===null||(t===f.clock&&head===f.head&&span===f.span),"original total");
  const bound=52*(a.N+2)*a.steps+8;ok(bound===a.upper,"explicit worker bound");
  return {name,m:f.m,t,head,span,witness:out.witness,producer:p.t,bridge:init.t,worker:a.clock,projection:out.t,steps:a.steps,N0:a.N0,N:a.N,growth:a.growth,equalCarries:a.equalCarries,changedCarries:a.changedCarries,upper:bound,slot:out.witness===null?null:Admission.slot(f.n,928445994,t)};
