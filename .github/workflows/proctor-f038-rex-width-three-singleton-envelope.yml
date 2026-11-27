@@ -52,7 +52,7 @@ jobs:
           JS
           node <<'JS' > /tmp/d5h.fixtures
           const E=require('./mathos/research/f038_tga_normalized_integration.js').engine(),p=[0,0];
-          for(const [name,c,z,t,h,s] of [['empty',[],Array(9).fill(0),289513684,53132,54161],['partial',[[-1],[-4],[-2,-4]],[1,0,0,0,0,0,0,0,0],289527574,53132,54162],['conflict',[[-1],[-4],[-2,-3]],null,155016220,40701,53970]])console.log([name,31,t,E.encode(2,p,c),z?E.witness(2,p,z):'-',h,s].join(' '));
+          for(const [name,c,z,t,h,s] of [['empty',[],Array(9).fill(0),289513684,53132,54161],['partial',[[-1],[-4],[-2,-4]],[1,0,0,0,0,0,0,0,0],289527574,53132,54162],['conflict',[[-1],[-2,-3]],null,155016220,40701,53970]])console.log([name,31,t,E.encode(2,p,c),z?E.witness(2,p,z):'-',h,s].join(' '));
           JS
           g++ -std=c++17 -O3 mathos/research/f038_rex_width_three_native.cpp -o /tmp/d5h-native
           /tmp/d5h-native /tmp/d5h.desc /tmp/d5h.fixtures > /tmp/d5h-native.out
