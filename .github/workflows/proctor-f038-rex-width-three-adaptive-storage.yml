@@ -1,0 +1,82 @@
+name: Proctor F038 RE-X adaptive packed-prefix storage
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-adaptive-storage']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Adaptive storage codec and actual compiled deposit-return audit
+        run: |
+          node mathos/research/f038_rex_width_three_adaptive_storage_audit.js > /tmp/d5r.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5r.json');a.equal(r.patterns,8191);a.equal(r.maxOverhead,2);a.equal(r.arithmetic,20034);a.equal(r.cases,7);a.equal(r.malformed,5);a.equal(r.batchGain,6);a.equal(r.batchLoss,1);a.equal(r.jointGain,0);a.equal(r.jointLoss,7);a.deepEqual(r.thresholds,['148868670','223106577']);console.log('D5R_STORAGE_ORACLE_OK')"
+          node mathos/research/f038_rex_width_three_adaptive_macro_audit.js > /tmp/d5r-macro.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5r-macro.json');a.equal(r.entries,260);a.equal(r.cases,10940);a.equal(r.folds,123);a.equal(r.switches,612);a.equal(r.literal,10205);a.equal(r.maxSteps,837);console.log('D5R_COMPILED_DEPOSIT_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5R_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [all-active, ternary-chain, ternary-empty, reverse-chain-cap, radius-three-refusal, ternary-three-rank]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_adaptive_storage_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_adaptive_storage_replay.js" "$mode" descriptor > /tmp/d5r.desc
+          node "${p}_adaptive_storage_replay.js" "$mode" fixtures > /tmp/d5r.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5r-native
+          /tmp/d5r-native /tmp/d5r.desc /tmp/d5r.fixtures > /tmp/d5r-native.out
+          python -m mathos.research.f038_rex_width_three_adaptive_storage_native_verify /tmp/d5r.fixtures /tmp/d5r-native.out "$mode"
