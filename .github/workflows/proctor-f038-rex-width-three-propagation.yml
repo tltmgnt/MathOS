@@ -1,0 +1,47 @@
+name: Proctor F038 RE-X binary propagation and radius-two repair
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-propagation']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent fixed point, candidate oracle and quadratic accounting
+        run: |
+          node mathos/research/f038_rex_width_three_propagation_audit.js > /tmp/d5j.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d5j.json');a.equal(r.count,68);a.equal(r.accepted,40);a.equal(r.refused,28);a.equal(r.gains,17);a.equal(r.falseNeg,1);a.equal(r.empty,27);a.equal(r.arith,10017);console.log('D5J_PROPAGATION_ORACLE_OK')"
+      - name: Physical replay and exact quotient cutoff
+        run: node mathos/research/f038_rex_width_three_propagation_replay.js all
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          node "${p}_propagation_replay.js" descriptor > /tmp/d5j.desc
+          node "${p}_propagation_replay.js" fixtures > /tmp/d5j.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d5j-native
+          /tmp/d5j-native /tmp/d5j.desc /tmp/d5j.fixtures > /tmp/d5j-native.out
+          python -m mathos.research.f038_rex_width_three_propagation_native_verify /tmp/d5j.fixtures /tmp/d5j-native.out
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5J_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
