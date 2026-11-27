@@ -1,0 +1,80 @@
+name: Proctor F038 RE-X automatic component fallback
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-component-fallback']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent graph decomposition, partition admission, traces and conditional resources
+        run: |
+          node mathos/research/f038_rex_width_three_component_fallback_audit.js > /tmp/d6e.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6e.json');a.equal(r.cases,705);a.equal(r.sat,1360);a.equal(r.unsat,50);a.equal(r.special,610);a.equal(r.fallback,800);a.equal(r.fallbackSat,782);a.equal(r.fallbackUnsat,18);a.equal(r.trials,3426);a.equal(r.conflicts,906);a.equal(r.arith,20034);a.equal(r.improved,4);a.equal(r.regressed,1356);a.equal(r.tied,0);console.log('D6E_COMPONENT_FALLBACK_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6E_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, triple-2-sat, triple-2-unsat, cross-sat, barrier-unsat, barrier-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector physical replay, quotient and cutoff
+        run: node mathos/research/f038_rex_width_three_component_fallback_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent native original-format replay
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node "${p}_component_fallback_replay.js" "$mode" descriptor > /tmp/d6e.desc
+          node "${p}_component_fallback_replay.js" "$mode" fixtures > /tmp/d6e.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6e-native
+          /tmp/d6e-native /tmp/d6e.desc /tmp/d6e.fixtures > /tmp/d6e-native.out
+          python -m mathos.research.f038_rex_width_three_component_fallback_native_verify /tmp/d6e.fixtures /tmp/d6e-native.out "$mode"
