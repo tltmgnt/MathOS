@@ -1,0 +1,88 @@
+name: Proctor F038 RE-X physical prefix separator search
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-prefix-separator']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent graph, edge-list, traces and candidate ceilings
+        run: |
+          node mathos/research/f038_rex_width_three_prefix_separator_audit.js > /tmp/d6g.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6g.json');for(const [k,v] of Object.entries({cases:580,modes:1160,sat:932,unsat:228,conditioned:40,conditionedSat:36,conditionedUnsat:4,fallback:904,early:216,visits:2530,conflicts:1298,components:6116,separators:54,localChecks:2530,graphChecks:6116,improved:6,regressed:938,tied:216,oldSteps:32362851,newSteps:35963963}))a.equal(r[k],v,k);a.deepEqual(r.ir,[12466,12465]);console.log('D6G_PREFIX_SEPARATOR_OK')"
+      - name: Independent separator-conditioned host reference
+        run: |
+          node mathos/research/f038_rex_width_three_separator_reference.js > /tmp/d6g-separator.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6g-separator.json');for(const [k,v] of Object.entries({cases:513,sat:451,unsat:62,selected:73,one:49,two:24,assignments:280,candidates:5661}))a.equal(r[k],v,k);console.log('D6G_SEPARATOR_REFERENCE_OK')"
+      - name: Hard connected separator family
+        run: |
+          node mathos/research/f038_rex_width_three_prefix_separator_hard.js > /tmp/d6g-hard.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6g-hard.json');a.equal(r.cases,4);a.equal(r.modes,8);const s=r.rows.find(x=>x.m===3&&!x.unsat&&!x.full);a.equal(s.visits,24);a.equal(s.oldVisits,483);a.equal(s.clock,2791995002);a.equal(s.oldClock,11501726628);console.log('D6G_HARD_SEPARATOR_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6G_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
+  physical:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+        fixture: [empty, empty-domain, cross-sat, conditioned-unsat, conditioned-sat, hard-3-sat]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original raw-selector replay, quotient and cutoff
+        run: node --max-old-space-size=4096 mathos/research/f038_rex_width_three_prefix_separator_replay.js ${{ matrix.mode }} ${{ matrix.fixture }}
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [bounded, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native original-format replay and one-short cutoff
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three
+          mode=${{ matrix.mode }}
+          node --max-old-space-size=4096 "${p}_prefix_separator_replay.js" "$mode" descriptor > /tmp/d6g.desc
+          node "${p}_prefix_separator_replay.js" "$mode" fixtures > /tmp/d6g.fixtures
+          g++ -std=c++17 -O3 "${p}_native.cpp" -o /tmp/d6g-native
+          /tmp/d6g-native /tmp/d6g.desc /tmp/d6g.fixtures > /tmp/d6g-native.out
+          python -m mathos.research.f038_rex_width_three_prefix_separator_native_verify /tmp/d6g.fixtures /tmp/d6g-native.out "$mode"
