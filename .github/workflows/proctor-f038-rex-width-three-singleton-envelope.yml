@@ -1,0 +1,70 @@
+name: Proctor F038 RE-X singleton quadratic envelope
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-singleton-envelope']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Quadratic arithmetic and strict/adaptive IR coverage
+        run: |
+          node mathos/research/f038_rex_width_three_singleton_envelope.js > /tmp/d5h.json
+          node <<'JS'
+          const a=require('node:assert/strict'),r=require('/tmp/d5h.json');
+          a.equal(r.arithmetic.count,10017);a.equal(r.arithmetic.boundary,6);
+          a.deepEqual(r.arithmetic.thresholds,['124696412','124697780']);
+          a.equal(r.experiment.checked,40);a.equal(r.experiment.strictChecked,40);
+          a.equal(r.experiment.accepted,23);a.equal(r.experiment.refused,17);
+          a.equal(r.experiment.falseNegative,7);a.equal(r.parentLedger.length,3);
+          console.log('D5H_QUADRATIC_ARITHMETIC_OK');
+          JS
+      - name: Physical adaptive replay and all-transition quotient cutoff
+        run: |
+          node mathos/research/f038_rex_width_three_adaptive_audit.js > /tmp/d5h-physical.json
+          node <<'JS'
+          const a=require('node:assert/strict'),r=require('/tmp/d5h-physical.json');
+          a.equal(r.stats.quotientBits,124697764);
+          a.deepEqual(r.rows.map(x=>x.t),[289513684,289527574,155016220]);
+          a.deepEqual(r.rows.map(x=>x.head),[53132,53132,40701]);
+          a.deepEqual(r.rows.map(x=>x.span),[54161,54162,53970]);
+          console.log('D5H_ADAPTIVE_PHYSICAL_OK');
+          JS
+      - name: Independent native original-format descriptor, witnesses and cutoff
+        run: |
+          set -euo pipefail
+          node <<'JS' > /tmp/d5h.desc
+          const p='./mathos/research/f038_rex_width_three_',U=require(p+'adaptive_ir.js'),B=require(p+'singleton_physical.js'),P=require(p+'bridge_producer.js'),K=require(p+'exit_compiler.js'),Q=require('./mathos/research/f038_rex_width_two_quotient.js'),C=require(p+'compiler.js');
+          const J=U.machine(true),N=Q.refine(B.compose(P,J,K.compile(J)));
+          (async()=>{for(const s of C.descriptorChunks(N))if(!process.stdout.write(s))await require('node:events').once(process.stdout,'drain');})().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+          node <<'JS' > /tmp/d5h.fixtures
+          const E=require('./mathos/research/f038_tga_normalized_integration.js').engine(),p=[0,0];
+          for(const [name,c,z,t,h,s] of [['empty',[],Array(9).fill(0),289513684,53132,54161],['partial',[[-1],[-4],[-2,-4]],[1,0,0,0,0,0,0,0,0],289527574,53132,54162],['conflict',[[-1],[-4],[-2,-3]],null,155016220,40701,53970]])console.log([name,31,t,E.encode(2,p,c),z?E.witness(2,p,z):'-',h,s].join(' '));
+          JS
+          g++ -std=c++17 -O3 mathos/research/f038_rex_width_three_native.cpp -o /tmp/d5h-native
+          /tmp/d5h-native /tmp/d5h.desc /tmp/d5h.fixtures > /tmp/d5h-native.out
+          python -m mathos.research.f038_rex_width_three_adaptive_native_verify /tmp/d5h.fixtures /tmp/d5h-native.out
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5H_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
