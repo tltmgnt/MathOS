@@ -7,7 +7,9 @@ function envelope(m,Space){
  const select=10000n*(b+1n)*rows+100000n+50n*N;
  const translate=10000n*M*(b+1n)+10000n+10n*N;
  const T=9n*local+9n*edge+9n*select+translate+10000n;
- return {local,edge,select,translate,T,N,physical:(26n*N+16n)*T+8n};
+ const physical=(26n*N+16n)*T+8n,base=(b+1n)*rows,uniformN=512n*base,uniformT=(1n<<24n)*base*(b+1n),uniformPhysical=(1n<<39n)*rows*rows*(b+1n)**3n;
+ if(N>uniformN||T>uniformT||physical>uniformPhysical)throw Error("simplified envelope");
+ return {local,edge,select,translate,T,N,physical,uniformN,uniformT,uniformPhysical};
 }
 function countPhases(J,I,Space,m){
  const T=I.map(x=>["L",...x,"_"]),h=I.map(()=>0),B=envelope(m,Space),ledger={local:[],edge:[],select:[],translate:0},ok=(v,s)=>{if(!v)throw Error(s)};
