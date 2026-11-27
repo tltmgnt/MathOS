@@ -18,12 +18,20 @@ function oracle(E,raw,domains){
  }
 }
 function envelope(V,m,full=false){const e=V.envelope(m),k=BigInt(m),S=e.S,N=S+35n*k+1479n,T=131072n*S*(k**9n+(full?k:1n)),W=(20n*N+12n)*T+6n,total=4n*e.P+32n*e.L+384n*S*S+W;if(N>2n*S||total>2097152n*k**9n*e.L*e.L)throw Error("envelope");return {N,T,W,total};}
+// Equality-star family only: first failed equality identifies a unique
+// prefix determined by root rank and unequal rank at that scope's leaf.
+// Each diagonal trial can occur at most once for each root rank.
+function starEnvelope(V,m,full=false){
+ const e=V.envelope(m),k=BigInt(m),S=e.S,trials=8n*k*(k-1n)+k,N=S+35n*k+1479n,T=131072n*S*(trials+(full?k:1n)),W=(20n*N+12n)*T+6n,total=4n*e.P+32n*e.L+384n*S*S+W;
+ if(N>2n*S||total>1048576n*k*k*e.L*e.L||total**3n> (4096n**3n)*e.L**8n)throw Error("star envelope");
+ return {trials,N,T,W,total};
+}
 function audit(U,E,Barrier,Prev,Prop,F,V,OldAudit){
  const J=[U.machine(false),U.machine(true)],O=[Prev.machine(false),Prev.machine(true)],ok=(x,s)=>{if(!x)throw Error(s)};
  let cases=0,sat=0,unsat=0,traceTrials=0,traceConflicts=0,skipped=0,improved=0,tied=0,regressed=0,arith=0;const rows=[];
 
- for(let m=2;m<=10000;m++)for(const full of [false,true]){envelope(V,m,full);arith++;}
- for(const k of [20n,30n,40n,50n,100n,1024n])for(const d of [-1n,0n,1n])for(const full of [false,true]){envelope(V,(1n<<k)+d,full);arith++;}
+ for(let m=2;m<=10000;m++)for(const full of [false,true]){envelope(V,m,full);starEnvelope(V,m,full);arith++;}
+ for(const k of [20n,30n,40n,50n,100n,1024n])for(const d of [-1n,0n,1n])for(const full of [false,true]){envelope(V,(1n<<k)+d,full);starEnvelope(V,(1n<<k)+d,full);arith++;}
  function test(name,m,B,detail=false,compare=true){
   const raw=E.encode(m,Array.from({length:m},(_,i)=>i%2),B),exact=Barrier.exact(E,raw),s=U.stream(E,raw),I=[...Array(19).fill(""),s];
   for(let i=0;i<2;i++){
@@ -42,7 +50,7 @@ function audit(U,E,Barrier,Prev,Prop,F,V,OldAudit){
     if(compare){prior=F.count(O[i],I).clock;if(clock<prior)improved++;else if(clock===prior)tied++;else regressed++;}
    }else unsat++;
    if(detail&&i===0)rows.push({name,m,solutionCount:exact.count,trials:trials.length,conflicts:conflicts.length,skipped:o.skipped,steps:r.steps,oldSteps:old?.steps??null,clock,prior});
-   if(name.startsWith("star-"))ok(trials.length<=8*m*(m-1)+m,"star trial bound");
+   if(name.startsWith("star-")){const b=starEnvelope(V,m,full);ok(BigInt(trials.length)<=b.trials&&BigInt(r.steps)<=b.T&&(clock===null||BigInt(clock)<=b.W),"star resource bound");}
   }cases++;
  }
  for(const f of OldAudit.fixtures(E,Barrier))test(f.name,f.m,f.B,true);
@@ -52,5 +60,5 @@ function audit(U,E,Barrier,Prev,Prop,F,V,OldAudit){
  for(let m=2;m<=6;m++)for(const unsat of [false,true])test("star-"+m+(unsat?"-unsat":"-sat"),m,Barrier.family(E,m,unsat).B,true,m===2);
  return {cases,sat,unsat,traceTrials,traceConflicts,skipped,improved,tied,regressed,arith,rows};
 }
-module.exports={oracle,envelope,audit};
+module.exports={oracle,envelope,starEnvelope,audit};
 if(require.main===module){const p='./f038_rex_width_three_';console.log(JSON.stringify(audit(require(p+'conflict_pruning_ir.js'),require('./f038_tga_normalized_integration.js').engine(),require(p+'completeness_barrier.js'),require(p+'complete_odometer_ir.js'),require(p+'sparse_audit.js'),require(p+'fast_clock.js'),require(p+'singleton_envelope.js'),require(p+'complete_odometer_audit.js'))));}
