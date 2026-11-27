@@ -167,6 +167,6 @@ function compile(J,paired=true,special=true,serial=paired&&special,fused=serial,
  put(i,pack(rootId.get("shift"+d+":"+c.slice(1)+"0"),+c[0],1),pack(rootId.get("shift"+d+":"+c.slice(1)+"1"),+c[0],1),finish);
 }
  const T=new Uint32Array(3*q);for(let i=0;i<q;i++)for(let a=0;a<3;a++){let v=get(i,a);T[3*i+a]=(v>>>4)>=H-1?pack(q+((v>>>4)===H-1?1:0),(v>>>2)&3,(v&3)-1):v;}
- return{q,T,w,codes,syms,logicalStates:logical.size,logicalRoots:rootCount,interned:used,entry:0};
+ return{q,T,w,codes,syms,logicalStates:logical.size,logicalRoots:rootCount,interned:used,entry:0,rootNames:roots};
 }
 module.exports={compile};
