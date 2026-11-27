@@ -10,6 +10,7 @@ on:
       - 'mathos/research/pnp_overlap_semantic.py'
       - 'mathos/research/pnp_overlap_recovery.py'
       - 'mathos/research/pnp_overlap_order.py'
+      - 'mathos/research/pnp_overlap_order_bounds.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
@@ -17,6 +18,7 @@ on:
       - 'tests/test_pnp_overlap_semantic.py'
       - 'tests/test_pnp_overlap_recovery.py'
       - 'tests/test_pnp_overlap_order.py'
+      - 'tests/test_pnp_overlap_order_bounds.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   pull_request:
@@ -29,6 +31,7 @@ on:
       - 'mathos/research/pnp_overlap_semantic.py'
       - 'mathos/research/pnp_overlap_recovery.py'
       - 'mathos/research/pnp_overlap_order.py'
+      - 'mathos/research/pnp_overlap_order_bounds.py'
       - 'tests/test_pnp_overlap_boundary.py'
       - 'tests/test_pnp_overlap_certificates.py'
       - 'tests/test_pnp_overlap_adaptive.py'
@@ -36,6 +39,7 @@ on:
       - 'tests/test_pnp_overlap_semantic.py'
       - 'tests/test_pnp_overlap_recovery.py'
       - 'tests/test_pnp_overlap_order.py'
+      - 'tests/test_pnp_overlap_order_bounds.py'
       - 'docs/research/papers/PNP-OVL-001*'
       - '.github/workflows/pnp-overlap.yml'
   workflow_dispatch:
@@ -69,6 +73,8 @@ jobs:
           python -m mathos.research.pnp_overlap_recovery > artifacts/pnp-overlap/recovery.json
           python -m unittest discover -s tests -p 'test_pnp_overlap_order.py' -v 2>&1 | tee artifacts/pnp-overlap/order-tests.txt
           python -m mathos.research.pnp_overlap_order > artifacts/pnp-overlap/order.json
+          python -m unittest discover -s tests -p 'test_pnp_overlap_order_bounds.py' -v 2>&1 | tee artifacts/pnp-overlap/order-bounds-tests.txt
+          python -m mathos.research.pnp_overlap_order_bounds > artifacts/pnp-overlap/order-bounds.json
       - run: |
           curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
           sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0

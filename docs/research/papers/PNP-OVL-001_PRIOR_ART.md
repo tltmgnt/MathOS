@@ -49,3 +49,6 @@ These sources establish related local consistency, projection, and affine-solvin
 
 ## Theorem L scope
 The monotonicity and greatest-fixed-point argument is standard finite-lattice reasoning; affine hulls and nullspace bases are standard linear algebra. Compare the variable-order threshold complexity to local-consistency rank/width decision problems and proof-system complexity. The coNP-hardness at full order is a direct consequence of B, not a new general SAT lower bound. The exact unrestricted threshold complexity remains unresolved here. No new external literature search or priority claim in this cycle.
+
+## Theorem M scope
+The implication-graph criterion is classical 2-SAT (Aspvall, Plass and Tarjan, A linear-time algorithm for testing the truth of certain quantified Boolean formulas, Information Processing Letters 1979). Girth and bounded-treewidth examples use elementary graph theory; no new external literature search was performed in this cycle. Compare the proposed bounds on the exact affine-hull closure threshold with existing consistency-width and proof-complexity work. The constant-treewidth example is limited to the original-variable graph of this encoding and does not imply hardness of bounded-treewidth CSPs.
