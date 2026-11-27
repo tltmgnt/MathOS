@@ -354,7 +354,9 @@ function compile(trace=false){
    shuttle(n+"PrefixOne","01",1,n+"Read");
    shuttle(n+"PrefixRun","11",1,n+"PrefixRead");
    shuttle(n+"PrefixZero","00",0,n+"PrefixRead");
-   add(n+"PrefixRead",a=>a===0?z(n+"PrefixZeroMark",a):a===1?l(n+"Prefix1",a):bad());
+   add(n+"PrefixRead",a=>a===0?l(n+"PrefixProbe1",a):a===1?l(n+"Prefix1",a):bad());
+   for(let k=1;k<=3;k++)add(n+"PrefixProbe"+k,a=>a===0?(k===3?bad():l(n+"PrefixProbe"+(k+1),a)):r(k===1?n+"PrefixZeroMark":n+"PrefixShort"+k+"Mark",a));
+   for(let k=2;k<=3;k++)shuttle(n+"PrefixShort"+k,"00".repeat(k),0,n+"PrefixRead");
    add(n+"Prefix1",a=>a===1?z(n+"PrefixOneMark",a):a===0?l(n+"PrefixRunMark",a):bad());
    add(n+"Read",a=>a===0?l(n+"Probe1",a):a===1?l(n+"Literal1",a):bad());
    add(n+"Literal1",a=>a===2?z(n+"Done",a):r(n+"Mark1",a));
