@@ -27,13 +27,12 @@ function machine(W,Gap,full=false){
  const encode=splice(Gap.machine(),[C,N,G,K,R],choose);
  const expand=loop(n=>rd(T,x=>x==="_"?encode:x==="x"?word(R,"0000",mv(T,1,n)):bit(x)?app(R,x,mv(T,1,n)):reject));
  const long=start(T,expand);
- // Count up to 17 tokens in finite control; small fields never invoke encoder.
- const scan=Array.from({length:18},()=>label());
- for(let k=0;k<18;k++){
-  const next=scan[Math.min(k+1,17)],end=k<=16?fallback:long;
-  bind(scan[k],rd(S,x=>x==="0"?mv(S,1,rd(S,y=>bit(y)?mv(S,1,app(T,y,next)):reject)):x==="1"?mv(S,1,rd(S,y=>y==="1"?mv(S,1,app(T,"x",next)):y==="0"?mv(S,1,end):reject)):reject));
- }
- bind(load,scan[0]);
+ // Probe the compact token buffer after loading, rather than duplicating
+ // the scanner for every short length.
+ let probe=long;
+ for(let k=16;k>=0;k--){const next=probe;probe=rd(T,x=>x==="_"?fallback:bit(x)||x==="x"?(k===16?long:mv(T,1,next)):reject);}
+ const select=start(T,probe);
+ bind(load,rd(S,x=>x==="0"?mv(S,1,rd(S,y=>bit(y)?mv(S,1,app(T,y,load)):reject)):x==="1"?mv(S,1,rd(S,y=>y==="1"?mv(S,1,app(T,"x",load)):y==="0"?mv(S,1,select):reject)):reject));
  bind(field,rd(S,x=>x==="_"?finish:x==="0"?load:x==="1"?mv(S,1,rd(S,y=>y==="0"?mv(S,1,word(Q,"10",field)):y==="1"?mv(S,-1,load):reject)):reject));
  let next=field;for(let i=0;i<11;i++){const end=word(Q,"10",next),scan=label();bind(scan,rd(S,x=>x==="0"?mv(S,1,rd(S,y=>bit(y)?mv(S,1,word(Q,"0"+y,scan)):reject)):x==="1"?mv(S,1,test(S,y=>y==="0",mv(S,1,end),reject)):reject));next=scan;}
  return {...worker,ins,entry:start(Q,start(R,start(T,start(S,next)))),streamTape:S,canonicalTape:Q};
