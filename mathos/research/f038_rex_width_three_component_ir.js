@@ -52,7 +52,9 @@ function machine(full=false){
  // Fixed-width binary scope IDs consume exactly four tape cells.
  function idRead(choose,p=""){return p.length===4?(parseInt(p,2)<9?choose(parseInt(p,2)):reject):rd(D,x=>bit(x)?mv(D,1,idRead(choose,p+x)):reject);}
  function load(slot,d){return clear(R[slot],idRead(g=>chosen(G[g],R[slot],d)));}
- bind(load3,load(2,beginRows));bind(load2,load(1,kind));bind(load1,idRead(g=>rd(A,x=>x===["0","1","x"][g%3]?clear(R[0],chosen(G[g],R[0],load2)):x==="0"||x==="1"||x==="x"?walkD(4,rd(D,y=>y==="0"?mv(D,1,skipMask(dispatch)):y==="1"?mv(D,1,walkD(4,skipMask(dispatch))):reject)):reject)));
+ bind(load3,load(2,beginRows));bind(load2,load(1,kind));const skipOther=walkD(4,rd(D,y=>y==="0"?mv(D,1,suffix):y==="1"?mv(D,1,walkD(4,suffix)):reject));
+ const loadCurrent=back(D,4,load(0,load2)),byMode=["0","1","x"].map(mode=>rd(A,x=>x===mode?loadCurrent:x==="0"||x==="1"||x==="x"?skipOther:reject));
+ bind(load1,idRead(g=>byMode[g%3]));
  bind(kind,rd(D,x=>x==="0"?mv(D,1,clear(R[2],app(R[2],"1",beginRows))):x==="1"?mv(D,1,load3):reject));
  // A flag is consumed at each scope dispatch. Skip only masks proved all-zero.
  function skipScope(d){
@@ -164,14 +166,15 @@ function machine(full=false){
  // Physical admission: every crossing factor must be universal.
  // Cross-field failure is a refusal outside the specialized precondition,
  // not a proof of UNSAT. The generic D6C solver remains separate.
- let guard=initEntry;
- for(const record of scopes.slice().reverse()){
+ const flags=scopes.map(record=>{
   const ids=[parseInt(record.slice(0,4),2),parseInt(record.slice(4,8),2)];
   if(record.length===13)ids.push(parseInt(record.slice(9),2));
-  guard=ids.every(g=>g%3===ids[0]%3)?skipMask(guard):test(Q,x=>x==="1",mv(Q,1,test(Q,x=>x==="0",mv(Q,1,guard),reject)),reject);
- }
- for(let j=0;j<11;j++)guard=field(null,guard);
- const entry=start(Q,guard);
+  return ids.every(g=>g%3===ids[0]%3)?"1":"0";
+ }).join("");
+ const guard=label(),guardNext=mv(D,1,guard);
+ bind(guard,rd(D,x=>x==="0"?test(Q,x=>x==="1",mv(Q,1,test(Q,x=>x==="0",mv(Q,1,guardNext),reject)),reject):x==="1"?skipMask(guardNext):x==="_"?test(Q,x=>x==="_",clear(D,initEntry),reject):reject));
+ let scanGuard=start(D,guard);for(let j=0;j<11;j++)scanGuard=field(null,scanGuard);
+ const entry=start(D,word(D,flags,start(Q,scanGuard)));
  return {alphabet,ins,tapes:20,entry,witnessTape:X,streamTape:Q,candidateEntry:attempt,conflictEntry:retry,componentDone};
 }
 
