@@ -55,5 +55,25 @@ function singletonAudit(){
  }
  return {cases,tuples};
 }
-module.exports={audit,singleton,singletonAudit};
-if(require.main===module)console.log(JSON.stringify({...audit(),shortcut:singletonAudit()},(_,v)=>typeof v==='bigint'?v.toString():v));
+function sharpened(){
+ const ok=(p,s)=>{if(!p)throw Error(s)},cl=x=>x===1n?0n:BigInt((x-1n).toString(2).length),ell=928445994n,C=3n*ell+9n;
+ // L >= (4/3)(31m/2)(15m)(29m/2) = 4495m^3.
+ ok(31n*15n*29n===13485n&&13485n>3n*4096n,"layout constant");
+ // Normalize against (H+1)^3 L^(8/3). W <= 128/27, P <= 1/2,
+ // I <= 1/64, O <= 1/4096; sum < 8.
+ ok(128n*4096n+27n*(2048n+64n+1n)<8n*27n*4096n,"coefficient");
+ let count=0;
+ const ms=[...Array.from({length:10000},(_,i)=>BigInt(i+2)),...[20n,30n,40n,50n,100n,1024n].flatMap(k=>[-1n,0n,1n].map(d=>(1n<<k)+d))];
+ for(const m of ms){
+  const n=19n*m-7n,L=n+1n+2n*n*n+8n*n*(n-1n)*(n-2n)/6n,b=cl(m),H=cl(L);
+  ok(L>=4096n*m**3n&&3n*(b+1n)<=H+1n&&L>=2n**15n&&H>=16n,"strong layout");
+  const P=2n**21n*L*L,I=2n**16n*L*L,W=2n**39n*(b+1n)**3n*m**8n,O=2n**20n*(b+1n)*m**5n;
+  ok((P+I+W+O)**3n<=2n**9n*(H+1n)**9n*L**8n,"sharpened cube");count++;
+ }
+ const rhs=h=>C+cl((h+1n)**9n);let h=C;while(h<rhs(h))h=rhs(h);
+ ok(h===2785338274n&&rhs(h)===h&&rhs(h-1n)>h-1n,"sharpened threshold");
+ let boundary=0;for(const v of [h-1n,h,h+1n,...Array.from({length:64},(_,i)=>1n<<BigInt(i+32)).flatMap(v=>[v-1n,v,v+1n])]){ok((v>=h)===(v>=rhs(v)),"boundary");boundary++;}
+ return {count,boundary,C:3,H0:h,previous:2785338390n,improvement:2785338390n-h};
+}
+module.exports={audit,singleton,singletonAudit,sharpened};
+if(require.main===module)console.log(JSON.stringify({...audit(),shortcut:singletonAudit(),sharpened:sharpened()},(_,v)=>typeof v==='bigint'?v.toString():v));
