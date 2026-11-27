@@ -34,7 +34,7 @@ function family(E,m,r,unsat=false){
  const B=[],factor=(h,allowed)=>{for(const z of E.tup(m,h.length))if(!allowed(z))B.push(h.map((g,i)=>-(g*m+z[i]+1)));};
  if(r===1){for(let j=1;j<9;j++)factor([0,j],([a,b])=>a===b);factor([0,1,8],([a,b,c])=>a!==b||b!==c||(!unsat&&a===m-1));}
  else if(r===2){factor([0,2],([a,c])=>a===c);factor([1,3],([b,c])=>b===c);for(let j=4;j<9;j++)factor([0,1,j],([a,b,c])=>c===(a+b)%m);factor([2,3,8],([a,b,c])=>c!==(a+b)%m||(!unsat&&a===m-1&&b===m-1));}
- else if(r===3){for(let j=3;j<9;j++)factor([(j-3)%3,j],([a,b])=>a===b);factor([3,4,5],z=>!unsat&&z.every(a=>a===m-1));}
+ else if(r===3){for(let j=3;j<9;j++)factor([(j-3)%3,j],([a,b])=>a===b);for(let j=0;j<3;j++)factor([j,j+3,j+6],([a,b,c])=>a!==b||b!==c||(!(unsat&&j===2)&&a===m-1));}
  else throw Error("roots");
  return B;
 }
