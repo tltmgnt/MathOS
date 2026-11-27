@@ -1,0 +1,64 @@
+name: Proctor F038 RE-X width-three resource audit
+on:
+  push:
+    branches: ['research/pnp-f038-rex-width-three-resource-audit']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact clock differential and explicit storage
+        run: |
+          set -euo pipefail
+          for case in empty edge-SAT edge-UNSAT m3-forced; do
+            node mathos/research/f038_rex_width_three_resource_audit.js "$case" > "/tmp/w3-resource-$case.json"
+          done
+          python - <<'PY'
+          import json
+          r=[json.loads(open('/tmp/w3-resource-'+c+'.json').read().split(' ',1)[1]) for c in ['empty','edge-SAT','edge-UNSAT','m3-forced']]
+          assert [x['clock'] for x in r]==[672161844,1144561610,512737138,71101906698]
+          assert [x['N'] for x in r]==[3446,3635,3441,12252]
+          assert [x['spaceBound'] for x in r]==[8415,8415,8415,43489]
+          PY
+      - name: Domain-four C1 and direct D2C phase audit
+        run: |
+          set -euo pipefail
+          p=mathos/research/f038_rex_width_three_domain_four.js
+          node "$p" | tee /tmp/w3-four.json
+          node "$p" direct | tee /tmp/w3-four-direct.json
+          python - <<'PY'
+          import json
+          a,b=[json.loads(open(p).read().split(' ',1)[1]) for p in ['/tmp/w3-four.json','/tmp/w3-four-direct.json']]
+          assert a['direct'] is None
+          d=b.pop('direct')
+          a.pop('direct')
+          assert a==b and d['t']==d['producer']+d['bridge']+a['workerClock']+a['projection']
+          assert a['c1Clock']==1526876345 and a['models']==1
+          assert a['steps']==1182966 and a['workerClock']==292006191202
+          assert a['N']==25391 and a['spaceBound']==128741
+          assert a['projection']==182917 and len(a['witness'])==69
+          print('REX-024D5C_DOMAIN_FOUR_PHASE_OK',json.dumps(d))
+          PY
+      - name: Governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5c > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D5C_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
