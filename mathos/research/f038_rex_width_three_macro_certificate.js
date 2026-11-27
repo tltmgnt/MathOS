@@ -1,6 +1,6 @@
 // Static bounded-span certificate for producer compiler macro SCCs. Instrumentation must preserve original descriptor bit-for-bit.
 function instrument(source){
- const kinds=["scan","groupRead","groupSet","classify","shift","deposit","queryBlock","emit","blanks","streamEnd"];
+ const kinds=["scan","groupRead","groupSet","classify","shift","deposit","queryBlock","emit","blanks","streamEnd","back"];
  const pre=`let active=-1;const owners=new Map(),macros=[];function tagged(kind,name,fn){const old=active;if(active<0){active=macros.length;macros.push({kind,name});}try{return fn();}finally{active=old;}}\n`;
  const old='const add=(s,f)=>{if(defs.has(s))throw Error("duplicate "+s);defs.set(s,f);return s;};';
  if(!source.includes(old))throw Error("add signature");
