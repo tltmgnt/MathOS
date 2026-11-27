@@ -7,7 +7,7 @@ ok(M.w===4&&N.stats.quotientBits===(full?152643192:152774140)&&N.stats.transitio
 const Barrier=require('./f038_rex_width_three_completeness_barrier.js');
 const Base=require('./f038_rex_width_three_complete_odometer_audit.js');
 const Prior=require('./f038_rex_width_three_prefix_order_audit.js');
-const cases=Audit.fixtures(E,Barrier,Prior,Base).map(f=>f.name==='cert-1-m3-sat'?{...f,...(full?{}:{t:1595479077,head:170613,span:172882})}:f.name==='cert-1-unsat'?{...f,t:633731654,head:38293,span:46646}:f);
+const cases=Audit.fixtures(E,Barrier,Prior,Base).map(f=>f.name==='cert-1-m3-sat'?{...f,t:1595479077,head:170613,span:172882}:f.name==='cert-1-unsat'?{...f,t:633731654,head:38293,span:46646}:f);
 function expected(f){const pins=Array(f.m).fill(0),raw=E.encode(f.m,pins,f.B),I=[...Array(19).fill(''),U.stream(E,raw)],ref=Barrier.exact(E,raw);return {raw,I,w:ref.bits,ref};}
 if(fixture==='descriptor'){
  const C=require('./f038_rex_width_three_compiler.js');
