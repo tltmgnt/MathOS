@@ -19,6 +19,9 @@ function fixtures(E,suite){
  const z=[2,1,0,2,0,1,2,1,0],B=z.flatMap((a,g)=>[0,1,2].filter(i=>i!==a).map(i=>[-(3*g+i+1)]));
  B.push(...[...E.subsets([0,3,6,8],2)].map(h=>h.map(v=>-(3*v+1))));
  a.push({name:"m3-forced",m:3,pins:[1,0,1],B,clock:72540199790,head:229473,span:232294,witness:E.witness(3,[1,0,1],z)});
+ const z4=[3,2,1,0,3,2,1,0,3],B4=z4.flatMap((a,g)=>[0,1,2,3].filter(i=>i!==a).map(i=>[-(4*g+i+1)]));
+ B4.push(...[...E.subsets([0,3,6,8],2)].map(h=>h.map(v=>-(4*v+1))));
+ a.push({name:"m4-forced",m:4,pins:[1,0,1,0],B:B4,clock:299944027294,head:568801,span:574997,witness:E.witness(4,[1,0,1,0],z4)});
  return a.filter(x=>suite==="all"||x.name===suite).map(x=>({...x,n:19*x.m-7,raw:E.encode(x.m,x.pins,x.B)}));
 }
 function replay(A,M,E,suite){
