@@ -49,9 +49,10 @@ function compose(B,producer,J,worker){
 function run(M,raw,n,limit=Infinity,initial=0){
  const origin=3*raw.length+1024;let tape=new Uint8Array(origin+2*raw.length+4096);tape.fill(2);for(let i=0;i<raw.length;i++)tape[origin+i]=+raw[i];
  let h=origin,s=initial,t=0,lo=h,hi=h,clocks={};
- while(s!==M.q&&t<limit){if(s===M.bridgeAt&&clocks.bridgeAt===undefined)clocks.bridgeAt=t;if(s===M.workerAt&&clocks.workerAt===undefined)clocks.workerAt=t;if(s===M.outputAt&&clocks.outputAt===undefined)clocks.outputAt=t;if(s===M.blankAt&&clocks.blankAt===undefined)clocks.blankAt=t;
-  let v=M.T[3*s+tape[h]];tape[h]=v>>2&3;h+=(v&3)-1;s=v>>>4;t++;
-  if(h<0)throw Error("left buffer");if(h===tape.length){let a=new Uint8Array(tape.length*2);a.fill(2);a.set(tape);tape=a;}lo=Math.min(lo,h);hi=Math.max(hi,h);
+ const phases=["bridgeAt","workerAt","outputAt"],entries=phases.map(k=>M[k]),blankAt=M.blankAt,T=M.T,q=M.q;let phase=0,next=entries[0];
+ while(s!==q&&t<limit){if(s===next){clocks[phases[phase]]=t;next=entries[++phase];}if(s===blankAt)clocks.blankAt=t;
+  let v=T[3*s+tape[h]];tape[h]=v>>2&3;h+=(v&3)-1;s=v>>>4;t++;
+  if(h<0)throw Error("left buffer");if(h===tape.length){let a=new Uint8Array(tape.length*2);a.fill(2);a.set(tape);tape=a;}if(h<lo)lo=h;if(h>hi)hi=h;
  }
  const bits=s===M.q?Array.from(tape.subarray(h,h+n)):[],witness=bits.length===n&&bits.every(x=>x<2)?bits.join(""):null;
  return{status:s===M.q?"HALT":"TIMEOUT",t,head:h-origin,span:hi-lo+1,clocks,witness,headSymbol:tape[h],nextSymbol:tape[h+n]};
