@@ -1,0 +1,41 @@
+name: PNP v18 shared Hall target index
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_hall_*.py'
+      - 'mathos/research/pnp_bounded_matching.py'
+      - 'mathos/research/pnp_signed_hall_subsystem.py'
+      - 'tests/independent_pnp_v18_*.py'
+      - '.github/workflows/pnp-v18-shared-hall-index.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/pnp-v18-shared-hall-index
+          cd "$GITHUB_WORKSPACE"
+          PYTHONPATH=. python tests/independent_pnp_v18_auto_embedding_probe.py > artifacts/pnp-v18-shared-hall-index/auto.json
+          python tests/independent_pnp_v18_auto_embedding_audit.py artifacts/pnp-v18-shared-hall-index/auto.json > artifacts/pnp-v18-shared-hall-index/auto-audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_rectangular_probe.py artifacts/pnp-v18-shared-hall-index/auto.json > artifacts/pnp-v18-shared-hall-index/rectangular.json
+          python tests/independent_pnp_v18_rectangular_audit.py artifacts/pnp-v18-shared-hall-index/rectangular.json artifacts/pnp-v18-shared-hall-index/auto.json > artifacts/pnp-v18-shared-hall-index/rectangular-audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_library_probe.py artifacts/pnp-v18-shared-hall-index/rectangular.json > artifacts/pnp-v18-shared-hall-index/report.json
+          python tests/independent_pnp_v18_library_audit.py artifacts/pnp-v18-shared-hall-index/report.json artifacts/pnp-v18-shared-hall-index/rectangular.json | tee artifacts/pnp-v18-shared-hall-index/audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_shared_index_probe.py artifacts/pnp-v18-shared-hall-index/report.json > artifacts/pnp-v18-shared-hall-index/shared.json
+          python tests/independent_pnp_v18_shared_index_audit.py artifacts/pnp-v18-shared-hall-index/shared.json artifacts/pnp-v18-shared-hall-index/report.json artifacts/pnp-v18-shared-hall-index/rectangular.json | tee artifacts/pnp-v18-shared-hall-index/shared-audit.json
+          (cd artifacts/pnp-v18-shared-hall-index && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-v18-shared-hall-index
+          path: artifacts/pnp-v18-shared-hall-index/
+          if-no-files-found: error
