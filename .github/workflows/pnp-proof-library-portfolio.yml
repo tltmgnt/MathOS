@@ -1,0 +1,37 @@
+name: PNP unified proof schema portfolio v17.6
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_schema_portfolio*.py'
+      - 'tests/test_pnp_schema_portfolio.py'
+      - '.github/workflows/pnp-proof-library-portfolio.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_schema_portfolio.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_composite_paths.py' -v
+          mkdir -p artifacts/pnp-schema-portfolio
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-schema-portfolio/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-schema-portfolio/source.json --checkpoint artifacts/pnp-schema-portfolio/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-schema-portfolio/source.json --scheduler artifacts/pnp-schema-portfolio/scheduler.json --checkpoint artifacts/pnp-schema-portfolio/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-schema-portfolio/source.json --scheduler artifacts/pnp-schema-portfolio/scheduler.json --failures artifacts/pnp-schema-portfolio/failures.json --checkpoint artifacts/pnp-schema-portfolio/v17.json > /dev/null
+          python -m mathos.research.pnp_schema_portfolio_frontier --benchmark artifacts/pnp-schema-portfolio/source.json --scheduler artifacts/pnp-schema-portfolio/scheduler.json --failures artifacts/pnp-schema-portfolio/failures.json --v17 artifacts/pnp-schema-portfolio/v17.json --checkpoint artifacts/pnp-schema-portfolio/report.json
+          python -m mathos.research.pnp_schema_portfolio_frontier --benchmark artifacts/pnp-schema-portfolio/source.json --scheduler artifacts/pnp-schema-portfolio/scheduler.json --failures artifacts/pnp-schema-portfolio/failures.json --v17 artifacts/pnp-schema-portfolio/v17.json --audit artifacts/pnp-schema-portfolio/report.json > artifacts/pnp-schema-portfolio/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-schema-portfolio-evidence
+          path: artifacts/pnp-schema-portfolio/
+          if-no-files-found: ignore
