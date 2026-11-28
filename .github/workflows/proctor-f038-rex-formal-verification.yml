@@ -56,6 +56,11 @@ jobs:
         run: |
           node mathos/research/f038_rex_fv10_audit.js > /tmp/fv10.json
           node -e "const a=require('node:assert/strict'),r=require('/tmp/fv10.json');a.deepEqual([r.random,r.contradictions,r.claims,r.checks,r.rejected],[128,17,496,3223,4]);a.deepEqual(r.rows.map(x=>[x.name,x.kind,x.ops,x.claims,x.models,x.free]),[['merge','narrow',0,6,2,2],['chain','narrow',0,9,2,1],['zero','narrow',0,6,1,0],['contradiction','contradiction',2,5,0,1],['empty','contradiction',0,1,0,1]])"
+      - name: Audit concrete D7A relational deletions and derived factors
+        working-directory: .
+        run: |
+          node mathos/research/f038_rex_fv11_audit.js > /tmp/fv11.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/fv11.json');a.deepEqual(r.random,{instances:128,models:793,comparisons:6170,deletions:457,events:247,contradictions:19,derived:3});a.equal(r.rejected,6);a.equal(r.generated,6);a.deepEqual(r.rows.map(x=>[x.name,x.events,x.deleted,x.contradiction,x.derived]),[['chain',2,2,false,0],['contradiction',2,2,true,0],['empty',0,0,true,0],['stable',0,0,false,0],['derived',0,0,false,1]])"
       - name: Install pinned Lean toolchain via elan
         run: |
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
@@ -95,6 +100,12 @@ jobs:
             node ../../mathos/research/f038_rex_fv10_audit.js lean "$mode" > "/tmp/FV10_${mode}.lean"
             lake env lean "/tmp/FV10_${mode}.lean" 2>&1 | tee -a /tmp/f038-lean.log
           done
+          lake env lean -o .lake/build/lib/lean/F038Formal/RelationalReplay.olean F038Formal/RelationalReplay.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/RelationalReplayTests.olean F038Formal/RelationalReplayTests.lean 2>&1 | tee -a /tmp/f038-lean.log
+          for mode in chain contradiction empty stable derived composed; do
+            node ../../mathos/research/f038_rex_fv11_audit.js lean "$mode" > "/tmp/FV11_${mode}.lean"
+            lake env lean "/tmp/FV11_${mode}.lean" 2>&1 | tee -a /tmp/f038-lean.log
+          done
           if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
           echo F038_FV02_CERTIFICATE_KERNEL_OK
           echo F038_FV03_REDUCTION_KERNEL_OK
@@ -104,6 +115,7 @@ jobs:
           echo F038_FV07_COMPOSITION_KERNEL_OK
           echo F038_FV09_LOCAL_MATERIALIZATION_OK
           echo F038_FV10_RESIDUAL_REFINEMENT_OK
+          echo F038_FV11_RELATIONAL_REPLAY_OK
       - name: Audit every named theorem and reject nonstandard axioms
         run: |
           set -euo pipefail
@@ -129,4 +141,5 @@ jobs:
             /tmp/fv08.json
             /tmp/fv09.json
             /tmp/fv10.json
+            /tmp/fv11.json
             formal/f038/lake-manifest.json
