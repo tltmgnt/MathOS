@@ -1,0 +1,39 @@
+name: PNP adaptive proof reuse v17.2
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_adaptive.py'
+      - 'mathos/research/pnp_library_adaptive_frontier.py'
+      - 'tests/test_pnp_library_adaptive.py'
+      - '.github/workflows/pnp-proof-library-adaptive.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_adaptive.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_proof_library.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_library_ablation.py' -v
+          mkdir -p artifacts/pnp-adaptive-reuse
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-adaptive-reuse/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-adaptive-reuse/source.json --checkpoint artifacts/pnp-adaptive-reuse/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-adaptive-reuse/source.json --scheduler artifacts/pnp-adaptive-reuse/scheduler.json --checkpoint artifacts/pnp-adaptive-reuse/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-adaptive-reuse/source.json --scheduler artifacts/pnp-adaptive-reuse/scheduler.json --failures artifacts/pnp-adaptive-reuse/failures.json --checkpoint artifacts/pnp-adaptive-reuse/v17.json > /dev/null
+          python -m mathos.research.pnp_library_adaptive_frontier --benchmark artifacts/pnp-adaptive-reuse/source.json --scheduler artifacts/pnp-adaptive-reuse/scheduler.json --failures artifacts/pnp-adaptive-reuse/failures.json --v17 artifacts/pnp-adaptive-reuse/v17.json --checkpoint artifacts/pnp-adaptive-reuse/report.json
+          python -m mathos.research.pnp_library_adaptive_frontier --benchmark artifacts/pnp-adaptive-reuse/source.json --scheduler artifacts/pnp-adaptive-reuse/scheduler.json --failures artifacts/pnp-adaptive-reuse/failures.json --v17 artifacts/pnp-adaptive-reuse/v17.json --audit artifacts/pnp-adaptive-reuse/report.json > artifacts/pnp-adaptive-reuse/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-adaptive-reuse-evidence
+          path: artifacts/pnp-adaptive-reuse/
+          if-no-files-found: ignore
