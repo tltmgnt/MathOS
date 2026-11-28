@@ -39,7 +39,10 @@ function audit(U,Q,R,A,AV,C,V,D,T,H,HV,B,G,N,NV,I,IV,P,PV,W,K,F,Min,section="ora
   reject(()=>PV.reconstruct(local,[{...r,c:[1,-2]}]));
   reject(()=>PV.reconstruct(local,[r,r]));
   const limited=P.discover(C,I,local,1);ok(limited.status==="budget"&&limited.metrics.work===1&&JSON.stringify(models(limited.d))===JSON.stringify(models(local)),"budget");
-  return {stats,kinds,limited:{status:limited.status,work:limited.metrics.work,records:limited.records.length}};
+  const guarded=bin(8,[[-1,-2,3],[-3,-4,5],[-3,-5,6],[-3,-6,-4],[-3,4,7],[-3,-7,8],[-3,-8,4]]);
+  const gm=models(guarded),projection=[...new Set(gm.map(z=>z.split(",").slice(0,2).join(",")))].sort(),g=P.discover(C,I,guarded),g2=P.discover(C,I,g.d),ic=I.closure(C,g.d);
+  ok(gm.length===96&&JSON.stringify(projection)===JSON.stringify(["0,0","0,1","1,0"])&&g.records.length===10&&!g.records.some(r=>r.c.join()==="-1,-2")&&ic.paths.some(r=>r.c.join()==="-3")&&g2.records.some(r=>r.c.join()==="-1,-2")&&JSON.stringify(models(PV.reconstruct(guarded,g.records)))===JSON.stringify(gm)&&JSON.stringify(models(PV.reconstruct(g.d,g2.records)))===JSON.stringify(gm),"guarded gadget");
+  return {stats,kinds,limited:{status:limited.status,work:limited.metrics.work,records:limited.records.length},guarded:{models:gm.length,projection,first:g.records.length,second:g2.records.map(r=>r.c.join())}};
  }
  if(section==="large"||section==="largest"){
   const rows=[],list=section==="largest"?[[20,false,4000000]]:[[3,false,2000000],[6,false,2000000],[6,true,2000000],[8,false,2000000],[12,true,2000000]];
