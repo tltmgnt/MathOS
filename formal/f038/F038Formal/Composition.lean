@@ -121,7 +121,7 @@ def certify {n m : Nat} (fs : List (RowFactor n)) (steps : List Nat)
     match relationalReplay fs steps with
     | none => .unknown
     | some out =>
-      if affineMapCheck out a && materializedCheck out a residual && packetCheck residual p
+      if affineMapCheck out a && (materializedCheck out a residual && packetCheck residual p)
       then .unsat else .unknown
 
 theorem certify_sound {n m : Nat} (fs : List (RowFactor n)) (steps : List Nat)
@@ -156,13 +156,16 @@ theorem certify_sound {n m : Nat} (fs : List (RowFactor n)) (steps : List Nat)
     cases hr : relationalReplay fs steps with
     | none => simp [certify, hr, Sound]
     | some out =>
-      cases ha : affineMapCheck out a <;>
-        cases hm : materializedCheck out a residual <;>
-        cases hp : packetCheck residual p <;>
-        simp [certify, hr, ha, hm, hp, Sound]
-      rintro ⟨x,hx⟩
-      exact packetCheck_sound residual p hp
-        ⟨project a x, residual_models_of_source fs out steps hr a ha residual hm x hx⟩
+      cases hg : (affineMapCheck out a &&
+          (materializedCheck out a residual && packetCheck residual p)) with
+      | false => simp [certify, hr, hg, Sound]
+      | true =>
+        obtain ⟨ha,hrest⟩ := and_parts hg
+        obtain ⟨hm,hp⟩ := and_parts hrest
+        simp only [certify, hr, hg, if_true, Sound]
+        rintro ⟨x,hx⟩
+        exact packetCheck_sound residual p hp
+          ⟨project a x, residual_models_of_source fs out steps hr a ha residual hm x hx⟩
 
 inductive Observation (m : Nat) where
   | timeout
