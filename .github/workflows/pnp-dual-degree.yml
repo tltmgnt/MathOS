@@ -1,0 +1,44 @@
+name: PNP dual algebraic degree certificates
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_dual_degree*.py'
+      - 'mathos/research/pnp_resolution_algebra.py'
+      - 'mathos/research/pnp_degree_closure.py'
+      - 'mathos/research/pnp_boolean_lift.py'
+      - 'tests/test_pnp_dual_degree.py'
+      - '.github/workflows/pnp-dual-degree.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_dual_degree*.py'
+      - 'mathos/research/pnp_resolution_algebra.py'
+      - 'mathos/research/pnp_degree_closure.py'
+      - 'mathos/research/pnp_boolean_lift.py'
+      - 'tests/test_pnp_dual_degree.py'
+      - '.github/workflows/pnp-dual-degree.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_dual_degree.py' -v
+          mkdir -p artifacts/pnp-dual-degree
+          python -m mathos.research.pnp_dual_degree_frontier --checkpoint artifacts/pnp-dual-degree/report.json > /dev/null
+          python -m mathos.research.pnp_dual_degree_frontier --audit artifacts/pnp-dual-degree/report.json > artifacts/pnp-dual-degree/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-dual-degree/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['cross_model_separations']==1"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-dual-degree-evidence
+          path: artifacts/pnp-dual-degree/
+          if-no-files-found: ignore
