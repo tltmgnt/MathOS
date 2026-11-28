@@ -54,7 +54,9 @@ def minimize_unsat(n,f,steps,limit=128):
 
 
 def fresh_cases(seed=EVAL_SEED,count=24):
-    if type(seed) is not int or not 0<=seed<2**31 or type(count) is not int or not 1<=count<=48:
+    # The orbit-disjoint frontier screens a bounded pool of 96 per family.
+    # Preserve the seeded stream and existing smaller evaluation suites.
+    if type(seed) is not int or not 0<=seed<2**31 or type(count) is not int or not 1<=count<=96:
         raise ValueError("invalid evaluation configuration")
     rng=random.Random(seed)
     result=[]
