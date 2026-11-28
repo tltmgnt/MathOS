@@ -21,9 +21,9 @@ The committed audit was loaded from the repository and executed in a JavaScript 
 |6|189|280|126|4242|
 |8|405|630|288|12024|
 
-The D7H 189-coordinate raw obstruction is refuted by seven groups and six holes. This is a scoped result, not a general polynomial SAT claim. A dedicated Proctor is configured; remote execution and full inherited/physical replay are not asserted. Main and PR #248 are not modified by this branch.
+The D7H 189-coordinate raw obstruction is refuted by seven groups and six holes. This is a scoped result, not a general polynomial SAT claim. Actual relational and affine preprocessing of the 189-coordinate fixture was executed: no contradiction, 189 free coordinates, zero affine equations; independent affine replay passed. The same 126 paths, seven groups/six holes and 4242 charged units were recovered. The actual worker replay of the certified ten-symbol contradiction stream returned UNSAT in 2092 transitions; original and minimized output agreed, exact clock and encoding agreed, and the one-short cutoff at 2091 timed out. Descriptor: 3683 states, 180471 bits. This is not an unreduced-worker timing or physical accounting for host inference. A dedicated Proctor is configured; remote execution and full inherited suite are not asserted. Main and PR #248 are not modified by this branch.
 
 ## Next gates
-- Actual predecessor residual and physical replay tests, wider signed and noisy path families, and independent review.
+- Wider signed and noisy path families, full inherited suite and independent review.
 - Mechanized proof-to-checker correspondence, complexity and physical accounting.
 - Explore boundary discovery without assuming all option coordinates occur in nonbinary factors.
