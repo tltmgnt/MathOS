@@ -1,0 +1,64 @@
+name: PNP Boolean monomial lifting
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_boolean_lift.py'
+      - 'formal/PnpBooleanLift.lean'
+      - '.github/workflows/pnp-boolean-lift.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_boolean_lift.py'
+      - 'formal/PnpBooleanLift.lean'
+      - '.github/workflows/pnp-boolean-lift.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_boolean_lift.py' -v
+          mkdir -p artifacts/pnp-boolean-lift
+          cd artifacts/pnp-boolean-lift
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          python -m mathos.research.pnp_proof_simulation_frontier --checkpoint simulation.json > /dev/null
+          python -m mathos.research.pnp_barrier_frontier --checkpoint barriers.json > /dev/null
+          python -m mathos.research.pnp_hypothesis_obligations --simulation simulation.json --barriers barriers.json --checkpoint hypotheses.json > /dev/null
+          python -m mathos.research.pnp_conjecture_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --checkpoint refinement.json > /dev/null
+          python -m mathos.research.pnp_symbolic_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --checkpoint symbolic.json > /dev/null
+          python -m mathos.research.pnp_boolean_lift_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --symbolic symbolic.json --checkpoint report.json > /dev/null
+          python -m mathos.research.pnp_boolean_lift_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --symbolic symbolic.json --audit report.json > audit.json
+          python -c "import json; r=json.load(open('report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['fresh_cases']==24 and r['summary']['all']['multiply_only']>=1"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-boolean-lift-evidence
+          path: artifacts/pnp-boolean-lift/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpBooleanLift.lean | tee /tmp/pnp-boolean-lift-lean.txt
+          for theorem in falsificationOr multiplyZero squareFree relaxationRefutation; do
+            grep -Fx "'PnpBooleanLift.$theorem' does not depend on any axioms" /tmp/pnp-boolean-lift-lean.txt
+          done

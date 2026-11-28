@@ -1,0 +1,59 @@
+name: PNP barrier aware hypotheses
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_hypothesis_obligations.py'
+      - 'formal/PnpHypothesisObligations.lean'
+      - '.github/workflows/pnp-hypothesis-obligations.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_hypothesis_obligations.py'
+      - 'formal/PnpHypothesisObligations.lean'
+      - '.github/workflows/pnp-hypothesis-obligations.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_hypothesis_obligations.py' -v
+          mkdir -p artifacts/pnp-hypotheses
+          python -m mathos.research.pnp_proof_simulation_frontier --checkpoint artifacts/pnp-hypotheses/simulation.json > /dev/null
+          python -m mathos.research.pnp_barrier_frontier --checkpoint artifacts/pnp-hypotheses/barriers.json > /dev/null
+          python -m mathos.research.pnp_hypothesis_obligations --simulation artifacts/pnp-hypotheses/simulation.json --barriers artifacts/pnp-hypotheses/barriers.json --checkpoint artifacts/pnp-hypotheses/report.json > /dev/null
+          python -m mathos.research.pnp_hypothesis_obligations --simulation artifacts/pnp-hypotheses/simulation.json --barriers artifacts/pnp-hypotheses/barriers.json --audit artifacts/pnp-hypotheses/report.json > artifacts/pnp-hypotheses/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-hypotheses/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['even_global_unsat']==4"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-hypothesis-obligations-evidence
+          path: artifacts/pnp-hypotheses/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpHypothesisObligations.lean | tee /tmp/pnp-hypotheses-lean.txt
+          for theorem in componentParityNotGlobal independentUnion conditionalComposition; do
+            grep -Fx "'PnpHypothesisObligations.$theorem' does not depend on any axioms" /tmp/pnp-hypotheses-lean.txt
+          done

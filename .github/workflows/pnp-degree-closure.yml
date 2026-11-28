@@ -1,0 +1,65 @@
+name: PNP adaptive algebraic degree closure
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_degree_*.py'
+      - 'tests/test_pnp_degree_closure.py'
+      - 'formal/PnpDegreeClosure.lean'
+      - '.github/workflows/pnp-degree-closure.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_degree_*.py'
+      - 'tests/test_pnp_degree_closure.py'
+      - 'formal/PnpDegreeClosure.lean'
+      - '.github/workflows/pnp-degree-closure.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_degree_closure.py' -v
+          mkdir -p artifacts/pnp-degree
+          cd artifacts/pnp-degree
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          python -m mathos.research.pnp_proof_simulation_frontier --checkpoint simulation.json > /dev/null
+          python -m mathos.research.pnp_barrier_frontier --checkpoint barriers.json > /dev/null
+          python -m mathos.research.pnp_hypothesis_obligations --simulation simulation.json --barriers barriers.json --checkpoint hypotheses.json > /dev/null
+          python -m mathos.research.pnp_conjecture_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --checkpoint refinement.json > /dev/null
+          python -m mathos.research.pnp_symbolic_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --checkpoint symbolic.json > /dev/null
+          python -m mathos.research.pnp_boolean_lift_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --symbolic symbolic.json --checkpoint lifting.json > /dev/null
+          python -m mathos.research.pnp_degree_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --symbolic symbolic.json --lifting lifting.json --checkpoint report.json > /dev/null
+          python -m mathos.research.pnp_degree_frontier --simulation simulation.json --barriers barriers.json --hypotheses hypotheses.json --refinement refinement.json --symbolic symbolic.json --lifting lifting.json --audit report.json > audit.json
+          python -c "import json; r=json.load(open('report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['cases']==30"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-degree-closure-evidence
+          path: artifacts/pnp-degree/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpDegreeClosure.lean | tee /tmp/pnp-degree-lean.txt
+          for theorem in xorZero mulZero closedSpaceObstruction; do
+            grep -Fx "'PnpDegreeClosure.$theorem' does not depend on any axioms" /tmp/pnp-degree-lean.txt
+          done
