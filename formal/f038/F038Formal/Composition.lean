@@ -231,6 +231,30 @@ theorem composed_physical_release {n m q r : Nat}
   have ho := observations_equal original quotient mapping _ _ hr hh decode
   exact ⟨release_sound fs steps a residual ev _, congrArg (release fs steps a residual ev) ho, hclock⟩
 
+-- Resource claims stay separate: host charged projection operations and
+-- physical transition ticks are distinct units, not a total runtime bound.
+theorem composed_release_with_bounds {n m q r : Nat}
+    (fs : List (RowFactor n)) (steps : List Nat) (a : AffineMap n m)
+    (residual : List (RowFactor m)) (ev : Evidence n m)
+    (original : Machine q) (quotient : Machine r)
+    (mapping : Fin q → Option (Fin r))
+    (ok : quotientCheck original quotient mapping = true)
+    (fuel : Nat) (head : Int) (tape : Int → Symbol)
+    (decode : Int → (Int → Symbol) → Observation m)
+    (v e : Nat) (counts : MathOS.F038.Resources.Counts)
+    (countOK : MathOS.F038.Resources.countsCheck v e counts = true) :
+    let o := run original fuel (initialConfig original head tape)
+    let p := run quotient fuel (initialConfig quotient head tape)
+    let vo := release fs steps a residual ev (observe original decode o.1)
+    let vp := release fs steps a residual ev (observe quotient decode p.1)
+    Sound fs vo ∧ vo = vp ∧ o.2 = p.2 ∧ p.2 ≤ fuel ∧
+      MathOS.F038.Resources.work counts ≤ MathOS.F038.Resources.bound v e := by
+  obtain ⟨hs,he,hc⟩ := composed_physical_release fs steps a residual ev original quotient
+    mapping ok fuel head tape decode
+  exact ⟨hs,he,hc,run_clock_le quotient fuel _,
+    MathOS.F038.Resources.checked_work_bound countOK⟩
+
+#print axioms composed_release_with_bounds
 #print axioms assignments_complete
 #print axioms materializedCheck_exact
 #print axioms residual_models_of_source
