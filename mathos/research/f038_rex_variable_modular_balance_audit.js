@@ -57,9 +57,24 @@ function audit(U,Q,R,A,AV,L,N,NV,O,OV,PN,C,D,T,I,IV,PNV,HV,section="oracle"){
  if(section==="adapter"){
   const r=O.reduce(N,L,A,NV,OV,prior),sat={k:4,m:2,F:block([0,1,2,3])},s=O.reduce(N,L,A,NV,OV,sat),w=O.reduce(N,L,A,NV,OV,sat,d=>({d,cert:{kind:"sentinel"},contradiction:false,expand:z=>z}));
   ok(r.contradiction&&r.d.k===1&&!r.d.F[0].S.size&&s.d===sat&&s.cert.kind==="unknown"&&w.d===sat&&w.cert.kind==="sentinel","adapter");
-  return {adapter:{kind:r.cert.kind,k:r.d.k,allowed:r.d.F[0].S.size,preserved:s.d===sat,delegated:w.cert.kind}};
+  // Full predecessor adapter path on an input whose local 3-XOR equations are
+  // inconsistent but have no integer balance sources.
+  const xor=h=>({h,S:new Set([...U.tuples(2,3)].filter(z=>z.reduce((s,x)=>s^x,0)===h[0]%2).map(z=>z.join()))});
+  const x={k:4,m:2,F:[{h:[0,1,2],S:xor([0,1,2]).S},{h:[0,1,2],S:new Set([...U.tuples(2,3)].filter(z=>z.reduce((s,x)=>s^x,0)===1).map(z=>z.join()))}]};
+  const inherited=O.reduce(N,L,A,NV,OV,x,e=>N.reduce(L,A,NV,...Array(19).fill(null),e));ok(inherited.modular.kind==="unknown"&&inherited.cert.kind==="affine-conflict"&&inherited.contradiction,"actual inherited fallback");
+  return {adapter:{kind:r.cert.kind,k:r.d.k,allowed:r.d.F[0].S.size,preserved:s.d===sat,delegated:w.cert.kind,inherited:inherited.cert.kind}};
  }
  throw Error("section");
 }
-module.exports={audit};
-if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_pair_counting.js'),require('./f038_rex_variable_balanced_affine.js'),require('./f038_rex_variable_balanced_affine_certificate.js'),require('./f038_rex_variable_modular_balance.js'),require('./f038_rex_variable_modular_balance_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),require('./f038_rex_variable_implication_closure.js'),require('./f038_rex_variable_implication_certificate.js'),require('./f038_rex_variable_polarity_certificate.js'),require('./f038_rex_variable_hall_certificate.js'),process.argv[2]||'oracle')));
+function physical(U,W,K,F,Min,A,L,N,NV,O,OV){
+ function mul(a,b){let r=0;while(b){if(b&1)r^=a;b>>=1;a<<=1;if(a&4)a^=7;}return r;}
+ const lines=[];for(let x=0;x<4;x++)lines.push(Array.from({length:4},(_,y)=>4*x+y));for(let slope=0;slope<3;slope++)for(let b=0;b<4;b++)lines.push(Array.from({length:4},(_,x)=>4*x+(mul(slope,x)^b)));
+ const signs=[[],[0,3],[1,3],[],[0,2],[1,2],[2,3],[0,3],[1,2],[0,1],[0,2],[0,3],[],[],[0,1],[]],fs=lines.flatMap((v,i)=>[...U.subsets(v,3)].map(h=>({h,S:new Set([...U.tuples(2,3)].filter(z=>{const y=z.map((x,j)=>x^+signs[i].includes(v.indexOf(h[j])));return y.some(x=>x!==y[0]);}).map(z=>z.join()))})));
+ const r=O.reduce(N,L,A,NV,OV,{k:16,m:2,F:fs});if(!r.contradiction)throw Error("adapter");
+ const J=W.machine(),M=W.singleExit(K.compile(J)),N0=Min.refine(M),q={...M,...N0},s=W.stream(U,r.d),b=W.run(M,s,300000000),c=W.run(q,s,b.t),cut=W.run(q,s,b.t-1),clock=F.count(J,["",s],M.codes);
+ if(b.status!=="UNSAT"||b.z!==null||JSON.stringify(b)!==JSON.stringify(c)||b.t!==clock.clock||b.encoded!==clock.encoded||cut.status!=="TIMEOUT"||cut.t!==b.t-1||cut.z!==null)throw Error("physical");
+ return {physical:{status:b.status,transitions:b.t,stream:s.length,clock:clock.clock,cutoff:cut.t,states:N0.stats.quotientStates,bits:N0.stats.quotientBits}};
+}
+module.exports={audit,physical};
+if(require.main===module&&process.argv[2]==='physical')console.log(JSON.stringify(physical(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_worker.js'),require('./f038_rex_width_three_local_motion_compiler.js'),require('./f038_rex_width_three_local_motion_clock.js'),require('./f038_rex_width_two_quotient.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_pair_counting.js'),require('./f038_rex_variable_balanced_affine.js'),require('./f038_rex_variable_balanced_affine_certificate.js'),require('./f038_rex_variable_modular_balance.js'),require('./f038_rex_variable_modular_balance_certificate.js'))));
+else if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_pair_counting.js'),require('./f038_rex_variable_balanced_affine.js'),require('./f038_rex_variable_balanced_affine_certificate.js'),require('./f038_rex_variable_modular_balance.js'),require('./f038_rex_variable_modular_balance_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),require('./f038_rex_variable_implication_closure.js'),require('./f038_rex_variable_implication_certificate.js'),require('./f038_rex_variable_polarity_certificate.js'),require('./f038_rex_variable_hall_certificate.js'),process.argv[2]||'oracle')));
