@@ -1,5 +1,5 @@
 // D7F: robust, polynomially restricted conflict-clique partitions; inherited Hall checker.
-function robust(H,C,d){
+function robust(H,C,d,groupPolicy=null){
  const metrics={supportEdges:0,supportProbes:0,thresholds:0,componentVisits:0,greedyTests:0,greedyTrials:0};
  function* alternatives(adj,owner){
   const vertices=[...adj.keys()],sets=new Map(vertices.map(x=>[x,new Set(adj.get(x))])),scores=new Map(vertices.map(x=>[x,new Map()])),values=new Set();
@@ -40,7 +40,7 @@ function robust(H,C,d){
    yield {strategy:"greedy-"+name,holes};
   }
  }
- const h=H.hall(C,d,alternatives);return {...h,metrics};
+ const h=H.hall(C,d,alternatives,groupPolicy);return {...h,metrics};
 }
 
 function reduce(H,C,V,D,T,HV,d,budget=2000000){
