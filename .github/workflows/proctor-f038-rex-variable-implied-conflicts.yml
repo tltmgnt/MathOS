@@ -1,0 +1,22 @@
+name: Proctor F038 RE-X implied conflicts
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-implied-conflicts']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: D7I independent path and oracle audit
+        run: |
+          node mathos/research/f038_rex_variable_implied_audit.js > /tmp/d7i.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7i.json');a.deepEqual(r,{rows:[{n:3,k:30,factors:40,paths:18,work:384},{n:6,k:189,factors:280,paths:126,work:4242},{n:8,k:405,factors:630,paths:288,work:12024}],oracles:256,models:472,refuted:104,tamperRejected:5,budgetCutoff:true});console.log('F038_D7I_IMPLIED_CONFLICTS_OK')"
