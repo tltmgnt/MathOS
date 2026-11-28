@@ -73,7 +73,7 @@ def _complete(vs, signed):
     return signed | {-v for v in vs if v not in present}
 
 
-def _solve(f, depth, budget):
+def _solve(f, depth, budget, choose=None):
     budget.tick(1 + len(f) + sum(map(len, f)))
     vs = _vars(f)
     if () in f:
@@ -93,7 +93,7 @@ def _solve(f, depth, budget):
     if len(groups) > 1:
         witness, unknown = set(), False
         for indices in groups:
-            status, proof = _solve(tuple(f[i] for i in indices), depth, budget)
+            status, proof = _solve(tuple(f[i] for i in indices), depth, budget, choose)
             if status is False:
                 # An empty-clause subset cannot arise here: handled above.
                 return False, {"rule": "subset", "indices": indices, "child": proof}
@@ -104,11 +104,16 @@ def _solve(f, depth, budget):
         return (None, None) if unknown else (True, witness)
     if depth == 0:
         return None, None
-    counts = Counter(abs(x) for c in f for x in c)
-    v = min(vs, key=lambda x: (-counts[x], x))
+    if choose is None:
+        counts = Counter(abs(x) for c in f for x in c)
+        v = min(vs, key=lambda x: (-counts[x], x))
+    else:
+        v = choose(f, budget)
+        if type(v) is not int or v not in vs:
+            raise ValueError("selector must choose an active variable")
     children = []
     for literal in (-v, v):
-        status, proof = _solve(_condition(f, literal, budget), depth-1, budget)
+        status, proof = _solve(_condition(f, literal, budget), depth-1, budget, choose)
         if status is True:
             return True, _complete(vs, proof | {literal})
         children.append((status, proof))
@@ -118,11 +123,11 @@ def _solve(f, depth, budget):
     return None, None
 
 
-def propose(n, clauses, budget, *, depth=2):
+def propose(n, clauses, budget, *, depth=2, choose=None):
     """Return a certificate for a constant formula, or None if unrecognized."""
     _options(depth)
     nn, f, _ = normalize(n, clauses)
-    status, proof = _solve(f, depth, budget)
+    status, proof = _solve(f, depth, budget, choose)
     if status is None:
         return None
     return {"schema": "mathos-generalized-escape/1", "depth": depth,
