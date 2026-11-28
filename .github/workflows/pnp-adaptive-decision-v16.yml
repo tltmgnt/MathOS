@@ -1,0 +1,55 @@
+name: PNP adaptive decision v16
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_adaptive_decision.py'
+      - 'formal/PnpAdaptiveDecision.lean'
+      - '.github/workflows/pnp-adaptive-decision-v16.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_adaptive_decision.py' -v
+          mkdir -p artifacts/pnp-adaptive
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-adaptive/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-adaptive/source.json --checkpoint artifacts/pnp-adaptive/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-adaptive/source.json --scheduler artifacts/pnp-adaptive/scheduler.json --checkpoint artifacts/pnp-adaptive/failures.json > /dev/null
+          python -m mathos.research.pnp_adaptive_frontier --benchmark artifacts/pnp-adaptive/source.json --scheduler artifacts/pnp-adaptive/scheduler.json --failures artifacts/pnp-adaptive/failures.json --checkpoint artifacts/pnp-adaptive/report.json | tee artifacts/pnp-adaptive/summary.json
+        shell: bash
+      - run: |
+          python -m mathos.research.pnp_adaptive_frontier --benchmark artifacts/pnp-adaptive/source.json --scheduler artifacts/pnp-adaptive/scheduler.json --failures artifacts/pnp-adaptive/failures.json --audit artifacts/pnp-adaptive/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-adaptive-v16-evidence
+          path: artifacts/pnp-adaptive/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpAdaptiveDecision.lean | tee /tmp/pnp-adaptive-lean.txt
+          for theorem in completeSplit conflictLeaf; do
+            grep -Fx "'PnpAdaptiveDecision.$theorem' does not depend on any axioms" /tmp/pnp-adaptive-lean.txt
+          done
