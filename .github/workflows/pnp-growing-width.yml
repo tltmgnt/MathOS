@@ -1,0 +1,57 @@
+name: PNP growing resolution width
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_growing_width.py'
+      - 'formal/PnpGrowingWidth.lean'
+      - '.github/workflows/pnp-growing-width.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_growing_width.py'
+      - 'formal/PnpGrowingWidth.lean'
+      - '.github/workflows/pnp-growing-width.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_growing_width.py' -v
+          mkdir -p artifacts/pnp-growing-width
+          python -m mathos.research.pnp_growing_width_frontier --checkpoint artifacts/pnp-growing-width/report.json > /dev/null
+          python -m mathos.research.pnp_growing_width_frontier --audit artifacts/pnp-growing-width/report.json > artifacts/pnp-growing-width/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-growing-width/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['affine_decisions']==12"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-growing-width-evidence
+          path: artifacts/pnp-growing-width/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpGrowingWidth.lean | tee /tmp/pnp-growing-width-lean.txt
+          for theorem in crossingBound cutLiteralBound contradiction; do
+            grep -Fx "'PnpGrowingWidth.$theorem' does not depend on any axioms" /tmp/pnp-growing-width-lean.txt
+          done
