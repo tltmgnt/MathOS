@@ -38,7 +38,12 @@ function audit(U,Q,R,A,AV,L,M,N,NV,PN,C,D,T,H,B,G,I,P,J,section="oracle"){
   const signs=[[],[0,3],[1,3],[],[0,2],[1,2],[2,3],[0,3],[1,2],[0,1],[0,2],[0,3],[],[],[0,1],[]],F=lines.flatMap((h,i)=>block(h,signs[i].map(j=>h[j]))),d={k:16,m:2,F};
   const m=models(d),p=R.reduce(U,Q,d),a=A.reduce(U,p.d);AV.verify(p.d,a.a);const r=N.infer(L,A,a.d),j=J.infer(PN,G,B,H,C,I,P,a.d),t=D.tree(C,a.d,2000000),l=L.discover(a.d),q=M.close(L,a.d);
   ok(!m.length&&a.a.free.length===16&&!a.a.rows.length&&r.kind==="unknown"&&r.rank===9&&r.metrics.rows===16&&N.discover(L,A,a.d).rows.every(q=>q.rhs===0)&&l.kind==="unknown"&&q.status==="fixed-point"&&!q.rounds.length&&j.kind==="unknown"&&j.status==="fixed-point"&&t.kind==="tree"&&T.verifyTree(a.d,t),"barrier");
-  return {barrier:{k:16,factors:F.length,assignments:65536,affineAssignments:2**(16-r.rank),balanced:r,count:l,tight:q.metrics,iterative:j,tree:{work:t.work,nodes:t.nodes,leaves:t.leaves,splits:t.splits,units:t.units}}};
+  // Explicit integer linear combination of the sixteen local balance equations.
+  const weights=[4,2,3,1,0,-4,-3,3,4,-2,1,-1,2,-2,0,-2],coeff=Array(16).fill(0);let rhs=0;
+  for(let i=0;i<lines.length;i++){rhs+=weights[i]*(2-signs[i].length);let sum=0;for(let j=0;j<4;j++){const a=signs[i].includes(j)?-1:1;coeff[lines[i][j]]+=weights[i]*a;sum+=a;}ok(sum===2*(2-signs[i].length),"half-valued rational relaxation");}
+  ok(coeff.every((x,i)=>x===(i===0?10:i===15?2:0))&&rhs===6,"integer identity");
+  ok(![0,1].some(x=>[0,1].some(y=>5*x+y===3)),"binary support contradiction");
+  return {barrier:{k:16,factors:F.length,assignments:65536,integerIdentity:{weights,coeff,rhs,halfFeasible:true},affineAssignments:2**(16-r.rank),balanced:r,count:l,tight:q.metrics,iterative:j,tree:{work:t.work,nodes:t.nodes,leaves:t.leaves,splits:t.splits,units:t.units}}};
  }
  if(section==="adapter"){
   const d=graph(5),r=N.reduce(L,A,NV,...Array(19).fill(null),d);ok(r.contradiction&&r.cert.kind==="affine-conflict"&&r.d.k===1&&!r.d.F[0].S.size,"adapter");return {adapter:{kind:r.cert.kind,k:r.d.k,allowed:r.d.F[0].S.size}};
