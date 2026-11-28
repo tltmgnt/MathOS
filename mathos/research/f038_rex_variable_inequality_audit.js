@@ -51,5 +51,19 @@ function audit(U,Q,R,A,AV,J,JV,PN,C,D,T,section="oracle"){
  }
  throw Error("section");
 }
-module.exports={fixture,audit};
-if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),process.argv[2]||'oracle')));
+function physical(U,W,K,F,Min,J,JV){
+ const d=fixture(U,31),r=J.reduce(JV,d);if(!r.contradiction||r.cert.kind!=="inequality-conflict")throw Error("adapter");
+ const machine=W.machine(),M=W.singleExit(K.compile(machine)),N0=Min.refine(M),q={...M,...N0},s=W.stream(U,r.d),b=W.run(M,s,300000000),c=W.run(q,s,b.t),cut=W.run(q,s,b.t-1),clock=F.count(machine,["",s],M.codes);
+ if(b.status!=="UNSAT"||b.z!==null||JSON.stringify(b)!==JSON.stringify(c)||b.t!==clock.clock||b.encoded!==clock.encoded||cut.status!=="TIMEOUT"||cut.t!==b.t-1||cut.z!==null)throw Error("physical");
+ return {physical:{status:b.status,transitions:b.t,stream:s.length,clock:clock.clock,cutoff:cut.t,states:N0.stats.quotientStates,bits:N0.stats.quotientBits}};
+}
+function fallback(U,A,L,N,NV,O,P,PV,Q,QV,J,JV){
+ const d={k:31,m:2,F:Array.from({length:31},(_,i)=>({h:[i,(i+2)%31,(i+5)%31],S:new Set(["1,0,0","0,1,0","0,0,1"])}))};
+ const r=J.reduce(JV,d,e=>Q.reduce(P,O,N,L,A,NV,PV,QV,null,null,null,e));
+ if(!r.contradiction||r.inequality.kind!=="unknown"||r.cert.kind!=="direct"||r.cert.record.prime!==3)throw Error("inherited fallback");
+ return {fallback:{inequality:r.inequality.kind,kind:r.cert.kind,prime:r.cert.record.prime,combination:r.cert.record.combination.length}};
+}
+module.exports={fixture,audit,physical,fallback};
+if(require.main===module&&process.argv[2]==='physical')console.log(JSON.stringify(physical(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_worker.js'),require('./f038_rex_width_three_local_motion_compiler.js'),require('./f038_rex_width_three_local_motion_clock.js'),require('./f038_rex_width_two_quotient.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'))));
+else if(require.main===module&&process.argv[2]==='fallback')console.log(JSON.stringify(fallback(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_pair_counting.js'),require('./f038_rex_variable_balanced_affine.js'),require('./f038_rex_variable_balanced_affine_certificate.js'),require('./f038_rex_variable_modular_balance.js'),require('./f038_rex_variable_conditional_modular.js'),require('./f038_rex_variable_conditional_modular_certificate.js'),require('./f038_rex_variable_integer_hull.js'),require('./f038_rex_variable_integer_hull_certificate.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'))));
+else if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),process.argv[2]||'oracle')));
