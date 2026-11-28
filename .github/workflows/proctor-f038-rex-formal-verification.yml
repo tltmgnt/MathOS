@@ -46,6 +46,11 @@ jobs:
         run: |
           node mathos/research/f038_rex_fv08_audit.js > /tmp/fv08.json
           node -e "const a=require('node:assert/strict'),r=require('/tmp/fv08.json');a.deepEqual(r,{instances:384,sat:155,unsat:229,models:1117,positive:1117,invalidWitness:3625,falseUnsat:310,corrupt:916,cutoffs:384})"
+      - name: Replay actual D7B local materialization and adversarial controls
+        working-directory: .
+        run: |
+          node mathos/research/f038_rex_fv09_audit.js > /tmp/fv09.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/fv09.json');a.deepEqual(r,{small:128,accepted:106,unsupported:22,localRows:1264,exhaustive:106,rejected:5,large:{source:64,free:62,rows:14,maxWidth:2},zeroFree:true,wideFallback:true})"
       - name: Install pinned Lean toolchain via elan
         run: |
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
@@ -76,6 +81,8 @@ jobs:
           lake env lean -o .lake/build/lib/lean/F038Formal/PhysicalTests.olean F038Formal/PhysicalTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean -o .lake/build/lib/lean/F038Formal/Composition.olean F038Formal/Composition.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean -o .lake/build/lib/lean/F038Formal/CompositionTests.olean F038Formal/CompositionTests.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/LocalMaterialization.olean F038Formal/LocalMaterialization.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/LocalMaterializationTests.olean F038Formal/LocalMaterializationTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
           echo F038_FV02_CERTIFICATE_KERNEL_OK
           echo F038_FV03_REDUCTION_KERNEL_OK
@@ -83,6 +90,7 @@ jobs:
           echo F038_FV05_RESOURCE_KERNEL_OK
           echo F038_FV06_PHYSICAL_QUOTIENT_OK
           echo F038_FV07_COMPOSITION_KERNEL_OK
+          echo F038_FV09_LOCAL_MATERIALIZATION_OK
       - name: Audit every named theorem and reject nonstandard axioms
         run: |
           set -euo pipefail
@@ -106,4 +114,5 @@ jobs:
             /tmp/fv06.json
             /tmp/fv07.json
             /tmp/fv08.json
+            /tmp/fv09.json
             formal/f038/lake-manifest.json
