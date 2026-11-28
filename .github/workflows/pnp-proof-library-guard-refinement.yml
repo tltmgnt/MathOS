@@ -1,0 +1,36 @@
+name: PNP counterexample guard refinement v17.14
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_guard_refinement*.py'
+      - 'tests/test_pnp_library_guard_refinement.py'
+      - '.github/workflows/pnp-proof-library-guard-refinement.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_guard_refinement.py' -v
+          mkdir -p artifacts/pnp-guard-refinement
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-guard-refinement/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-guard-refinement/source.json --checkpoint artifacts/pnp-guard-refinement/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-guard-refinement/source.json --scheduler artifacts/pnp-guard-refinement/scheduler.json --checkpoint artifacts/pnp-guard-refinement/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-guard-refinement/source.json --scheduler artifacts/pnp-guard-refinement/scheduler.json --failures artifacts/pnp-guard-refinement/failures.json --checkpoint artifacts/pnp-guard-refinement/v17.json > /dev/null
+          python -m mathos.research.pnp_library_guard_refinement_frontier --benchmark artifacts/pnp-guard-refinement/source.json --scheduler artifacts/pnp-guard-refinement/scheduler.json --failures artifacts/pnp-guard-refinement/failures.json --v17 artifacts/pnp-guard-refinement/v17.json --checkpoint artifacts/pnp-guard-refinement/report.json
+          python -m mathos.research.pnp_library_guard_refinement_frontier --benchmark artifacts/pnp-guard-refinement/source.json --scheduler artifacts/pnp-guard-refinement/scheduler.json --failures artifacts/pnp-guard-refinement/failures.json --v17 artifacts/pnp-guard-refinement/v17.json --audit artifacts/pnp-guard-refinement/report.json > artifacts/pnp-guard-refinement/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-guard-refinement-evidence
+          path: artifacts/pnp-guard-refinement/
+          if-no-files-found: ignore
