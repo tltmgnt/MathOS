@@ -58,7 +58,11 @@ def probe(report):
             else:
                 x,y=rng.sample(range(1,7),2);f.append([x if rng.randrange(2) else -x,y if rng.randrange(2) else -y])
         p=list(range(1,7));rng.shuffle(p);p=[x if rng.randrange(2) else -x for x in p]
-        f=[[p[abs(x)-1]*(1 if x>0 else -x) for x in q] for q in f]
+        # A signed permutation maps -x to the negation of the image of x.
+        # Multiplying by -x instead would manufacture out-of-range variables.
+        assert sorted(map(abs,p))==list(range(1,7))
+        f=[[p[abs(x)-1]*(1 if x>0 else -1) for x in q] for q in f]
+        assert all(0<abs(x)<=6 for q in f for x in q)
         ref=exact(f);a=solve(6,f,sr);auto(6,f,sr,a)
         assert a['status']!='resource_exhausted' and (a['decision']=='unsat')==ref
         counts['exact_oracle_'+str(ref).lower()]+=1
