@@ -131,3 +131,88 @@ def verify(n, clauses, policy, plan, library, r):
             or r["work_steps"] != used or used > total):
         raise ValueError("conclusion mismatch")
     return True
+
+
+def abstract_verified_tree(n, clauses, result, budget):
+    """Offline: turn a checked split tree into a bounded guarded RUP fragment.
+
+    At a conflict leaf, negating its path-blocking clause fixes the path
+    assignment and falsifies the cited input clause. At a split, the two
+    child blocking clauses force opposite pivot values under the negated
+    parent blocker. Hence postorder blockers are RUP, ending with empty.
+    No optimality, semantic minimality, or uniform complexity is claimed.
+    """
+    from .pnp_adaptive_decision import verify_search
+    f = validate(n, clauses)
+    if result["decision"] != "unsat":
+        raise ValueError("abstraction requires a checked contradiction")
+    verify_search(n, f, result, budget)
+    guards, steps, seen = set(), [], set()
+
+    def visit(node, path):
+        budget.tick()
+        if node[0] == "leaf":
+            guards.add(tuple(sorted(set(f[node[1]]))))
+        else:
+            v = node[1]
+            visit(node[2], path + (-v,))
+            visit(node[3], path + (v,))
+        blocker = tuple(sorted(-x for x in path))
+        if blocker not in seen:
+            if len(steps) >= 64:
+                raise Exhausted("offline abstraction step cap")
+            seen.add(blocker)
+            steps.append(blocker)
+    visit(result["certificate"], ())
+    active = sorted({abs(x) for c in list(guards) + steps for x in c})
+    if len(active) > 9:
+        raise Exhausted("offline abstraction support cap")
+    labels = {v: i+1 for i, v in enumerate(active)}
+    def rename(c):
+        return tuple(sorted(labels[abs(x)] if x > 0 else -labels[abs(x)] for x in c))
+    template = {"n": len(active), "axioms": tuple(sorted(map(rename, guards))),
+                "steps": tuple(map(rename, steps)), "edges": ()}
+    record = {"source_sha256": fingerprint(n, f), "template": template,
+              "source_embedding": tuple(active)}
+    check_abstraction(n, f, record, budget)
+    return record
+
+
+def check_abstraction(n, clauses, record, budget):
+    from .pnp_proof_abstraction import _original_clauses
+    from .pnp_proof_library import mapped
+    f = validate(n, clauses)
+    t, e = record["template"], record["source_embedding"]
+    if (record["source_sha256"] != fingerprint(n, f)
+            or type(t["n"]) is not int or not 0 <= t["n"] <= 9
+            or not 1 <= len(t["steps"]) <= 64
+            or len(e) != t["n"] or any(type(x) is not int or not 0 < abs(x) <= n for x in e)
+            or len({abs(x) for x in e}) != len(e)
+            or t["edges"] not in ((), [])):
+        raise ValueError("abstraction metadata")
+    verify_certificate(t["n"], t["axioms"], t["steps"], budget)
+    original = _original_clauses(n, f)
+    for c in t["axioms"]:
+        budget.tick(1 + len(c))
+        if mapped(c, e) not in original:
+            raise ValueError("abstraction lacks source guard")
+    verify_certificate(n, f, [mapped(c, e) for c in t["steps"]], budget)
+    return True
+
+
+def admit_offline(library, n, clauses, record, budget):
+    """Return a new immutable library snapshot; never mutate a scored one.
+
+    Caller must preserve the source and record in a separate provenance log.
+    Admission is not called by solve or held-out evaluation.
+    """
+    from .pnp_proof_library import MAX_TEMPLATES
+    check_abstraction(n, clauses, record, budget)
+    t = record["template"]
+    if any(digest(x) == digest(t) for x in library):
+        return tuple(library)
+    if len(library) >= MAX_TEMPLATES:
+        raise Exhausted("library admission cap")
+    # JSON roundtrip prevents aliasing caller-owned candidate objects.
+    import json
+    return tuple(json.loads(json.dumps(x)) for x in (*library, t))
