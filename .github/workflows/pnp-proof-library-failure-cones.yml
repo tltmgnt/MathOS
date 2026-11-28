@@ -1,0 +1,39 @@
+name: PNP failure-directed resolution cones v17.13
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_failure_cones*.py'
+      - 'tests/test_pnp_library_failure_cones.py'
+      - '.github/workflows/pnp-proof-library-failure-cones.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_orbit_split.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_library_failure_cones.py' -v
+          mkdir -p artifacts/pnp-failure-cones
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-failure-cones/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-failure-cones/source.json --checkpoint artifacts/pnp-failure-cones/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --checkpoint artifacts/pnp-failure-cones/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --failures artifacts/pnp-failure-cones/failures.json --checkpoint artifacts/pnp-failure-cones/v17.json > /dev/null
+          python -m mathos.research.pnp_library_orbit_split_frontier --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --failures artifacts/pnp-failure-cones/failures.json --v17 artifacts/pnp-failure-cones/v17.json --checkpoint artifacts/pnp-failure-cones/prior.json
+          python -m mathos.research.pnp_library_orbit_split_frontier --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --failures artifacts/pnp-failure-cones/failures.json --v17 artifacts/pnp-failure-cones/v17.json --audit artifacts/pnp-failure-cones/prior.json > artifacts/pnp-failure-cones/audit.json
+          python -m mathos.research.pnp_library_failure_cones_frontier --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --failures artifacts/pnp-failure-cones/failures.json --v17 artifacts/pnp-failure-cones/v17.json --prior artifacts/pnp-failure-cones/prior.json --checkpoint artifacts/pnp-failure-cones/report.json
+          python -m mathos.research.pnp_library_failure_cones_frontier --benchmark artifacts/pnp-failure-cones/source.json --scheduler artifacts/pnp-failure-cones/scheduler.json --failures artifacts/pnp-failure-cones/failures.json --v17 artifacts/pnp-failure-cones/v17.json --prior artifacts/pnp-failure-cones/prior.json --audit artifacts/pnp-failure-cones/report.json > artifacts/pnp-failure-cones/final-audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-failure-cones-evidence
+          path: artifacts/pnp-failure-cones/
+          if-no-files-found: ignore
