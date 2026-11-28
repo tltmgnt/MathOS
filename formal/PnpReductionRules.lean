@@ -9,21 +9,21 @@ theorem resolutionLocal (a b : Bool) :
   constructor
   · intro h
     rcases h with ⟨x, hx⟩
-    cases x <;> cases a <;> cases b <;> simp_all
+    cases x <;> cases a <;> cases b <;> first | rfl | exact hx
   · intro h
     cases a <;> cases b
-    · simp at h
+    · nomatch h
     · exact ⟨true, by decide⟩
     · exact ⟨false, by decide⟩
     · exact ⟨true, by decide⟩
 
 theorem purePositive (a : Bool) :
     ∃ x : Bool, (x || a) = true :=
-  ⟨true, by decide⟩
+  ⟨true, by cases a <;> rfl⟩
 
 theorem pureNegative (a : Bool) :
     ∃ x : Bool, (!x || a) = true :=
-  ⟨false, by decide⟩
+  ⟨false, by cases a <;> rfl⟩
 
 theorem subsumptionLocal (a b : Bool) :
     (a && (a || b)) = a := by
