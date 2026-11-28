@@ -32,6 +32,7 @@ jobs:
           set -euo pipefail
           python -m unittest discover -s tests -p 'test_pnp_external_satlib.py' -v
           python -m unittest discover -s tests -p 'test_pnp_native_xor.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_incremental_xor.py' -v
           mkdir -p artifacts/pnp-external
           python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-external/source.json > /dev/null
           python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-external/source.json --checkpoint artifacts/pnp-external/scheduler.json > /dev/null

@@ -71,3 +71,30 @@ P vs NP or industrial superiority. Modern competition suites,
 full replay formalization and incremental/main integration remain
 open. Results pending actual GitHub Actions execution; local
 checkout unavailable (DNS), PySAT not installed locally.
+
+
+## Protocol revision 2 (before solver outcomes)
+
+#312 has now merged into main at 3e7961c7460aa75687788a8d101473e8db551928;
+main-target run 46154064114 passed. The research branch integrates that
+main revision as a second parent and adds the incremental portfolio
+as a sixth arm, preserving the original five arms, all 32 cases, and
+unchanged budgets and integrity gates. Original run 46154249766 was
+still queued when this change was prepared. Schema /2 distinguishes the
+expanded protocol; no result from /1 is relabeled.
+
+Independent connector-side preflight on the pinned revision:
+eight uf20 formulas had exactly 2,16,15,6,3,1,1,2 models in manifest
+order (all 91 clauses, exhaustive 20-bit assignment count).
+Four selected Dubois files parsed with declared 200,192,240,176
+clauses respectively. Each yielded a checked direct GF(2)
+contradiction from 50,48,60,44 exact parity equations. Unlike the
+unselected dubois100 example, the selected four are well-formed
+in the retrieved text. The committed reference implementation
+recomputes uf20 model counts and the Dubois direct parity sum
+without using the candidate solvers, stores results in the report,
+and independently rechecks them in serialized replay. Exact-byte
+checks remain mandatory on CI; preflight used fetched text, not
+a verified local checkout. Remaining 20 labels are published
+references until candidate certificates establish them.
+No comparative solver performance has been measured here.

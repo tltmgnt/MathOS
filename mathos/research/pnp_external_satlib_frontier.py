@@ -12,6 +12,8 @@ from . import pnp_adaptive_decision as v16
 from . import pnp_conflict_learning as cdcl
 from . import pnp_affine_projected_portfolio as projected
 from . import pnp_native_xor_portfolio as native
+from . import pnp_incremental_xor_state as incremental
+from . import pnp_external_satlib_reference as refs
 from .pnp_adaptive_frontier import certificate_bytes
 from .pnp_failure_synthesis import audit as audit_v13
 from .pnp_evidence_benchmark import digest
@@ -19,8 +21,8 @@ from .pnp_evidence_scheduler import train
 from .pnp_outcome_engine import checkpoint
 from .pnp_structural_kernel import Budget, Exhausted
 
-SCHEMA="mathos-pnp-external-satlib-audit/1"
-ARMS=("v16","cdcl","projected","native","glucose4")
+SCHEMA="mathos-pnp-external-satlib-audit/2"
+ARMS=("v16","cdcl","projected","native","glucose4","incremental")
 TOTAL,SECONDS=100_000,5
 REPLAY_STEPS,REPLAY_SECONDS=20_000_000,15
 MAX_REPORT_BYTES=128_000_000
@@ -35,6 +37,8 @@ def worker():
         a=corpus.glucose(n,f)
     elif arm=="cdcl":
         a=cdcl.attempt(n,f,TOTAL,SECONDS)
+    elif arm=="incremental":
+        a=native.solve(n,f,policy,plan,total=TOTAL,seconds=SECONDS,attempt_fn=incremental.attempt)
     else:
         a={"v16":v16,"projected":projected,"native":native}[arm].solve(
             n,f,policy,plan,total=TOTAL,seconds=SECONDS)
@@ -52,7 +56,7 @@ def replay(n,f,arm,p,policy,plan):
         raise ValueError("budget mismatch")
     if arm=="v16":
         return v16.verify_report(n,f,policy,plan,p)
-    return {"projected":projected,"native":native}[arm].verify(n,f,policy,plan,p)
+    return {"projected":projected,"native":native,"incremental":native}[arm].verify(n,f,policy,plan,p)
 
 
 def measure(n,f,arm,policy,plan):
@@ -96,6 +100,9 @@ def summary(rows):
               "solver_ns":0,"replay_ns":0,"certificate_bytes":0,
               "work_steps":None if a=="glucose4" else 0} for a in ARMS}})
         s["selected"]+=1
+        s.setdefault("independent_reference",0)
+        if row.get("reference") and row["reference"]["decision"] is not None:
+            s["independent_reference"]+=1
         if row["parse_error"] is not None:
             s["parse_rejected"]+=1
             continue
@@ -128,13 +135,16 @@ def run(root,source,scheduler,failures,path):
     checkpoint(path,r)
     for i,c in enumerate(m["cases"]):
         data=corpus.read_case(root,c) # mismatch is a hard failure
-        row={"case":c,"parse_error":None,"n":None,"m":None,"arms":{}}
+        row={"case":c,"parse_error":None,"n":None,"m":None,"reference":None,"arms":{}}
         try:
             n,f=corpus.parse_dimacs(data)
         except (ValueError,Exhausted) as e:
             row["parse_error"]=str(e)
         else:
-            row.update(n=n,m=len(f))
+            ref=refs.reference(c["group"],n,f)
+            if ref["decision"] not in (None,c["expected"]):
+                raise ValueError("independent reference disagreement")
+            row.update(n=n,m=len(f),reference=ref)
             for arm in ARMS[i%len(ARMS):]+ARMS[:i%len(ARMS)]:
                 a=measure(n,f,arm,policy,plan)
                 if a["claimed"] not in ("unknown",c["expected"]):
@@ -166,12 +176,15 @@ def audit(root,source,scheduler,failures,r):
         try:
             n,f=corpus.parse_dimacs(data)
         except (ValueError,Exhausted) as e:
-            if row["parse_error"]!=str(e) or row["arms"] or row["n"] is not None or row["m"] is not None:
+            if row["parse_error"]!=str(e) or row["arms"] or row["n"] is not None or row["m"] is not None or row["reference"] is not None:
                 raise ValueError("parse rejection mismatch")
             continue
         if (row["parse_error"] is not None or row["n"]!=n or row["m"]!=len(f)
                 or set(row["arms"])!=set(ARMS)):
             raise ValueError("external case mismatch")
+        ref=refs.reference(c["group"],n,f)
+        if row["reference"]!=ref or ref["decision"] not in (None,c["expected"]):
+            raise ValueError("independent reference mismatch")
         for arm,a in row["arms"].items():
             p,status=a["payload"],a["status"]
             if a["claimed"] not in ("unknown",c["expected"]) or a["decision"] not in ("unknown",c["expected"]):

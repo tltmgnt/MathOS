@@ -32,6 +32,27 @@ class ExternalTests(unittest.TestCase):
         with self.assertRaises(Exhausted):
             c.verify_drup(2,f,p,Budget(seconds=5,max_steps=1))
 
+    def test_independent_reference(self):
+        from mathos.research import pnp_external_satlib_reference as refs
+        self.assertEqual(refs.exact_count(3,[[1,2],[-1]]),2)
+        self.assertEqual(refs.exact_count(1,[[1],[-1]]),0)
+        from itertools import product
+        f=[]
+        for rhs in (0,1):
+            f.extend([[-v if bit else v for v,bit in enumerate(bits,1)]
+                      for bits in product((0,1),repeat=3) if sum(bits)%2!=rhs])
+        # Two opposing blocks on the same scope are not a Dubois block.
+        with self.assertRaises(ValueError):
+            refs.parity_sum(3,f)
+        f=[]
+        for vs,rhs in (([1,2,3],0),([1,4,5],0),([2,4,6],0),([3,5,6],1)):
+            f.extend([[-v if bit else v for v,bit in zip(vs,bits)]
+                      for bits in product((0,1),repeat=3) if sum(bits)%2!=rhs])
+        self.assertEqual(refs.parity_sum(6,f),4)
+        self.assertEqual(refs.exact_count(6,f),0)
+        with self.assertRaises(ValueError):
+            refs.parity_sum(6,f[:-1])
+
     def test_manifest(self):
         m=c.manifest()
         rows=m["cases"]

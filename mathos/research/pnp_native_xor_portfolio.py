@@ -16,14 +16,14 @@ def eligible(f):
             and mixed_eligible(f) and not hall_eligible(f))
 
 
-def solve(n,clauses,policy,plan,*,total=100_000,seconds=5):
+def solve(n,clauses,policy,plan,*,total=100_000,seconds=5,attempt_fn=None):
     _limits(total,seconds)
     f=validate(n,clauses)
     use=eligible(f)
     start=time.monotonic()
     a,fb,used,decision=None,None,0,"unknown"
     if use:
-        a=native.attempt(n,f,max(1,total//5),seconds/5)
+        a=(native.attempt if attempt_fn is None else attempt_fn)(n,f,max(1,total//5),seconds/5)
         used,decision=a["work_steps"],a["decision"]
     if decision=="unknown" and used<total:
         left=seconds-(time.monotonic()-start) if use else seconds
