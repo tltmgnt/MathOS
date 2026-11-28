@@ -1,0 +1,59 @@
+name: PNP v18 budgeted structural route
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_bounded_matching.py'
+      - 'mathos/research/pnp_budgeted_structural_v18.py'
+      - 'tests/test_pnp_bounded_matching.py'
+      - 'formal/PnpHallCapacity.lean'
+      - 'tests/independent_pnp_v18_budgeted_frontier.py'
+      - '.github/workflows/pnp-v18-budgeted-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_pnp_bounded_matching.py' -v
+          mkdir -p artifacts/pnp-v18-budgeted
+          PYTHONPATH=. python tests/independent_pnp_v18_budgeted_frontier.py --self-test | tee artifacts/pnp-v18-budgeted/self-test.json
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-v18-budgeted/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-v18-budgeted/source.json --checkpoint artifacts/pnp-v18-budgeted/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-v18-budgeted/source.json --scheduler artifacts/pnp-v18-budgeted/scheduler.json --checkpoint artifacts/pnp-v18-budgeted/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-v18-budgeted/source.json --scheduler artifacts/pnp-v18-budgeted/scheduler.json --failures artifacts/pnp-v18-budgeted/failures.json --checkpoint artifacts/pnp-v18-budgeted/library.json > /dev/null
+          PYTHONPATH=. python tests/independent_pnp_v18_budgeted_frontier.py --benchmark artifacts/pnp-v18-budgeted/source.json --scheduler artifacts/pnp-v18-budgeted/scheduler.json --failures artifacts/pnp-v18-budgeted/failures.json --library artifacts/pnp-v18-budgeted/library.json --checkpoint artifacts/pnp-v18-budgeted/report.json
+          PYTHONPATH=. python tests/independent_pnp_v18_budgeted_frontier.py --benchmark artifacts/pnp-v18-budgeted/source.json --scheduler artifacts/pnp-v18-budgeted/scheduler.json --failures artifacts/pnp-v18-budgeted/failures.json --library artifacts/pnp-v18-budgeted/library.json --audit artifacts/pnp-v18-budgeted/report.json > artifacts/pnp-v18-budgeted/audit.json
+          (cd artifacts/pnp-v18-budgeted && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-v18-budgeted-frontier
+          path: artifacts/pnp-v18-budgeted/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          lean -DwarningAsError=true formal/PnpHallCapacity.lean | tee /tmp/pnp-hall-capacity.txt
+          for theorem in bucketCapacity deficitContradiction; do
+            grep -Fx "'PnpHallCapacity.$theorem' does not depend on any axioms" /tmp/pnp-hall-capacity.txt
+          done
