@@ -140,3 +140,36 @@ lake env lean F038Formal/PhysicalTests.lean
 ```
 
 FV-06 is a scoped physical quotient simulation milestone. Full physical correspondence remains open: packed decoding/refinement, compiler microstep simulation for read/write/move/growth/local motion, canonical stream semantics and universal least-witness correctness, buffer bounds, exact clock formula proof, raw selector conversion, and end-to-end host+physical resource accounting. Lean is unavailable locally and remote Proctor completion is unconfirmed. Next planned layer FV-07 composes verified interfaces while retaining these outstanding obligations. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main unchanged.
+
+## FV-07 — scoped end-to-end certificate release composition
+
+`F038Formal/Composition.lean` composes the FV-02–06 typed reference interfaces. Its materialized residual checker compares the reduced table predicate with the exact affine pullback on every Boolean free assignment; the enumeration completeness theorem is explicit. This gate is exponential, deliberately a finite reference checker rather than a polynomial-time algorithm. Successful relational replay, an accepted affine reconstruction map and exact materialized residual equivalence transfer original models to the residual and allow a checked residual contradiction to refute the original. Direct original Hall proofs and relationally replayed affine contradictions also have release paths. Every SAT candidate is expanded (if needed) and checked against the original tables, regardless of the reliability of the producer or preprocessing. Unverified evidence returns UNKNOWN.
+
+The central scripts `certify_sound` and `release_sound` state that a released SAT verdict contains an original model, a released UNSAT verdict implies absence of any original model, and UNKNOWN makes no mathematical assertion. The physical observation gate accepts a witness candidate only after original model checking and accepts a terminal UNSAT observation only with independent contradiction evidence. It deliberately makes no assumption that the physical decoder or compiler is correct. The `composed_physical_release` script combines this policy with FV-06 quotient checking: for every common initial tape, head and budget, both machines release the same verdict and have equal executed clocks, conditional on the quotient certificate. `composed_release_with_bounds` additionally bounds the physical clock by fuel and the reported projection count by the FV-05 expression conditional on acceptance of the count summary. It does not add host operation counts to physical clock ticks or equate them to total cost. The 15 Boolean regression examples and two fixture theorem scripts have not been compiled.
+
+### Executed JavaScript composition audit
+
+The new independent release adapter binds an exported packet to caller-supplied original or residual tables (ordered factor scopes and row arrays must match). Its raw replay uses the caller's tables rather than accepting a proof's self-described instance. SAT requires a valid residual assignment and a reconstructed original model. Residual UNSAT requires both a valid proof and a bounded exhaustive witness-image equality check (original and residual coordinate counts at most 10). Larger cases use a direct original certificate, not an assumed transfer from preprocessing. Timeouts and missing, mismatched or invalid evidence return UNKNOWN. This is a research adapter for finite data and pure expansion functions, not a proof of JavaScript operational semantics or a cryptographic provenance guarantee.
+
+Eight composed fixtures ran actual D7A/D7B preprocessing, the independent affine replay where applicable, the actual original/minimized physical workers, the independent sparse interpreter and exact clock calculator. Four small SAT cases matched the first exhaustive original model. One small relational contradiction passed the bounded exact-image gate and a checked residual empty-clause certificate. Three larger split-exclusion cases produced checked original D7I certificates and also recovered structural proofs on their prepared residuals; their release depends only on the original certificate, not a formally unverified reduction transfer. All eight one-short physical cutoffs returned UNKNOWN.
+
+|fixture|original coordinates|prepared residual coordinates|released verdict|physical ticks|
+|---|---:|---:|---|---:|
+|free|1|1|SAT|338|
+|equal|2|1|SAT|338|
+|forced|2|1|SAT|794|
+|ternary|3|2|SAT|3577|
+|local conflict|2|1|UNSAT|2092|
+|split PHP3 plain|30|30|UNSAT|2092|
+|split PHP6 plain|189|189|UNSAT|2092|
+|split PHP6 signed|189|189|UNSAT|2092|
+
+All nine rejection controls passed (missing certificate, false residual transfer, wrong-instance packet, invalid witness, invalid reconstruction, invalid witness length, invalid status, unproved large transfer, corrupted proof). The audit was executed in a JS runtime using committed modules and previously retrieved unchanged dependency source. It is not independent Lean execution. Large UNSAT physical ticks are for the constant contradiction stream, not original uncompressed physical solving or whole-host cost. The adapter does not promise completeness, polynomial SAT, universal least-witness correctness, or proof of the real compiler.
+
+Reproduce from repo root: `node mathos/research/f038_rex_fv07_audit.js`. The Proctor runs this audit and compiles the composition kernel and fixtures with admission checks. After FV-06 commands from `formal/f038`:
+```sh
+lake env lean -o .lake/build/lib/lean/F038Formal/Composition.olean F038Formal/Composition.lean
+lake env lean F038Formal/CompositionTests.lean
+```
+
+FV-07 is committed as a scoped composition milestone. Local Lean is unavailable and no remote Proctor completion is confirmed. No mechanically checked theorem or full verification is asserted. Outstanding gates include actual successful Lean compilation, full JS/typed refinement and source provenance, efficient materialized residual verification, compiler/clock and raw-selector proofs, complete operation/bit accounting, and independent scientific review. FV-08 should be a verification and independent-review gate, not a declaration of completion while these obligations remain. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main unchanged.
