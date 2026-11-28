@@ -1,0 +1,20 @@
+name: Proctor certified residual tractability (research only)
+on:
+  push:
+    branches: ['research/pnp-certified-residual-tractability']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay certified residual oracle and obstruction controls
+        run: node mathos/research/pnp_certified_residual_audit.js
