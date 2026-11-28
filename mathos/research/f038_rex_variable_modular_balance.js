@@ -1,18 +1,18 @@
 // D7O: exact integer balance sources and fixed-prime Boolean residue certificates.
 function sources(N,L,A,d){
- const q=N.discover(L,A,d,true),blocks=q.blocks,rows=[],seen=new Set();
+ const extraction=N.discover(L,A,d,true),blocks=extraction.blocks,rows=[],seen=new Set();
  function add(h,c,b,source,rule){
   const key=h.join()+":"+c.join()+":"+b;if(seen.has(key))return;seen.add(key);rows.push({h,c,b,source,rule});
  }
  for(let i=0;i<blocks.length;i++){
   const q=blocks[i];if(q.kind==="tight"&&q.coords.length%2===0)add(q.coords,q.sigma.map(x=>1-2*x),q.coords.length/2-q.sigma.reduce((s,x)=>s+x,0),i,"balance");
  }
- for(const q of q.rows){
+ for(const q of extraction.rows){
   if(q.h.length===0&&q.rhs===1)add([],[],1,q.source,"parity");
   if(q.h.length===1)add(q.h,[1],q.rhs,q.source,"parity");
   if(q.h.length===2)add(q.h,[1,q.rhs?1:-1],q.rhs,q.source,"parity");
  }
- return {blocks,rows,discovery:q.metrics};
+ return {blocks,rows,discovery:extraction.metrics};
 }
 
 function reachable(a,p){
@@ -48,10 +48,10 @@ function infer(N,L,A,d){
  return {kind:"unknown",discovery:q.discovery,rows:q.rows.length,metrics};
 }
 
-function reduce(N,L,A,OV,d,fallback){
+function reduce(N,L,A,NV,OV,d,fallback){
  const r=infer(N,L,A,d);
  if(r.kind==="unknown"){if(typeof fallback!=="function")return {d,cert:r,modular:r,contradiction:false,expand:z=>z};return {...fallback(d),modular:r};}
- if(OV.verify(d,r)!==true)throw Error("unverified modular proof");
+ if(OV.verify(NV,d,r)!==true)throw Error("unverified modular proof");
  return {d:{k:1,m:2,F:[{h:[0],S:new Set()}]},cert:r,modular:r,contradiction:true,expand:()=>{throw Error("UNSAT");}};
 }
 module.exports={sources,reachable,eliminate,infer,reduce};
