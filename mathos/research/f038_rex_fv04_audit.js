@@ -6,16 +6,18 @@ function split(d){let k=d.k;const F=[];for(const f of d.F){if(f.h.length!==2){F.
 function fixture(holes,mode){
  let d=split(D.php(U,holes));
  if(mode==="mixed")d=N.transform(d,Array.from({length:d.k},(_,i)=>+(i%3===0))).d;
+ if(mode==="signed")d=N.transform(d,Array.from({length:d.k},(_,i)=>+(i%2===0))).d;
  if(mode==="negative")d=N.transform(d,Array(d.k).fill(1)).d;
  const cert=I.infer(N,G,B,H,C,d);
  if(cert.kind!=="implied-hall")throw Error("expected D7I certificate: "+holes+" "+mode);
+ if(mode==="signed"&&cert.hall.kind!=="signed-hall")throw Error("expected signed-chain branch");
  const data=exportPacket(d,cert);
  if(!replay(data))throw Error("portable replay");
  return {data,kind:cert.hall.kind};
 }
 function audit(){
  const rows=[];
- for(const [holes,mode] of [[3,"plain"],[3,"mixed"],[3,"negative"],[4,"mixed"],[6,"plain"],[8,"plain"]]){
+ for(const [holes,mode] of [[3,"plain"],[3,"mixed"],[3,"negative"],[4,"mixed"],[6,"plain"],[6,"signed"],[8,"plain"]]){
   const {data,kind}=fixture(holes,mode),p=data.packet;
   rows.push({holes,mode,kind,k:data.n,factors:data.factors.length,paths:p.paths.length,groups:p.groups.length,conflicts:p.conflicts.length});
  }
