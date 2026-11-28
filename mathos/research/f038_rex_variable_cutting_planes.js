@@ -47,10 +47,10 @@ function discover(J,d,maxNodes=4096){
  return {kind:"unknown",status:stopped?"budget":"portfolio-exhausted",metrics};
 }
 
-function reduce(J,V,d,fallback,maxNodes=4096){
+function reduce(J,V,SV,d,fallback,maxNodes=4096){
  const r=discover(J,d,maxNodes);
  if(r.kind==="unknown")return {...(typeof fallback==="function"?fallback(d):{d,cert:r,contradiction:false,expand:z=>z}),cutting:r};
- if(V.verify(d,r)!==true)throw Error("unverified cutting proof");
+ if(SV.verify(V,d,r)!==true)throw Error("unverified cutting proof");
  return {d:{k:1,m:2,F:[{h:[0],S:new Set()}]},cert:r,cutting:r,contradiction:true,expand:()=>{throw Error("UNSAT");}};
 }
 module.exports={gcd,floor,discover,reduce};
