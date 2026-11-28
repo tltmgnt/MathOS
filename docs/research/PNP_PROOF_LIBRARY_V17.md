@@ -90,4 +90,4 @@ execution. The research target is at least one independently verified
 held-out match; zero matches are a valid negative experiment, not a
 reason to change the held-out split. Further work: blinded external
 benchmarks, stronger indexing, complete canonicalization, an end-to-end
-formal RUP checker, provenance per fragment and independent report audit.
+formal RUP checker, provenance per fragment and audit of negative search outcomes. The positive-claim report audit independently regenerates the library, rechecks training embeddings and credited target certificates, and checks aggregate counts. Timing and missed-search claims are not certified.

@@ -159,15 +159,98 @@ def run(source,scheduler,failures):
             "p_equals_np_established":False,"p_not_equals_np_established":False}
 
 
+def audit(source,scheduler,failures,r):
+    """Audit positive claims, fixed inputs, library lineage and aggregate counts.
+
+    Timings and negative search outcomes are observations, not certificates.
+    """
+    if (r["schema"]!="mathos-pnp-proof-library/1"
+            or r["upstream"]!=[digest(x) for x in (source,scheduler,failures)]
+            or r["seeds"]!={"training":TRAIN,"discovery":DISCOVERY,"heldout":HOLDOUT,
+                            "retrospective":RETROSPECTIVE}
+            or r["universal_obligation"]!="unresolved"
+            or any(r[k] is not False for k in ("novel_theorem_verified",
+                "p_equals_np_established","p_not_equals_np_established"))):
+        raise ValueError("report metadata mismatch")
+    old=[compress(c["n"],c["clauses"],p,budget())["template"]
+         for c,p in targets(source,scheduler,failures)]
+    if digest(old)!=digest(r["v15_source_templates"]):
+        raise ValueError("v15 source mismatch")
+    train=suite(TRAIN,12)
+    if digest(train)!=digest([row["case"] for row in r["training"]]):
+        raise ValueError("training split mismatch")
+    extra=[]
+    for c,row in zip(train,r["training"]):
+        t=row["compact"]
+        if row["status"]=="verified":
+            verify_embedding(c["n"],c["clauses"],t["template"],t["source_embedding"],budget())
+            extra.append(t["template"])
+        elif t is not None or row["status"] not in ("not_refuted","resource_exhausted"):
+            raise ValueError("unverified training admission")
+    b=Budget(seconds=60,max_steps=25_000_000)
+    original,orefinement=build(old,b)
+    library,refinement=build(old+extra,b)
+    for actual,expected in ((r["original_library"],original),(r["library"],library),
+                            (r["refinement"],refinement),(r["original_refinement"],orefinement)):
+        if digest(actual)!=digest(expected):
+            raise ValueError("library derivation mismatch")
+    if r["library_sha256"]!=digest(library) or r["library_bytes"]!=bytesize(library):
+        raise ValueError("library hash/size mismatch")
+    splits={"discovery":suite(DISCOVERY,8),"heldout":suite(HOLDOUT,16),
+            "retrospective":[{**c,"family":"random3"} for c in fresh_cases(RETROSPECTIVE,16)]}
+    for split,cases in splits.items():
+        rows=r[split]
+        if digest(cases)!=digest([row["case"] for row in rows]):
+            raise ValueError("evaluation split mismatch")
+        index=Index(original if split=="retrospective" else library)
+        for c,row in zip(cases,rows):
+            n,f=c["n"],c["clauses"]
+            ref=reference(n,f)
+            if row["reference_sat"] is not ref:
+                raise ValueError("reference mismatch")
+            v=row["v15"]
+            if v["status"]=="verified":
+                if ref or type(v["record"]) is not int or not 0<=v["record"]<len(old):
+                    raise ValueError("invalid v15 match")
+                verify_embedding(n,f,old[v["record"]],v["embedding"],budget())
+            v=row["v17"]
+            if v["status"]=="verified":
+                proof=reconstruct(n,f,index,v["transfers"],budget())
+                if ref or digest(proof)!=digest(v["proof"]):
+                    raise ValueError("invalid v17 certificate")
+                if v["expanded_bytes"]!=bytesize(proof) or v["recipe_bytes"]!=bytesize(v["transfers"]):
+                    raise ValueError("certificate sizes mismatch")
+                if split=="retrospective" and (len(v["transfers"])!=1
+                        or index.templates[v["transfers"][0][0]]["steps"][-1]!=()):
+                    raise ValueError("retrospective must use one contradiction")
+            elif "proof" in v or "transfers" in v:
+                raise ValueError("uncredited result contains proof")
+        if r["summary"][split]!=totals(rows):
+            raise ValueError("aggregate mismatch")
+    for family in ("random3","random2"):
+        if r["summary"]["heldout_"+family]!=totals([row for row in r["heldout"]
+                                                   if row["case"]["family"]==family]):
+            raise ValueError("family aggregate mismatch")
+    return True
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    for name in ("benchmark","scheduler","failures","checkpoint"):
+    for name in ("benchmark","scheduler","failures"):
         p.add_argument("--"+name,type=Path,required=True)
+    mode=p.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--checkpoint",type=Path)
+    mode.add_argument("--audit",type=Path)
     a=p.parse_args()
     paths=(a.benchmark,a.scheduler,a.failures)
+    inputs=tuple(json.loads(x.read_text()) for x in paths)
+    if a.audit:
+        audit(*inputs,json.loads(a.audit.read_text()))
+        print(json.dumps({"status":"positive_claims_replayed"}))
+        return
     if a.checkpoint.resolve() in {x.resolve() for x in paths}:
         p.error("cannot overwrite upstream evidence")
-    result=run(*(json.loads(x.read_text()) for x in paths))
+    result=run(*inputs)
     a.checkpoint.parent.mkdir(parents=True,exist_ok=True)
     a.checkpoint.write_text(json.dumps(result,sort_keys=True,indent=2))
     print(json.dumps(result["summary"],indent=2))

@@ -27,7 +27,6 @@ theorem signedLiteralSound (v : Nat → Bool) (m : Nat → Nat)
     (h : Holds v (signedMap m flip l)) : Holds (pullback v m flip) l := by
   rcases l with ⟨x,b⟩
   unfold Holds signedMap pullback at *
-  simp only at *
   cases hf : flip x <;> cases hb : b <;> cases hv : v (m x) <;>
     simp [hf, hb, hv] at *
 
