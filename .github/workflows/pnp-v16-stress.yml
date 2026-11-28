@@ -1,0 +1,38 @@
+name: PNP v16 stress and allocation ablation
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_v16_stress.py'
+      - 'tests/test_pnp_v16_stress.py'
+      - '.github/workflows/pnp-v16-stress.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - shell: bash
+        run: |
+          python -m unittest discover -s tests -p 'test_pnp_adaptive_decision.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_v16_stress.py' -v
+          mkdir -p artifacts/pnp-v16-stress
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-v16-stress/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-v16-stress/source.json --checkpoint artifacts/pnp-v16-stress/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-v16-stress/source.json --scheduler artifacts/pnp-v16-stress/scheduler.json --checkpoint artifacts/pnp-v16-stress/failures.json > /dev/null
+          python -m mathos.research.pnp_v16_stress --benchmark artifacts/pnp-v16-stress/source.json --scheduler artifacts/pnp-v16-stress/scheduler.json --failures artifacts/pnp-v16-stress/failures.json --checkpoint artifacts/pnp-v16-stress/report.json | tee artifacts/pnp-v16-stress/summary.json
+      - run: |
+          python -m mathos.research.pnp_v16_stress --benchmark artifacts/pnp-v16-stress/source.json --scheduler artifacts/pnp-v16-stress/scheduler.json --failures artifacts/pnp-v16-stress/failures.json --audit artifacts/pnp-v16-stress/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-v16-stress-evidence
+          path: artifacts/pnp-v16-stress/
+          if-no-files-found: ignore
