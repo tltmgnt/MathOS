@@ -116,6 +116,52 @@ theorem checker_comparison_bound (options conflicts pairs probes : Nat)
     probes ≤ checkerBound options conflicts :=
   hc.trans (Nat.mul_le_mul_right conflicts hp)
 
+-- Executable validation of an instrumented count summary. The theorem
+-- validates the arithmetic obligations, not the truth of a reported trace.
+def countsCheck (v e : Nat) (c : Counts) : Bool :=
+  decide (c.starts ≤ v ∧ c.edgeScans ≤ c.starts * e ∧
+    c.pairTests ≤ c.starts * v ∧ c.pathSteps ≤ c.pairTests * v ∧
+    c.emitted ≤ c.pairTests ∧ c.peakQueue ≤ v ∧ c.peakPredecessors ≤ v)
+
+theorem countsCheck_sound {v e : Nat} {c : Counts}
+    (h : countsCheck v e c = true) : ValidCounts v e c := by
+  have hc : c.starts ≤ v ∧ c.edgeScans ≤ c.starts * e ∧
+      c.pairTests ≤ c.starts * v ∧ c.pathSteps ≤ c.pairTests * v ∧
+      c.emitted ≤ c.pairTests ∧ c.peakQueue ≤ v ∧ c.peakPredecessors ≤ v :=
+    of_decide_eq_true h
+  rcases hc with ⟨a,b,d,f,g,i,j⟩
+  exact ⟨a,b,d,f,g,i,j⟩
+
+theorem checked_work_bound {v e : Nat} {c : Counts}
+    (h : countsCheck v e c = true) : work c ≤ bound v e :=
+  charged_work_bound (countsCheck_sound h)
+
+-- An explicit abstract array representation: adjacency triples + dense
+-- offsets, option list, queue, predecessor triples, current path scratch
+-- and saved certificate. Excludes original factors and projected tables.
+def liveWords (v e retained edges : Nat) (c : Counts) : Nat :=
+  3*e + (v+1) + v + c.peakQueue + 3*c.peakPredecessors +
+    3*v + payloadWords retained c.emitted edges
+
+theorem live_word_bound {v e f retained edges : Nat} {c : Counts}
+    (h : ValidCounts v e c) (hr : retained ≤ f) (he : edges ≤ c.pathSteps) :
+    liveWords v e retained edges c ≤
+      3*e + 9*v + 1 + (2 + f + 3*(v*v) + 3*(v*v*v)) := by
+  unfold liveWords
+  have hp := Nat.mul_le_mul_left 3 h.predecessors
+  have hq := h.queue
+  have hb := payload_word_bound h hr he
+  omega
+
+theorem projected_factor_bound {v e f retained : Nat} {c : Counts}
+    (h : ValidCounts v e c) (hr : retained ≤ f) :
+    retained + c.emitted ≤ f + v*v :=
+  Nat.add_le_add hr (path_count_bound h)
+
+#print axioms countsCheck_sound
+#print axioms checked_work_bound
+#print axioms live_word_bound
+#print axioms projected_factor_bound
 #print axioms charged_work_bound
 #print axioms simple_path_vertices
 #print axioms charge_safe
