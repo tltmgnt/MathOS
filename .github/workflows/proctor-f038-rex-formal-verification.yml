@@ -1,4 +1,4 @@
-name: Proctor F038 RE-X formal semantic kernel
+name: Proctor F038 RE-X formal semantic and certificate kernels
 on:
   push:
     branches: ['research/pnp-f038-rex-formal-verification']
@@ -28,6 +28,10 @@ jobs:
       - name: Compile and reject admitted proofs
         run: |
           set -o pipefail
+          lake build F038Formal
+          mkdir -p .lake/build/lib/lean/F038Formal
           lake env lean F038Formal.lean 2>&1 | tee /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/Certificate.olean F038Formal/Certificate.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean F038Formal/CertificateTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
-          lake build
+          echo F038_FV02_CERTIFICATE_KERNEL_OK
