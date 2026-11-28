@@ -1,8 +1,18 @@
 # FV-09 — Certified bounded local residual materialization
 
-Status: implementation committed; executable replay PASS; new Lean compilation and axiom gate PENDING.
+Status: scoped mechanized verification PASS; executable replay PASS; concrete implementation refinement and independent review OPEN.
 Prior FV-08 proof checkpoint d9b3eca07b06379b41ebb4e2c33b02b30662bda6 passed Proctor run 52.
 PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE.
+
+## Mechanized verification result
+
+Proctor run 68 completed successfully at exact checkpoint a1288c6699c3abedda0378de956cd34794aa1c39. All six executable audits, the entire Lean build (including FV-09 and its fixtures), and all 111 named theorem axiom checks passed. F038_FV09_LOCAL_MATERIALIZATION_OK and F038_FV08_AXIOM_GATE_OK were emitted; no unapproved dependency or admitted proof was accepted.
+
+- Run: https://github.com/tltmgnt/MathOS/actions/runs/46095977937
+- Evidence: https://github.com/tltmgnt/MathOS/actions/runs/46095977937/artifacts/15243462787
+- Evidence ZIP SHA-256 reported by GitHub: 7d9daacf7f4c83e0edf0ce65a60286f92ebc3ba784baa3ba56c14d70c65c5751
+
+This record documents verification of the exact checkpoint, not a proof of the concrete JavaScript producer or unrestricted complexity.
 
 ## Mathematical interface
 
@@ -32,7 +42,8 @@ This is actual finite execution evidence, not a proof of JavaScript semantics. F
 
 ## Outstanding obligations
 
-- Obtain successful compilation and actual axiom audit of the 111 named theorems and all fixtures.
+- Scoped compilation and 111-theorem axiom audit: completed in run 68.
+- Proposed FV-10: certify the concrete residual simplification operations (tautology removal, same-scope intersection, zero-free padding) before extending to the operation-log translation.
 - Mechanize concrete D7B source/operation log translation, omission of tautologies, duplicate-scope intersection, zero-free dummy-coordinate semantics and contradiction/fallback paths. The Lean one-to-one interface does not yet verify these concrete output transformations.
 - Mechanize D7A relational logs, input decoding, graph operations, physical compiler/selector, exact clock formula and total bit complexity.
 - Obtain independent human mathematical review. No proof of P vs NP or production promotion.
