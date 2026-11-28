@@ -71,6 +71,26 @@ function audit(U,Q,R,A,AV,C,V,D,T,H,HV,B,G,N,NV,I,IV,P,K,F,Min,section="oracle")
    rows.push({n,len,flip,k:d.k,factors:d.F.length,free:a.a.free.length,proof:c.proof.kind,groups:c.proof.hall.groups.length,holes:c.proof.hall.holes.length,groupAxioms:c.proof.hall.groups.reduce((s,g)=>s+g.proof.length,0),exclusions:c.proof.hall.exclusions.length,paths:c.paths.length,metrics:c.metrics});
   }return {rows};
  }
+ if(section==="invariance"){
+  let relabelled=0,paths=0,pathSteps=0,minLength=Infinity,maxLength=0;
+  for(let t=0;t<32;t++){
+   const n=3+t%4,original=D.php(U,n);let k=original.k,F=[],binary=0,mutex=0;
+   for(const f of original.F){
+    if(f.h.length!==2){F.push(f);continue;}mutex++;
+    const [x,y]=f.h,len=1+(rand()>>>16)%5;minLength=Math.min(minLength,len);maxLength=Math.max(maxLength,len);binary+=len;
+    let last=x;for(let j=1;j<len;j++){const u=k++;F.push(factor([-(last+1),u+1]));last=u;}F.push(factor([-(last+1),-(y+1)]));
+   }
+   const d=N.transform({k,m:2,F},Array.from({length:k},()=>rand()>>>31)).d,perm=Array.from({length:k},(_,i)=>i);
+   for(let i=k-1;i>0;i--){const j=(rand()>>>16)%(i+1);[perm[i],perm[j]]=[perm[j],perm[i]];}
+   d.F=d.F.map(f=>({h:f.h.map(x=>perm[x]).reverse(),S:new Set([...f.S].map(s=>s.split(",").reverse().join()))})).reverse();
+   const r=I.infer(N,G,B,H,C,d);
+   ok(r.kind==="reach-hall"&&IV.verify(NV,HV,d,r)&&r.anchors.length===original.k&&r.paths.length===mutex&&r.metrics.pathSteps===binary,"heterogeneous chains");
+   relabelled++;paths+=r.paths.length;pathSteps+=r.metrics.pathSteps;
+  }
+  const local=bin(4,[[-1,-2,3],[-1,-3,4],[-2,-3,-4]]),m=models(local),projected=[...new Set(m.map(z=>z.slice(0,2).join()))].sort();
+  ok(JSON.stringify(projected)===JSON.stringify(["0,0","0,1","1,0"]),"ternary gadget projection");
+  return {invariance:{relabelled,paths,pathSteps,minLength,maxLength,gadgetModels:m.length,gadgetProjection:projected}};
+ }
  if(section==="physical"){
   const J=P.machine(),M=P.singleExit(K.compile(J)),N0=Min.refine(M),min={...M,...N0},physical=[];
   for(const [name,d,compare] of [["binary-cycle",cycle,true],["mixed-sat",sat,true],["PHP6-path2",fixture(6,2),false],["PHP6-path3-signed",fixture(6,3,true),false]]){
