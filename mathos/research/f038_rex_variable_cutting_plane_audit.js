@@ -33,7 +33,7 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,PN,C,D,T,section="oracle"){
   for(let i=0;i<192;i++){const k=4+i%4,F=[];for(let j=0;j<3+i%7;j++){const h=[...new Set(Array.from({length:1+(rand()>>>16)%3},()=> (rand()>>>16)%k))].sort((a,b)=>a-b),mask=rand()>>>16;F.push({h,S:new Set([...U.tuples(2,h.length)].filter(z=>mask>>(z.reduce((s,x,i)=>s+(x<<i),0))&1).map(z=>z.join()))});}check({k,m:2,F});}
   const d=JA.fixture(U,11,1),r=check(d);ok(r.kind==="cutting-conflict"&&r.metrics.divisions===2,"rounding");
   const flipped=check(PN.transform(d,sig(11)).d);ok(flipped.kind==="cutting-conflict","signed");
-  const sat=JA.fixture(U,12,1);check(sat);
+  const divisible=JA.fixture(U,12,1);check(divisible);const sat={...divisible,F:divisible.F.slice(0,12)};ok(models(sat).length>0&&check(sat).kind==="unknown","SAT control");
   const zero=S.reduce(J,JV,SV,d,e=>({d:e,cert:{kind:"sentinel"},expand:z=>z}),0),limited=S.discover(J,d,r.nodes.length-1);
   ok(zero.d===d&&zero.cert.kind==="sentinel"&&limited.kind==="unknown"&&limited.status==="budget","limits");
   function reject(fn){let bad=false;try{fn();}catch(e){bad=true;}ok(bad,"tamper");stats.tamperRejected++;}
@@ -45,7 +45,7 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,PN,C,D,T,section="oracle"){
   reject(()=>SV.verify(JV,d,replace(0,{kind:"source",row:{...r.nodes[0].row,b:r.nodes[0].row.b-1}})));
   reject(()=>SV.verify(JV,d,{...r,rhs:"0"}));
   ok(S.floor(-31n,3n)===-11n&&S.floor(31n,3n)===10n&&S.floor(-30n,3n)===-10n,"signed floor");
-  return {stats,limits:{zero:zero.cutting.metrics.nodes,limited:limited.metrics.nodes,complete:r.nodes.length},satControlModels:models(sat).length};
+  return {stats,limits:{zero:zero.cutting.metrics.nodes,limited:limited.metrics.nodes,complete:r.nodes.length},divisibleControlModels:models(divisible).length,satControlModels:models(sat).length};
  }
  if(section==="large"){
   const rows=[];for(const [k,flip,pre] of [[31,false,true],[31,true,true],[127,true,true],[1001,true,false]]){
@@ -64,5 +64,20 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,PN,C,D,T,section="oracle"){
  }
  throw Error("section");
 }
-module.exports={fixture,rankTwo,audit};
-if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_inequality_audit.js'),require('./f038_rex_variable_cutting_planes.js'),require('./f038_rex_variable_cutting_plane_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),process.argv[2]||'oracle')));
+function physical(U,W,K,F,Min,J,JV,JA,S,SV){
+ const d=JA.fixture(U,31,1),r=S.reduce(J,JV,SV,d);
+ if(!r.contradiction||r.cert.kind!=="cutting-conflict")throw Error("adapter");
+ const machine=W.machine(),M=W.singleExit(K.compile(machine)),N0=Min.refine(M),q={...M,...N0},s=W.stream(U,r.d),b=W.run(M,s,300000000),c=W.run(q,s,b.t),cut=W.run(q,s,b.t-1),clock=F.count(machine,["",s],M.codes);
+ if(b.status!=="UNSAT"||b.z!==null||JSON.stringify(b)!==JSON.stringify(c)||b.t!==clock.clock||b.encoded!==clock.encoded||cut.status!=="TIMEOUT"||cut.t!==b.t-1||cut.z!==null)throw Error("physical");
+ return {physical:{status:b.status,transitions:b.t,stream:s.length,clock:clock.clock,cutoff:cut.t,states:N0.stats.quotientStates,bits:N0.stats.quotientBits}};
+}
+function fallback(J,JV,S,SV){
+ const d={k:6,m:2,F:[{h:[0,2,3],S:new Set(["0,0,0","0,1,1","1,1,1"])},{h:[2,3,5],S:new Set(["0,1,0","1,1,0","1,1,1"])},{h:[1],S:new Set(["0","1"])},{h:[0],S:new Set(["0","1"])},{h:[2],S:new Set(["0"])},{h:[2,3,5],S:new Set(["0,0,0","0,0,1","0,1,0","1,0,1","1,1,0","1,1,1"])}]};
+ const r=S.reduce(J,JV,SV,d,e=>{if(e!==d)throw Error("changed residual");return J.reduce(JV,e);},0);
+ if(!r.contradiction||r.cert.kind!=="inequality-conflict"||r.cutting.status!=="budget")throw Error("fallback");
+ return {fallback:{kind:r.cert.kind,rounds:r.cert.metrics.rounds,cutting:r.cutting.status}};
+}
+module.exports={fixture,rankTwo,audit,physical,fallback};
+if(require.main===module&&process.argv[2]==='physical')console.log(JSON.stringify(physical(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_worker.js'),require('./f038_rex_width_three_local_motion_compiler.js'),require('./f038_rex_width_three_local_motion_clock.js'),require('./f038_rex_width_two_quotient.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_inequality_audit.js'),require('./f038_rex_variable_cutting_planes.js'),require('./f038_rex_variable_cutting_plane_certificate.js'))));
+else if(require.main===module&&process.argv[2]==='fallback')console.log(JSON.stringify(fallback(require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_cutting_planes.js'),require('./f038_rex_variable_cutting_plane_certificate.js'))));
+else if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_rank_reduction.js'),require('./f038_rex_variable_rank_quotient.js'),require('./f038_rex_variable_relational_closure.js'),require('./f038_rex_variable_affine_closure.js'),require('./f038_rex_variable_affine_certificate.js'),require('./f038_rex_variable_inequality_certificates.js'),require('./f038_rex_variable_inequality_certificate.js'),require('./f038_rex_variable_inequality_audit.js'),require('./f038_rex_variable_cutting_planes.js'),require('./f038_rex_variable_cutting_plane_certificate.js'),require('./f038_rex_variable_polarity_normalization.js'),require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_adaptive_inference.js'),require('./f038_rex_variable_adaptive_certificate.js'),process.argv[2]||'oracle')));
