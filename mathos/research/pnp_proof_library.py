@@ -281,7 +281,7 @@ def reconstruct(n, formula, index, transfers, budget):
 
 
 def reuse(n, formula, index, budget, *, rounds=4, max_transfers=32, compose=True,
-          subsumption=True):
+          subsumption=True, shared_replay=False):
     """Unknown on exhaustion or miss. No fallback solver is credited as reuse."""
     known = set(_original_clauses(n,formula))
     transfers = []
@@ -304,7 +304,7 @@ def reuse(n, formula, index, budget, *, rounds=4, max_transfers=32, compose=True
                 changed = True
                 if () in known:
                     proof = reconstruct(n,formula,index,transfers,
-                                        Budget(seconds=10,max_steps=4_000_000))
+                                        budget if shared_replay else Budget(seconds=10,max_steps=4_000_000))
                     return {"status":"verified","transfers":transfers,"proof":proof,
                             "examined":examined}
                 if len(transfers)>=max_transfers:

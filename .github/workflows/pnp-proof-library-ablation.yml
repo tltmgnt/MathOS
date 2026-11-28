@@ -1,0 +1,37 @@
+name: PNP proof library v17 ablation
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_ablation.py'
+      - 'mathos/research/pnp_proof_library.py'
+      - 'tests/test_pnp_library_ablation.py'
+      - '.github/workflows/pnp-proof-library-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_ablation.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_proof_library.py' -v
+          mkdir -p artifacts/pnp-ablation
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-ablation/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-ablation/source.json --checkpoint artifacts/pnp-ablation/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-ablation/source.json --scheduler artifacts/pnp-ablation/scheduler.json --checkpoint artifacts/pnp-ablation/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-ablation/source.json --scheduler artifacts/pnp-ablation/scheduler.json --failures artifacts/pnp-ablation/failures.json --checkpoint artifacts/pnp-ablation/v17.json > /dev/null
+          python -m mathos.research.pnp_library_ablation --benchmark artifacts/pnp-ablation/source.json --scheduler artifacts/pnp-ablation/scheduler.json --failures artifacts/pnp-ablation/failures.json --v17 artifacts/pnp-ablation/v17.json --checkpoint artifacts/pnp-ablation/report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-proof-library-ablation
+          path: artifacts/pnp-ablation/
+          if-no-files-found: ignore
