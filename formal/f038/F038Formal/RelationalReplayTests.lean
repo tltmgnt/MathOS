@@ -38,7 +38,7 @@ theorem deletion_fixture_exact (x : Assignment 2) :
 
 theorem addition_fixture_exact (x : Assignment 2) :
     TableModels (pin :: [refined]) x ↔ TableModels [refined] x :=
-  addStep_exact 2 [refined] (pin :: [refined]) ⟨0,pin,[0,1]⟩ (by decide) x
+  addStep_exact 2 [refined] (pin :: [refined]) ⟨0,pin,[0,1]⟩ (by rfl) x
 
 #print axioms deletion_fixture_exact
 #print axioms addition_fixture_exact
