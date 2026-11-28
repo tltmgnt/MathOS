@@ -1,0 +1,36 @@
+name: PNP orbit-disjoint proof transfer v17.12
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_orbit_split*.py'
+      - 'tests/test_pnp_library_orbit_split.py'
+      - '.github/workflows/pnp-proof-library-orbit-split.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_orbit_split.py' -v
+          mkdir -p artifacts/pnp-orbit
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-orbit/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-orbit/source.json --checkpoint artifacts/pnp-orbit/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-orbit/source.json --scheduler artifacts/pnp-orbit/scheduler.json --checkpoint artifacts/pnp-orbit/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-orbit/source.json --scheduler artifacts/pnp-orbit/scheduler.json --failures artifacts/pnp-orbit/failures.json --checkpoint artifacts/pnp-orbit/v17.json > /dev/null
+          python -m mathos.research.pnp_library_orbit_split_frontier --benchmark artifacts/pnp-orbit/source.json --scheduler artifacts/pnp-orbit/scheduler.json --failures artifacts/pnp-orbit/failures.json --v17 artifacts/pnp-orbit/v17.json --checkpoint artifacts/pnp-orbit/report.json
+          python -m mathos.research.pnp_library_orbit_split_frontier --benchmark artifacts/pnp-orbit/source.json --scheduler artifacts/pnp-orbit/scheduler.json --failures artifacts/pnp-orbit/failures.json --v17 artifacts/pnp-orbit/v17.json --audit artifacts/pnp-orbit/report.json > artifacts/pnp-orbit/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-orbit-disjoint-evidence
+          path: artifacts/pnp-orbit/
+          if-no-files-found: ignore
