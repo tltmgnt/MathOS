@@ -38,17 +38,17 @@ def hidden(n,f,seed):
 
 
 def control(k,bad):
-    e=4*k+1
-    f=[[-e]]
+    e,t=4*k+1,4*k+2
+    f=[[-e],[-t]]
     for i in range(k):
         a,b,c,d=range(4*i+1,4*i+5)
         f.extend(encode([a,b,c],0))
         f.extend(encode([a,b,d],0))
-    # Equality c=d is an implied, not syntactically encoded, equation.
-    # With e=false, the two clauses enforce inequality on that pair.
-    f.append([-3,-4,e])
-    if bad:
-        f.append([3,4,e])
+    # Both residual units are induced by non-affine ternary clauses.
+    # Ordinary root propagation fixes c=false and d=bad, but neither
+    # shared latent bit. Elimination must derive the conflict if bad.
+    f.append([-3,e,t])
+    f.append([4 if bad else -4,e,t])
     rng=random.Random(SEED+k)
     rng.shuffle(f)
     return f
@@ -67,7 +67,7 @@ def manifest():
     for k in (5,8,12,20):
         for bad in (False,True):
             rows.append({"id":f"native_{k}_{int(bad)}","group":"native_controls",
-                         "kind":"native_control","n":4*k+1,"blocks":k,"bad":bad,
+                         "kind":"native_control","n":4*k+2,"blocks":k,"bad":bad,
                          "clauses":control(k,bad)})
     return rows
 
@@ -82,10 +82,10 @@ def reference(c):
         return bitset20(n,c["base"])
     if c["kind"]=="native_control":
         k,bad=c["blocks"],c["bad"]
-        if k not in (5,8,12,20) or type(bad) is not bool or c["n"]!=4*k+1 or c["clauses"]!=control(k,bad):
+        if k not in (5,8,12,20) or type(bad) is not bool or c["n"]!=4*k+2 or c["clauses"]!=control(k,bad):
             raise ValueError("invalid control reference")
         # All zero is a witness for SAT; UNSAT follows from equality
-        # of the first pair and their residual inequality.
+        # of the first pair and their opposite residual unit assignments.
         return not bad
     return old_reference(c)
 

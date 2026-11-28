@@ -94,13 +94,13 @@ class NativeTests(unittest.TestCase):
 
     def test_native_proof_and_portfolio(self):
         f=control(5,True)
-        r=native.attempt(21,f,100000,5)
+        r=native.attempt(22,f,100000,5)
         self.assertEqual(r["decision"],"unsat")
         self.assertGreater(r["proof"]["xor_events"],0)
-        native.replay(21,f,json.loads(json.dumps(r)),100000)
+        native.replay(22,f,json.loads(json.dumps(r)),100000)
         policy={"order":[{"plan":list(p),"suggested_cap":50000} for p in DEFAULT_PLANS]}
         plan=["min_product",8]
-        for n,f,want in ((21,f,"unsat"),(21,control(5,False),"sat"),(2,[[1,2]],"sat")):
+        for n,f,want in ((22,f,"unsat"),(22,control(5,False),"sat"),(2,[[1,2]],"sat")):
             p=portfolio.solve(n,f,policy,plan)
             self.assertEqual(p["decision"],want)
             portfolio.verify(n,f,policy,plan,json.loads(json.dumps(p)))
@@ -108,9 +108,9 @@ class NativeTests(unittest.TestCase):
             q["work_steps"]+=1
             with self.assertRaises(ValueError):
                 portfolio.verify(n,f,policy,plan,q)
-        u=native.attempt(21,control(5,True),1,5)
+        u=native.attempt(22,control(5,True),1,5)
         self.assertEqual(u["decision"],"unknown")
-        native.replay(21,control(5,True),u,1)
+        native.replay(22,control(5,True),u,1)
 
     def test_manifest_and_hidden(self):
         cases=manifest()

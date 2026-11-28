@@ -48,7 +48,7 @@ Resource exhaustion is UNKNOWN.
 
 191 cases: 171 archived plus 12 new random base CNFs (16/18 variables)
 masked through two latent bits per copied coordinate, and eight
-explicit native equality/inequality controls. Base reference is
+explicit native equality/contradictory residual unit controls. Base reference is
 exhaustive bitset evaluation; the constructed controls follow
 elementary parity and residual-clause arguments. Public synthetic
 development set, not a blind industrial comparison. Seed 192208.
