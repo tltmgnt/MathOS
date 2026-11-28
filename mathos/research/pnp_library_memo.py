@@ -33,9 +33,9 @@ def memo_find(f,n,known,budget,*,subsumption=True,limit=4096,stats=None):
 
     def tick():
         nonlocal attempts
+        budget.tick()
         attempts+=1
         stats["candidate_ticks"]+=1
-        budget.tick()
         return attempts<=limit
 
     def finish(d,used):
