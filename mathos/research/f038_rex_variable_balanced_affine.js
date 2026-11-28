@@ -1,5 +1,5 @@
 // D7N: locally oriented tight balance equations and GF(2) contradiction certificates.
-function discover(L,A,d){
+function discover(L,A,d,retainEven=false){
  if(d.m!==2)throw Error("binary");
  const eligible=[],by=Array.from({length:d.k},()=>[]),byPair=new Map();
  for(let i=0;i<d.F.length;i++){
@@ -28,7 +28,7 @@ function discover(L,A,d){
    const source=blocks.length,old=rows.length;
    if(coords.length%2===0)row(coords,(coords.length/2%2)^sigma.reduce((s,x)=>s^x,0),source);
    for(let i=0;i<coords.length;i++)for(let j=i+1;j<coords.length;j++){const x=coords[i],y=coords[j],n=w.get([x,y].join())||0;if(n!==b.threshold)row([x,y],sigma[i]^sigma[j]^+(n>b.threshold),source);}
-   if(rows.length>old)blocks.push({...block,kind:"tight"});
+   if(rows.length>old||retainEven&&coords.length%2===0)blocks.push({...block,kind:"tight"});
   }
  }
  const visited=new Set();for(const x of eligible.flatMap(i=>d.F[i].h))if(!visited.has(x)){const q=[x];visited.add(x);for(let j=0;j<q.length;j++)for(const i of by[q[j]])for(const y of d.F[i].h)if(!visited.has(y)){visited.add(y);q.push(y);}test(q);}
