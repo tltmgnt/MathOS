@@ -92,6 +92,8 @@ def inputs(source,scheduler,failures,lr,dev):
         forbidden.update(case_key(r["case"]) for r in lr[k])
     forbidden.update(case_key(r["case"]) for r in dev["rows"])
     rows=manifest()
+    if digest(rows)!="a3d6c722f83619950b5255014991cf9e9402e2ec80e782506a2b928a2c9a561f":
+        raise ValueError("frozen manifest differs from independent local generation")
     keys=[case_key(c) for c in rows]
     if len(set(keys))!=len(keys) or forbidden.intersection(keys):
         raise ValueError("normalized input overlap")
