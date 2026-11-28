@@ -52,3 +52,6 @@ The monotonicity and greatest-fixed-point argument is standard finite-lattice re
 
 ## Theorem M scope
 The implication-graph criterion is classical 2-SAT (Aspvall, Plass and Tarjan, A linear-time algorithm for testing the truth of certain quantified Boolean formulas, Information Processing Letters 1979). Girth and bounded-treewidth examples use elementary graph theory; no new external literature search was performed in this cycle. Compare the proposed bounds on the exact affine-hull closure threshold with existing consistency-width and proof-complexity work. The constant-treewidth example is limited to the original-variable graph of this encoding and does not imply hardness of bounded-treewidth CSPs.
+
+## Theorem N scope
+The block-support distance is the usual dual-distance/projection-surjectivity connection from coding theory, generalized to grouped coordinates. Projective directions, finite-field hyperplane pencils, and deletion-minimal inconsistent cores are classical. Compare the exact recovery-order-four example and closure-specific certificate format against existing algebraic SAT and consistency-width research before any priority claim. No new external literature search was performed in this cycle.

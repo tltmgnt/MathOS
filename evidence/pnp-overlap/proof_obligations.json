@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "53_GROUPS_PASSED_AT_3d9b11eb_6_BOUND_GROUPS_AWAITING_CI",
+    "python_tests": "59_GROUPS_PASSED_AT_cb7e12f8_6_ALGEBRAIC_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -52,10 +52,15 @@
     "minimum_order_certificates": "SCOPED_CI_PASSED_AT_3d9b11eb",
     "minimum_order_formalization": "OPEN",
     "graph_order_bounds": "ARGUMENT_DRAFT",
-    "graph_bound_checker": "IMPLEMENTED_AWAITING_CI",
+    "graph_bound_checker": "SCOPED_CI_PASSED_AT_cb7e12f8",
     "constant_treewidth_obstruction": "ARGUMENT_DRAFT",
     "factor_threshold_identity": "ARGUMENT_DRAFT",
-    "graph_bounds_formalization": "OPEN"
+    "graph_bounds_formalization": "OPEN",
+    "block_support_distance_bound": "ARGUMENT_DRAFT",
+    "affine_dimension_core_bound": "ARGUMENT_DRAFT",
+    "algebraic_pencil_exact_order": "ARGUMENT_DRAFT",
+    "algebraic_bound_checker": "IMPLEMENTED_AWAITING_CI",
+    "algebraic_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
