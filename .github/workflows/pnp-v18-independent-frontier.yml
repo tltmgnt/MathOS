@@ -1,0 +1,40 @@
+name: PNP v18 independent synthetic frontier
+on:
+  pull_request:
+    paths:
+      - 'tests/independent_pnp_v18_*'
+      - '.github/workflows/pnp-v18-independent-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/pnp-v18-independent
+          python tests/independent_pnp_v18_horn_probe.py | tee artifacts/pnp-v18-independent/horn.json
+          # Reuse the same release's independently checked upstream artifacts.
+          # Regeneration is explicit; it does not select or modify a solver.
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-v18-independent/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-v18-independent/source.json --checkpoint artifacts/pnp-v18-independent/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-v18-independent/source.json --scheduler artifacts/pnp-v18-independent/scheduler.json --checkpoint artifacts/pnp-v18-independent/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-v18-independent/source.json --scheduler artifacts/pnp-v18-independent/scheduler.json --failures artifacts/pnp-v18-independent/failures.json --checkpoint artifacts/pnp-v18-independent/library.json > /dev/null
+          python -m mathos.research.pnp_unified_discovery_frontier_v18 --benchmark artifacts/pnp-v18-independent/source.json --scheduler artifacts/pnp-v18-independent/scheduler.json --failures artifacts/pnp-v18-independent/failures.json --library artifacts/pnp-v18-independent/library.json --checkpoint artifacts/pnp-v18-independent/development.json > /dev/null
+          PYTHONPATH=. python tests/independent_pnp_v18_frozen_frontier.py --benchmark artifacts/pnp-v18-independent/source.json --scheduler artifacts/pnp-v18-independent/scheduler.json --failures artifacts/pnp-v18-independent/failures.json --library artifacts/pnp-v18-independent/library.json --development artifacts/pnp-v18-independent/development.json --checkpoint artifacts/pnp-v18-independent/report.json
+          PYTHONPATH=. python tests/independent_pnp_v18_frozen_frontier.py --benchmark artifacts/pnp-v18-independent/source.json --scheduler artifacts/pnp-v18-independent/scheduler.json --failures artifacts/pnp-v18-independent/failures.json --library artifacts/pnp-v18-independent/library.json --development artifacts/pnp-v18-independent/development.json --audit artifacts/pnp-v18-independent/report.json > artifacts/pnp-v18-independent/audit.json
+          (cd artifacts/pnp-v18-independent && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-v18-independent-frontier
+          path: artifacts/pnp-v18-independent/
+          if-no-files-found: ignore
