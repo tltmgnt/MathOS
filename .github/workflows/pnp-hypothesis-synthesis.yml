@@ -1,0 +1,68 @@
+name: PNP hypothesis synthesis and certificate replay
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_certificate_routes.py'
+      - 'mathos/research/pnp_hypothesis_synthesis.py'
+      - 'mathos/research/pnp_structural_kernel.py'
+      - 'mathos/research/pnp_reduction_arena.py'
+      - 'tests/test_pnp_hypothesis_synthesis.py'
+      - 'formal/PnpHypothesisRules.lean'
+      - '.github/workflows/pnp-hypothesis-synthesis.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_certificate_routes.py'
+      - 'mathos/research/pnp_hypothesis_synthesis.py'
+      - 'mathos/research/pnp_structural_kernel.py'
+      - 'mathos/research/pnp_reduction_arena.py'
+      - 'tests/test_pnp_hypothesis_synthesis.py'
+      - 'formal/PnpHypothesisRules.lean'
+      - '.github/workflows/pnp-hypothesis-synthesis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_hypothesis_synthesis.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_reduction_arena.py' -v
+          mkdir -p artifacts/pnp-synthesis
+          python -m mathos.research.pnp_hypothesis_synthesis --checkpoint artifacts/pnp-synthesis/checkpoint.json > artifacts/pnp-synthesis/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-synthesis/report.json')); assert r['completion']=='finite_synthesis_cycle_completed' and r['statistics']['challenge_program_covered']==r['statistics']['challenge_grammar_covered'] and r['unresolved_examples'] and r['universal_obligation']=='unresolved'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-hypothesis-synthesis-evidence
+          path: artifacts/pnp-synthesis/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-synthesis-formal
+          lean -DwarningAsError=true formal/PnpHypothesisRules.lean | tee artifacts/pnp-synthesis-formal/lean.txt
+          for theorem in renameLiteral implicationStep oppositeConflict; do
+            grep -Fx "'PnpHypothesisRules.$theorem' does not depend on any axioms" artifacts/pnp-synthesis-formal/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-hypothesis-formal-evidence
+          path: artifacts/pnp-synthesis-formal/
