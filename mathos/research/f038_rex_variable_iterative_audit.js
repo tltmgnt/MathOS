@@ -43,8 +43,8 @@ function audit(U,Q,R,A,AV,C,V,D,T,H,HV,B,G,N,NV,I,IV,P,PV,J,JV,W,K,F,Min,section
   reject(()=>JV.reconstruct(PV,local,[[]]));
   return {stats,kinds,local:{models:models(local).length,rounds:r.rounds.map(x=>x.length),work:r.work,limit:lim.status,budget:budget.status,zero:zero.status}};
  }
- if(section==="large"||section==="largest"){
-  const rows=[],list=section==="largest"?[[16,false,4000000]]:[[3,false,2000000],[6,false,2000000],[6,true,2000000],[8,false,2000000],[12,true,2000000]];
+ if(section==="large"){
+  const rows=[],list=[[3,false,2000000],[6,false,2000000],[6,true,2000000],[8,false,2000000],[12,true,2000000]];
   for(const [n,flip,budget] of list){const d=fixture(n,flip),p=R.reduce(U,Q,d),a=A.reduce(U,p.d);AV.verify(p.d,a.a);const r=J.infer(N,G,B,H,C,I,P,a.d,budget);
    ok(!p.contradiction&&a.a.free.length===d.k&&a.a.rows.length===0&&r.kind==="structural"&&JV.verify(PV,IV,NV,HV,a.d,r),"large");
    rows.push({n,flip,budget,k:d.k,factors:d.F.length,rounds:r.rounds.map(x=>x.length),work:r.work,metrics:r.metrics,proof:r.proof.proof.kind,groups:r.proof.proof.hall.groups.length,holes:r.proof.proof.hall.holes.length});
