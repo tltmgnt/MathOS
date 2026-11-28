@@ -1,8 +1,8 @@
 // D7E: certified extraction of Hall-deficient option systems.
-function hall(C,d){
+function hall(C,d,alternatives=null){
  if(d.m!==2)throw Error("binary");
- const axioms=C.clauses(d);let chains=0,steps=0,edgeChecks=0,searchEdges=0;
- const info=()=>({chains,steps,edgeChecks,searchEdges});
+ const axioms=C.clauses(d);let chains=0,steps=0,edgeChecks=0,searchEdges=0,attempts=0,strategy=null;
+ const info=()=>({chains,steps,edgeChecks,searchEdges,...(alternatives?{attempts,strategy}:{})});
  for(const sign of [1,-1]){
   const next=new Map(),mutex=new Map(),groups=[],taken=new Set();
   for(const a of axioms){
@@ -27,13 +27,18 @@ function hall(C,d){
   const owner=new Map();groups.forEach((g,i)=>g.options.forEach(x=>owner.set(x,i)));
   const adj=new Map([...owner.keys()].map(x=>[x,[]]));
   for(const a of mutex.values()){const [x,y]=a.c.map(v=>-v);if(owner.has(x)&&owner.has(y)&&owner.get(x)!==owner.get(y)){adj.get(x).push(y);adj.get(y).push(x);}}
-  const holes=[],at=new Map();
-  for(const x of adj.keys())if(!at.has(x)){
-   const q=[x],id=holes.length;at.set(x,id);
-   for(let i=0;i<q.length;i++)for(const y of adj.get(q[i]))if(!at.has(y)){at.set(y,id);q.push(y);}
-   holes.push(q);
+  const components=[],seen=new Map();
+  for(const x of adj.keys())if(!seen.has(x)){
+   const q=[x],id=components.length;seen.set(x,id);
+   for(let i=0;i<q.length;i++)for(const y of adj.get(q[i]))if(!seen.has(y)){seen.set(y,id);q.push(y);}
+   components.push(q);
   }
+  function* candidates(){yield {strategy:'components',holes:components};if(alternatives)yield* alternatives(adj,owner);}
+  for(const candidate of candidates()){
+  const holes=candidate.holes,at=new Map();attempts++;strategy=candidate.strategy;
   let valid=true;
+  for(let h=0;h<holes.length;h++){if(!holes[h].length)valid=false;for(const x of holes[h]){if(!owner.has(x)||at.has(x))valid=false;at.set(x,h);}}
+  if(!valid||at.size!==owner.size)continue;
   for(const q of holes)for(let i=0;i<q.length;i++)for(let j=0;j<i;j++)if(owner.get(q[i])!==owner.get(q[j])){
    edgeChecks++;if(!mutex.has([q[i],q[j]].sort((a,b)=>Math.abs(a)-Math.abs(b)).join()))valid=false;
   }
@@ -53,6 +58,7 @@ function hall(C,d){
     for(const q of outHoles)for(let i=0;i<q.length;i++)for(let j=0;j<i;j++)if(owner.get(q[i])!==owner.get(q[j]))exclusions.push(mutex.get([q[i],q[j]].sort((a,b)=>Math.abs(a)-Math.abs(b)).join()));
     return {kind:"hall",sign,groups:S.map(i=>groups[i]),holes:outHoles,exclusions,...info()};
    }
+  }
   }
  }
  return {kind:"unknown",...info()};
