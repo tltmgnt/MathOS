@@ -26,9 +26,14 @@ theorem signedLiteralSound (v : Nat → Bool) (m : Nat → Nat)
     (flip : Nat → Bool) (l : Nat × Bool)
     (h : Holds v (signedMap m flip l)) : Holds (pullback v m flip) l := by
   rcases l with ⟨x,b⟩
-  unfold Holds signedMap pullback at *
-  cases hf : flip x <;> cases hb : b <;> cases hv : v (m x) <;>
-    simp [hf, hb, hv] at *
+  -- Direct Boolean case analysis avoids propositional extensionality.
+  have transport : ∀ (s bit value : Bool),
+      value = (if s then !bit else bit) →
+      (if s then !value else value) = bit := by
+    intro s bit value heq
+    cases s <;> cases bit <;> cases value <;>
+      first | rfl | exact heq | exact heq.symm
+  exact transport (flip x) b (v (m x)) h
 
 theorem fragmentComposition {A : Type} (p q r : A → Prop)
     (first : ∀ a, p a → q a) (second : ∀ a, p a → q a → r a) :
