@@ -20,3 +20,7 @@ jobs:
         run: |
           node mathos/research/f038_rex_variable_implied_audit.js > /tmp/d7i.json
           node -e "const a=require('node:assert/strict'),r=require('/tmp/d7i.json');a.deepEqual(r,{rows:[{n:3,k:30,factors:40,paths:18,work:384},{n:6,k:189,factors:280,paths:126,work:4242},{n:8,k:405,factors:630,paths:288,work:12024}],oracles:256,models:472,refuted:104,tamperRejected:5,budgetCutoff:true});console.log('F038_D7I_IMPLIED_CONFLICTS_OK')"
+      - name: D7I predecessor residual and physical replay
+        run: |
+          node mathos/research/f038_rex_variable_implied_physical_audit.js > /tmp/d7i-physical.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7i-physical.json');a.deepEqual(r,{k:189,factors:280,free:189,equations:0,paths:126,work:4242,status:'UNSAT',transitions:2092,stream:10,cutoff:2091,states:3683,bits:180471});console.log('F038_D7I_PHYSICAL_OK')"
