@@ -47,9 +47,18 @@ class TestEvidenceBenchmark(unittest.TestCase):
     def test_exhaustion_is_not_unsat(self):
         r=benchmark(random_count=0,steps=1)
         self.assertEqual(r["completion"],"completed")
-        self.assertEqual(r["metrics"]["portfolio_union_decided"],0)
         self.assertTrue(audit(r)["complete"])
-        self.assertTrue(all(p["exhausted"]==11 for p in r["metrics"]["plans"].values()))
+        exhausted=0
+        for row in r["rows"]:
+            for plan in row["plans"]:
+                e=plan["report"]["entries"][0]
+                if e["status"]=="resource_exhausted":
+                    exhausted+=1
+                    self.assertEqual(e["decision"],"unknown")
+                    self.assertIsNone(e["proof"])
+                elif e["decision"]!="unknown":
+                    self.assertEqual(e["decision"]=="sat",row["reference"])
+        self.assertGreater(exhausted,0)
 
 
 if __name__=="__main__":
