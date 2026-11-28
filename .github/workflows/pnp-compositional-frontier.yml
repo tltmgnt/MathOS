@@ -1,0 +1,62 @@
+name: PNP compositional proof frontier
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_compositional.py'
+      - 'formal/PnpComposition.lean'
+      - '.github/workflows/pnp-compositional-frontier.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_compositional.py'
+      - 'formal/PnpComposition.lean'
+      - '.github/workflows/pnp-compositional-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_compositional.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_constraint_algebra.py' -v
+          mkdir -p artifacts/pnp-composition
+          python -m mathos.research.pnp_compositional_frontier --checkpoint artifacts/pnp-composition/checkpoint.json > artifacts/pnp-composition/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-composition/report.json')); assert r['completion']=='scoped_compositional_research_completed' and r['family'][-1]['componentwise_verified_leaf_count']==128 and all(o['status']=='unresolved' for o in r['obligations'])"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-compositional-evidence
+          path: artifacts/pnp-composition/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-composition-formal
+          lean -DwarningAsError=true formal/PnpComposition.lean | tee artifacts/pnp-composition-formal/lean.txt
+          for theorem in independentProduct treeSound forestSound; do
+            grep -Fx "'PnpComposition.$theorem' does not depend on any axioms" artifacts/pnp-composition-formal/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-compositional-formal-evidence
+          path: artifacts/pnp-composition-formal/
