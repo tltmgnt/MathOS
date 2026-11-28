@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "71_GROUPS_PASSED_AT_98f311e7_6_DETERMINISTIC_GROUPS_AWAITING_CI",
+    "python_tests": "77_GROUPS_PASSED_AT_9450f154_6_QUADRATIC_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -67,10 +67,15 @@
     "asymptotic_formalization": "OPEN",
     "deterministic_grouped_distance": "ARGUMENT_DRAFT",
     "deterministic_affine_exclusion": "ARGUMENT_DRAFT",
-    "deterministic_construction": "IMPLEMENTED_AWAITING_CI",
+    "deterministic_construction": "SCOPED_CI_PASSED_AT_9450f154",
     "deterministic_resource_bound": "ARGUMENT_DRAFT",
-    "polynomial_time_explicit_construction": "OPEN",
-    "deterministic_formalization": "OPEN"
+    "polynomial_time_explicit_construction": "ARGUMENT_DRAFT_USING_PUBLISHED_AG_SUPPLIER_NOT_IMPLEMENTED",
+    "deterministic_formalization": "OPEN",
+    "dual_code_transform": "IMPLEMENTED_AWAITING_CI",
+    "quadratic_unsat_certificate": "IMPLEMENTED_AWAITING_CI",
+    "rm_distance_control": "ARGUMENT_DRAFT",
+    "ag_supplier_implementation": "OPEN",
+    "quadratic_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
