@@ -35,12 +35,15 @@ function stream(U,d){
  }return s;
 }
 function encode(M,s){return ["G","hL","u_","D","hL",...[...s].map(x=>"u"+x),"u_","E"].map(x=>M.codes[x]).join("");}
+// Both genuine terminal states already encode SAT/UNSAT at G.
+// Unify halt identifiers for the existing standard descriptor codec.
+function singleExit(M){return {...M,singleExit:true,T:Uint32Array.from(M.T,v=>(v>>>4)===M.q+1?(M.q<<4)|(v&15):v)};}
 function run(M,s,limit=100000000){
  const input=encode(M,s),o=16,a=new Uint8Array(input.length+4*s.length+128);a.fill(2);for(let i=0;i<input.length;i++)a[o+i]=+input[i];
- let q=0,h=o,t=0,hi=h;while(q<M.q&&t<limit){const v=M.T[3*q+a[h]];a[h]=v>>>2&3;h+=(v&3)-1;q=v>>>4;t++;if(h>hi)hi=h;if(h<0||h>=a.length)throw Error("buffer");}
- const status=q<M.q?"TIMEOUT":q===M.q+1?"SAT":"UNSAT",rev=new Map(Object.entries(M.codes).map(([x,y])=>[y,x]));let z=null,encoded="";
+ let q=0,h=o,t=0,hi=o+input.length-1;while(q<M.q&&t<limit){const v=M.T[3*q+a[h]];a[h]=v>>>2&3;h+=(v&3)-1;q=v>>>4;t++;if(h>hi)hi=h;if(h<0||h>=a.length)throw Error("buffer");}
+ const status=q<M.q?"TIMEOUT":(M.singleExit?Array.from(a.subarray(o,o+M.w)).join("")===M.codes.G:q===M.q+1)?"SAT":"UNSAT",rev=new Map(Object.entries(M.codes).map(([x,y])=>[y,x]));let z=null,encoded="";
  for(let i=o;i<a.length;i+=M.w){const w=Array.from(a.subarray(i,i+M.w)).join("");encoded+=w;if(rev.get(w)==="E")break;}
  if(status==="SAT"){z=[];for(let i=M.w;i<encoded.length;i+=M.w){const x=rev.get(encoded.slice(i,i+M.w));if(x==="D")break;if(x==="u0"||x==="h0"||x==="u1"||x==="h1")z.push(+x.slice(1));}}
  return {status,z,t,head:h-o,span:hi-o+1,encoded};
 }
-module.exports={machine,stream,encode,run};
+module.exports={machine,stream,encode,singleExit,run};
