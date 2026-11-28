@@ -80,6 +80,7 @@ theorem pruneAgainst_exact {n : Nat} (fs : List (RowFactor n)) (b : RowFactor n)
   constructor
   · intro h a ha
     have h' := h (semijoin a b) (List.mem_map.mpr ⟨a, ha, rfl⟩)
+    change a.scope.map x ∈ a.rows.filter _ at h'
     exact (List.mem_filter.mp h').1
   · intro h a ha
     obtain ⟨orig, horig, rfl⟩ := List.mem_map.mp ha
@@ -200,14 +201,16 @@ theorem cancel_sound {α : Type} [DecidableEq α] (x : α → Bool)
     (h1 : removeOnce v xs = some ys) (h2 : removeOnce v ys = some zs) :
     parity x xs = parity x zs := by
   rw [removeOnce_parity x v xs ys h1, removeOnce_parity x v ys zs h2]
-  cases x v <;> cases parity x zs <;> rfl
+  cases (x v) <;> cases (parity x zs) <;> rfl
 
 inductive EqProof (n : Nat) where
+  | reflexive (var : Fin n)
   | source (factor : Nat) (mask : List Bool) (rhs : Bool)
   | add (left right : EqProof n)
   | cancel (proof : EqProof n) (var : Fin n)
 
 def eqDerive {n : Nat} (fs : List (RowFactor n)) : EqProof n → Option (Equation n)
+  | .reflexive v => some ⟨[v,v], false⟩
   | .source i mask rhs =>
     match lookup fs i with
     | none => none
@@ -233,6 +236,13 @@ theorem eqDerive_sound {n : Nat} (fs : List (RowFactor n)) (x : Assignment n)
     (hm : TableModels fs x) (p : EqProof n) :
     ∀ e, eqDerive fs p = some e → EqHolds x e := by
   induction p with
+  | reflexive v =>
+    intro e h
+    have he : (⟨[v,v], false⟩ : Equation n) = e := by
+      simpa [eqDerive] using h
+    subst e
+    change bxor (x v) (bxor (x v) false) = false
+    cases (x v) <;> rfl
   | source i mask rhs =>
     intro e h
     cases hf : lookup fs i with
@@ -332,7 +342,7 @@ theorem affineMap_reconstruct {n m : Nat} (fs : List (RowFactor n)) (a : AffineM
   change bxor (a.forms i).rhs (parity (project a x) (a.forms i).vars) = x i
   change bxor (x i) (parity (project a x) (a.forms i).vars) = (a.forms i).rhs at he
   rw [← he]
-  cases x i <;> cases parity (project a x) (a.forms i).vars <;> rfl
+  cases (x i) <;> cases (parity (project a x) (a.forms i).vars) <;> rfl
 
 -- Executable residual predicate, with exact substitution into every original
 -- table. This is not the narrower materialized factor output of D7B.
