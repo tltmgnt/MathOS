@@ -1,8 +1,9 @@
 // D7H: certified coordinate complements and mixed intermediate resolution chains.
 function transform(d,sigma){
- if(d.m!==2||sigma.length!==d.k||sigma.some(x=>x!==0&&x!==1))throw Error("invalid polarity");
- const F=d.F.map(f=>({h:f.h.slice(),S:new Set([...f.S].map(t=>t.split(",").map((x,i)=>Number(x)^sigma[f.h[i]]).join()))}));
- return {d:{k:d.k,m:2,F},expand:z=>z.map((x,i)=>x^sigma[i])};
+ if(d.m!==2||!Array.isArray(sigma)||sigma.length!==d.k||Array.from(sigma).some(x=>x!==0&&x!==1))throw Error("invalid polarity");
+ const s=sigma.slice();
+ const F=d.F.map(f=>({h:f.h.slice(),S:new Set([...f.S].map(t=>{const row=t.split(",");return f.h.map((v,i)=>Number(row[i])^s[v]).join();}))}));
+ return {d:{k:d.k,m:2,F},expand:z=>z.map((x,i)=>x^s[i])};
 }
 
 function orientations(C,d){
