@@ -45,3 +45,7 @@ The follow-up experiment freezes existing v12 policy, old and new template-libra
 - V18-09: P versus NP remains unresolved.
 
 No verified solver is to be replaced solely on these results. Keep this follow-up PR draft until the new experiment completes and is reviewed; preserve all failure and unknown outcomes.
+
+### Pre-scoring independent manifest verification
+
+The local standalone generator executed and produced 30 distinct normalized inputs (21 SAT, 9 UNSAT), with no exact normalized overlap against 171 archived prior rows. Canonical manifest SHA256 a3d6c722f83619950b5255014991cf9e9402e2ec80e782506a2b928a2c9a561f is now enforced in CI. Pigeonhole 5 SAT/5 UNSAT; cycle2 4 SAT/4 UNSAT; random3 12 SAT/0 UNSAT. The random3 seed happened to contain no UNSAT reference cases; preserve it rather than reseeding. This suite cannot evaluate random3 UNSAT coverage. Future separately preregistered pure-3-CNF obstruction strata are required. No solver outcomes were observed when freezing this manifest.
