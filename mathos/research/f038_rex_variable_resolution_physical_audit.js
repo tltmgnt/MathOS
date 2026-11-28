@@ -3,7 +3,7 @@ function audit(U,Q,R,A,AV,C,V,P,K,F,Min){
  const ok=(b,msg)=>{if(!b)throw Error(msg);},J=P.machine(),M=P.singleExit(K.compile(J)),N0=Min.refine(M),N={...M,...N0};
  const factor=(h,fn)=>({h,S:new Set([...U.tuples(2,h.length)].filter(fn).map(z=>z.join()))});
  const nae=k=>({k,m:2,F:[...U.subsets(Array.from({length:k},(_,i)=>i),3)].map(h=>factor(h,z=>z.some(x=>x!==z[0])))});
- const cases=[["NAE5",nae(5)],["NAE4",nae(4)],["narrow-mixed",{k:4,m:2,F:[factor([0,1,3],z=>(z[0]^z[1])===z[2]),factor([2,3],z=>z[0]+z[1]<=1)]}],["wide-mixed",{k:6,m:2,F:[factor([0,1,4],z=>(z[0]^z[1])===z[2]),factor([2,3,5],z=>(z[0]^z[1])===z[2]),factor([4,5],z=>z[0]+z[1]<=1)]}]];
+ const cases=[["NAE5",nae(5)],["NAE4",nae(4)],["Fano",{k:7,m:2,F:[[0,1,2],[0,3,4],[0,5,6],[1,3,5],[1,4,6],[2,3,6],[2,4,5]].map(h=>factor(h,z=>z.some(x=>x!==z[0])))}],["narrow-mixed",{k:4,m:2,F:[factor([0,1,3],z=>(z[0]^z[1])===z[2]),factor([2,3],z=>z[0]+z[1]<=1)]}],["wide-mixed",{k:6,m:2,F:[factor([0,1,4],z=>(z[0]^z[1])===z[2]),factor([2,3,5],z=>(z[0]^z[1])===z[2]),factor([4,5],z=>z[0]+z[1]<=1)]}]];
  const rows=[];
  for(const [name,d] of cases){
   const pre=R.reduce(U,Q,d),a=A.reduce(U,pre.d);AV.verify(pre.d,a.a);
