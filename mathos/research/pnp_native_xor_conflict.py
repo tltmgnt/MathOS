@@ -140,7 +140,7 @@ def verify(n,clauses,result,b):
     return True
 
 
-def propose(n, clauses, b):
+def propose(n, clauses, b, *, state_factory=None):
     f = validate(n, clauses)
     rows=extract(f,b)
     if not rows:
@@ -149,6 +149,7 @@ def propose(n, clauses, b):
         raise Exhausted("source row cap")
     masks=row_masks(rows)
     b.cells(max(1,len(rows))*(min(n,len(rows))+1))
+    state=state_factory(masks,b) if state_factory is not None else None
     explanation_cache={}
     xor_events=xor_units=xor_conflicts=scans=0
     db, watched, watch = [], [], defaultdict(list)
@@ -291,7 +292,7 @@ def propose(n, clauses, b):
     def native():
         nonlocal xor_events,xor_units,xor_conflicts,scans
         scans+=1
-        inferred=scan(masks,trail,b)
+        inferred=scan(masks,trail,b) if state is None else state.sync(trail,b)
         for event,lit in inferred:
             key=tuple(event["clause"])
             if key not in explanation_cache:
@@ -359,13 +360,15 @@ def propose(n, clauses, b):
         enqueue(v if phase[v] else -v, None)
 
 
-def attempt(n, clauses, total, seconds):
+def attempt(n, clauses, total, seconds, *, state_factory=None, transform=None):
     b = Budget(seconds=seconds, max_steps=total, max_cells=200_000)
     try:
-        p = propose(n, clauses, b)
+        p = propose(n, clauses, b, state_factory=state_factory)
         if p is None:
             return {"decision":"unknown","proof":None,
                     "status":"unrecognized","work_steps":b.steps}
+        if transform is not None:
+            p=transform(p,b)
         verify(n, clauses, p, b)
         return {"decision": p["decision"], "proof": p,
                 "status": "replayed", "work_steps": b.steps}
