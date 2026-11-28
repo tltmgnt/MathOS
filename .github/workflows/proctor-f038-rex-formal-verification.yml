@@ -1,4 +1,4 @@
-name: Proctor F038 RE-X formal kernels and physical simulation
+name: Proctor F038 RE-X formal kernels and compositional release
 on:
   push:
     branches: ['research/pnp-f038-rex-formal-verification']
@@ -34,6 +34,11 @@ jobs:
         run: |
           node mathos/research/f038_rex_fv06_audit.js > /tmp/fv06.json
           node -e "const a=require('node:assert/strict'),r=require('/tmp/fv06.json');a.deepEqual([r.originalStates,r.quotientStates,r.descriptorBits,r.mapped,r.checks,r.corrupt,r.comparisons,r.cutoffs],[4934,3683,180471,4935,14802,3,42,28]);a.deepEqual(r.rows.map(x=>x.transitions),[2092,338,1520,3715,5379,198944,20047])"
+      - name: Audit actual preprocessing, certificate and physical release composition
+        working-directory: .
+        run: |
+          node mathos/research/f038_rex_fv07_audit.js > /tmp/fv07.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/fv07.json');a.equal(r.rows.length,8);a.equal(r.cutoffs,8);a.equal(r.rejected,9);a.deepEqual(r.rows.map(x=>x.status),['SAT','SAT','SAT','SAT','UNSAT','UNSAT','UNSAT','UNSAT']);a.deepEqual(r.rows.map(x=>x.transitions),[338,338,794,3577,2092,2092,2092,2092]);a.deepEqual(r.rows.map(x=>x.witness),[[0],[0,0],[1,1],[0,1,1],null,null,null,null])"
       - name: Install pinned Lean toolchain via elan
         run: |
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
@@ -62,9 +67,12 @@ jobs:
           lake env lean F038Formal/ResourcesTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean -o .lake/build/lib/lean/F038Formal/Physical.olean F038Formal/Physical.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean F038Formal/PhysicalTests.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/Composition.olean F038Formal/Composition.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean F038Formal/CompositionTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
           echo F038_FV02_CERTIFICATE_KERNEL_OK
           echo F038_FV03_REDUCTION_KERNEL_OK
           echo F038_FV04_RAW_BRIDGE_OK
           echo F038_FV05_RESOURCE_KERNEL_OK
           echo F038_FV06_PHYSICAL_QUOTIENT_OK
+          echo F038_FV07_COMPOSITION_KERNEL_OK
