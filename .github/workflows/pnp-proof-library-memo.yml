@@ -1,0 +1,36 @@
+name: PNP memoized proof retrieval v17.9
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_memo*.py'
+      - 'tests/test_pnp_library_memo.py'
+      - '.github/workflows/pnp-proof-library-memo.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_memo.py' -v
+          mkdir -p artifacts/pnp-memo
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-memo/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-memo/source.json --checkpoint artifacts/pnp-memo/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-memo/source.json --scheduler artifacts/pnp-memo/scheduler.json --checkpoint artifacts/pnp-memo/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-memo/source.json --scheduler artifacts/pnp-memo/scheduler.json --failures artifacts/pnp-memo/failures.json --checkpoint artifacts/pnp-memo/v17.json > /dev/null
+          python -m mathos.research.pnp_library_memo_frontier --benchmark artifacts/pnp-memo/source.json --scheduler artifacts/pnp-memo/scheduler.json --failures artifacts/pnp-memo/failures.json --v17 artifacts/pnp-memo/v17.json --checkpoint artifacts/pnp-memo/report.json
+          python -m mathos.research.pnp_library_memo_frontier --benchmark artifacts/pnp-memo/source.json --scheduler artifacts/pnp-memo/scheduler.json --failures artifacts/pnp-memo/failures.json --v17 artifacts/pnp-memo/v17.json --audit artifacts/pnp-memo/report.json > artifacts/pnp-memo/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-memoized-retrieval-evidence
+          path: artifacts/pnp-memo/
+          if-no-files-found: ignore
