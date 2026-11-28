@@ -30,10 +30,16 @@ function audit(P,V){
   if(k<=16)check(d);
   rows.push({k,factors:d.F.length,certificateFactors:r.cert.factors.length,trials:r.cert.trials,candidates:0});
  }
+ const sparse=[];
+ for(const [name,k,hs] of [["Fano",7,[[0,1,2],[0,3,4],[0,5,6],[1,3,5],[1,4,6],[2,3,6],[2,4,5]]],["affine-plane-9",9,[...subsets(9,3)].filter(h=>h.reduce((s,i)=>s+Math.floor(i/3),0)%3===0&&h.reduce((s,i)=>s+i%3,0)%3===0)]]){
+  const d={k,m:2,F:hs.map(h=>factor(h,126))},r3=P.resolution(d,3),r=check(d);
+  ok(r3.kind==="unknown"&&P.cardinality(d).kind==="unknown"&&r.cert.kind==="resolution"&&V.verify(d,r.cert),"sparse resolution");
+  sparse.push({name,k,factors:hs.length,width3Clauses:r3.clauses,width4Nodes:r.cert.nodes.length,pairs:r.cert.pairs});
+ }
  function bad(d,c){let rejected=false;try{V.verify(d,c);}catch{rejected=true;}ok(rejected,"tamper accepted");stats.tamperRejected++;}
  const card=P.cardinality(d5);bad(d5,{...card,v:[0,1,2,3,3]});bad(d5,{...card,factors:card.factors.slice(1)});bad(d5,{...card,factors:card.factors.map(()=>0)});
  bad(d5,{...r4,nodes:r4.nodes.slice(0,-1)});bad(d5,{...r4,nodes:r4.nodes.map((n,i)=>i===0?{...n,f:-1}:n)});bad(d5,{...r4,nodes:r4.nodes.map((n,i)=>i===r4.nodes.length-1?{...n,p:0}:n)});
- return {stats,rows,width3:{clauses:r3.clauses,pairs:r3.pairs},width4:{nodes:r4.nodes.length,pairs:r4.pairs}};
+ return {stats,rows,sparse,width3:{clauses:r3.clauses,pairs:r3.pairs},width4:{nodes:r4.nodes.length,pairs:r4.pairs}};
 }
 module.exports={audit};
 if(require.main===module)console.log(JSON.stringify(audit(require('./f038_rex_variable_resolution_closure.js'),require('./f038_rex_variable_resolution_certificate.js'))));
