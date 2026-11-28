@@ -34,7 +34,7 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,PN,C,D,T,section="oracle"){
   const d=JA.fixture(U,11,1),r=check(d);ok(r.kind==="cutting-conflict"&&r.metrics.divisions===2,"rounding");
   const flipped=check(PN.transform(d,sig(11)).d);ok(flipped.kind==="cutting-conflict","signed");
   const sat=JA.fixture(U,12,1);check(sat);
-  const zero=S.reduce(J,SV,d,e=>({d:e,cert:{kind:"sentinel"},expand:z=>z}),0),limited=S.discover(J,d,r.nodes.length-1);
+  const zero=S.reduce(J,JV,SV,d,e=>({d:e,cert:{kind:"sentinel"},expand:z=>z}),0),limited=S.discover(J,d,r.nodes.length-1);
   ok(zero.d===d&&zero.cert.kind==="sentinel"&&limited.kind==="unknown"&&limited.status==="budget","limits");
   function reject(fn){let bad=false;try{fn();}catch(e){bad=true;}ok(bad,"tamper");stats.tamperRejected++;}
   const i=r.nodes.findIndex(n=>n.kind==="divide"),replace=(i,n)=>({...r,nodes:r.nodes.map((x,j)=>i===j?n:x)});
