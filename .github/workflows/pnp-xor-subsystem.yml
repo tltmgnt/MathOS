@@ -1,0 +1,58 @@
+name: PNP partial XOR subsystem certificates
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_xor_*.py'
+      - 'tests/test_pnp_xor_subsystem.py'
+      - 'formal/PnpXorSubsystem.lean'
+      - '.github/workflows/pnp-xor-subsystem.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -p 'test_pnp_constraint_algebra.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_conflict_learning.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_xor_subsystem.py' -v
+          mkdir -p artifacts/pnp-xor
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-xor/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-xor/source.json --checkpoint artifacts/pnp-xor/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-xor/source.json --scheduler artifacts/pnp-xor/scheduler.json --checkpoint artifacts/pnp-xor/failures.json > /dev/null
+          python -m mathos.research.pnp_xor_frontier --benchmark artifacts/pnp-xor/source.json --scheduler artifacts/pnp-xor/scheduler.json --failures artifacts/pnp-xor/failures.json --checkpoint artifacts/pnp-xor/report.json | tee artifacts/pnp-xor/summary.json
+      - run: |
+          python -m mathos.research.pnp_xor_frontier --benchmark artifacts/pnp-xor/source.json --scheduler artifacts/pnp-xor/scheduler.json --failures artifacts/pnp-xor/failures.json --audit artifacts/pnp-xor/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-xor-evidence
+          path: artifacts/pnp-xor/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpXorSubsystem.lean | tee /tmp/pnp-xor-lean.txt
+          for theorem in xorRowAddition zeroEqualsOneImpossible; do
+            grep -Fx "'PnpXorSubsystem.$theorem' does not depend on any axioms" /tmp/pnp-xor-lean.txt
+          done
