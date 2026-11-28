@@ -41,7 +41,7 @@ function reduce(U,Q,d,certificate=false){
  for(;;){
   const q=Q.reduce(U,current);expansions.push(q.expand);
   const c=close(q.d,certificate),round={before:current.k,after:q.d.k,quotient:q.rounds,closure:c.stats};
-  if(certificate){round.closureInput=q.d;round.log=c.log;}
+  if(certificate){round.closureInput=q.d;round.closureOutput=c.d;round.log=c.log;}
   rounds.push(round);current=c.d;
   if(c.contradiction){
    // Once certified UNSAT, use a constant genuine contradiction stream.
