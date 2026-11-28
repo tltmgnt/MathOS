@@ -12,7 +12,7 @@ class TestCanonical(unittest.TestCase):
     def test_signed_orbits(self):
         rng=random.Random(171171)
         for n in (2,3,5,7,9):
-            f={"n":n,"axioms":tuple((-i,i+1) for i in range(1,n)),
+            f={"n":n,"axioms":tuple(tuple(range(1,i+1)) for i in range(1,n+1)),
                "steps":((1,n),),"edges":()}
             a=canonical(f,Budget())
             self.assertEqual(a["status"],"exact")
