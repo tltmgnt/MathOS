@@ -25,7 +25,8 @@ function audit(U,Q,R,A,AV,J,JV,S,SV,TA,X,PN,C,D,DV,T,section="oracle"){
   const rows=[];for(const [n,w,flip,pre,cap] of [[5,5,false,true,4096],[7,5,true,true,4096],[7,4,true,true,4096],[11,9,true,true,4096],[41,13,true,false,20000],[5,31,true,false,4096]]){
    let d=TA.fixture(U,n,w);if(flip)d=PN.transform(d,sig(d.k)).d;const p=pre?R.reduce(U,Q,d):null,a=pre?A.reduce(U,p.d):null;if(pre){AV.verify(p.d,a.a);ok(!p.contradiction&&a.a.free.length===d.k&&!a.a.rows.length,"pre");}
    const e=pre?a.d:d,r=X.discover(S,e,cap);ok(r.kind==="cutting-conflict"&&r.lower==="0"&&r.rhs===String(n-Math.ceil(d.k/3))&&SV.verify(JV,e,r),"large");
-   rows.push({n,w,k:d.k,factors:d.F.length,flip,pre,cap,rhs:r.rhs,metrics:r.metrics});
+   const limited=cap>4096?X.discover(S,e):null;if(limited)ok(limited.kind==="unknown"&&limited.status==="budget"&&limited.metrics.nodes===4096,"default budget");
+   rows.push({n,w,k:d.k,factors:d.F.length,flip,pre,cap,rhs:r.rhs,metrics:r.metrics,defaultLimited:limited?.metrics.nodes??null});
   }return {rows};
  }
  if(section==="barrier"){
