@@ -72,6 +72,7 @@ function solve(U,d){
   let used=0n;for(const t of U.tuples(2,r.a.free.length)){used++;const z=r.a.expand(t);if(d.F.every(f=>f.S.has(f.h.map(v=>z[v]).join())))return {status:"SAT",z,used,r};}
   return {status:"UNSAT",z:null,used,r};
  }
+ if(r.a.affine.every(Boolean))return {status:"SAT",z:r.a.expand(Array(r.a.free.length).fill(0)),used:0n,r};
  const s=U.solve(r.d);return {...s,z:s.z?r.expand(s.z):null,r};
 }
 function barrier(U,k){

@@ -1,7 +1,7 @@
 // D7B exhaustive model parity, independent algebra certificates, worker replay.
 function audit(U,Q,R,A,V,P,K,F,Min){
  const ok=(v,s)=>{if(!v)throw Error(s)},J=P.machine(),M=P.singleExit(K.compile(J)),N0=Min.refine(M),N={...M,...N0};
- const stats={cases:0,assignments:0,models:0,sat:0,unsat:0,localMasks:0,affineMasks:0,equations:0,rowOps:0,cellOps:0,affineContradictions:0,constantConflicts:0,narrow:0,wideFallback:0,freeRemoved:0,physicalCases:0,oldPhysical:0,newPhysical:0,improved:0,tied:0,regressed:0,clockChecks:0,cutoffs:0,tamperRejected:0},rows=[];
+ const stats={cases:0,assignments:0,models:0,sat:0,unsat:0,localMasks:0,affineMasks:0,equations:0,rowOps:0,cellOps:0,affineContradictions:0,priorContradictions:0,newAffineContradictions:0,constantConflicts:0,pureAffineSat:0,narrow:0,wideFallback:0,freeRemoved:0,physicalCases:0,oldPhysical:0,newPhysical:0,improved:0,tied:0,regressed:0,clockChecks:0,cutoffs:0,tamperRejected:0},rows=[];
  function oracle(d){const out=[];for(let i=0;i<2**d.k;i++){const z=Array.from({length:d.k},(_,j)=>Math.floor(i/2**(d.k-j-1))%2);if(d.F.every(f=>f.S.has(f.h.map(v=>z[v]).join())))out.push(z.join());}return out;}
  const factor=(h,fn)=>({h,S:new Set([...U.tuples(2,h.length)].filter(fn).map(z=>z.join()))});
  // Every possible relation of arity 1,2,3, including empty.
@@ -19,6 +19,9 @@ function audit(U,Q,R,A,V,P,K,F,Min){
   const z=s.z?pre.expand(s.z):null;ok(s.status===(expected.length?"SAT":"UNSAT")&&(z?.join()??null)===(expected[0]??null),"lex "+name);
   stats.cases++;stats.assignments+=2**d.k;stats.models+=actual.length;stats[expected.length?"sat":"unsat"]++;stats.equations+=v.equations;stats.rowOps+=v.ops;stats.cellOps+=v.cellOps;
   stats[r.kind==="contradiction"?"affineContradictions":r.kind==="constant-conflict"?"constantConflicts":r.kind==="narrow"?"narrow":"wideFallback"]++;
+  if(pre.contradiction)stats.priorContradictions++;
+  if(v.contradiction&&!pre.contradiction)stats.newAffineContradictions++;
+  if(s.status==="SAT"&&r.a.affine.every(Boolean)){ok(s.used===0n,"pure affine search");stats.pureAffineSat++;}
   if(!v.contradiction)stats.freeRemoved+=pre.d.k-r.a.free.length;
   const row={name,k:d.k,prior:pre.d.k,free:r.a.free.length,reduced:r.d.k,kind:r.kind,status:s.status,models:actual.length,used:String(s.used),equations:v.equations,rowOps:v.ops};
   if(physical){
@@ -51,7 +54,19 @@ function audit(U,Q,R,A,V,P,K,F,Min){
  // Narrow mixed rewrite preserves genuine constraints after substitution.
  {const d={k:4,m:2,F:[factor([0,1,3],z=>(z[0]^z[1])===z[2]),factor([2,3],z=>z[0]+z[1]<=1)]};const r=check(d,"narrow-mixed",true);ok(r.kind==="narrow"&&r.models===6,"narrow");rows.push(r);}
  for(const k of [5,6,8,10,12,16]){const d=A.barrier(U,k),r=check(d,"dense-NAE",k===5);ok(r.kind==="narrow"&&r.free===k&&r.equations===0&&r.used===String(2n**BigInt(k))&&U.gac(d).deletions===0,"NAE");rows.push(r);}
- return {stats,rows,resources:{logical:J.ins.length,...N0.stats}};
+ // Larger pure affine examples without exponential oracle enumeration.
+ // The first two ranks determine the rest by a recurrence, giving
+ // exactly four solutions. An opposite copy of an equation refutes all.
+ const large=[];
+ for(const k of [32,64,128]){
+  const F=Array.from({length:k-2},(_,i)=>factor([i,i+1,i+2],z=>(z[0]^z[1]^z[2])===1)),d={k,m:2,F},s=A.solve(U,d),v=V.verify(d,s.r.a),z=[0,0];
+  while(z.length<k)z.push(1^z[z.length-1]^z[z.length-2]);
+  ok(s.status==="SAT"&&s.used===0n&&s.r.a.free.join()==="0,1"&&s.z.join()===z.join(),"large affine");
+  const bad={...d,F:[...F,factor([0,1,2],z=>(z[0]^z[1]^z[2])===0)]},b=A.solve(U,bad),bv=V.verify(bad,b.r.a);
+  ok(b.status==="UNSAT"&&b.used===0n&&bv.contradiction,"large contradiction");
+  large.push({k,free:s.r.a.free.length,equations:v.equations,contradictionOps:bv.ops,used:String(s.used),witness:s.z.join("")});
+ }
+ return {stats,rows,large,resources:{logical:J.ins.length,...N0.stats}};
 }
 module.exports={audit};
 if(require.main===module)console.log(JSON.stringify(audit(require("./f038_rex_variable_rank_reduction.js"),require("./f038_rex_variable_rank_quotient.js"),require("./f038_rex_variable_relational_closure.js"),require("./f038_rex_variable_affine_closure.js"),require("./f038_rex_variable_affine_certificate.js"),require("./f038_rex_variable_rank_worker.js"),require("./f038_rex_width_three_local_motion_compiler.js"),require("./f038_rex_width_three_local_motion_clock.js"),require("./f038_rex_width_two_quotient.js"))));
