@@ -35,7 +35,7 @@ theorem orTrue (a b : Bool) : (a || b) = true ↔ a = true ∨ b = true := by
     · exact Or.inl rfl
   · intro h
     cases h with
-    | inl ha => rw [ha]
+    | inl ha => rw [ha] <;> cases b <;> rfl
     | inr hb => rw [hb] <;> cases a <;> rfl
 
 theorem treeSound (t : DecisionTree) : result t = true ↔ accepts t := by
