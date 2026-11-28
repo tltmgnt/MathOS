@@ -11,12 +11,13 @@ import time
 from collections import Counter
 from itertools import combinations, product
 from pathlib import Path
-from independent_pnp_v18_frozen_frontier import exhaustive
+from independent_pnp_v18_frozen_frontier import exhaustive, manifest as previous_manifest
 from mathos.research.pnp_evidence_benchmark import digest
 from mathos.research.pnp_evidence_scheduler import train
 from mathos.research.pnp_library_frontier import audit as audit_library, case_key
 from mathos.research.pnp_unified_discovery_frontier_v18 import (
-    isolated, run_arm, replay_arm, WALL, MEMORY)
+    isolated, run_arm, replay_arm, cases as development_cases, WALL, MEMORY)
+from mathos.research.pnp_structural_kernel import Exhausted
 from mathos.research.pnp_matching_certificates import solve, verify
 
 SEED=184729
@@ -113,7 +114,7 @@ def worker():
         fallback=run_arm(req) if r["decision"]=="unknown" else None
         result={"decision":fallback["decision"] if fallback else r["decision"],
                 "matching":r,"fallback":fallback}
-    except MemoryError:
+    except (MemoryError, Exhausted):
         result={"decision":"unknown","resource_exhausted":True}
     print(json.dumps({"result":result}))
 
@@ -181,6 +182,8 @@ def main():
     known={case_key(x["case"]) for x in source["rows"]}
     for k in ("training","evaluation"):known.update(case_key(x["case"]) for x in failures[k])
     for k in ("training","discovery","heldout","retrospective"):known.update(case_key(x["case"]) for x in lr[k])
+    known.update(case_key(c) for c in development_cases(source,lr))
+    known.update(case_key(c) for c in previous_manifest())
     keys=[case_key(c) for c in cases]
     if len(set(keys))!=len(keys) or set(keys)&known:raise ValueError("input overlap")
     meta={"schema":"mathos-pnp-v18-matching-frontier/1","manifest_sha256":MANIFEST,
