@@ -48,3 +48,34 @@ lake env lean F038Formal/ReductionTests.lean
 ```
 
 FV-03 is committed as a reference implementation and proof layer. Lean is not installed locally, and remote workflow completion is not confirmed; no theorem is claimed mechanically checked. Remaining: obtain a successful Lean build, formalize concrete D7A/D7B log and raw certificate decoding/refinement, quotient/pivot correspondence and materialized residual checks, then algorithm/resource and physical-machine correspondence. FV-04 is the implementation-to-specification refinement stage. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE.
+
+## FV-04 — executable algorithm-to-specification certificate bridge
+
+This increment connects actual D7I JavaScript producer certificates to the Lean reference proof interface. It is certificate-based validation, not whole-program verification of JavaScript. The exporter reads original Boolean factor tables, cited implication paths and the nested D7E/D7H Hall certificate. It converts normalized signed options, source clauses and resolution pivots back to original coordinates, preserving factor index order; produces both directions of each direct exclusion; and emits finite raw data with integer literals and explicit rows. The exporter and original JS checker are not trusted by the intended Lean soundness theorem.
+
+`F038Formal/Bridge.lean` checks raw scope and signed literal bounds before constructing finite indices, validates row lengths, replays the retained-factor list and each implication path, reconstructs the projected exclusion factors, and invokes the FV-02 checker. The scripts for `decodeFactors_models` and `projection_preserves_models` establish that every raw source model survives decoding and projection. The central theorem script `rawCheck_sound` states that acceptance of a finite raw packet implies absence of any original model. It does not require trusting the graph search, orientation heuristic or the exporter. This theorem is about the raw tables supplied to Lean; a caller must bind those tables to the intended original instance. JSON parsing, JS operational semantics, source-byte integrity and D7A/D7B raw reduction log refinement remain outside the theorem.
+
+### Executed JavaScript bridge evidence
+
+Seven actual D7I exports were loaded from the committed repository and executed in a JavaScript runtime. Every packet was accepted by an independent raw replay oracle. The tests cover inherited Hall, polarity-normalized Hall, and mixed-intermediate signed Hall.
+
+|coordinates|factors|mode|paths|groups|directed conflicts|
+|---:|---:|---|---:|---:|---:|
+|30|40|plain|18|4|36|
+|30|40|mixed|18|4|36|
+|30|40|negative|18|4|36|
+|65|90|mixed|40|5|80|
+|189|280|plain|126|7|252|
+|189|280|signed|126|7|252|
+|405|630|plain|288|9|576|
+
+Nine corruptions were rejected by the JS raw replay oracle: invalid source index, truncated path, zero literal, out-of-range literal, out-of-range hole, omitted conflicts, invalid proof row, out-of-range scope and invalid row length. Generated Lean fixture source was also produced for plain, mixed and negative 30-coordinate packets; each contains five Boolean examples and one concrete UNSAT theorem script. These fixtures have not been compiled in Lean.
+
+The formal Proctor now runs the JS bridge audit, compiles Bridge.lean and compiles three generated Lean fixtures, checking theorem axioms and rejecting admitted proofs. Reproduce the JS audit from repo root with `node mathos/research/f038_rex_fv04_audit.js`. After FV-03 Lean build commands, from `formal/f038`, run:
+```sh
+lake env lean -o .lake/build/lib/lean/F038Formal/Bridge.olean F038Formal/Bridge.lean
+node ../../mathos/research/f038_rex_fv04_audit.js lean mixed > /tmp/FV04_mixed.lean
+lake env lean /tmp/FV04_mixed.lean
+```
+
+FV-04 is a partial implementation-to-specification correspondence milestone for the D7I contradiction path. No Lean compilation is confirmed; FV-01–FV-04 mechanized verification remains pending. Outstanding correspondence includes actual D7A/D7B certificate logs, materialized residuals, raw-selector and physical-machine semantics, SAT witness and lexicographic behavior, JSON/data provenance and full algorithm/resource bounds. Next planned research layer: FV-05 scoped resource accounting, while completing FV-04 refinement and obtaining actual Lean evidence. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main and PR #248 unchanged.
