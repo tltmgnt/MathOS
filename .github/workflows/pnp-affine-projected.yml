@@ -1,0 +1,58 @@
+name: PNP affine projected conflict learning
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_affine_projected*.py'
+      - 'tests/test_pnp_affine_projected.py'
+      - 'formal/PnpAffineProjected.lean'
+      - '.github/workflows/pnp-affine-projected.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -p 'test_pnp_conflict_learning.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_xor_subsystem.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_affine_projected.py' -v
+          mkdir -p artifacts/pnp-affine-projected
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-affine-projected/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-affine-projected/source.json --checkpoint artifacts/pnp-affine-projected/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-affine-projected/source.json --scheduler artifacts/pnp-affine-projected/scheduler.json --checkpoint artifacts/pnp-affine-projected/failures.json > /dev/null
+          python -m mathos.research.pnp_affine_projected_frontier --benchmark artifacts/pnp-affine-projected/source.json --scheduler artifacts/pnp-affine-projected/scheduler.json --failures artifacts/pnp-affine-projected/failures.json --checkpoint artifacts/pnp-affine-projected/report.json | tee artifacts/pnp-affine-projected/summary.json
+      - run: |
+          python -m mathos.research.pnp_affine_projected_frontier --benchmark artifacts/pnp-affine-projected/source.json --scheduler artifacts/pnp-affine-projected/scheduler.json --failures artifacts/pnp-affine-projected/failures.json --audit artifacts/pnp-affine-projected/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-affine-projected-evidence
+          path: artifacts/pnp-affine-projected/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpAffineProjected.lean | tee /tmp/pnp-affine-projected-lean.txt
+          for theorem in substitutionPreservesXor projectedContradictionLifts xorGateCharacterization; do
+            grep -Fx "'PnpAffineProjected.$theorem' does not depend on any axioms" /tmp/pnp-affine-projected-lean.txt
+          done
