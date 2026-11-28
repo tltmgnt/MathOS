@@ -1,0 +1,39 @@
+name: PNP outcome engine scoped regression
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_structural_kernel.py'
+      - 'mathos/research/pnp_outcome_registry.py'
+      - 'mathos/research/pnp_outcome_engine.py'
+      - 'tests/test_pnp_outcome_engine.py'
+      - '.github/workflows/pnp-outcome-engine.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_structural_kernel.py'
+      - 'mathos/research/pnp_outcome_registry.py'
+      - 'mathos/research/pnp_outcome_engine.py'
+      - 'tests/test_pnp_outcome_engine.py'
+      - '.github/workflows/pnp-outcome-engine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_outcome_engine.py' -v
+          mkdir -p artifacts/pnp-outcome
+          python -m mathos.research.pnp_outcome_engine --objective E12 --checkpoint artifacts/pnp-outcome/checkpoint.json > artifacts/pnp-outcome/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-outcome/report.json')); assert r['completion']=='verified_finite_limitation' and not r['novel_theorem_verified']"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-outcome-scoped-evidence
+          path: artifacts/pnp-outcome/
