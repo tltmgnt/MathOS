@@ -1,0 +1,40 @@
+name: PNP failure directed synthesis
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_failure_synthesis.py'
+      - '.github/workflows/pnp-failure-synthesis.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_failure_synthesis.py'
+      - '.github/workflows/pnp-failure-synthesis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_failure_synthesis.py' -v
+          mkdir -p artifacts/pnp-failures
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-failures/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-failures/source.json --checkpoint artifacts/pnp-failures/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-failures/source.json --scheduler artifacts/pnp-failures/scheduler.json --checkpoint artifacts/pnp-failures/report.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-failures/source.json --scheduler artifacts/pnp-failures/scheduler.json --audit artifacts/pnp-failures/report.json > artifacts/pnp-failures/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-failures/report.json')); print(json.dumps({'summary':r['summary'],'selected_plan':r['selected_plan'],'training':[{'id':x['case']['id'],'reference':x['reference'],'core_clauses':len(x['minimized_unsat']['clauses']) if x['minimized_unsat'] else None,'original_clauses':len(x['case']['clauses']),'refuted_plans':sum(a['status']=='refuted' for a in x['attempts'])} for x in r['training']]},indent=2)); assert r['completion']=='completed' and r['summary']['fresh_cases']==24"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-failure-synthesis-evidence
+          path: artifacts/pnp-failures/
+          if-no-files-found: ignore
