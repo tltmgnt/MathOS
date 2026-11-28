@@ -10,7 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 MODULES = ["F038Formal", *("F038Formal." + m for m in (
     "Certificate", "Reduction", "Bridge", "Resources", "Physical", "Composition",
-    "CertificateTests", "ReductionTests", "ResourcesTests", "PhysicalTests", "CompositionTests"))]
+    "CertificateTests", "ReductionTests", "ResourcesTests", "PhysicalTests", "CompositionTests",
+    "LocalMaterialization", "LocalMaterializationTests"))]
 ALLOWED = {"propext", "Classical.choice", "Quot.sound"}
 DECL = re.compile(r"^(?:@\[[^\n]*\]\s+)?theorem\s+([A-Za-z_][\w']*)\b", re.M)
 NS = re.compile(r"^namespace\s+([\w.]+)\s*$", re.M)
