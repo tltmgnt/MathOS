@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "89_GROUPS_PASSED_AT_24e67e14_6_PEBBLING_GROUPS_AWAITING_CI",
+    "python_tests": "95_GROUPS_PASSED_AT_daa44221_6_HYBRID_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -82,9 +82,15 @@
     "strict_degree_two_three": "ARGUMENT_DRAFT",
     "static_degree_formalization": "OPEN",
     "unbounded_static_degree_hierarchy": "ARGUMENT_DRAFT_CLASSICAL_LINE_PEBBLING_TRANSFER",
-    "pebbling_certificate_checker": "IMPLEMENTED_AWAITING_CI",
+    "pebbling_certificate_checker": "SCOPED_CI_PASSED_AT_daa44221",
     "static_dynamic_degree_separation": "ARGUMENT_DRAFT",
-    "pebbling_formalization": "OPEN"
+    "pebbling_formalization": "OPEN",
+    "dynamic_saturation": "ARGUMENT_DRAFT",
+    "dynamic_certificate_checker": "IMPLEMENTED_AWAITING_CI",
+    "hybrid_resolution": "IMPLEMENTED_AWAITING_CI",
+    "finite_simultaneous_obstruction": "ARGUMENT_DRAFT",
+    "asymptotic_simultaneous_obstruction": "OPEN",
+    "hybrid_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
