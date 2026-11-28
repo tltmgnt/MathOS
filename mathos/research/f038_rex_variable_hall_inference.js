@@ -1,5 +1,5 @@
 // D7E: certified extraction of Hall-deficient option systems.
-function hall(C,d,alternatives=null){
+function hall(C,d,alternatives=null,groupPolicy=null){
  if(d.m!==2)throw Error("binary");
  const axioms=C.clauses(d);let chains=0,steps=0,edgeChecks=0,searchEdges=0,attempts=0,strategy=null;
  const info=()=>({chains,steps,edgeChecks,searchEdges,...(alternatives?{attempts,strategy}:{})});
@@ -10,7 +10,12 @@ function hall(C,d,alternatives=null){
    if(opp.length===1&&a.c.length>1){const p=-opp[0];if(!next.has(p))next.set(p,[]);next.get(p).push(a);}
    if(opp.length===2&&a.c.length===2)mutex.set(a.c.map(x=>-x).sort((a,b)=>Math.abs(a)-Math.abs(b)).join(),a);
   }
-  for(const a of axioms){
+  if(groupPolicy){
+   for(const g of groupPolicy(axioms,sign,next,mutex,d)){
+    if(!g.options.length||g.options.some(x=>x*sign<=0||taken.has(x))||new Set(g.options).size!==g.options.length)throw Error('invalid group proposal');
+    g.options.forEach(x=>taken.add(x));groups.push(g);
+   }
+  }else for(const a of axioms){
    if(!a.c.length||!a.c.every(x=>x*sign>0))continue;
    chains++;let options=a.c.slice(),proof=[a],used=new Set(),ok=true;
    for(;;){
