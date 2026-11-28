@@ -1,0 +1,58 @@
+[
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0187.cnf",
+    "blob": "02624ce23fd603c7fbcb9e19356a0ad7eb38d9c9",
+    "size": 2728
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0220.cnf",
+    "blob": "02c819e1ecbe0ac70944918653048556afb78ac1",
+    "size": 2751
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0207.cnf",
+    "blob": "02d51f1bea717f7db07f7eaf17454cabe9c58a6d",
+    "size": 2742
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0728.cnf",
+    "blob": "02d61cc3b0ecddc4cecaa9dc32201b244fa534bc",
+    "size": 2731
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0754.cnf",
+    "blob": "035eeed6061974053362f9e39e5c6b23516a8ea4",
+    "size": 2761
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0555.cnf",
+    "blob": "0373226985376c415f043c6f30165c2a6aac364b",
+    "size": 2761
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0704.cnf",
+    "blob": "03df24d4a82dff931390b43235987cd9b4eec49e",
+    "size": 2739
+  },
+  {
+    "group": "uuf50_heldout",
+    "expected": "unsat",
+    "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0217.cnf",
+    "blob": "0407f0213f8b18d4f4527bb5046baa8022aa13d5",
+    "size": 2752
+  }
+]

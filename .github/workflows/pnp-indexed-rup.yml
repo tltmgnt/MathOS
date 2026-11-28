@@ -1,0 +1,52 @@
+name: PNP indexed RUP external ablation
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_indexed_rup*'
+      - 'tests/test_pnp_indexed_rup.py'
+      - '.github/workflows/pnp-indexed-rup.yml'
+      - 'docs/research/PNP_INDEXED_RUP.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: mitchellh/go-sat
+          ref: fc0e735aff48989326f256121b5ed6fc585858c3
+          path: external-satlib
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'python-sat==1.8.dev24'
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_pnp_indexed_rup.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_conflict_learning.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_coloring_repair.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_native_xor.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_incremental_xor.py' -v
+          mkdir -p artifacts/pnp-indexed-rup
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-indexed-rup/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-indexed-rup/source.json --checkpoint artifacts/pnp-indexed-rup/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-indexed-rup/source.json --scheduler artifacts/pnp-indexed-rup/scheduler.json --checkpoint artifacts/pnp-indexed-rup/failures.json > /dev/null
+          python -m mathos.research.pnp_indexed_rup_external --corpus external-satlib --benchmark artifacts/pnp-indexed-rup/source.json --scheduler artifacts/pnp-indexed-rup/scheduler.json --failures artifacts/pnp-indexed-rup/failures.json --checkpoint artifacts/pnp-indexed-rup/report.json | tee artifacts/pnp-indexed-rup/summary.json
+          python -m mathos.research.pnp_indexed_rup_internal --benchmark artifacts/pnp-indexed-rup/source.json --scheduler artifacts/pnp-indexed-rup/scheduler.json --failures artifacts/pnp-indexed-rup/failures.json --checkpoint artifacts/pnp-indexed-rup/archived.json
+          python -m mathos.research.pnp_indexed_rup_internal --benchmark artifacts/pnp-indexed-rup/source.json --scheduler artifacts/pnp-indexed-rup/scheduler.json --failures artifacts/pnp-indexed-rup/failures.json --audit artifacts/pnp-indexed-rup/archived.json
+      - run: |
+          python -m mathos.research.pnp_indexed_rup_external --corpus external-satlib --benchmark artifacts/pnp-indexed-rup/source.json --scheduler artifacts/pnp-indexed-rup/scheduler.json --failures artifacts/pnp-indexed-rup/failures.json --audit artifacts/pnp-indexed-rup/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-indexed-rup-evidence
+          path: artifacts/pnp-indexed-rup/
+          if-no-files-found: ignore
