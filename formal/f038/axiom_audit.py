@@ -12,7 +12,8 @@ MODULES = ["F038Formal", *("F038Formal." + m for m in (
     "Certificate", "Reduction", "Bridge", "Resources", "Physical", "Composition",
     "CertificateTests", "ReductionTests", "ResourcesTests", "PhysicalTests", "CompositionTests",
     "LocalMaterialization", "LocalMaterializationTests",
-    "ResidualRefinement", "ResidualRefinementTests", "AffineReplay"))]
+    "ResidualRefinement", "ResidualRefinementTests", "AffineReplay",
+    "RelationalReplay", "RelationalReplayTests"))]
 ALLOWED = {"propext", "Classical.choice", "Quot.sound"}
 DECL = re.compile(r"^(?:@\[[^\n]*\]\s+)?theorem\s+([A-Za-z_][\w']*)\b", re.M)
 NS = re.compile(r"^namespace\s+([\w.]+)\s*$", re.M)
