@@ -1,0 +1,61 @@
+name: PNP certified reduction arena
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_reduction_arena.py'
+      - 'formal/PnpReductionRules.lean'
+      - '.github/workflows/pnp-reduction-arena.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_reduction_arena.py'
+      - 'formal/PnpReductionRules.lean'
+      - '.github/workflows/pnp-reduction-arena.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_reduction_arena.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_convergence.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_outcome_engine.py' -v
+          mkdir -p artifacts/pnp-reduction
+          python -m mathos.research.pnp_reduction_arena --checkpoint artifacts/pnp-reduction/checkpoint.json > artifacts/pnp-reduction/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-reduction/report.json')); assert r['completion']=='scoped_research_cycle_completed' and all(h['status']=='refuted_by_replayed_instance' for h in r['hypotheses']) and r['universal_obligation']=='unresolved'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-reduction-scoped-evidence
+          path: artifacts/pnp-reduction/
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-reduction-formal
+          lean -DwarningAsError=true formal/PnpReductionRules.lean | tee artifacts/pnp-reduction-formal/lean.txt
+          for theorem in resolutionLocal purePositive pureNegative subsumptionLocal; do
+            grep -Fx "'PnpReductionRules.$theorem' does not depend on any axioms" artifacts/pnp-reduction-formal/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-reduction-formal-evidence
+          path: artifacts/pnp-reduction-formal/
