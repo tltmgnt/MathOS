@@ -1,0 +1,57 @@
+name: PNP computational universality barriers
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_complexity_barriers.py'
+      - 'formal/PnpComplexityBarriers.lean'
+      - '.github/workflows/pnp-complexity-barriers.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_complexity_barriers.py'
+      - 'formal/PnpComplexityBarriers.lean'
+      - '.github/workflows/pnp-complexity-barriers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_complexity_barriers.py' -v
+          mkdir -p artifacts/pnp-barriers
+          python -m mathos.research.pnp_barrier_frontier --checkpoint artifacts/pnp-barriers/report.json > /dev/null
+          python -m mathos.research.pnp_barrier_frontier --audit artifacts/pnp-barriers/report.json > artifacts/pnp-barriers/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-barriers/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['sizes']==8 and r['summary']['barriers_overcome']==0"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-barrier-evidence
+          path: artifacts/pnp-barriers/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpComplexityBarriers.lean | tee /tmp/pnp-barriers-lean.txt
+          for theorem in transcriptAgreement decisionConflict singletonNonzero; do
+            grep -Fx "'PnpComplexityBarriers.$theorem' does not depend on any axioms" /tmp/pnp-barriers-lean.txt
+          done
