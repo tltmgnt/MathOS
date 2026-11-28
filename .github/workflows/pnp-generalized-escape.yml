@@ -1,0 +1,53 @@
+name: PNP generalized semantic escape
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_generalized_escape.py'
+      - 'formal/PnpGeneralizedEscape.lean'
+      - '.github/workflows/pnp-generalized-escape.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_generalized_escape.py'
+      - 'formal/PnpGeneralizedEscape.lean'
+      - '.github/workflows/pnp-generalized-escape.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_generalized_escape.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_reduction_arena.py' -v
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-generalized
+          lean -DwarningAsError=true formal/PnpGeneralizedEscape.lean | tee artifacts/pnp-generalized/lean.txt
+          for theorem in splitExhaustive independentConjunction subformulaContradiction; do
+            grep -Fx "'PnpGeneralizedEscape.$theorem' does not depend on any axioms" artifacts/pnp-generalized/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-generalized-formal-evidence
+          path: artifacts/pnp-generalized/
