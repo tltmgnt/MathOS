@@ -50,7 +50,11 @@ example : pathCheck tables x y forward = false := by decide
 example : pathCheck tables x (neg y)
     [(u, .source 2 [true,true]), (neg y, .source 3 [true,true])] = false := by decide
 example : hallCheck tables { certificate with conflicts := [] } = false := by decide
-example : hallCheck tables { certificate with placements := [(x, 0)] } = false := by decide
+-- Construct the dependent fields explicitly: holeCount is definitionally 1,
+-- rather than an abstract record-update binder.
+example : hallCheck tables
+    { groupCount := 2, holeCount := 1, groups := certificate.groups,
+      placements := [(x, 0)], conflicts := certificate.conflicts } = false := by decide
 
 def groupsList : List (Group 3) :=
   [⟨[x], .source 0 [false]⟩, ⟨[y], .source 1 [false]⟩]
