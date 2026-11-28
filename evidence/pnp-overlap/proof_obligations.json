@@ -12,7 +12,7 @@
     "encoding_complexity": "ARGUMENT_DRAFT",
     "np_membership": "ARGUMENT_DRAFT",
     "parameterized_bound": "ARGUMENT_DRAFT",
-    "python_tests": "65_GROUPS_PASSED_AT_0e30b907_6_ASYMPTOTIC_GROUPS_AWAITING_CI",
+    "python_tests": "71_GROUPS_PASSED_AT_98f311e7_6_DETERMINISTIC_GROUPS_AWAITING_CI",
     "full_lean_proof": "OPEN",
     "prior_art": "SUBSPACE_TRANSVERSAL_AND_XNF_CONNECTIONS_IDENTIFIED",
     "external_review": "OPEN",
@@ -63,8 +63,14 @@
     "algebraic_formalization": "OPEN",
     "asymptotic_linear_order_existence": "ARGUMENT_DRAFT",
     "asymptotic_scanner_bound": "ARGUMENT_DRAFT",
-    "asymptotic_finite_checker": "IMPLEMENTED_AWAITING_CI",
-    "asymptotic_formalization": "OPEN"
+    "asymptotic_finite_checker": "SCOPED_CI_PASSED_AT_98f311e7",
+    "asymptotic_formalization": "OPEN",
+    "deterministic_grouped_distance": "ARGUMENT_DRAFT",
+    "deterministic_affine_exclusion": "ARGUMENT_DRAFT",
+    "deterministic_construction": "IMPLEMENTED_AWAITING_CI",
+    "deterministic_resource_bound": "ARGUMENT_DRAFT",
+    "polynomial_time_explicit_construction": "OPEN",
+    "deterministic_formalization": "OPEN"
   },
   "canonical_pnp_status": "OPEN"
 }
