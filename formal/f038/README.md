@@ -79,3 +79,34 @@ lake env lean /tmp/FV04_mixed.lean
 ```
 
 FV-04 is a partial implementation-to-specification correspondence milestone for the D7I contradiction path. No Lean compilation is confirmed; FV-01–FV-04 mechanized verification remains pending. Outstanding correspondence includes actual D7A/D7B certificate logs, materialized residuals, raw-selector and physical-machine semantics, SAT witness and lexicographic behavior, JSON/data provenance and full algorithm/resource bounds. Next planned research layer: FV-05 scoped resource accounting, while completing FV-04 refinement and obtaining actual Lean evidence. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main and PR #248 unchanged.
+
+## FV-05 — scoped complexity, budget and logical resource accounting
+
+The actual D7I projection routine on this formal research branch now optionally returns graph dimensions, BFS starts, charged edge scans, candidate-pair tests, path reconstruction steps, emitted paths, peak queue length and peak predecessor records. The default result schema is unchanged. The successful-charge discipline is explicit: a charge at the limit fails without incrementing the counter or returning a partial certificate. No behavior change is intended for valid inputs; the audit checks ordinary/collect result correspondence and the FV-04 replay suite was rerun.
+
+Let k be the original number of coordinates, f the number of factors, v=2k the literal universe, e the number of directed implication edges, and b the number of signed boundary options. For valid explicit Boolean factors with distinct coordinates, each binary factor contributes at most four forbidden rows, hence e≤8f. The projection performs at most b≤v BFS searches. Each search visits each reachable vertex once and scans each reachable outgoing edge once, so edge scans≤ve. Candidate pairs are exactly b(b−1)/2 on completion, bounded by v²; simple reconstructed paths have at most v−1 edges, so path steps≤v³, even at a cutoff. Therefore the charged projection work is bounded by W=ve+v²+v³, and also by (2k)(8f)+(2k)²+(2k)³. These counts exclude graph construction, factor tuple enumeration, object operations, allocation, normalization/Hall extraction, fallback and verification. The full D7I algorithm is not asserted to have this work bound.
+
+The new explicit projection-payload encoding uses fixed-width unsigned words; signed literals are encoded as 2*(abs(literal)-1)+negativeFlag. The width w is the binary bit length of max(v²,v,f,1), externally determined by the original dimensions. The two header counts, retained factor IDs R, P path headers (three words each) and L path edges (three words each) occupy exactly w(2+R+3P+3L) bits. Since R≤f, P≤v² and L≤v³, the payload is bounded by w(2+f+3v²+3v³) bits. For an abstract array representation, adjacency triples, offsets, options, queue, predecessor triples, current path scratch and saved certificate require at most 3e+9v+1+(2+f+3v²+3v³) logical words. Original and projected factors and JS object overhead are excluded. At most f+v² projected factors are emitted. This encoding covers only the implication projection certificate, not the Hall packet, original input, JS heap or physical tape. It is not a measured runtime or whole-program bit-complexity bound.
+
+The reference Lean resource module checks count summaries and derives the conditional charged-work, path cardinality, successful-charge/cutoff, payload, abstract live-word and projected-factor bounds. It also derives the bound options²*conflicts on conflict-candidate comparison opportunities given the stated nested-scan premises. This is not a bound on full checker execution; proof-tree expansion, factor lookup, row tests and the cost per candidate remain to be formalized. The count invariants are justified by the algorithm structure and audited independently, but the Lean theorems do not establish them from JavaScript operational semantics. The width/logarithm asymptotic argument and the encoder/decoder correspondence are not yet mechanized.
+
+### Executed JavaScript resource audit
+
+The committed resource audit independently constructed a graph directly from forbidden binary rows, computed shortest-path distances, checked exact counts against the instrumented implementation, and bit-encoded/decoded every completed projection certificate before independent source-path replay. Four split-exclusion pigeonhole fixtures and 128 deterministic small formulas (including repeated factors) passed. All 448 sub-budget cutoffs (432 small and 16 large) and 264 exact/above-budget completion controls (256 small and 8 large) matched expected behavior. Three malformed bit encodings were rejected. The prior FV-04 seven-packet/nine-corruption audit also passed after instrumentation.
+
+|coordinates|factors|graph edges|charged edge scans|pair tests|path steps|paths|total work|payload bits|
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|30|40|72|72|276|36|18|384|2016|
+|189|280|504|504|3486|252|126|4242|20952|
+|405|630|1152|1152|10296|576|288|12024|52960|
+|1209|2002|3744|3744|48516|1872|936|54132|196788|
+
+The new larger 1209-coordinate test is projection replay only; no Hall refutation, full physical execution or arbitrary SAT complexity claim is made for it.
+
+Reproduce from repo root with `node mathos/research/f038_rex_fv05_audit.js`. The formal Proctor also compiles `F038Formal/Resources.lean` and `ResourcesTests.lean` (11 Boolean/equality examples and four fixture theorem scripts), prints axioms and rejects admissions. From `formal/f038` after the earlier module build commands:
+```sh
+lake env lean -o .lake/build/lib/lean/F038Formal/Resources.olean F038Formal/Resources.lean
+lake env lean F038Formal/ResourcesTests.lean
+```
+
+FV-05 scoped resource model and instrumentation are committed; JS checks executed. Lean is unavailable locally and the remote Proctor result remains unconfirmed. Remaining FV-05 work includes mechanized operational count invariants, full verifier/producer complexity, bit-level operations and complete physical resource accounting. Next planned layer FV-06 is physical-machine simulation equivalence. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main and PR #248 unchanged.
