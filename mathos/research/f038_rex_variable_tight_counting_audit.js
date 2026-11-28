@@ -48,7 +48,7 @@ function audit(U,Q,R,A,AV,L,LV,M,MV,N,C,D,T,H,B,G,I,P,J,section="oracle"){
   }return {rows};
  }
  if(section==="adapter"){
-  const r=M.reduce(L,LV,MV,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,comp);
+  const r=M.reduce(L,LV,MV,...Array(16).fill(null),comp);
   ok(r.contradiction&&r.cert.kind==="factor-conflict"&&r.d.k===1&&r.d.F.length===1&&!r.d.F[0].S.size,"adapter");
   return {adapter:{kind:r.cert.kind,k:r.d.k,allowed:r.d.F[0].S.size}};
  }
