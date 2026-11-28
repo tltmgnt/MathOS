@@ -92,14 +92,13 @@ theorem deletionStep_exact {n : Nat} (fs out : List (RowFactor n))
     cases hb : lookup fs e.b with
     | none => simp [deletionStep, ha, hb] at h
     | some b =>
-      cases hg : (decide (e.a ≠ e.b) && (overlap a b &&
-          (decide (e.removed ≠ []) && rowSetCheck e.removed (deletionRows a b)))) with
-      | false => simp [deletionStep, ha, hb, hg] at h
-      | true =>
-        have eq : replaceAt fs e.a (semijoin a b) = out := by
-          simpa [deletionStep, ha, hb, hg] using h
+      -- Keep the Boolean guard intact until its branch is selected.
+      simp only [deletionStep, ha, hb] at h
+      split at h
+      · have eq : replaceAt fs e.a (semijoin a b) = out := Option.some.inj h
         subst out
         exact replaceSemijoin_exact fs e.a a b ha (lookup_mem fs e.b b hb) x
+      · contradiction
 
 def replay {n : Nat} (fs : List (RowFactor n)) :
     List Deletion → Option (List (RowFactor n))
