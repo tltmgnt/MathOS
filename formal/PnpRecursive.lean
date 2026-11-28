@@ -74,14 +74,17 @@ theorem knownSat (t : Tree) (h : validLeaves t) (hs : reported t = .sat) :
   rw [hs] at q
   exact q
 
+theorem negTrueFalse (b : Bool) (h : (!b) = true) : b = false := by
+  cases b
+  · rfl
+  · nomatch h
+
 theorem knownUnsat (t : Tree) (h : validLeaves t) (hs : reported t = .unsat) :
     actual t = false := by
   have q := treeSound t h
   rw [hs] at q
   change (!actual t) = true at q
-  cases actual t
-  · rfl
-  · exact q.symm
+  exact negTrueFalse (actual t) q
 
 #print axioms PnpRecursive.bothSound
 #print axioms PnpRecursive.eitherSound
