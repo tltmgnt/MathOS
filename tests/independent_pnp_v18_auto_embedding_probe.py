@@ -8,7 +8,7 @@ from independent_pnp_v18_hall_memory_probe import base,mapped,independent,sat
 
 
 def probe():
-    rng=random.Random(187102);rows=[];tot=Counter(); controls=Counter()
+    rng=random.Random(187102);rows=[];negative=[];tot=Counter(); controls=Counter()
     for h in range(3,9):
         n,f=base(h,rng);record=admit(n,f,cold(n,f)['certificate'])
         for i in range(20):
@@ -45,6 +45,9 @@ def probe():
             p=list(range(1,k+1));rng.shuffle(p);p=[x if rng.randrange(2) else -x for x in p]
             g=mapped(g,p);r=solve(k,g,record);replay(k,g,record,r)
             assert r['decision']=='unknown';controls['sat_'+r['status']]+=1
+            model=[False]*k
+            for v,y in enumerate(p,1):model[abs(y)-1]=assignment[v]==(y>0)
+            negative.append({'n':k,'clauses':g,'model':model,'record':record,'auto':r})
     n,f=base(3,rng);record=admit(n,f,cold(n,f)['certificate']);r=solve(n,f,record);q=r['work_steps'];assert r['decision']=='unsat'
     for budget in (1,q-1,q):
         a=solve(n,f,record,steps=budget);assert a['decision']==('unsat' if budget==q else 'unknown');replay(n,f,record,a,steps=budget);controls['boundary']+=1
@@ -53,7 +56,16 @@ def probe():
         try:replay(n,f,rec,x)
         except (ValueError,RuntimeError):controls['tamper_rejected']+=1
         else:raise AssertionError('tamper accepted')
-    return {'counts':dict(tot),'controls':dict(controls),'boundary':q,'rows':rows,
+    f=[[9,-7,-11],[-4,1,6,7],[5,-8],[-9,5],[-2,-8],[-2,-9],[10,4,2],
+       [12,-1],[11,-4],[-12,8,3],[12,7],[1,9,-4,7],[5,-2],[-4,-3],
+       [-8,-9],[7,-10],[-5,-6,1],[7,-8,9,3],[1],[-10,12],[6,-4],
+       [10,6,-8,11],[-1,7],[6,11],[11,-3],[-1,-10],[6,-3]]
+    c=cold(12,f);record=admit(12,f,c['certificate']);g=f+[[11,12]]
+    a=solve(12,g,record);replay(12,g,record,a);miss=cold(12,g)
+    assert a['decision']=='unsat' and miss['decision']=='unknown'
+    independent(12,g,a['certificate'])
+    counterexample={'n':12,'clauses':g,'record':record,'auto':a,'cold':miss}
+    return {'counts':dict(tot),'controls':dict(controls),'boundary':q,'rows':rows,'negative':negative,'counterexample':counterexample,
             'scope':'one preselected source record; no target correspondence given to automatic search; related synthetic development'}
 
 
