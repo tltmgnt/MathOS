@@ -1,7 +1,7 @@
 // D7H: certified coordinate complements and mixed intermediate resolution chains.
 function verifyMap(d,sigma,e){
  const ok=b=>{if(!b)throw Error("invalid polarity map");};
- ok(d.m===2&&e.m===2&&d.k===e.k&&Array.isArray(sigma)&&sigma.length===d.k&&sigma.every(x=>x===0||x===1)&&e.F.length===d.F.length);
+ ok(d.m===2&&e.m===2&&d.k===e.k&&Array.isArray(sigma)&&sigma.length===d.k&&Array.from(sigma).every(x=>x===0||x===1)&&e.F.length===d.F.length);
  for(let i=0;i<d.F.length;i++){
   const a=d.F[i],b=e.F[i];ok(a.h.length===b.h.length&&a.h.every((x,j)=>x===b.h[j])&&a.S.size===b.S.size);
   for(let n=0;n<2**a.h.length;n++){const y=a.h.map((_,j)=>(n>>j)&1),x=y.map((v,j)=>(v+sigma[a.h[j]])%2);ok(a.S.has(x.join())===b.S.has(y.join()));}
@@ -11,7 +11,7 @@ function verifyMap(d,sigma,e){
 function verify(HV,d,cert){
  const ok=b=>{if(!b)throw Error("invalid signed Hall certificate");};
  if(cert.kind==="hall")return HV.verify(d,cert.hall);
- ok(["polarity-hall","signed-hall"].includes(cert.kind)&&Array.isArray(cert.sigma)&&cert.sigma.length===d.k&&cert.sigma.every(x=>x===0||x===1));
+ ok(["polarity-hall","signed-hall"].includes(cert.kind)&&Array.isArray(cert.sigma)&&cert.sigma.length===d.k&&Array.from(cert.sigma).every(x=>x===0||x===1));
  const h=cert.hall,s=cert.sigma;
  // Reconstruct normalized factor truth tables independently of the producer.
  const e={k:d.k,m:2,F:d.F.map(f=>{const S=new Set();for(let n=0;n<2**f.h.length;n++){const y=f.h.map((_,j)=>(n>>j)&1);if(f.S.has(y.map((v,j)=>(v+s[f.h[j]])%2).join()))S.add(y.join());}return {h:f.h.slice(),S};})};
