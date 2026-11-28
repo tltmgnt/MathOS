@@ -73,10 +73,10 @@ function discover(S,d,maxNodes=4096,maxChecks=2000000){
  return {kind:"unknown",status:"portfolio-exhausted",metrics};
 }
 
-function reduce(J,S,SV,TV,d,fallback,maxNodes=4096,maxChecks=2000000){
+function reduce(JV,S,SV,TV,d,fallback,maxNodes=4096,maxChecks=2000000){
  const r=discover(S,d,maxNodes,maxChecks);
  if(r.kind==="unknown")return {...(typeof fallback==="function"?fallback(d):{d,cert:r,contradiction:false,expand:z=>z}),cliqueCuts:r};
- if(TV.verify(J,SV,d,r)!==true)throw Error("unverified clique cut");
+ if(TV.verify(JV,SV,d,r)!==true)throw Error("unverified clique cut");
  return {d:{k:1,m:2,F:[{h:[0],S:new Set()}]},cert:r,cliqueCuts:r,contradiction:true,expand:()=>{throw Error("UNSAT");}};
 }
 module.exports={discover,reduce};
