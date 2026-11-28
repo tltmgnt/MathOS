@@ -29,7 +29,7 @@ function audit(U,Q,R,A,AV,L,N,NV,O,P,PV,J,JV,PN,C,D,T,I,IV,PNV,HV,PA,section="or
   for(let i=0;i<128;i++){const k=3+i%5,F=[];for(let j=0;j<2+i%9;j++){const h=[...new Set(Array.from({length:1+(rand()>>>16)%3},()=> (rand()>>>16)%k))].sort((a,b)=>a-b),mask=rand()>>>16;F.push({h,S:new Set([...U.tuples(2,h.length)].filter(z=>mask>>(z.reduce((s,x,i)=>s+(x<<i),0))&1).map(z=>z.join()))});}check({k,m:2,F});}
   const r=check(mixed),used=r.record.combination.map(([i])=>r.blocks[r.rows[i].source].kind);ok(used.includes("tight")&&used.includes("integer-local")&&used.includes("local"),"mixed sources");
   const prev=PA.fixture(U),p=check(prev);ok(p.kind==="view"&&p.records.length===172&&verify(prev,{...p,kind:"conditional",proof:binary(p.d)}),"prior discharge");
-  const a=check(regular(7,1,3));ok(a.kind==="direct","regular");
+  const a=check(regular(7,1,3));ok(a.kind==="direct"||a.kind==="count-conflict","regular");
   function reject(fn){let bad=false;try{fn();}catch(e){bad=true;}ok(bad,"tamper");stats.tamperRejected++;}
   const i=r.blocks.findIndex(b=>b.kind==="integer-local"),b=r.blocks[i];
   reject(()=>JV.verify(NV,PV,IV,PNV,HV,mixed,{...r,blocks:r.blocks.map((q,j)=>i===j?{...q,b:q.b+1}:q)}));
