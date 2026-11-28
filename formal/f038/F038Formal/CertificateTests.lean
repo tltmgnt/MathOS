@@ -52,5 +52,17 @@ example : pathCheck tables x (neg y)
 example : hallCheck tables { certificate with conflicts := [] } = false := by decide
 example : hallCheck tables { certificate with placements := [(x, 0)] } = false := by decide
 
+def groupsList : List (Group 3) :=
+  [⟨[x], .source 0 [false]⟩, ⟨[y], .source 1 [false]⟩]
+def conflictsList : List (Conflict 3) := [⟨x,y,forward⟩, ⟨y,x,backward⟩]
+
+example : checkHallLists tables 1 groupsList [(x,0),(y,0)] conflictsList = true := by decide
+example : checkHallLists tables 1 groupsList [(x,1),(y,0)] conflictsList = false := by decide
+example : checkHallLists tables 2 groupsList [(x,0),(y,1)] conflictsList = false := by decide
+
+theorem list_fixture_unsat : ¬ ∃ a, TableModels tables a :=
+  checkHallLists_sound tables 1 groupsList [(x,0),(y,0)] conflictsList (by decide)
+
+#print axioms list_fixture_unsat
 #print axioms fixture_unsat
 end MathOS.F038.Cert.Tests
