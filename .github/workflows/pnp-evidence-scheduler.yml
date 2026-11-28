@@ -1,0 +1,40 @@
+name: PNP evidence guided scheduler
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_evidence_scheduler.py'
+      - '.github/workflows/pnp-evidence-scheduler.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_evidence_scheduler.py'
+      - '.github/workflows/pnp-evidence-scheduler.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_evidence_scheduler.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_evidence_benchmark.py' -v
+          mkdir -p artifacts/pnp-scheduler
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-scheduler/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-scheduler/source.json --checkpoint artifacts/pnp-scheduler/report.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-scheduler/source.json --audit artifacts/pnp-scheduler/report.json > artifacts/pnp-scheduler/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-scheduler/report.json')); print(json.dumps({'policy':r['policy'],'summary':r['summary']},indent=2,sort_keys=True)); assert r['completion']=='completed' and r['summary']['holdout_cases']==12 and r['universal_obligation']=='unresolved'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-scheduler-evidence
+          path: artifacts/pnp-scheduler/
+          if-no-files-found: ignore

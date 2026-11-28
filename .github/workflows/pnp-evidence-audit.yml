@@ -1,0 +1,39 @@
+name: PNP reproducible evidence audit
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_evidence_benchmark.py'
+      - '.github/workflows/pnp-evidence-audit.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_evidence_benchmark.py'
+      - '.github/workflows/pnp-evidence-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_evidence_benchmark.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_unified_portfolio.py' -v
+          mkdir -p artifacts/pnp-benchmark
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-benchmark/report.json > /dev/null
+          python -m mathos.research.pnp_evidence_benchmark --audit artifacts/pnp-benchmark/report.json > artifacts/pnp-benchmark/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-benchmark/report.json')); print(json.dumps(r['metrics'],indent=2,sort_keys=True)); assert r['completion']=='completed' and r['metrics']['cases']==35"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-benchmark-evidence
+          path: artifacts/pnp-benchmark/
+          if-no-files-found: ignore
