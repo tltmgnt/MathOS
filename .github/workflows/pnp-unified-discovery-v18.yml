@@ -1,0 +1,59 @@
+name: PNP unified discovery v18
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_unified_discovery_v18.py'
+      - 'formal/PnpUnifiedDiscoveryV18.lean'
+      - '.github/workflows/pnp-unified-discovery-v18.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_unified_discovery_v18.py' -v
+          python tests/independent_pnp_v18_baseline_probe.py
+          mkdir -p artifacts/pnp-v18
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-v18/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-v18/source.json --checkpoint artifacts/pnp-v18/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --checkpoint artifacts/pnp-v18/failures.json > /dev/null
+          python -m mathos.research.pnp_adaptive_frontier --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --checkpoint artifacts/pnp-v18/adaptive.json --gate > artifacts/pnp-v18/adaptive-summary.json
+          python -m mathos.research.pnp_adaptive_frontier --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --audit artifacts/pnp-v18/adaptive.json --gate
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --checkpoint artifacts/pnp-v18/library.json
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --audit artifacts/pnp-v18/library.json
+          python -m mathos.research.pnp_unified_discovery_frontier_v18 --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --library artifacts/pnp-v18/library.json --checkpoint artifacts/pnp-v18/report.json
+          python -m mathos.research.pnp_unified_discovery_frontier_v18 --benchmark artifacts/pnp-v18/source.json --scheduler artifacts/pnp-v18/scheduler.json --failures artifacts/pnp-v18/failures.json --library artifacts/pnp-v18/library.json --audit artifacts/pnp-v18/report.json > artifacts/pnp-v18/audit.json
+          (cd artifacts/pnp-v18 && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-v18-development-evidence
+          path: artifacts/pnp-v18/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpUnifiedDiscoveryV18.lean | tee /tmp/pnp-v18-lean.txt
+          for theorem in conflictBlocker splitBlocker rootBlocker; do
+            grep -Fx "'PnpUnifiedDiscovery.$theorem' does not depend on any axioms" /tmp/pnp-v18-lean.txt
+          done
