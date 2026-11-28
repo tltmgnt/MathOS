@@ -85,7 +85,19 @@ def probe():
     for b in (1,q-1,q):
         x=transfer(n,f,record,e,steps=b)
         assert x['decision']==('unsat' if b==q else 'unknown');counts['boundary_checks']+=1
+    # Exact archived greedy-search counterexample, not a newly selected case.
+    f=[[9,-7,-11],[-4,1,6,7],[5,-8],[-9,5],[-2,-8],[-2,-9],[10,4,2],
+       [12,-1],[11,-4],[-12,8,3],[12,7],[1,9,-4,7],[5,-2],[-4,-3],
+       [-8,-9],[7,-10],[-5,-6,1],[7,-8,9,3],[1],[-10,12],[6,-4],
+       [10,6,-8,11],[-1,7],[6,11],[11,-3],[-1,-10],[6,-3]]
+    a=cold(12,f);g=f+[[11,12]];miss=cold(12,g)
+    assert a['decision']=='unsat' and miss['decision']=='unknown' and not sat(12,g)
+    record=admit(12,f,a['certificate']); t=transfer(12,g,record,record['source_embedding'])
+    assert t['decision']=='unsat';independent(12,g,t['certificate'])
+    counterexample={'cold_base_work':a['work_steps'],'cold_strengthened_work':miss['work_steps'],
+                    'transfer_work':t['work_steps'],'guard_count':len(record['guards'])}
     return {'counts':dict(counts),'work':dict(work),'max_transfer_work':peak,'boundary':q,
+            'counterexample':counterexample,
             'scope':'explicit embedding; pre-admitted witness; synthetic development only'}
 
 
