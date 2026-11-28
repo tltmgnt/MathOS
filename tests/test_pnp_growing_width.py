@@ -2,7 +2,7 @@ import json
 import random
 import unittest
 from mathos.research.pnp_growing_width import family,certificate,verify,balanced_cut,torus
-from mathos.research.pnp_growing_width_frontier import run,audit,budget
+from mathos.research.pnp_growing_width_frontier import run,audit,budget,balanced_strip
 
 
 class TestGrowingWidth(unittest.TestCase):
@@ -17,6 +17,17 @@ class TestGrowingWidth(unittest.TestCase):
                 seen+=1
         self.assertGreater(seen,0)
 
+    def test_balanced_strip_boundary(self):
+        # floor(3/2) rows have size V/3, excluded by the support interval.
+        with self.assertRaisesRegex(ValueError, "cut not in support interval"):
+            balanced_cut(3,range(3),budget())
+        for s in range(3,17):
+            with self.subTest(side=s):
+                strip=balanced_strip(s)
+                self.assertLess(s*s,3*len(strip))
+                self.assertLessEqual(3*len(strip),2*s*s)
+                self.assertEqual(balanced_cut(s,strip,budget())["size"],2*s)
+
     def test_random_cuts(self):
         rng=random.Random(22022)
         for s in (4,6,8,12,16):
@@ -24,7 +35,7 @@ class TestGrowingWidth(unittest.TestCase):
                 v=s*s
                 subset=rng.sample(range(v),rng.randint(v//3+1,2*v//3))
                 self.assertGreaterEqual(balanced_cut(s,subset,budget())["size"],2*s)
-            self.assertEqual(balanced_cut(s,range(s*(s//2)),budget())["size"],2*s)
+            self.assertEqual(balanced_cut(s,balanced_strip(s),budget())["size"],2*s)
 
     def test_certificate_and_tampering(self):
         n,f,rows=family(3)
