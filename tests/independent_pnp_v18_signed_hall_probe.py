@@ -101,6 +101,15 @@ def probe():
         try: replay(n,f,bad)
         except (ValueError,RuntimeError): counts['forgeries_rejected']+=1
         else: raise AssertionError('forged certificate accepted')
+    # Preserve a discovered search-monotonicity counterexample, not a soundness failure.
+    n,f=make(3,False,random.Random(185620))
+    old=solve(n,f)
+    stronger=f+[[11,12]]
+    assert old['decision']=='unsat' and solve(n,stronger)['decision']=='unknown'
+    assert not exhaustive(n,stronger)
+    independent_check(n,stronger,old['certificate'])
+    replay(n,stronger,old)
+    counts['search_monotonicity_counterexample']+=1
     return {'counts':dict(counts),'max_mixed_work':max(costs),'example_boundary':w,
             'scope':'synthetic development only; independent mathematical witness replay'}
 
