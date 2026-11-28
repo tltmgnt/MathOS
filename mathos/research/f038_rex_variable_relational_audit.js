@@ -51,8 +51,11 @@ function audit(U,Q,R,V,P,K,F,Min){
  const inherited={...stats};
  // New independent projection-discovered permutation (no original binary factor).
  for(const m of [2,3,4]){const d={k:3,m,F:[factor([0,1,2],m,([a,b,c])=>b===(a+1)%m&&c!==a)]},r=check(d,"projected-permutation",m===2);ok(r.derived>=1&&r.reduced<3&&r.models===m*(m-1),"projection contraction");rows.push(r);}
- // Contradiction requires information propagated along overlapping scopes.
+ // SAT chain exercises propagation and exposes a physical stream-cost regression.
  {const m=2,k=5,F=[factor([0],m,([a])=>a===0),factor([0,1],m,([a,b])=>a<=b),factor([1,2],m,([a,b])=>a<=b),factor([2,3],m,([a,b])=>a<=b),factor([3,4],m,([a,b])=>a<=b),factor([4],m,([a])=>a===1)];rows.push(check({k,m,F},"overlap-chain",true));}
+ // Ordered implication chain: conflicting fixed endpoints; reverse
+ // implication factor order delays propagation through the chain.
+ {const m=2,k=7,F=[factor([0],m,([a])=>a===1),...Array.from({length:k-1},(_,i)=>k-2-i).map(i=>factor([i,i+1],m,([a,b])=>a<=b)),factor([k-1],m,([a])=>a===0)];const d={k,m,F},r=check(d,"contradictory-chain",true);ok(r.status==="UNSAT"&&r.used==="0"&&r.deleted>0,"chain contradiction");rows.push(r);}
  // Dense XOR relations: each proper projection universal, yet a four-row
  // linear dependency has odd RHS. Semijoin and permutation quotient fail.
  for(const k of [6,8,10,12,16]){

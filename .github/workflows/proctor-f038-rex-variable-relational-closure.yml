@@ -1,0 +1,44 @@
+name: Proctor F038 RE-X certified variable relational closure
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-relational-closure']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact semijoin certificate and physical witness audit
+        run: |
+          node mathos/research/f038_rex_variable_relational_audit.js > /tmp/d7a.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7a.json');a.deepEqual(r.stats,{"cases":656,"sourceAssignments":282745,"finalAssignments":76663,"models":3036,"sat":472,"unsat":184,"lexChecks":656,"certificateRounds":705,"certificateOperations":157,"certifiedDeletions":257,"certificateComparisons":1415781,"closurePasses":630,"projectionRows":801908,"testedRows":801942,"derivedPairs":59,"contradictions":179,"physicalCases":562,"oldPhysical":46154316,"newPhysical":12448664,"improved":195,"tied":317,"regressed":50,"exactClocks":1124,"quotientReplays":562,"cutoffs":562,"tamperRejected":3});a.deepEqual(r.inherited,{"cases":646,"sourceAssignments":211510,"finalAssignments":5626,"models":3012,"sat":468,"unsat":178,"lexChecks":646,"certificateRounds":692,"certificateOperations":148,"certifiedDeletions":242,"certificateComparisons":7723,"closurePasses":616,"projectionRows":19677,"testedRows":19708,"derivedPairs":54,"contradictions":178,"physicalCases":558,"oldPhysical":38981158,"newPhysical":6846537,"improved":193,"tied":316,"regressed":49,"exactClocks":1116,"quotientReplays":558,"cutoffs":558,"tamperRejected":3});a.equal(r.resources.quotientStates,3683);a.equal(r.resources.quotientBits,180471);a.deepEqual(r.rows.filter(x=>x.name==='pair-triple-barrier'&&x.oldPhysical).map(x=>[x.k,x.oldPhysical,x.newPhysical]),[[4,327609,2092],[6,3129327,2092],[8,26268031,2092]]);a.deepEqual(r.rows.filter(x=>x.name==='dense-parity-barrier').map(x=>[x.k,x.used,x.deleted]),[[6,'64',0],[8,'256',0],[10,'1024',0],[12,'4096',0],[16,'65536',0]]);console.log('F038_D7A_RELATIONAL_CLOSURE_OK')"
+      - name: Inherited D6Z physical and permutation audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_quotient_audit.js > /tmp/d6z.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6z.json');a.equal(r.stats.modelCases,646);a.equal(r.stats.reducedPhysicalTransitions,38981158);a.equal(r.stats.cutoffs,558);a.equal(r.resources.quotientStates,3683)"
+      - name: Inherited D6Y source reduction audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_reduction_audit.js > /tmp/d6y.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6y.json');a.equal(r.formulas,599);a.equal(r.rawExtensionChecks,50048)"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D7A_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
