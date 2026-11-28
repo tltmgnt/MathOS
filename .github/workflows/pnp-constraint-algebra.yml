@@ -1,0 +1,62 @@
+name: PNP generalized constraint algebra
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_constraint_algebra.py'
+      - 'formal/PnpConstraintAlgebra.lean'
+      - '.github/workflows/pnp-constraint-algebra.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_constraint_algebra.py'
+      - 'formal/PnpConstraintAlgebra.lean'
+      - '.github/workflows/pnp-constraint-algebra.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_constraint_algebra.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_triple_parity.py' -v
+          mkdir -p artifacts/pnp-algebra
+          python -m mathos.research.pnp_algebra_frontier --checkpoint artifacts/pnp-algebra/checkpoint.json > artifacts/pnp-algebra/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-algebra/report.json')); assert r['completion']=='scoped_algebra_research_completed' and len(r['controls'])==6 and r['controls'][-1]['status']=='unrecognized' and r['universal_obligation']=='unresolved'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-algebra-evidence
+          path: artifacts/pnp-algebra/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-algebra-formal
+          lean -DwarningAsError=true formal/PnpConstraintAlgebra.lean | tee artifacts/pnp-algebra-formal/lean.txt
+          for theorem in parityAppend parityCancel contradiction splitUnsat splitSat; do
+            grep -Fx "'PnpConstraintAlgebra.$theorem' does not depend on any axioms" artifacts/pnp-algebra-formal/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-algebra-formal-evidence
+          path: artifacts/pnp-algebra-formal/
