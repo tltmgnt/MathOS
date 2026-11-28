@@ -1,0 +1,78 @@
+name: Proctor F038 RE-X certified variable polarity normalization
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-polarity-normalization']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Certified polarity maps, signed Hall inference and implied-conflict obstruction
+        run: |
+          for section in oracle masks large physical barrier; do
+            node mathos/research/f038_rex_variable_polarity_audit.js "$section" > "/tmp/d7h-$section.json"
+          done
+          node -e "const a=require('node:assert/strict'),r=Object.assign({},...['oracle','masks','large','physical','barrier'].map(s=>require('/tmp/d7h-'+s+'.json')));a.deepEqual(r.stats,{mapCases:2671,mapModels:8937,localTypes:276,oracleCases:551,oracleModels:609,sat:288,unsat:263,oldHall:117,newHall:231,addedHall:114,tamperRejected:5});a.deepEqual(r.screen,{dense:'cardinality',sparse:'unknown',eligible:0,trials:0});a.deepEqual(r.masks,{hall:2,'polarity-hall':4094,'signed-hall':0});a.equal(r.relabelled,32);a.deepEqual(r.rows.map(x=>[x.n,x.type,x.k,x.factors,x.kind,x.groups,x.holes,x.axioms,x.exclusions,x.search?.expanded??null]),[[3,'occupancy',12,22,'polarity-hall',4,3,4,18,null],[6,'first',63,154,'polarity-hall',7,6,28,126,null],[6,'all',63,154,'signed-hall',7,6,28,126,112],[6,'aux',63,154,'signed-hall',7,6,28,126,112],[8,'all',117,342,'signed-hall',9,8,54,288,324],[12,'all',273,1066,'signed-hall',13,12,130,936,1300],[20,'all',777,4578,'signed-hall',21,20,378,4200,6804]]);a.deepEqual(r.physical.map(x=>[x.name,x.status,x.kind,x.oldPhysical??null,x.newPhysical]),[['mixed-small','UNSAT','polarity-hall',943295,2092],['mixed-sat','SAT','unknown',14801,14801],['PHP6-first','UNSAT','polarity-hall',null,2092],['PHP20-all','UNSAT','signed-hall',null,2092]]);const b=r.barrier;a.deepEqual([b.k,b.factors,b.free,b.equations],[189,280,189,0]);a.deepEqual(b.polarity,{kind:'unknown',mode:'none',attempts:2,binary:252,anchored:168,ties:126,search:{starts:28,expanded:112,transitions:84,tautologies:0,dropped:0,candidates:28}});a.deepEqual(b.first,{kind:'unknown',reason:'budget',width:4,work:2000000,pairs:16485,postings:48923,probes:21339,generated:9956});a.deepEqual(b.final,{kind:'unknown',reason:'budget',work:2000000,nodes:12554,leaves:360,splits:377,units:11816});a.deepEqual(r.resources,{states:3683,bits:180471,clockChecks:6,cutoffs:4});console.log('F038_D7H_POLARITY_NORMALIZATION_OK')"
+      - name: Inherited certified alternative disjunctions, dominance and signed obstruction
+        run: |
+          node mathos/research/f038_rex_variable_disjunction_alternatives_audit.js > /tmp/d7g.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7g.json');a.deepEqual(r.stats,{cases:1788,models:2812,sat:904,unsat:884,oldHall:224,newHall:762,addedHall:538,localMasks:276,cleanGraphs:343,ambiguousGraphs:528,tamperRejected:4});a.equal(r.relabelled,32);a.deepEqual(r.limited,{kind:'unknown',beamDropped:1});a.deepEqual(r.rows.map(x=>[x.n,x.type,x.k,x.factors,x.groupStrategy,x.partition,x.groups,x.holes,x.proof,x.exclusions,x.extraction.expanded,x.extraction.dominated]),[[4,'single',25,51,'minimal','components',5,4,10,36,11,1],[5,'single',42,94,'minimal','components',6,5,17,65,19,1],[6,'single',63,155,'minimal','components',7,6,26,108,29,1],[6,'multi',63,161,'minimal','components',4,3,8,18,35,7],[6,'mixed-noise',63,162,'minimal','support-1',4,3,8,18,35,7],[6,'wide',63,155,'wide','components',7,6,28,126,161,0],[8,'multi',117,351,'minimal','components',4,3,8,18,63,9],[12,'multi',273,1079,'minimal','components',4,3,8,18,143,13],[20,'multi',777,4599,'minimal','components',4,3,8,18,399,21]]);a.deepEqual(r.physical.map(x=>[x.name,x.status,x.kind,x.oldPhysical??null,x.newPhysical]),[['ambiguous-small','UNSAT','resolution',2092,2092],['ambiguous-sat','SAT','unknown',794,794],['PHP6-single','UNSAT','hall',null,2092],['PHP20-multi','UNSAT','hall',null,2092]]);const b=r.barrier;a.deepEqual([b.k,b.factors,b.free,b.equations],[63,154,63,0]);a.equal(b.hall.kind,'unknown');a.equal(b.hall.groupStrategy,'none');a.deepEqual(b.hall.extraction,{policies:4,starts:126,expanded:294,ambiguous:0,transitions:168,beamDropped:0,candidates:126,dominanceTests:0,dominated:0});a.deepEqual(b.first,{kind:'unknown',reason:'budget',width:4,work:2000000,pairs:21082,postings:40805,probes:46286,generated:8392});a.deepEqual(b.final,{kind:'unknown',reason:'budget',work:2000000,nodes:17354,leaves:1017,splits:1027,units:15309});a.deepEqual(r.resources,{states:3683,bits:180471,clockChecks:6,cutoffs:4});console.log('F038_D7G_DISJUNCTION_ALTERNATIVES_OK')"
+      - name: Inherited certified robust conflict partitions, noise oracle and physical replay
+        run: |
+          node mathos/research/f038_rex_variable_conflict_cliques_audit.js > /tmp/d7f.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7f.json');a.deepEqual(r.stats,{cases:1452,models:2797,sat:966,unsat:486,oldHall:138,robustHall:233,addedHall:95,localMasks:276,cleanGraphs:343,noisyGraphs:192,greedyRecovered:66,tamperRejected:4});a.deepEqual(r.strategies,{components:2,'support-1':17,'greedy-rank':33,'greedy-reverse':4,'greedy-degree-low':2,'support-2':6});a.equal(r.relabelled,32);a.deepEqual(r.rows.map(x=>[x.n,x.type,x.k,x.factors,x.strategy,x.attempts,x.groups,x.holes,x.exclusions,x.metrics.supportProbes]),[[3,'bridge',12,23,'support-1',2,4,3,18,58],[5,'bridge',42,94,'support-1',2,6,5,75,381],[6,'bridge',63,155,'support-1',2,7,6,126,763],[6,'triangle',63,156,'support-2',2,7,6,126,771],[6,'cycle',63,160,'support-1',2,7,6,126,804],[6,'many',63,184,'support-1',2,7,6,126,1116],[8,'cycle',117,350,'support-1',2,9,8,288,2384],[12,'cycle',273,1078,'support-1',2,13,12,936,11400],[20,'bridge',777,4579,'support-1',2,21,20,4200,84021]]);a.deepEqual(r.physical.map(x=>[x.name,x.status,x.kind,x.oldPhysical??null,x.newPhysical]),[['greedy-small','UNSAT','hall',945051,2092],['noisy-sat','SAT','unknown',47419,47419],['PHP6-bridge','UNSAT','hall',null,2092],['PHP20-bridge','UNSAT','hall',null,2092]]);const b=r.barrier;a.deepEqual([b.k,b.factors,b.free,b.equations],[63,155,63,0]);a.deepEqual(b.hall,{kind:'unknown',chains:133,steps:18,edgeChecks:90,searchEdges:141,attempts:11,strategy:'greedy-degree-high',metrics:{supportEdges:90,supportProbes:450,thresholds:1,componentVisits:180,greedyTests:2248,greedyTrials:8}});a.deepEqual(b.first,{kind:'unknown',reason:'budget',width:4,work:2000000,pairs:21944,postings:52249,probes:42448,generated:8541});a.deepEqual(b.final,{kind:'unknown',reason:'budget',work:2000000,nodes:17065,leaves:998,splits:1004,units:15062});a.deepEqual(r.resources,{states:3683,bits:180471,clockChecks:6,cutoffs:4});console.log('F038_D7F_CONFLICT_CLIQUES_OK')"
+      - name: Inherited certified Hall extraction, physical replay and residual policy obstruction
+        run: |
+          node mathos/research/f038_rex_variable_hall_audit.js > /tmp/d7e.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7e.json');a.deepEqual(r.stats,{cases:1263,models:2784,sat:901,unsat:362,hallRefuted:114,localMasks:276,tamperRejected:6});a.deepEqual(r.rows.map(x=>[x.n,x.k,x.factors,x.groups,x.holes,x.proof,x.exclusions]),[[3,12,22,4,3,4,18],[5,42,93,6,5,18,75],[6,63,154,7,6,28,126],[8,117,342,9,8,54,288],[12,273,1066,13,12,130,936],[20,777,4578,21,20,378,4200]]);a.deepEqual(r.sparse,{totalGroups:4,totalHoles:5,coreGroups:3,coreHoles:2});a.deepEqual(r.physical.map(x=>[x.name,x.status,x.kind,x.oldPhysical??null,x.newPhysical]),[['small','UNSAT','hall',943995,2092],['sparse','UNSAT','hall',13647854,2092],['sat','SAT','unknown',42197,42197],['PHP5','UNSAT','hall',null,2092],['PHP20','UNSAT','hall',null,2092]]);const b=r.barrier;a.deepEqual([b.k,b.factors,b.free,b.equations],[63,155,63,0]);a.deepEqual(b.hall,{kind:'unknown',chains:134,steps:21,edgeChecks:168,searchEdges:18});a.deepEqual(b.first,{kind:'unknown',reason:'budget',width:4,work:2000000,pairs:20970,postings:40925,probes:45889,generated:8429});a.deepEqual(b.final,{kind:'unknown',reason:'budget',work:2000000,nodes:16347,leaves:1017,splits:1030,units:14299});a.deepEqual(r.resources,{states:3683,bits:180471,clockChecks:8,cutoffs:5});console.log('F038_D7E_HALL_INFERENCE_OK')"
+      - name: Inherited independent bounded-width obstruction and adaptive tree audit
+        run: |
+          node mathos/research/f038_rex_variable_adaptive_audit.js > /tmp/d7d.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7d.json');a.deepEqual(r.stats,{cases:919,models:2398,sat:652,unsat:267,indexedRefuted:265,treeRefuted:1,unknownUnsat:0,localMasks:276,tamperRejected:5});a.deepEqual(r.indexRows.map(x=>[x.name,x.oldPairs,x.newPairs,x.oldNodes,x.newNodes,x.work]),[['NAE5',20908,379,211,124,13448],['Fano',432914,3094,939,653,156139]]);const b=r.barrier;a.deepEqual([b.k,b.factors,b.pre,b.free,b.equations],[42,93,42,42,0]);a.deepEqual(b.saturation,{kind:'unknown',reason:'saturated',width:4,work:5408364,pairs:39042,postings:57274,probes:307724,generated:10750});a.deepEqual(b.closure,{axioms:93,pairs:50295435,eligible:38052,clauses:10030});a.deepEqual(b.tree,{kind:'tree',work:468006,nodes:6912,leaves:474,splits:473,units:5965});a.deepEqual(b.limited,{first:'budget',final:'budget'});a.deepEqual(b.physical,{transitions:2092,stream:10,clockChecks:1,cutoffs:1,states:3683,bits:180471});console.log('F038_D7D_ADAPTIVE_INFERENCE_OK')"
+      - name: Inherited certified bounded resolution and cardinality model audit
+        run: |
+          node mathos/research/f038_rex_variable_resolution_audit.js > /tmp/d7c.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7c.json');a.deepEqual(r.stats,{"cases":925,"models":2398,"sat":652,"unsat":273,"refuted":273,"unknownUnsat":0,"localMasks":276,"tamperRejected":6});a.deepEqual(r.width3,{clauses:20,pairs:190});a.deepEqual(r.width4,{nodes:211,pairs:20908});a.deepEqual(r.rows.map(x=>[x.k,x.certificateFactors,x.trials,x.candidates]),[5,6,8,10,12,16,32].map(k=>[k,10,1,0]));a.deepEqual(r.sparse.map(x=>[x.k,x.width4Nodes,x.pairs]),[[7,939,432914],[9,2851,4028536]]);console.log('F038_D7C_RESOLUTION_CLOSURE_OK')"
+      - name: Exact physical integration and witness replay
+        run: |
+          node mathos/research/f038_rex_variable_resolution_physical_audit.js > /tmp/d7c-physical.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7c-physical.json');a.deepEqual(r.rows.map(x=>[x.name,x.certificate,x.oldPhysical,x.newPhysical]),[['NAE5','cardinality',3815854,2092],['NAE4','unknown',95554,95554],['Fano','resolution',11556172,2092],['narrow-mixed','unknown',7848,7848],['wide-mixed','unknown',134197,134197]]);a.equal(r.clockChecks,10);a.equal(r.cutoffs,5);a.equal(r.resources.quotientStates,3683);a.equal(r.resources.quotientBits,180471)"
+      - name: Inherited independent affine certificate and physical witness audit
+        run: |
+          node mathos/research/f038_rex_variable_affine_audit.js > /tmp/d7b.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7b.json');for(const [k,v] of Object.entries({"cases":628,"assignments":150680,"models":1741,"sat":385,"unsat":243,"localMasks":276,"affineMasks":68,"equations":1750,"rowOps":504,"cellOps":3175,"affineContradictions":237,"priorContradictions":232,"newAffineContradictions":5,"pureAffineSat":162,"physicalCases":558,"oldPhysical":18083859,"newPhysical":7115859,"improved":168,"tied":390,"regressed":0,"clockChecks":1116,"cutoffs":558,"tamperRejected":3}))a.equal(r.stats[k],v,k);a.equal(r.resources.quotientStates,3683);a.equal(r.resources.quotientBits,180471);a.deepEqual(r.large.map(x=>[x.k,x.free,x.used,x.witness.length]),[[32,2,'0',32],[64,2,'0',64],[128,2,'0',128]]);a.deepEqual(r.rows.filter(x=>x.name==='dense-NAE').map(x=>[x.k,x.used]),[[5,'32'],[6,'64'],[8,'256'],[10,'1024'],[12,'4096'],[16,'65536']]);a.deepEqual(r.rows.filter(x=>x.name==='parity-barrier'&&x.oldPhysical).map(x=>[x.oldPhysical,x.newPhysical]),[[5535627,2092]]);console.log('F038_D7B_AFFINE_CLOSURE_OK')"
+      - name: Inherited exact semijoin certificate and physical witness audit
+        run: |
+          node mathos/research/f038_rex_variable_relational_audit.js > /tmp/d7a.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d7a.json');a.deepEqual(r.stats,{"cases":656,"sourceAssignments":282745,"finalAssignments":76663,"models":3036,"sat":472,"unsat":184,"lexChecks":656,"certificateRounds":705,"certificateOperations":157,"certifiedDeletions":257,"certificateComparisons":1415781,"closurePasses":630,"projectionRows":801908,"testedRows":801942,"derivedPairs":59,"contradictions":179,"physicalCases":562,"oldPhysical":46154316,"newPhysical":12448664,"improved":195,"tied":317,"regressed":50,"exactClocks":1124,"quotientReplays":562,"cutoffs":562,"tamperRejected":3});a.deepEqual(r.inherited,{"cases":646,"sourceAssignments":211510,"finalAssignments":5626,"models":3012,"sat":468,"unsat":178,"lexChecks":646,"certificateRounds":692,"certificateOperations":148,"certifiedDeletions":242,"certificateComparisons":7723,"closurePasses":616,"projectionRows":19677,"testedRows":19708,"derivedPairs":54,"contradictions":178,"physicalCases":558,"oldPhysical":38981158,"newPhysical":6846537,"improved":193,"tied":316,"regressed":49,"exactClocks":1116,"quotientReplays":558,"cutoffs":558,"tamperRejected":3});a.equal(r.resources.quotientStates,3683);a.equal(r.resources.quotientBits,180471);a.deepEqual(r.rows.filter(x=>x.name==='pair-triple-barrier'&&x.oldPhysical).map(x=>[x.k,x.oldPhysical,x.newPhysical]),[[4,327609,2092],[6,3129327,2092],[8,26268031,2092]]);a.deepEqual(r.rows.filter(x=>x.name==='dense-parity-barrier').map(x=>[x.k,x.used,x.deleted]),[[6,'64',0],[8,'256',0],[10,'1024',0],[12,'4096',0],[16,'65536',0]]);console.log('F038_D7A_RELATIONAL_CLOSURE_OK')"
+      - name: Inherited D6Z physical and permutation audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_quotient_audit.js > /tmp/d6z.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6z.json');a.equal(r.stats.modelCases,646);a.equal(r.stats.reducedPhysicalTransitions,38981158);a.equal(r.stats.cutoffs,558);a.equal(r.resources.quotientStates,3683)"
+      - name: Inherited D6Y source reduction audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_reduction_audit.js > /tmp/d6y.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6y.json');a.equal(r.formulas,599);a.equal(r.rawExtensionChecks,50048)"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D7H_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
