@@ -61,8 +61,9 @@ at least 2s edges:
   2(R+K). Since RK >= |U| (after possible complement) >= s^2/3,
   (R+K)^2 >= 4RK >= 4s^2/3, so R+K >= s.
 
-Together these establish width(C) >= 2s. A strip of floor(s/2) rows
-attains the balanced cut bound, but this does NOT prove tightness of
+Together these establish width(C) >= 2s. A strip of ceil(s/2) rows
+lies in the strict support interval for every s >= 3 and attains the
+balanced cut bound, but this does NOT prove tightness of
 the resolution width bound. No matching resolution upper bound or
 resolution-size lower bound is claimed here.
 
