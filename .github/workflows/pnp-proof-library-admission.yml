@@ -1,0 +1,36 @@
+name: PNP offline knowledge admission v17.7
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_admission*.py'
+      - 'tests/test_pnp_library_admission.py'
+      - '.github/workflows/pnp-proof-library-admission.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_admission.py' -v
+          mkdir -p artifacts/pnp-admission
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-admission/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-admission/source.json --checkpoint artifacts/pnp-admission/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-admission/source.json --scheduler artifacts/pnp-admission/scheduler.json --checkpoint artifacts/pnp-admission/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-admission/source.json --scheduler artifacts/pnp-admission/scheduler.json --failures artifacts/pnp-admission/failures.json --checkpoint artifacts/pnp-admission/v17.json > /dev/null
+          python -m mathos.research.pnp_library_admission_frontier --benchmark artifacts/pnp-admission/source.json --scheduler artifacts/pnp-admission/scheduler.json --failures artifacts/pnp-admission/failures.json --v17 artifacts/pnp-admission/v17.json --checkpoint artifacts/pnp-admission/report.json
+          python -m mathos.research.pnp_library_admission_frontier --benchmark artifacts/pnp-admission/source.json --scheduler artifacts/pnp-admission/scheduler.json --failures artifacts/pnp-admission/failures.json --v17 artifacts/pnp-admission/v17.json --audit artifacts/pnp-admission/report.json > artifacts/pnp-admission/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-knowledge-admission-evidence
+          path: artifacts/pnp-admission/
+          if-no-files-found: ignore
