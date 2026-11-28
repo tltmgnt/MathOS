@@ -1,0 +1,60 @@
+name: PNP certified constraint learning
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_certified_learning.py'
+      - 'formal/PnpCertifiedLearning.lean'
+      - '.github/workflows/pnp-certified-learning.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_certified_learning.py'
+      - 'formal/PnpCertifiedLearning.lean'
+      - '.github/workflows/pnp-certified-learning.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_certified_learning.py' -v
+          mkdir -p artifacts/pnp-learning
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-learning/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-learning/source.json --checkpoint artifacts/pnp-learning/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-learning/source.json --scheduler artifacts/pnp-learning/scheduler.json --checkpoint artifacts/pnp-learning/failures.json > /dev/null
+          python -m mathos.research.pnp_learning_frontier --benchmark artifacts/pnp-learning/source.json --scheduler artifacts/pnp-learning/scheduler.json --failures artifacts/pnp-learning/failures.json --checkpoint artifacts/pnp-learning/report.json > /dev/null
+          python -m mathos.research.pnp_learning_frontier --benchmark artifacts/pnp-learning/source.json --scheduler artifacts/pnp-learning/scheduler.json --failures artifacts/pnp-learning/failures.json --audit artifacts/pnp-learning/report.json > artifacts/pnp-learning/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-learning/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['cases']==24"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-learning-evidence
+          path: artifacts/pnp-learning/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpCertifiedLearning.lean | tee /tmp/pnp-learning-lean.txt
+          for theorem in failedAssumption extendEquisat twoAssumptions; do
+            grep -Fx "'PnpCertifiedLearning.$theorem' does not depend on any axioms" /tmp/pnp-learning-lean.txt
+          done
