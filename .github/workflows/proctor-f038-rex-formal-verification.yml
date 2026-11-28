@@ -1,4 +1,4 @@
-name: Proctor F038 RE-X formal semantic, certificate and reduction kernels
+name: Proctor F038 RE-X formal kernels and JS certificate bridge
 on:
   push:
     branches: ['research/pnp-f038-rex-formal-verification']
@@ -16,6 +16,14 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay actual D7I exports and corruption controls
+        working-directory: .
+        run: |
+          node mathos/research/f038_rex_fv04_audit.js > /tmp/fv04.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/fv04.json');a.equal(r.rows.length,7);a.equal(r.tamperRejected,9);a.deepEqual([...new Set(r.rows.map(x=>x.kind))].sort(),['hall','polarity-hall','signed-hall']);a.equal(r.rows.at(-1).k,405)"
       - name: Install pinned Lean toolchain via elan
         run: |
           curl --fail --silent --show-error --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
@@ -35,6 +43,12 @@ jobs:
           lake env lean F038Formal/CertificateTests.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean -o .lake/build/lib/lean/F038Formal/Reduction.olean F038Formal/Reduction.lean 2>&1 | tee -a /tmp/f038-lean.log
           lake env lean F038Formal/ReductionTests.lean 2>&1 | tee -a /tmp/f038-lean.log
+          lake env lean -o .lake/build/lib/lean/F038Formal/Bridge.olean F038Formal/Bridge.lean 2>&1 | tee -a /tmp/f038-lean.log
+          for mode in plain mixed negative; do
+            node ../../mathos/research/f038_rex_fv04_audit.js lean "$mode" > "/tmp/FV04_${mode}.lean"
+            lake env lean "/tmp/FV04_${mode}.lean" 2>&1 | tee -a /tmp/f038-lean.log
+          done
           if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
           echo F038_FV02_CERTIFICATE_KERNEL_OK
           echo F038_FV03_REDUCTION_KERNEL_OK
+          echo F038_FV04_RAW_BRIDGE_OK
