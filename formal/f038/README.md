@@ -173,3 +173,7 @@ lake env lean F038Formal/CompositionTests.lean
 ```
 
 FV-07 is committed as a scoped composition milestone. Local Lean is unavailable and no remote Proctor completion is confirmed. No mechanically checked theorem or full verification is asserted. Outstanding gates include actual successful Lean compilation, full JS/typed refinement and source provenance, efficient materialized residual verification, compiler/clock and raw-selector proofs, complete operation/bit accounting, and independent scientific review. FV-08 should be a verification and independent-review gate, not a declaration of completion while these obligations remain. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main unchanged.
+
+## FV-08 — verification and review gate
+
+See [FV08-REVIEW.md](FV08-REVIEW.md) for the source inventory, new independent adversarial finite oracle, reproduced audits, full named-theorem axiom policy and remaining obligations. FV-08 is open; actual Lean compiler and external reviewer evidence are required. No promotion is authorized.
