@@ -1,0 +1,57 @@
+name: PNP proof simulation and invariance
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_proof_simulation.py'
+      - 'formal/PnpProofSimulation.lean'
+      - '.github/workflows/pnp-proof-simulation.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_proof_simulation.py'
+      - 'formal/PnpProofSimulation.lean'
+      - '.github/workflows/pnp-proof-simulation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_proof_simulation.py' -v
+          mkdir -p artifacts/pnp-simulation
+          python -m mathos.research.pnp_proof_simulation_frontier --checkpoint artifacts/pnp-simulation/report.json > /dev/null
+          python -m mathos.research.pnp_proof_simulation_frontier --audit artifacts/pnp-simulation/report.json > artifacts/pnp-simulation/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-simulation/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['parity_escapes']==10"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-proof-simulation-evidence
+          path: artifacts/pnp-simulation/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpProofSimulation.lean | tee /tmp/pnp-simulation-lean.txt
+          for theorem in paddingEquiv restrictedResolution implicationTransport; do
+            grep -Fx "'PnpProofSimulation.$theorem' does not depend on any axioms" /tmp/pnp-simulation-lean.txt
+          done
