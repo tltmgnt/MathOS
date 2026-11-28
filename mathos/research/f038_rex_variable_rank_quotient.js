@@ -30,15 +30,20 @@ function quotient(U,d){
  }
  return {d:{k:roots.length,m,F:[...factors.values()]},roots,group,maps,stats,expand:z=>group.map((g,v)=>maps[v][z[g]])};
 }
-function solve(U,d){
+function reduce(U,d){
  let current=d,rounds=[],maps=[];
  for(;;){
   const q=quotient(U,current);rounds.push({before:current.k,after:q.d.k,...q.stats});maps.push(q.expand);current=q.d;
-  if(q.d.F.some(f=>f.S.size===0))return {status:"UNSAT",z:null,used:0n,ceiling:0n,k:current.k,rounds,reason:"empty-relation"};
+  if(q.d.F.some(f=>f.S.size===0))break;
   if(rounds.at(-1).before===current.k)break;
  }
- const r=U.solve(current);let z=r.z;
- if(z){for(const expand of maps.reverse())z=expand(z);if(!d.F.every(f=>f.S.has(f.h.map(v=>z[v]).join())))throw Error("expanded witness");}
+ return {d:current,rounds,expand:z=>{for(let i=maps.length-1;i>=0;i--)z=maps[i](z);return z;}};
+}
+function solve(U,d){
+ const q=reduce(U,d),current=q.d,rounds=q.rounds;
+ if(current.F.some(f=>f.S.size===0))return {status:"UNSAT",z:null,used:0n,ceiling:0n,k:current.k,rounds,reason:"empty-relation"};
+ const r=U.solve(current),z=r.z?q.expand(r.z):null;
+ if(z&&!d.F.every(f=>f.S.has(f.h.map(v=>z[v]).join())))throw Error("expanded witness");
  return {...r,z,k:current.k,rounds,reason:"enumeration"};
 }
-module.exports={quotient,solve};
+module.exports={quotient,reduce,solve};

@@ -1,7 +1,15 @@
 // D6Z independent exhaustive model sets and physical-transition replays.
 function audit(U,Q,P,K,F,Min){
  const ok=(v,s)=>{if(!v)throw Error(s)},J=P.machine(),dual=K.compile(J),M=P.singleExit(dual),N0=Min.refine(M),N={...M,...N0};
- const stats={modelCases:0,sourceAssignments:0,quotientAssignments:0,quotientModels:0,lexChecks:0,physicalCases:0,physicalSat:0,physicalUnsat:0,physicalTransitions:0,clockChecks:0,quotientReplays:0,cutoffs:0,derivedRounds:0,cycleCases:0,barrierCases:0};
+ const stats={modelCases:0,sourceAssignments:0,quotientAssignments:0,quotientModels:0,lexChecks:0,physicalCases:0,physicalSat:0,physicalUnsat:0,physicalTransitions:0,clockChecks:0,quotientReplays:0,cutoffs:0,derivedRounds:0,cycleCases:0,barrierCases:0,reducedPhysical:0,reducedPhysicalTransitions:0,reducedImproved:0,reducedTied:0,reducedRegressed:0,rawProjectionChecks:0,descriptorRows:0};
+ // Decode the standard descriptor independently, including every row.
+ const desc=Min.encode(N),w=N.q.toString(2).length;
+ ok(desc.slice(0,N.q+4)==="111"+"1".repeat(N.q)+"0"&&desc.length===N0.stats.quotientBits,"descriptor header");
+ let off=N.q+4;
+ for(let i=0;i<N.T.length;i++){const next=parseInt(desc.slice(off,off+w),2),write=parseInt(desc.slice(off+w,off+w+2),2),move=parseInt(desc.slice(off+w+2,off+w+4),2);
+  ok(((next<<4)|(write<<2)|move)===N.T[i],"descriptor row");off+=w+4;stats.descriptorRows++;
+ }
+ ok(off===desc.length,"descriptor length");
  const rows=[];
  function oracle(d){let out=[];for(let i=0;i<d.m**d.k;i++){const z=Array.from({length:d.k},(_,j)=>Math.floor(i/d.m**(d.k-j-1))%d.m);if(d.F.every(f=>f.S.has(f.h.map(v=>z[v]).join())))out.push(z.join());}return out;}
  function check(d,name,physical=false){
@@ -17,7 +25,15 @@ function audit(U,Q,P,K,F,Min){
    ok(JSON.stringify(a)===JSON.stringify(b)&&JSON.stringify(a)===JSON.stringify(e),"quotient/dual parity "+name);
    ok(c.status==="TIMEOUT"&&c.t===a.t-1&&c.z===null,"cutoff");
    stats.physicalCases++;stats[a.status==="SAT"?"physicalSat":"physicalUnsat"]++;stats.physicalTransitions+=a.t;stats.clockChecks++;stats.quotientReplays++;stats.cutoffs++;
-   return {status:r.status,k:d.k,reduced:r.k,models:expected.length,used:String(r.used),physical:a.t,stream:s.length,span:a.span};
+   const reduced=Q.reduce(U,d),rs=P.stream(U,reduced.d),ra=P.run(N,rs),rf=F.count(J,["",rs],M.codes);
+   const expanded=ra.z?reduced.expand(ra.z):null;
+   ok(ra.status===a.status&&JSON.stringify(expanded)===JSON.stringify(a.z)&&ra.t===rf.clock&&ra.encoded===rf.encoded,"reduced physical "+name);
+   stats.reducedPhysical++;stats.reducedPhysicalTransitions+=ra.t;
+   stats[ra.t<a.t?"reducedImproved":ra.t===a.t?"reducedTied":"reducedRegressed"]++;
+   if(expanded&&d.pins){const bits=U.witness(d.k,d.m,d.pins,expanded);
+    ok(U.project(d.k,bits).join()===expected[0],"raw projection");stats.rawProjectionChecks++;
+   }
+   return {status:r.status,k:d.k,reduced:r.k,models:expected.length,used:String(r.used),physical:a.t,reducedPhysical:ra.t,stream:s.length,reducedStream:rs.length,span:a.span};
   }
   return {status:r.status,k:d.k,reduced:r.k,models:expected.length,used:String(r.used),rounds:r.rounds};
  }
