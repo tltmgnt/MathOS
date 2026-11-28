@@ -21,6 +21,7 @@ jobs:
           python-version: '3.11'
       - run: |
           python -m unittest discover -s tests -p 'test_pnp_library_orbit_split.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_library_failure_cones.py' -v
           mkdir -p artifacts/pnp-failure-cones
           python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-failure-cones/source.json > /dev/null
           python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-failure-cones/source.json --checkpoint artifacts/pnp-failure-cones/scheduler.json > /dev/null
