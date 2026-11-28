@@ -1,0 +1,62 @@
+name: PNP certified analogy
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_analogy.py'
+      - 'formal/PnpAnalogy.lean'
+      - '.github/workflows/pnp-analogy.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_analogy.py'
+      - 'formal/PnpAnalogy.lean'
+      - '.github/workflows/pnp-analogy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_analogy.py' -v
+          mkdir -p artifacts/pnp-analogy
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-analogy/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-analogy/source.json --checkpoint artifacts/pnp-analogy/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-analogy/source.json --scheduler artifacts/pnp-analogy/scheduler.json --checkpoint artifacts/pnp-analogy/failures.json > /dev/null
+          python -m mathos.research.pnp_abstraction_frontier --benchmark artifacts/pnp-analogy/source.json --scheduler artifacts/pnp-analogy/scheduler.json --failures artifacts/pnp-analogy/failures.json --checkpoint artifacts/pnp-analogy/abstraction.json > /dev/null
+          python -m mathos.research.pnp_knowledge_frontier --benchmark artifacts/pnp-analogy/source.json --scheduler artifacts/pnp-analogy/scheduler.json --failures artifacts/pnp-analogy/failures.json --abstraction artifacts/pnp-analogy/abstraction.json --checkpoint artifacts/pnp-analogy/knowledge.json > /dev/null
+          python -m mathos.research.pnp_analogy_frontier --benchmark artifacts/pnp-analogy/source.json --scheduler artifacts/pnp-analogy/scheduler.json --failures artifacts/pnp-analogy/failures.json --abstraction artifacts/pnp-analogy/abstraction.json --knowledge artifacts/pnp-analogy/knowledge.json --checkpoint artifacts/pnp-analogy/report.json > /dev/null
+          python -m mathos.research.pnp_analogy_frontier --benchmark artifacts/pnp-analogy/source.json --scheduler artifacts/pnp-analogy/scheduler.json --failures artifacts/pnp-analogy/failures.json --abstraction artifacts/pnp-analogy/abstraction.json --knowledge artifacts/pnp-analogy/knowledge.json --audit artifacts/pnp-analogy/report.json > artifacts/pnp-analogy/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-analogy/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['fresh_cases']==24 and r['control']['match']['status']=='matched'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-analogy-evidence
+          path: artifacts/pnp-analogy/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpAnalogy.lean | tee /tmp/pnp-analogy-lean.txt
+          for theorem in clauseSubset allPremises; do
+            grep -Fx "'PnpAnalogy.$theorem' does not depend on any axioms" /tmp/pnp-analogy-lean.txt
+          done

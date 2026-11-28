@@ -1,0 +1,65 @@
+name: PNP semantic implication transfer
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_semantic_implication.py'
+      - 'formal/PnpSemanticImplication.lean'
+      - '.github/workflows/pnp-semantic-implication.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_semantic_implication.py'
+      - 'formal/PnpSemanticImplication.lean'
+      - '.github/workflows/pnp-semantic-implication.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_semantic_implication.py' -v
+          mkdir -p artifacts/pnp-semantic
+          cd artifacts/pnp-semantic
+          export PYTHONPATH="$GITHUB_WORKSPACE"
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark source.json --checkpoint scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark source.json --scheduler scheduler.json --checkpoint failures.json > /dev/null
+          python -m mathos.research.pnp_abstraction_frontier --benchmark source.json --scheduler scheduler.json --failures failures.json --checkpoint abstraction.json > /dev/null
+          python -m mathos.research.pnp_knowledge_frontier --benchmark source.json --scheduler scheduler.json --failures failures.json --abstraction abstraction.json --checkpoint knowledge.json > /dev/null
+          python -m mathos.research.pnp_analogy_frontier --benchmark source.json --scheduler scheduler.json --failures failures.json --abstraction abstraction.json --knowledge knowledge.json --checkpoint analogy.json > /dev/null
+          python -m mathos.research.pnp_semantic_frontier --benchmark source.json --scheduler scheduler.json --failures failures.json --abstraction abstraction.json --knowledge knowledge.json --analogy analogy.json --checkpoint report.json > /dev/null
+          python -m mathos.research.pnp_semantic_frontier --benchmark source.json --scheduler scheduler.json --failures failures.json --abstraction abstraction.json --knowledge knowledge.json --analogy analogy.json --audit report.json > audit.json
+          python -c "import json; r=json.load(open('report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['fresh_cases']==24 and r['control']['semantic']['reason']=='template_transfer'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-semantic-evidence
+          path: artifacts/pnp-semantic/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpSemanticImplication.lean | tee /tmp/pnp-semantic-lean.txt
+          for theorem in resolve liftPremise consequencesPreserve; do
+            grep -Fx "'PnpSemanticImplication.$theorem' does not depend on any axioms" /tmp/pnp-semantic-lean.txt
+          done
