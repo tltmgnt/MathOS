@@ -1,0 +1,38 @@
+name: PNP v18 matching certificate frontier
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_matching_certificates.py'
+      - 'tests/independent_pnp_v18_matching_frontier.py'
+      - '.github/workflows/pnp-v18-matching-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/pnp-v18-matching
+          PYTHONPATH=. python tests/independent_pnp_v18_matching_frontier.py --self-test | tee artifacts/pnp-v18-matching/self-test.json
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-v18-matching/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-v18-matching/source.json --checkpoint artifacts/pnp-v18-matching/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-v18-matching/source.json --scheduler artifacts/pnp-v18-matching/scheduler.json --checkpoint artifacts/pnp-v18-matching/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-v18-matching/source.json --scheduler artifacts/pnp-v18-matching/scheduler.json --failures artifacts/pnp-v18-matching/failures.json --checkpoint artifacts/pnp-v18-matching/library.json > /dev/null
+          PYTHONPATH=. python tests/independent_pnp_v18_matching_frontier.py --benchmark artifacts/pnp-v18-matching/source.json --scheduler artifacts/pnp-v18-matching/scheduler.json --failures artifacts/pnp-v18-matching/failures.json --library artifacts/pnp-v18-matching/library.json --checkpoint artifacts/pnp-v18-matching/report.json
+          PYTHONPATH=. python tests/independent_pnp_v18_matching_frontier.py --benchmark artifacts/pnp-v18-matching/source.json --scheduler artifacts/pnp-v18-matching/scheduler.json --failures artifacts/pnp-v18-matching/failures.json --library artifacts/pnp-v18-matching/library.json --audit artifacts/pnp-v18-matching/report.json > artifacts/pnp-v18-matching/audit.json
+          (cd artifacts/pnp-v18-matching && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-v18-matching-frontier
+          path: artifacts/pnp-v18-matching/
+          if-no-files-found: ignore
