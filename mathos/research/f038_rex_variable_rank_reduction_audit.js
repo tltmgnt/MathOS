@@ -1,6 +1,6 @@
 // D6Y independent source-CNF, original pool, witness and separator audit.
 function audit(U,E){
- const ok=(v,s)=>{if(!v)throw Error(s)},stats={formulas:0,sat:0,unsat:0,sourceAssignments:0,rawWitnessChecks:0,rawExtensionChecks:0,uniqueExtensions:0,separatorChecks:0,gacModelChecks:0,legacyChecks:0,malformed:0},rows=[];
+ const ok=(v,s)=>{if(!v)throw Error(s)},stats={formulas:0,sat:0,unsat:0,sourceAssignments:0,rawWitnessChecks:0,rawExtensionChecks:0,uniqueExtensions:0,separatorChecks:0,gacModelChecks:0,legacyChecks:0,malformed:0,sparseCases:0,sparseAssignments:0,sparseModels:0},rows=[];
  // Independent tuple counter based on numeric indices (small audit sizes).
  function* tup(m,k){for(let i=0;i<m**k;i++)yield Array.from({length:k},(_,j)=>Math.floor(i/m**(k-j-1))%m);}
  const truth=(C,z)=>C.every(c=>c.some(x=>z[Math.abs(x)-1]===(x>0?1:0)));
@@ -25,6 +25,23 @@ function audit(U,E){
  for(const C of [[],[[]],[[1]],[[1,1]],[[1,-1]],[[1],[-1]],[[1,1,-1]]])check(1,C,true);
  let seed=0xD6F00D;const rand=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
  for(let i=0;i<80;i++){const k=1+i%7,C=[];for(let j=0;j<1+i%19;j++){const c=[];for(let t=0;t<1+rand()%3;t++){const v=1+rand()%k;c.push(rand()>>>31?v:-v);}C.push(c);}check(k,C);}
+ // Arbitrary-length sparse identifiers, zero-variable formulas,
+ // tautologies and repeated literals, through the uniform source API.
+ const huge="340282366920938463463374607431768211507";
+ for(const C of [[],[[]],[[huge]],[[huge,"-2"],["-"+huge,"2"]],[[huge,"-"+huge]],[[huge,huge,"-2"]],[["-99999999999999999999999999999999999"],["2",huge]]]){
+  const R=U.reduce(C),d=U.decode(R.k,2,R.raw),rawC=selected(R.raw,d.n),s=U.solve(d);
+  const vars=[...new Set(C.flat().map(x=>String(x).replace(/^-/,"")))].sort((a,b)=>BigInt(a)<BigInt(b)?-1:BigInt(a)>BigInt(b)?1:0);
+  ok(R.variables.join()===vars.join()&&R.k===Math.max(1,vars.length),"sparse IDs");
+  let first=null,count=0;
+  for(const z of tup(2,vars.length)){
+   const values=new Map(vars.map((v,i)=>[v,z[i]])),expected=C.every(c=>c.some(x=>values.get(String(x).replace(/^-/,""))===+(String(x)[0]!=="-")));
+   const q=vars.length?z:[0],w=U.witness(R.k,2,[0,0],q);
+   ok(truth(rawC,w.split("").map(Number))===expected&&JSON.stringify(U.projectSource(R,w))===JSON.stringify(vars.map((id,i)=>({id,value:z[i]}))),"sparse witness");
+   stats.sparseAssignments++;if(expected){count++;if(!first)first=q;stats.sparseModels++;}
+  }
+  if(!vars.length)ok(!truth(rawC,U.witness(R.k,2,[0,0],[1]).split("").map(Number)),"dummy forced");
+  ok(JSON.stringify(s.z)===JSON.stringify(first)&&s.status===(count?"SAT":"UNSAT"),"sparse exact");stats.sparseCases++;
+ }
  // Exact k=9 backwards compatibility, including the original raw witness.
  for(const m of [2,3,4]){const pins=Array.from({length:m},(_,i)=>i%2),B=[[-1],[-m,-(m+1)],[-1,-(2*m+1),-(8*m+1)]],raw=U.encode(9,m,pins,B),a=U.decode(9,m,raw),b=E.decode(raw);
   ok(raw===E.encode(m,pins,B)&&a.pins.join()===b.pins.join(),"legacy raw");

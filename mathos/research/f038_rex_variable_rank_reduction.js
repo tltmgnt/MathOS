@@ -3,7 +3,7 @@
 const assert=(v,s)=>{if(!v)throw Error(s)};
 function dims(k,m){
  assert(Number.isSafeInteger(k)&&k>=1&&Number.isSafeInteger(m)&&m>=2,"dimensions");
- const n=(2*k+1)*m-k+2;assert(Number.isSafeInteger(n),"n");return n;
+ const n=(2n*BigInt(k)+1n)*BigInt(m)-BigInt(k)+2n;assert(n<=BigInt(Number.MAX_SAFE_INTEGER),"n");return Number(n);
 }
 function length(n){const N=BigInt(n);return N+1n+2n*N*N+8n*N*(N-1n)*(N-2n)/6n;}
 function* subsets(a,r,i=0){
@@ -33,6 +33,7 @@ function fixed(k,m,pins=null){
  return F;
 }
 function encode(k,m,pins,B){
+ assert(Array.isArray(pins)&&pins.length===m&&pins.every(x=>x===0||x===1),"pins");
  const n=dims(k,m),F=new Set(fixed(k,m,pins).map(key));
  for(const c of B){
   assert(c.length>=1&&c.length<=3&&c.every(x=>Number.isInteger(x)&&x<0&&-x<=k*m),"optional clause");
@@ -59,6 +60,7 @@ function decode(k,m,raw){
  return {k,m,n,pins:pins.map(v=>+(v[1]===4)),F:[...F.values()].map(f=>({h:f.h,S:new Set([...tuples(m,f.h.length)].map(z=>z.join()).filter(z=>!f.bad.has(z)))}))};
 }
 function witness(k,m,pins,z){
+ assert(Array.isArray(pins)&&pins.length===m&&pins.every(x=>x===0||x===1),"pins");
  const n=dims(k,m),b=Array(n).fill(0);
  assert(z.length===k&&z.every(v=>Number.isInteger(v)&&v>=0&&v<m),"ranks");
  for(let g=0;g<k;g++){b[g*m+z[g]]=1;for(let j=0;j<m-1;j++)b[k*m+g*(m-1)+j]=+(z[g]<=j+1);}
@@ -82,6 +84,26 @@ function project(k,bits){
  if(bits.length!==dims(k,2)||!/^[01]+$/.test(bits))return null;
  const z=[];for(let g=0;g<k;g++){const s=bits.slice(2*g,2*g+2);if(s!=="10"&&s!=="01")return null;z.push(+(s==="01"));}
  return z;
+}
+// Uniform source interface: renumber occurring variable identifiers,
+// never allocate according to the largest identifier. Signed decimal
+// strings allow identifiers larger than machine integers.
+function reduce(clauses){
+ assert(Array.isArray(clauses),"formula");
+ const parse=x=>{assert(typeof x==="string"&&/^-?[1-9][0-9]*$/.test(x)||typeof x==="number"&&Number.isSafeInteger(x)&&x!==0||typeof x==="bigint"&&x!==0n,"literal");return BigInt(x);};
+ const C=clauses.map(c=>{assert(Array.isArray(c)&&c.length<=3,"width");return c.map(parse);});
+ const abs=x=>x<0n?-x:x,variables=[...new Set(C.flat().map(x=>abs(x)))].sort((a,b)=>a<b?-1:a>b?1:0).map(String);
+ const ids=new Map(variables.map((v,i)=>[v,i+1])),k=Math.max(1,variables.length);
+ const compact=C.map(c=>c.map(x=>(x<0n?-1:1)*ids.get(String(abs(x)))));
+ // Zero-variable case: force a dummy Boolean variable false,
+ // preserving one extension of the empty satisfying assignment.
+ if(!variables.length)compact.push([-1]);
+ return {...lift(k,compact),variables};
+}
+function projectSource(R,bits){
+ const z=project(R.k,bits);if(!z)return null;
+ if(!R.variables.length&&z[0]!==0)return null;
+ return R.variables.map((id,i)=>({id,value:z[i]}));
 }
 const pass=(f,z)=>f.S.has(f.h.map(v=>z[v]).join());
 function gac(d){
@@ -133,4 +155,4 @@ function denseBarrier(k,m){
  for(let x=0;x<m;x++)B.push([-(x+1),-(m+x+1),-(2*m+x+1)]);
  return B;
 }
-module.exports={dims,length,pool,subsets,tuples,fixed,encode,decode,witness,lift,project,gac,residual,plan,solve,denseBarrier};
+module.exports={dims,length,pool,subsets,tuples,fixed,encode,decode,witness,lift,project,reduce,projectSource,gac,residual,plan,solve,denseBarrier};
