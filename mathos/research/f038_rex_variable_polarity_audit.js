@@ -20,7 +20,10 @@ function audit(U,Q,R,A,AV,C,V,D,T,H,HV,B,G,N,NV,P,K,F,Min,section="all"){
   reject(()=>NV.verify(HV,d,{...cert,sigma:cert.sigma.map(x=>1-x)}));
   reject(()=>NV.verify(HV,d,{...cert,hall:{...cert.hall,groups:cert.hall.groups.map((g,i)=>i?g:{...g,proof:g.proof.map((a,j)=>j===1?{...a,p:9999}:a)})}}));
   reject(()=>NV.verify(HV,d,{...cert,hall:{...cert.hall,exclusions:cert.hall.exclusions.slice(1)}}));reject(()=>NV.verifyMap(d,cert.sigma,d));
-  out.stats=stats;
+  const nae={k:5,m:2,F:[...U.subsets([0,1,2,3,4],3)].map(h=>({h,S:new Set(["0,0,1","0,1,0","0,1,1","1,0,0","1,0,1","1,1,0"])}))};
+  const dense=N.sparseCardinality(C,nae),sparse=N.sparseCardinality(C,D.php(U,6));
+  ok(dense.kind==="cardinality"&&V.verify(nae,dense)&&sparse.kind==="unknown"&&sparse.eligible===0&&sparse.trials===0,"sparse cardinality");
+  out.stats=stats;out.screen={dense:dense.kind,sparse:sparse.kind,eligible:sparse.eligible,trials:sparse.trials};
  }
  if(section==="all"||section==="masks"){
   const masks={hall:0,"polarity-hall":0,"signed-hall":0},d3=D.php(U,3);
