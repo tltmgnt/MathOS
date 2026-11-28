@@ -1,0 +1,50 @@
+name: PNP coloring repair external follow-up
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_coloring*'
+      - 'tests/test_pnp_coloring_repair.py'
+      - '.github/workflows/pnp-coloring-repair.yml'
+      - 'docs/research/PNP_COLORING_REPAIR.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: mitchellh/go-sat
+          ref: fc0e735aff48989326f256121b5ed6fc585858c3
+          path: external-satlib
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'python-sat==1.8.dev24'
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_pnp_coloring_repair.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_native_xor.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_incremental_xor.py' -v
+          mkdir -p artifacts/pnp-coloring
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-coloring/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-coloring/source.json --checkpoint artifacts/pnp-coloring/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-coloring/source.json --scheduler artifacts/pnp-coloring/scheduler.json --checkpoint artifacts/pnp-coloring/failures.json > /dev/null
+          python -m mathos.research.pnp_coloring_external --corpus external-satlib --benchmark artifacts/pnp-coloring/source.json --scheduler artifacts/pnp-coloring/scheduler.json --failures artifacts/pnp-coloring/failures.json --checkpoint artifacts/pnp-coloring/report.json | tee artifacts/pnp-coloring/summary.json
+          python -m mathos.research.pnp_coloring_internal --benchmark artifacts/pnp-coloring/source.json --scheduler artifacts/pnp-coloring/scheduler.json --failures artifacts/pnp-coloring/failures.json --checkpoint artifacts/pnp-coloring/archived.json
+          python -m mathos.research.pnp_coloring_internal --benchmark artifacts/pnp-coloring/source.json --scheduler artifacts/pnp-coloring/scheduler.json --failures artifacts/pnp-coloring/failures.json --audit artifacts/pnp-coloring/archived.json
+      - run: |
+          python -m mathos.research.pnp_coloring_external --corpus external-satlib --benchmark artifacts/pnp-coloring/source.json --scheduler artifacts/pnp-coloring/scheduler.json --failures artifacts/pnp-coloring/failures.json --audit artifacts/pnp-coloring/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-coloring-evidence
+          path: artifacts/pnp-coloring/
+          if-no-files-found: ignore

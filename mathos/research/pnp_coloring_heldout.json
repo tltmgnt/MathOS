@@ -1,0 +1,58 @@
+[
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-52.cnf",
+    "blob": "0d5e558dbce2239056fab3fb419675a1393fb553",
+    "size": 16876
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-4.cnf",
+    "blob": "0fd2bd1e5e758385b018a70c4e560eaa6b151017",
+    "size": 16816
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-69.cnf",
+    "blob": "19490c621d7e5c71002829b6ee79d48e132abb71",
+    "size": 16828
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-80.cnf",
+    "blob": "1a379ebd8e567f081ad7a9db674b86f5dcab8884",
+    "size": 16819
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-23.cnf",
+    "blob": "1a94b5be57e4a9df253a6b6edea881381fe7485d",
+    "size": 16828
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-76.cnf",
+    "blob": "1c9ec93fd70c27624637edc15edc7fc33dbac860",
+    "size": 16810
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-79.cnf",
+    "blob": "1e5530a3be9ce6183ea4e4ed084a91707afc76a6",
+    "size": 16858
+  },
+  {
+    "group": "flat_heldout",
+    "expected": "sat",
+    "path": "testdata/satlib/sat-flat125-301/flat125-90.cnf",
+    "blob": "2298f957401d3d78d0f3807957f9619b4be35e85",
+    "size": 16870
+  }
+]
