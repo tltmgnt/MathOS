@@ -1,0 +1,36 @@
+name: Proctor F038 RE-X variable-coordinate rank reduction
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-rank-reduction']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Uniform lift, independent raw witnesses, separator and barrier audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_reduction_audit.js > /tmp/d6y.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6y.json');for(const [k,v] of Object.entries({formulas:599,sat:390,unsat:209,sourceAssignments:5894,rawWitnessChecks:5894,rawExtensionChecks:50048,uniqueExtensions:27,separatorChecks:599,gacModelChecks:1514,legacyChecks:9,malformed:6,sparseCases:7,sparseAssignments:22,sparseModels:12,structuralCases:9}))a.equal(r[k],v,k);a.deepEqual(r.rows.slice(0,6).map(x=>[x.k,x.raw,x.used,x.deletions,x.gacPasses]),[[4,5009,'16',0,1],[6,13311,'64',0,1],[8,27805,'256',0,1],[10,50219,'1024',0,1],[12,82281,'4096',0,1],[16,182261,'65536',0,1]]);a.deepEqual(r.rows.slice(6).map(x=>[x.k,x.m,x.used,x.ceiling,x.separators]),[[8,2,'23','30',[[7]]],[8,3,'31','66',[[7]]],[10,2,'52','68',[[0,1]]]]);console.log('F038_D6Y_UNIFORM_REDUCTION_OK')"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6Y_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
