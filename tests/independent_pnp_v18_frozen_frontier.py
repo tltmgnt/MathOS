@@ -95,7 +95,13 @@ def inputs(source,scheduler,failures,lr,dev):
     keys=[case_key(c) for c in rows]
     if len(set(keys))!=len(keys) or forbidden.intersection(keys):
         raise ValueError("normalized input overlap")
-    return rows,train(source),failures["selected_plan"],lr["v15_source_templates"],lr["library"]
+    policy=train(source)
+    if (digest(lr["library"])!="e3a6ce6c5e148e95e9760c4c924be2f9457e6ff98c864efab6ff5b93570adb03"
+            or digest(lr["v15_source_templates"])!="c7d31f4cb372ffdfd3106d632249313221f0192c16c8b02e6494279d6f0659d9"
+            or digest(policy)!="c5f6ee569aa050f4077b83d1ab4a58642fabbcb59cc1fa653e5d92d131475898"
+            or failures["selected_plan"]!=["min_product",8]):
+        raise ValueError("frozen release policy/library mismatch; do not score")
+    return rows,policy,failures["selected_plan"],lr["v15_source_templates"],lr["library"]
 
 
 def summary(rows):
