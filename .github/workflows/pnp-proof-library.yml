@@ -1,0 +1,53 @@
+name: PNP proof library v17
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_proof_library.py'
+      - 'mathos/research/pnp_library_frontier.py'
+      - 'tests/test_pnp_proof_library.py'
+      - 'formal/PnpProofLibrary.lean'
+      - '.github/workflows/pnp-proof-library.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_proof_library.py' -v
+          mkdir -p artifacts/pnp-library
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-library/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-library/source.json --checkpoint artifacts/pnp-library/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-library/source.json --scheduler artifacts/pnp-library/scheduler.json --checkpoint artifacts/pnp-library/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-library/source.json --scheduler artifacts/pnp-library/scheduler.json --failures artifacts/pnp-library/failures.json --checkpoint artifacts/pnp-library/report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-library-evidence
+          path: artifacts/pnp-library/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpProofLibrary.lean | tee /tmp/pnp-library-lean.txt
+          for theorem in subsumptionSound signedLiteralSound fragmentComposition checkedAddition emptyClause refutationComposition; do
+            grep -Fx "'PnpProofLibrary.$theorem' does not depend on any axioms" /tmp/pnp-library-lean.txt
+          done
