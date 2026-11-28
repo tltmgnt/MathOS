@@ -35,7 +35,10 @@ function audit(U,Q,R,A,AV,L,LV,M,MV,N,C,D,T,H,B,G,I,P,J,section="oracle"){
   const limited=M.close(L,nested,1);ok(limited.kind==="view"&&limited.status==="round-limit"&&limited.d.k===11,"round limit");
   function reject(fn){let bad=false;try{fn();}catch(e){bad=true;}ok(bad,"tamper");stats.tamperRejected++;}
   const t=a.rounds[0][0];reject(()=>MV.verifyTight(comp,{...t,lower:"999"}));reject(()=>MV.verifyTight(comp,{...t,equations:t.equations.slice(1)}));reject(()=>MV.verifyTight(comp,{...t,equations:t.equations.map((x,i)=>i?x:[x[0],x[1],1-x[2]])}));reject(()=>MV.verifyTight(comp,{...t,factors:[...t.factors,t.factors[0]]}));reject(()=>MV.verify(LV,comp,{...a,kind:"parity-conflict"}));reject(()=>MV.reconstruct(nested,c.rounds[1]));
-  return {stats,local:{models:models(g).length,weightedModels:models(weighted).length,weightedEquations:w.rounds[0][0].equations,nestedModels:models(nested).length,nestedMetrics:c.metrics,nestedUnsat:e.metrics,limit:limited.d.k}};
+  const map2=[0,1,7,8,9,10,11],left={k:12,m:2,F:g.F},right=N.transform({k:12,m:2,F:h.map(x=>f(x.map(y=>map2[y])))},Array.from({length:12},(_,i)=>+(i===1))).d;
+  const both={k:12,m:2,F:[...left.F,...right.F]},l=M.candidates(L,left).blocks.find(x=>x.kind==="tight"),rr=M.candidates(L,right).blocks.find(x=>x.kind==="tight"),batch=[l,{...rr,factors:rr.factors.map(x=>x+6)}],pc={kind:"parity-conflict",rounds:[batch]};
+  ok(M.quotient(both,batch).kind==="parity-conflict"&&MV.verify(LV,both,pc)&&!models(both).length,"explicit incompatible parity certificates");
+  return {stats,parityConflict:{kind:pc.kind,equations:batch.reduce((s,x)=>s+x.equations.length,0)},local:{models:models(g).length,weightedModels:models(weighted).length,weightedEquations:w.rounds[0][0].equations,nestedModels:models(nested).length,nestedMetrics:c.metrics,nestedUnsat:e.metrics,limit:limited.d.k}};
  }
  if(section==="large"){
   const rows=[];for(const [name,d,pre] of [["prior",comp,true],["signed",N.transform(comp,sig(13)).d,true],["chain5",chain(5,false),true],["chain20",chain(20,true),true],["chain100",chain(100,true),false]]){
@@ -43,6 +46,11 @@ function audit(U,Q,R,A,AV,L,LV,M,MV,N,C,D,T,H,B,G,I,P,J,section="oracle"){
    const e=pre?a.d:d,r=M.close(L,e);ok(r.kind!=="view"&&MV.verify(LV,e,r),"large certificate");
    rows.push({name,k:d.k,factors:d.F.length,pre,kind:r.kind,metrics:r.metrics});
   }return {rows};
+ }
+ if(section==="adapter"){
+  const r=M.reduce(L,LV,MV,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,comp);
+  ok(r.contradiction&&r.cert.kind==="factor-conflict"&&r.d.k===1&&r.d.F.length===1&&!r.d.F[0].S.size,"adapter");
+  return {adapter:{kind:r.cert.kind,k:r.d.k,allowed:r.d.F[0].S.size}};
  }
  if(section==="barrier"){
   const edges=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)edges.push([i,j]);const F=[];
