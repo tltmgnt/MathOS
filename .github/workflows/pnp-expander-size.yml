@@ -1,0 +1,38 @@
+name: PNP expander proof size separation
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_expander_size.py'
+      - '.github/workflows/pnp-expander-size.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_expander_size.py'
+      - '.github/workflows/pnp-expander-size.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_expander_size.py' -v
+          mkdir -p artifacts/pnp-expander
+          python -m mathos.research.pnp_expander_frontier --checkpoint artifacts/pnp-expander/report.json > /dev/null
+          python -m mathos.research.pnp_expander_frontier --audit artifacts/pnp-expander/report.json > artifacts/pnp-expander/audit.json
+          python -c "import json; r=json.load(open('artifacts/pnp-expander/report.json')); print(json.dumps(r['summary'],indent=2)); assert r['completion']=='completed' and r['summary']['parity_decisions']==12"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-expander-evidence
+          path: artifacts/pnp-expander/
+          if-no-files-found: ignore
