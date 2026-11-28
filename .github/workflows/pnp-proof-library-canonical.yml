@@ -1,0 +1,36 @@
+name: PNP signed orbit compaction v17.11
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_library_canonical*.py'
+      - 'tests/test_pnp_library_canonical.py'
+      - '.github/workflows/pnp-proof-library-canonical.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_library_canonical.py' -v
+          mkdir -p artifacts/pnp-canonical
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-canonical/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-canonical/source.json --checkpoint artifacts/pnp-canonical/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-canonical/source.json --scheduler artifacts/pnp-canonical/scheduler.json --checkpoint artifacts/pnp-canonical/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-canonical/source.json --scheduler artifacts/pnp-canonical/scheduler.json --failures artifacts/pnp-canonical/failures.json --checkpoint artifacts/pnp-canonical/v17.json > /dev/null
+          python -m mathos.research.pnp_library_canonical_frontier --benchmark artifacts/pnp-canonical/source.json --scheduler artifacts/pnp-canonical/scheduler.json --failures artifacts/pnp-canonical/failures.json --v17 artifacts/pnp-canonical/v17.json --checkpoint artifacts/pnp-canonical/report.json
+          python -m mathos.research.pnp_library_canonical_frontier --benchmark artifacts/pnp-canonical/source.json --scheduler artifacts/pnp-canonical/scheduler.json --failures artifacts/pnp-canonical/failures.json --v17 artifacts/pnp-canonical/v17.json --audit artifacts/pnp-canonical/report.json > artifacts/pnp-canonical/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-canonical-retrieval-evidence
+          path: artifacts/pnp-canonical/
+          if-no-files-found: ignore
