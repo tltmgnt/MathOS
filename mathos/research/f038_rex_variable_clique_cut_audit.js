@@ -39,7 +39,7 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,SA,T,TV,PN,C,D,DV,section="oracle"){
   for(let mask=0;mask<16;mask++){const d=PN.transform(k4,Array.from({length:4},(_,i)=>mask>>i&1)).d;ok(check(d).kind==="cutting-conflict","signed K4");}
   const perm={...k4,F:k4.F.slice().reverse().map(f=>({h:f.h.slice().reverse(),S:new Set([...f.S].map(s=>s.split(",").reverse().join()))}))};ok(check(perm).kind==="cutting-conflict","scope and factor permutation");
   const sat={...k4,F:k4.F.slice(0,6)};ok(check(sat).kind==="unknown"&&models(sat).length===5,"sat clique");
-  const zero=T.reduce(J, S, SV, TV,k4,e=>({d:e,cert:{kind:"sentinel"},expand:z=>z}),0),limited=T.discover(S,k4,r.nodes.length-1),checks=T.discover(S,k4,4096,0);
+  const zero=T.reduce(JV, S, SV, TV,k4,e=>({d:e,cert:{kind:"sentinel"},expand:z=>z}),0),limited=T.discover(S,k4,r.nodes.length-1),checks=T.discover(S,k4,4096,0);
   ok(zero.d===k4&&zero.cert.kind==="sentinel"&&limited.kind==="unknown"&&limited.status==="budget"&&checks.kind==="unknown"&&checks.status==="budget","limits");
   function reject(fn){let bad=false;try{fn();}catch(e){bad=true;}ok(bad,"tamper");stats.tamperRejected++;}
   const i=r.nodes.findIndex(n=>n.kind==="divide"),replace=(i,n)=>({...r,nodes:r.nodes.map((x,j)=>i===j?n:x)});
@@ -70,7 +70,7 @@ function audit(U,Q,R,A,AV,J,JV,JA,S,SV,SA,T,TV,PN,C,D,DV,section="oracle"){
 }
 
 function physical(U,W,K,F,Min,J,JV,S,SV,SA,T,TV){
- const d=SA.fixture(U,5),r=T.reduce(J,S,SV,TV,d);
+ const d=SA.fixture(U,5),r=T.reduce(JV,S,SV,TV,d);
  if(!r.contradiction||r.cert.kind!=="cutting-conflict")throw Error("adapter");
  const machine=W.machine(),M=W.singleExit(K.compile(machine)),N0=Min.refine(M),q={...M,...N0},s=W.stream(U,r.d),b=W.run(M,s,300000000),c=W.run(q,s,b.t),cut=W.run(q,s,b.t-1),clock=F.count(machine,["",s],M.codes);
  if(b.status!=="UNSAT"||b.z!==null||JSON.stringify(b)!==JSON.stringify(c)||b.t!==clock.clock||b.encoded!==clock.encoded||cut.status!=="TIMEOUT"||cut.t!==b.t-1||cut.z!==null)throw Error("physical");
@@ -78,7 +78,7 @@ function physical(U,W,K,F,Min,J,JV,S,SV,SA,T,TV){
 }
 
 function fallback(U,J,JV,JA,S,SV,T,TV){
- const d=JA.fixture(U,31,1),r=T.reduce(J,S,SV,TV,d,e=>{if(e!==d)throw Error("changed residual");return S.reduce(J,JV,SV,e);});
+ const d=JA.fixture(U,31,1),r=T.reduce(JV,S,SV,TV,d,e=>{if(e!==d)throw Error("changed residual");return S.reduce(J,JV,SV,e);});
  if(!r.contradiction||r.cert.kind!=="cutting-conflict"||r.cliqueCuts.kind!=="unknown")throw Error("fallback");
  return {fallback:{kind:r.cert.kind,nodes:r.cert.nodes.length,cliqueCuts:r.cliqueCuts.status}};
 }
