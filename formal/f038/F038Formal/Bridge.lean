@@ -187,7 +187,9 @@ def exclusionFactor {n : Nat} (a b : Lit n) : RowFactor n :=
 theorem exclusionFactor_models {n : Nat} (x : Assignment n) (a b : Lit n)
     (h : ¬ (holds x a ∧ holds x b)) :
     (exclusionFactor a b).scope.map x ∈ (exclusionFactor a b).rows := by
-  change [x a.var,x b.var] ∈ _ 
+  change [x a.var, x b.var] ∈
+    ([[false,false],[true,false],[false,true],[true,true]].filter
+      (fun r => decide (r ≠ [a.positive,b.positive])))
   apply List.mem_filter.mpr
   constructor
   · cases (x a.var) <;> cases (x b.var) <;> simp
