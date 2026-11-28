@@ -1,0 +1,232 @@
+{
+  "schema": "mathos-external-satlib/1",
+  "repository": "mitchellh/go-sat",
+  "revision": "fc0e735aff48989326f256121b5ed6fc585858c3",
+  "selection": "smallest Git blob IDs per stratum, before solver execution",
+  "cases": [
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0877.cnf",
+      "blob": "001a162c8f38cb20aadeee5bd84db6a56320fd17",
+      "size": 1148
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0566.cnf",
+      "blob": "00457b11a9b151e71f9535608fe30acf1d281dff",
+      "size": 1162
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0681.cnf",
+      "blob": "00cef3d8ff5454f96a924332bb8324d0e4a6cb9e",
+      "size": 1149
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0267.cnf",
+      "blob": "00d004d4d8bbd100d276fb88c3521611c68a3d55",
+      "size": 1161
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0739.cnf",
+      "blob": "00fc7c9ef16def5cd0f0957af71fd02b17945a5d",
+      "size": 1156
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0701.cnf",
+      "blob": "0105fcd3ad07c02052583a50615a17ce131ce249",
+      "size": 1167
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-0625.cnf",
+      "blob": "01237594caa4cb81ff6b8b3548894e583b822764",
+      "size": 1164
+    },
+    {
+      "group": "uf20",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-uniform-20-91/uf20-085.cnf",
+      "blob": "012ee625a1f2a40ab88b1e4e3ee5bfe81f043a3b",
+      "size": 1144
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-063.cnf",
+      "blob": "011cbbeb0254a17778ab2cc51d39175f983ec5fd",
+      "size": 2740
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0920.cnf",
+      "blob": "011fc71988e30ed9e63078e91e866d59754b4e58",
+      "size": 2732
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0817.cnf",
+      "blob": "01299ab9bb091de7fb588896ac3d068119aedb97",
+      "size": 2735
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0258.cnf",
+      "blob": "0137353afccb06fd2bfc6b6601bc42af804d1203",
+      "size": 2756
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0412.cnf",
+      "blob": "0150f2431a4f70dcf80135c0f52a0e05f4a2e18a",
+      "size": 2749
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0269.cnf",
+      "blob": "01da125fe5f6cbcedce3721bef672c10b4d6a230",
+      "size": 2752
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0756.cnf",
+      "blob": "01dc1c01f15affedfbff17d00610569a5c06dad6",
+      "size": 2736
+    },
+    {
+      "group": "uuf50",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-uniform-50-218/uuf50-0626.cnf",
+      "blob": "025c63ccf93a10e215850406bb8fa764295ea5a7",
+      "size": 2720
+    },
+    {
+      "group": "aim_sat",
+      "expected": "sat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-200-3_4-yes1-3.cnf",
+      "blob": "04d5c6b03b5b3f91c89679ae4ecd6c42bc281331",
+      "size": 9739
+    },
+    {
+      "group": "aim_sat",
+      "expected": "sat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-50-2_0-yes1-4.cnf",
+      "blob": "097158eb93fb6e5a7271c54b0654dff6405673ff",
+      "size": 1493
+    },
+    {
+      "group": "aim_sat",
+      "expected": "sat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-100-2_0-yes1-3.cnf",
+      "blob": "1762cb9e94d01ed4eafbba0e45fe20df8ba9df64",
+      "size": 2750
+    },
+    {
+      "group": "aim_sat",
+      "expected": "sat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-50-1_6-yes1-4.cnf",
+      "blob": "1ccc07024d6df4ef2e88d99813c2dc4295e457c4",
+      "size": 1257
+    },
+    {
+      "group": "aim_unsat",
+      "expected": "unsat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-100-1_6-no-1.cnf",
+      "blob": "0b72579b2fb750f98b717df2072953471af4db68",
+      "size": 2273
+    },
+    {
+      "group": "aim_unsat",
+      "expected": "unsat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-50-1_6-no-1.cnf",
+      "blob": "0e3089294af447cf617119621481126c4b4a362a",
+      "size": 1261
+    },
+    {
+      "group": "aim_unsat",
+      "expected": "unsat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-100-1_6-no-2.cnf",
+      "blob": "144d8aaa39efbb5314971bae8f1558bce82339ac",
+      "size": 2258
+    },
+    {
+      "group": "aim_unsat",
+      "expected": "unsat",
+      "path": "testdata/satlib/file-dimacs-aim/aim-50-1_6-no-2.cnf",
+      "blob": "17bc8ff3be7d9855e8ba9fcff41ebae3f4a38b53",
+      "size": 1265
+    },
+    {
+      "group": "flat",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-flat125-301/flat125-86.cnf",
+      "blob": "002a4ea4c80dd3cb6ae504f7e187761467e08749",
+      "size": 16888
+    },
+    {
+      "group": "flat",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-flat125-301/flat125-93.cnf",
+      "blob": "014714585d95e29194f44196f6b404dafb8e62d4",
+      "size": 16810
+    },
+    {
+      "group": "flat",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-flat125-301/flat125-7.cnf",
+      "blob": "05451dac6c5a58f92f1d7641df1055e68fb4360c",
+      "size": 16903
+    },
+    {
+      "group": "flat",
+      "expected": "sat",
+      "path": "testdata/satlib/sat-flat125-301/flat125-85.cnf",
+      "blob": "0d0a2acf9aa1885e60511727aa410ffb163e7beb",
+      "size": 16822
+    },
+    {
+      "group": "dubois",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-dimacs-dubois/dubois25.cnf",
+      "blob": "0c01e79cb0678a9d20a4452173e4d629d327554a",
+      "size": 3203
+    },
+    {
+      "group": "dubois",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-dimacs-dubois/dubois24.cnf",
+      "blob": "3292e6817061e8acca2df39891c23661fd99911d",
+      "size": 3083
+    },
+    {
+      "group": "dubois",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-dimacs-dubois/dubois30.cnf",
+      "blob": "3f9649b58713ddca7380389a8cadf2762e132909",
+      "size": 3803
+    },
+    {
+      "group": "dubois",
+      "expected": "unsat",
+      "path": "testdata/satlib/unsat-dimacs-dubois/dubois22.cnf",
+      "blob": "7f5edcaa911ed7a190bc810d05982fbb3f95edde",
+      "size": 2843
+    }
+  ]
+}

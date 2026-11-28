@@ -1,0 +1,48 @@
+name: PNP external SATLIB certificate audit
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_external_satlib*'
+      - 'tests/test_pnp_external_satlib.py'
+      - '.github/workflows/pnp-external-satlib.yml'
+      - 'docs/research/PNP_EXTERNAL_SATLIB_AUDIT.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: mitchellh/go-sat
+          ref: fc0e735aff48989326f256121b5ed6fc585858c3
+          path: external-satlib
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'python-sat==1.8.dev24'
+      - shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_pnp_external_satlib.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_native_xor.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_incremental_xor.py' -v
+          mkdir -p artifacts/pnp-external
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-external/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-external/source.json --checkpoint artifacts/pnp-external/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-external/source.json --scheduler artifacts/pnp-external/scheduler.json --checkpoint artifacts/pnp-external/failures.json > /dev/null
+          python -m mathos.research.pnp_external_satlib_frontier --corpus external-satlib --benchmark artifacts/pnp-external/source.json --scheduler artifacts/pnp-external/scheduler.json --failures artifacts/pnp-external/failures.json --checkpoint artifacts/pnp-external/report.json | tee artifacts/pnp-external/summary.json
+      - run: |
+          python -m mathos.research.pnp_external_satlib_frontier --corpus external-satlib --benchmark artifacts/pnp-external/source.json --scheduler artifacts/pnp-external/scheduler.json --failures artifacts/pnp-external/failures.json --audit artifacts/pnp-external/report.json --gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-external-satlib-evidence
+          path: artifacts/pnp-external/
+          if-no-files-found: ignore
