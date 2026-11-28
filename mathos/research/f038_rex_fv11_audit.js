@@ -58,10 +58,10 @@ theorem exported_exact (x : Assignment ${k}) :
   ok(i>=0,"derived source");
   s+=`def addition : Addition ${k} := ⟨${i},${factor(g)},${list(c.d.F[i].h)}⟩
 def augmented : List (RowFactor ${k}) := addition.factor :: output
-example : addStep 3 output addition = some augmented := by decide
+example : addStep 3 output addition = some augmented := by rfl
 theorem exported_added (x : Assignment ${k}) :
     TableModels augmented x ↔ TableModels input x :=
-  (addStep_exact 3 output augmented addition (by decide) x).trans (exported_exact x)
+  (addStep_exact 3 output augmented addition (by rfl) x).trans (exported_exact x)
 #print axioms exported_added
 `;
  }
