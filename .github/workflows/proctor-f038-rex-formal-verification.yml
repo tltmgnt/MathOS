@@ -1,0 +1,33 @@
+name: Proctor F038 RE-X formal semantic kernel
+on:
+  push:
+    branches: ['research/pnp-f038-rex-formal-verification']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: formal/f038
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lean toolchain via elan
+        run: |
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve dependencies and fetch Mathlib cache
+        run: |
+          lean --version
+          lake update
+          lake exe cache get
+      - name: Compile and reject admitted proofs
+        run: |
+          set -o pipefail
+          lake env lean F038Formal.lean 2>&1 | tee /tmp/f038-lean.log
+          if grep -E 'sorryAx|declaration uses .sorry.' /tmp/f038-lean.log; then exit 1; fi
+          lake build
