@@ -44,9 +44,9 @@ theorem assignments_complete (n : Nat) (x : Assignment n) : x ∈ assignments n 
       · intro j
         rfl
     rw [← he]
-    change Fin.cases (x 0) tail ∈
-      (assignments n).flatMap (fun z => [Fin.cases false z, Fin.cases true z])
-    apply List.mem_flatMap.mpr
+    -- Unfold the already elaborated enumeration rather than re-elaborating
+    -- dependent Fin.cases terms without an expected function type.
+    simp only [assignments, List.mem_flatMap]
     refine ⟨tail, ht, ?_⟩
     cases (x 0) <;> simp
 
