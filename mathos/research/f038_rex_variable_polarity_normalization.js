@@ -74,10 +74,17 @@ function normalize(G,B,H,C,d,beam=8){
  return {kind:"unknown",mode:"none",attempts,binary:o.binary,anchored:o.anchored,ties:o.ties,search:last};
 }
 
+// A five-coordinate NAE core needs ten distinct eligible triple scopes.
+function sparseCardinality(C,d){
+ const scopes=new Set();
+ for(const f of d.F)if(f.h.length===3&&!f.S.has("0,0,0")&&!f.S.has("1,1,1"))scopes.add(f.h.slice().sort((a,b)=>a-b).join());
+ if(scopes.size<10)return {kind:"unknown",reason:"fewer-than-ten-triples",eligible:scopes.size,trials:0};
+ return C.cardinality(d);
+}
 function reduce(G,B,H,C,V,D,T,HV,NV,d,budget=2000000,beam=8){
  const h=normalize(G,B,H,C,d,beam);
- if(h.kind==="unknown")return {...D.reduce(C,V,T,d,budget),polarity:h};
+ if(h.kind==="unknown")return {...D.reduce({...C,cardinality:x=>sparseCardinality(C,x)},V,T,d,budget),polarity:h};
  if(NV.verify(HV,d,h)!==true)throw Error("unverified polarity proof");
  return {d:{k:1,m:2,F:[{h:[0],S:new Set()}]},cert:h,polarity:h,contradiction:true,expand:()=>{throw Error("UNSAT");}};
 }
-module.exports={transform,orientations,signedGroups,normalize,reduce};
+module.exports={transform,orientations,signedGroups,normalize,sparseCardinality,reduce};
