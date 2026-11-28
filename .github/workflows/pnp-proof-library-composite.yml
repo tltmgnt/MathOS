@@ -1,0 +1,54 @@
+name: PNP composite proof schemas v17.5
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_composite_paths*.py'
+      - 'formal/PnpCompositePaths.lean'
+      - 'tests/test_pnp_composite_paths.py'
+      - '.github/workflows/pnp-proof-library-composite.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_composite_paths.py' -v
+          mkdir -p artifacts/pnp-composite
+          python -m mathos.research.pnp_evidence_benchmark --checkpoint artifacts/pnp-composite/source.json > /dev/null
+          python -m mathos.research.pnp_evidence_scheduler --benchmark artifacts/pnp-composite/source.json --checkpoint artifacts/pnp-composite/scheduler.json > /dev/null
+          python -m mathos.research.pnp_failure_synthesis --benchmark artifacts/pnp-composite/source.json --scheduler artifacts/pnp-composite/scheduler.json --checkpoint artifacts/pnp-composite/failures.json > /dev/null
+          python -m mathos.research.pnp_library_frontier --benchmark artifacts/pnp-composite/source.json --scheduler artifacts/pnp-composite/scheduler.json --failures artifacts/pnp-composite/failures.json --checkpoint artifacts/pnp-composite/v17.json > /dev/null
+          python -m mathos.research.pnp_composite_paths_frontier --benchmark artifacts/pnp-composite/source.json --scheduler artifacts/pnp-composite/scheduler.json --failures artifacts/pnp-composite/failures.json --v17 artifacts/pnp-composite/v17.json --checkpoint artifacts/pnp-composite/report.json
+          python -m mathos.research.pnp_composite_paths_frontier --benchmark artifacts/pnp-composite/source.json --scheduler artifacts/pnp-composite/scheduler.json --failures artifacts/pnp-composite/failures.json --v17 artifacts/pnp-composite/v17.json --audit artifacts/pnp-composite/report.json > artifacts/pnp-composite/audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-composite-evidence
+          path: artifacts/pnp-composite/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          lean -DwarningAsError=true formal/PnpCompositePaths.lean | tee /tmp/pnp-composite-lean.txt
+          for theorem in residualClause prefixPreserves compositeRefutation; do
+            grep -Fx "'PnpCompositePaths.$theorem' does not depend on any axioms" /tmp/pnp-composite-lean.txt
+          done
