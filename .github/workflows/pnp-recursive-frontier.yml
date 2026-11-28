@@ -1,0 +1,62 @@
+name: PNP recursive separator frontier
+on:
+  push:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_recursive_separators.py'
+      - 'formal/PnpRecursive.lean'
+      - '.github/workflows/pnp-recursive-frontier.yml'
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_*.py'
+      - 'tests/test_pnp_recursive_separators.py'
+      - 'formal/PnpRecursive.lean'
+      - '.github/workflows/pnp-recursive-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m unittest discover -s tests -p 'test_pnp_recursive_separators.py' -v
+          python -m unittest discover -s tests -p 'test_pnp_compositional.py' -v
+          mkdir -p artifacts/pnp-recursive
+          python -m mathos.research.pnp_recursive_frontier --checkpoint artifacts/pnp-recursive/checkpoint.json > artifacts/pnp-recursive/report.json
+          python -c "import json; r=json.load(open('artifacts/pnp-recursive/report.json')); assert r['completion']=='scoped_recursive_research_completed' and r['family'][-1]['recursive_verified_leaves']==256 and all(o['status']=='unresolved' for o in r['obligations'])"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pnp-recursive-evidence
+          path: artifacts/pnp-recursive/
+          if-no-files-found: ignore
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -o pipefail
+          mkdir -p artifacts/pnp-recursive-formal
+          lean -DwarningAsError=true formal/PnpRecursive.lean | tee artifacts/pnp-recursive-formal/lean.txt
+          for theorem in bothSound eitherSound treeSound knownSat knownUnsat; do
+            grep -Fx "'PnpRecursive.$theorem' does not depend on any axioms" artifacts/pnp-recursive-formal/lean.txt
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-recursive-formal-evidence
+          path: artifacts/pnp-recursive-formal/
