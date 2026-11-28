@@ -1,0 +1,85 @@
+name: PNP v18 multi-family certificate routing
+on:
+  pull_request:
+    paths:
+      - 'mathos/research/pnp_hall_*.py'
+      - 'mathos/research/pnp_bounded_matching.py'
+      - 'mathos/research/pnp_signed_hall_subsystem.py'
+      - 'mathos/research/pnp_v18_multifamily.py'
+      - 'mathos/research/pnp_xor_subsystem.py'
+      - 'mathos/research/pnp_structural_kernel.py'
+      - 'formal/PnpCompositePaths.lean'
+      - 'formal/PnpSignedHorn.lean'
+      - 'formal/PnpHallCapacity.lean'
+      - 'formal/PnpXorSubsystem.lean'
+      - 'tests/independent_pnp_v18_*.py'
+      - '.github/workflows/pnp-v18-multifamily.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          set -euo pipefail
+          mkdir -p artifacts/pnp-v18-multifamily
+          cd "$GITHUB_WORKSPACE"
+          PYTHONPATH=. python tests/independent_pnp_v18_auto_embedding_probe.py > artifacts/pnp-v18-multifamily/auto.json
+          python tests/independent_pnp_v18_auto_embedding_audit.py artifacts/pnp-v18-multifamily/auto.json > artifacts/pnp-v18-multifamily/auto-audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_rectangular_probe.py artifacts/pnp-v18-multifamily/auto.json > artifacts/pnp-v18-multifamily/rectangular.json
+          python tests/independent_pnp_v18_rectangular_audit.py artifacts/pnp-v18-multifamily/rectangular.json artifacts/pnp-v18-multifamily/auto.json > artifacts/pnp-v18-multifamily/rectangular-audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_library_probe.py artifacts/pnp-v18-multifamily/rectangular.json > artifacts/pnp-v18-multifamily/report.json
+          python tests/independent_pnp_v18_library_audit.py artifacts/pnp-v18-multifamily/report.json artifacts/pnp-v18-multifamily/rectangular.json | tee artifacts/pnp-v18-multifamily/audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_shared_index_probe.py artifacts/pnp-v18-multifamily/report.json > artifacts/pnp-v18-multifamily/shared.json
+          python tests/independent_pnp_v18_shared_index_audit.py artifacts/pnp-v18-multifamily/shared.json artifacts/pnp-v18-multifamily/report.json artifacts/pnp-v18-multifamily/rectangular.json | tee artifacts/pnp-v18-multifamily/shared-audit.json
+          PYTHONPATH=. python tests/independent_pnp_v18_multifamily_probe.py artifacts/pnp-v18-multifamily/shared.json > artifacts/pnp-v18-multifamily/multifamily.json
+          python - <<'PY'
+          import json, hashlib
+          r=json.load(open('artifacts/pnp-v18-multifamily/multifamily.json'))
+          def digest(x):return hashlib.sha256(json.dumps(x,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          assert digest([{k:v for k,v in row.items() if k!='arms'} for row in r['rows']])=='ca28a31f32c5ed55137abd7c246b9ce794d7b5c9403b6fc285e01196c638bd3a'
+          assert digest(r['library'])=='38183b12d698ccb6d4467b33a45dfc4620de6931d446b2ca69ace216848ffdf4'
+          PY
+          python tests/independent_pnp_v18_multifamily_audit.py artifacts/pnp-v18-multifamily/multifamily.json artifacts/pnp-v18-multifamily/shared.json artifacts/pnp-v18-multifamily/report.json artifacts/pnp-v18-multifamily/rectangular.json | tee artifacts/pnp-v18-multifamily/multifamily-audit.json
+          (cd artifacts/pnp-v18-multifamily && sha256sum *.json > SHA256SUMS && sha256sum --check SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnp-v18-multifamily
+          path: artifacts/pnp-v18-multifamily/
+          if-no-files-found: error
+  formal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -euo pipefail
+          for module in PnpCompositePaths PnpSignedHorn PnpHallCapacity PnpXorSubsystem; do
+            lean -DwarningAsError=true "formal/$module.lean" | tee "/tmp/$module.txt"
+          done
+          for theorem in residualClause prefixPreserves compositeRefutation; do
+            grep -Fx "'PnpCompositePaths.$theorem' does not depend on any axioms" /tmp/PnpCompositePaths.txt
+          done
+          for theorem in bodySound forwardSound conflictSound traceSound traceConflict; do
+            grep -Fx "'PnpSignedHorn.$theorem' does not depend on any axioms" /tmp/PnpSignedHorn.txt
+          done
+          for theorem in bucketCapacity deficitContradiction; do
+            grep -Fx "'PnpHallCapacity.$theorem' does not depend on any axioms" /tmp/PnpHallCapacity.txt
+          done
+          for theorem in xorRowAddition zeroEqualsOneImpossible; do
+            grep -Fx "'PnpXorSubsystem.$theorem' does not depend on any axioms" /tmp/PnpXorSubsystem.txt
+          done
