@@ -52,7 +52,8 @@ theorem forbidden_sound {n : Nat} (x : Assignment n) (f : RowFactor n)
     CSat x (forbiddenClause f.scope row) := by
   classical
   by_contra hn
-  exact forbidden (row_eq_of_no_clause x f.scope row hlen hn ▸ accepted)
+  rw [row_eq_of_no_clause x f.scope row hlen hn] at accepted
+  exact forbidden accepted
 
 def lookup {α : Type} : List α → Nat → Option α
   | [], _ => none
@@ -302,10 +303,46 @@ theorem hallCheck_sound {n : Nat} (fs : List (RowFactor n)) (c : HallCert n)
     have h2 := allCheck_sound _ _ h1 b hb
     exact conflictCheck_sound fs x hm c.conflicts a b (by simpa [same] using h2)
 
+-- Finite list-backed entry point: raw natural-number hole IDs are checked
+-- before constructing the dependent certificate; no modular Fin coercion.
+def decodePlacements {n : Nat} (h : Nat) :
+    List (Lit n × Nat) → Option (List (Lit n × Fin h))
+  | [] => some []
+  | (l, j) :: rest =>
+    if hj : j < h then
+      match decodePlacements h rest with
+      | none => none
+      | some ps => some ((l, ⟨j, hj⟩) :: ps)
+    else none
+
+def hallOfLists {n h : Nat} (gs : List (Group n))
+    (ps : List (Lit n × Fin h)) (cs : List (Conflict n)) : HallCert n :=
+  { groupCount := gs.length
+    holeCount := h
+    groups := fun i => gs.get i
+    placements := ps
+    conflicts := cs }
+
+def checkHallLists {n : Nat} (fs : List (RowFactor n)) (h : Nat)
+    (gs : List (Group n)) (ps : List (Lit n × Nat)) (cs : List (Conflict n)) : Bool :=
+  match decodePlacements h ps with
+  | none => false
+  | some placed => hallCheck fs (hallOfLists gs placed cs)
+
+theorem checkHallLists_sound {n : Nat} (fs : List (RowFactor n)) (h : Nat)
+    (gs : List (Group n)) (ps : List (Lit n × Nat)) (cs : List (Conflict n))
+    (ok : checkHallLists fs h gs ps cs = true) : ¬ ∃ x, TableModels fs x := by
+  cases he : decodePlacements h ps with
+  | none => simp [checkHallLists, he] at ok
+  | some placed =>
+    exact hallCheck_sound fs (hallOfLists gs placed cs)
+      (by simpa [checkHallLists, he] using ok)
+
 #print axioms forbidden_sound
 #print axioms derive_sound
 #print axioms clauseCheck_sound
 #print axioms pathCheck_sound
 #print axioms hallCheck_sound
+#print axioms checkHallLists_sound
 
 end MathOS.F038.Cert
