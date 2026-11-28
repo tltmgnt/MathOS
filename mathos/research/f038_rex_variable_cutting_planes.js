@@ -33,7 +33,7 @@ function discover(J,d,maxNodes=4096){
  if(!stopped)for(const ids of groups.values()){
   let i=ids.length===1?ids[0]:sum(ids);if(i<0||terminal)break;
   let {a,b}=values[i],g=0n;for(const v of a.values())g=gcd(g,v);
-  if(g>1n){i=add({kind:"divide",parent:i,divisor:String(g)},new Map([...a].map(([x,v])=>[x,v/g])),floor(b,g));if(i<0||terminal)break;metrics.divisions++;}
+  if(g>1n){i=add({kind:"divide",parent:i,divisor:String(g)},new Map([...a].map(([x,v])=>[x,v/g])),floor(b,g));if(i>=0)metrics.divisions++;if(i<0||terminal)break;}
   ready.push(i);
  }
  if(terminal)return terminal;
