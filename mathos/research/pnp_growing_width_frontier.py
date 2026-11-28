@@ -15,11 +15,16 @@ SIDES=(3,4,6,8,12,16)
 SCHEMA="mathos-pnp-growing-width/1"
 
 
+def balanced_strip(s):
+    """Use ceil(s/2) rows: s^2/3 < |U| <= 2s^2/3, even at s=3."""
+    return list(range(s*((s+1)//2)))
+
+
 def investigate(s,odd):
     n,f,_=family(s,odd=odd)
     c=certificate(s,n,f,budget(),odd=odd)
-    # A strip of floor(s/2) complete rows attains the balanced cut bound.
-    strip=list(range(s*(s//2)))
+    # A strip of ceil(s/2) complete rows attains the balanced cut bound.
+    strip=balanced_strip(s)
     cut=balanced_cut(s,strip,budget())
     if cut["size"]!=2*s:
         raise AssertionError("balanced cut upper witness mismatch")
@@ -92,7 +97,7 @@ def audit(r):
         verify(s,n,f,c,budget())
         if c["odd"] is not o:
             raise ValueError("parity control mismatch")
-        strip=list(range(s*(s//2)))
+        strip=balanced_strip(s)
         if a["balanced_strip"]!=strip or a["cut"]!=balanced_cut(s,strip,budget()) or a["cut"]["size"]!=2*s:
             raise ValueError("cut witness mismatch")
         p=a["affine_proof"]
