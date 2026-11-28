@@ -48,7 +48,8 @@ function audit(U,Q,R,A,AV,C,V,D,T,H,HV,B,G,N,NV,I,IV,P,PV,J,JV,L,LV,section="ora
   ok(maxGap===0&&!positive,"all subsets");
   const p=R.reduce(U,Q,d),a=A.reduce(U,p.d);AV.verify(p.d,a.a);
   const r=L.infer(J,N,G,B,H,C,I,P,a.d),t=D.tree(C,a.d,2000000);ok(a.a.free.length===13&&a.a.rows.length===0&&r.kind==="unknown"&&r.iterative.status==="fixed-point"&&r.iterative.rounds===0&&t.kind==="tree"&&T.verifyTree(a.d,t),"barrier");
-  return {barrier:{k:d.k,factors:d.F.length,gadgetModels:gm.length,subsets,maxGap,positive,count:r.count,iterative:r.iterative,tree:{work:t.work,nodes:t.nodes,leaves:t.leaves,splits:t.splits,units:t.units}}};
+  const fallback=D.reduce({...C,cardinality:x=>N.sparseCardinality(C,x)},V,T,a.d,2000000);ok(fallback.contradiction&&fallback.cert.kind==="resolution","full fallback");
+  return {barrier:{k:d.k,factors:d.F.length,gadgetModels:gm.length,subsets,maxGap,positive,count:r.count,iterative:r.iterative,resolution:{work:fallback.cert.work,nodes:fallback.cert.nodes.length,pairs:fallback.cert.pairs},tree:{work:t.work,nodes:t.nodes,leaves:t.leaves,splits:t.splits,units:t.units}}};
  }
  if(section==="adapter"){
   const d=base,r=L.reduce(J,N,G,B,H,C,V,D,T,HV,NV,I,IV,P,PV,JV,LV,d),sat={...fano,F:fano.F.slice(1)},s=L.reduce(J,N,G,B,H,C,V,D,T,HV,NV,I,IV,P,PV,JV,LV,sat);
