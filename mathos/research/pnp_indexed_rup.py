@@ -114,13 +114,13 @@ def verify(n,f,p,b):
     return True
 
 
-def attempt(n,f,total,seconds):
+def attempt(n,f,total,seconds,*,proposer=cdcl.propose):
     b=Budget(seconds=seconds,max_steps=total,max_cells=200_000)
     p=None
     search_steps=None
     stage="search"
     try:
-        p=cdcl.propose(n,f,b)
+        p=proposer(n,f,b)
         search_steps=b.steps
         stage="replay"
         verify(n,f,p,b)
@@ -153,13 +153,13 @@ def replay(n,f,r,total):
     return True
 
 
-def profile(n,f,total=100_000,seconds=5):
+def profile(n,f,total=100_000,seconds=5,*,proposer=cdcl.propose):
     """Diagnostic only: search then both independent checkers with
     separate audit budgets. Does not credit a combined-budget decision.
     """
     b=Budget(seconds=seconds,max_steps=total,max_cells=200_000)
     try:
-        p=cdcl.propose(n,f,b)
+        p=proposer(n,f,b)
     except Exhausted:
         return {"proof":None,"search_steps":b.steps,"slow_steps":None,"fast_steps":None}
     out={"proof":p,"search_steps":b.steps}
