@@ -110,3 +110,33 @@ lake env lean F038Formal/ResourcesTests.lean
 ```
 
 FV-05 scoped resource model and instrumentation are committed; JS checks executed. Lean is unavailable locally and the remote Proctor result remains unconfirmed. Remaining FV-05 work includes mechanized operational count invariants, full verifier/producer complexity, bit-level operations and complete physical resource accounting. Next planned layer FV-06 is physical-machine simulation equivalence. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main and PR #248 unchanged.
+
+## FV-06 — scoped physical-machine quotient simulation
+
+The new `F038Formal/Physical.lean` defines a ternary, single-tape transition system with integer-indexed unbounded tape, physical head movement, explicit writes, distinguished halt and fuel-bounded execution. A partial state mapping permits unreachable original states to be omitted. The executable quotient checker verifies initial/halt mapping and, at every mapped nonterminal state for all three symbols, equality of write and move and correspondence of mapped successors. The theorem scripts `step_related`, `run_related` and `checked_simulation` establish a lockstep simulation conditional on checker acceptance: for every common initial tape, head and fuel, the states remain related, entire tapes and head positions agree, halt status agrees, and exact executed transition counts agree. Halt freezes the configuration without charging further transitions. A separate script bounds the physical clock by fuel. This is a proof layer for quotienting a physical transition table, not a proof that the two-tape IR compiler implements its source semantics. The 10 concrete Lean regression examples and one general fixture theorem script have not been compiled.
+
+### Executed physical audit
+
+The audit loads the actual D6Z rank worker, D6T local-motion compiler, D6S clock and reachable Mealy quotient. An independent checker scans every mapped transition in the actual packed physical tables, without trusting the quotient partition algorithm. All 4,935 mapped states including halt and all 14,802 nonterminal symbol transitions passed. The original 4,934 nonterminal states reduce to 3,683; the existing descriptor reports 180,471 bits. Three corruptions (initial mapping, terminal mapping and output write) were rejected.
+
+A separate sparse-map, unbounded blank-default physical tape interpreter independently executes the packed tables. For seven valid canonical streams, the original and quotient bounded-buffer workers and both sparse interpreters agreed on complete returned records at six budgets each (0, 1, midpoint, one-short, exact and one-over). All 42 four-way comparisons and 28 sub-halt cutoff controls passed. Terminal output, exact physical clock and encoded tape also matched the independent logical clock calculator; SAT witnesses matched the lexicographically first exhaustive model in these bounded examples.
+
+|fixture|stream symbols|result|physical transitions|IR primitive steps|
+|---|---:|---|---:|---:|
+|constant contradiction|10|UNSAT|2092|90|
+|free bit|2|SAT|338|16|
+|forced one|6|SAT|1520|72|
+|equality|19|SAT|3715|90|
+|inequality|19|SAT|5379|162|
+|last three-bit witness|95|SAT|198944|3007|
+|binary contradiction|51|UNSAT|20047|545|
+
+The sparse interpreter matches the existing worker's finite serialization window for timeout records; it does not share the worker's bounded tape representation. The exhaustive oracle compares valid small canonical streams, not malformed streams or arbitrary inputs. These actual-table checks were executed in a JavaScript runtime after loading the repository modules; they are not Lean compilation evidence. The Lean checker is a typed reference and the actual packed table decoding/checker correspondence is not yet mechanically established. The physical transition clock excludes compiler, quotient construction and host inference work. The constant contradiction fixture is the same canonical stream used after D7I certified contradiction; this audit does not re-execute the entire D7I host pipeline.
+
+Reproduce from repo root with `node mathos/research/f038_rex_fv06_audit.js`. The Proctor runs this audit with exact expected counts, compiles `Physical.lean` and `PhysicalTests.lean`, and checks printed axioms for admissions. After FV-05 build commands, from `formal/f038`:
+```sh
+lake env lean -o .lake/build/lib/lean/F038Formal/Physical.olean F038Formal/Physical.lean
+lake env lean F038Formal/PhysicalTests.lean
+```
+
+FV-06 is a scoped physical quotient simulation milestone. Full physical correspondence remains open: packed decoding/refinement, compiler microstep simulation for read/write/move/growth/local motion, canonical stream semantics and universal least-witness correctness, buffer bounds, exact clock formula proof, raw selector conversion, and end-to-end host+physical resource accounting. Lean is unavailable locally and remote Proctor completion is unconfirmed. Next planned layer FV-07 composes verified interfaces while retaining these outstanding obligations. PNP_RESOLUTION_STATUS=OPEN; PROMOTION=NONE. Main unchanged.
