@@ -18,7 +18,7 @@ function canonical(fs){
  const map=new Map();
  for(const f of fs){
   const key=f.h.join(),prior=map.get(key);
-  if(prior)for(const t of prior)if(!f.S.has(t))prior.delete(t);
+  if(prior){for(const t of prior)if(!f.S.has(t))prior.delete(t);}
   else map.set(key,new Set(f.S));
  }
  return [...map].map(([k,s])=>[k,[...s].sort()]).sort((a,b)=>a[0].localeCompare(b[0]));
