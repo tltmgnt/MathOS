@@ -71,7 +71,7 @@ theorem seedFamily (s : Nat → Bool) (f : List Block) :
   | nil => rfl
   | cons b rest ih =>
     change (source s (seeded s b) && evaluate s (rest.map (seeded s)) source) = true
-    rw [seedBlock, ih]
+    rw [seedBlock, ih] <;> rfl
 
 #print axioms PnpTripleParity.localReduction
 #print axioms PnpTripleParity.allBlocks
