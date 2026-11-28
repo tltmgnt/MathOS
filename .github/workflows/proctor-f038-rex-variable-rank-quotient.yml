@@ -1,0 +1,40 @@
+name: Proctor F038 RE-X variable rank quotient and uniform worker
+on:
+  push:
+    branches: ['research/pnp-f038-rex-variable-rank-quotient']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independent quotient, exact physical replays and descriptor audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_quotient_audit.js > /tmp/d6z.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6z.json');a.deepEqual(r.stats,{modelCases:646,sourceAssignments:211510,quotientAssignments:77098,quotientModels:3012,lexChecks:646,physicalCases:558,physicalSat:388,physicalUnsat:170,physicalTransitions:55366513,clockChecks:558,quotientReplays:558,cutoffs:558,derivedRounds:2,cycleCases:2,barrierCases:12,reducedPhysical:558,reducedPhysicalTransitions:38981158,reducedImproved:75,reducedTied:483,reducedRegressed:0,rawProjectionChecks:350,descriptorRows:11049});for(const [k,v] of Object.entries({logical:219,originalStates:4934,quotientStates:3683,transitionChecks:14802,originalBits:256572,quotientBits:180471}))a.equal(r.resources[k],v,k);a.deepEqual(r.rows.filter(x=>x.name==='equality-barrier'&&x.physical).map(x=>[x.k,x.physical,x.reducedPhysical]),[[4,292837,2092],[6,1916171,2092],[8,8767105,2092]]);a.deepEqual(r.rows.filter(x=>x.name==='residual-barrier').map(x=>[x.k,x.used,x.gacDeletions]),[[4,'16',0],[6,'64',0],[8,'256',0],[10,'1024',0],[12,'4096',0],[16,'65536',0]]);console.log('F038_D6Z_QUOTIENT_UNIFORM_WORKER_OK')"
+      - name: Inherited source reduction audit
+        run: |
+          node mathos/research/f038_rex_variable_rank_reduction_audit.js > /tmp/d6y.json
+          node -e "const a=require('node:assert/strict'),r=require('/tmp/d6y.json');a.equal(r.formulas,599);a.equal(r.rawExtensionChecks,50048);a.equal(r.sparseCases,7);a.equal(r.structuralCases,9)"
+      - name: Inherited governance gates
+        run: |
+          python -m mathos.research.tga_f038_rex_024d5e > /tmp/w3-gates.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/w3-gates.json'))
+          assert g['PNP_RESOLUTION_STATUS']=='OPEN' and g['PROMOTION']=='NONE'
+          assert all(v['status']=='BLOCKED' for v in g['local_routes'].values())
+          assert all(v['status']=='BLOCKED' for v in g['global_routes'].values())
+          print('REX-024D6Z_INHERITED_GATE_OK PNP_RESOLUTION_STATUS=OPEN PROMOTION=NONE')
+          PY
